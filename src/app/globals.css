@@ -144,3 +144,12 @@ h6 {
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
 }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

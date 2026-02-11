@@ -17,11 +17,8 @@ export default function HeroSection() {
                     around the world — crafted with culture, passion, and purpose.
                 </p>
 
-
-
-
                 {/* CTA Buttons */}
-                <div className="mt-4 flex sm:flex-row gap-3 sm:gap-4">
+                <div className="mt-4 flex py-4 sm:flex-row gap-3 sm:gap-4">
                     <button className="px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base cursor-pointer rounded-lg bg-[#F57C00] text-white font-medium hover:opacity-90 transition">
                         Explore Products
                     </button>
@@ -31,13 +28,13 @@ export default function HeroSection() {
                     </button>
                 </div>
                 {/* Filters / Selects */}
-                <div className="max-w-3xl w-full mx-auto p-4 flex flex-col md:flex-row gap-4">
+                <div className="max-w-3xl w-full mx-auto py-4 flex flex-col md:flex-row gap-4">
 
                     {/* Category */}
                     <div className="relative w-full md:w-1/3 mx-auto">
                         <FaUtensils className="absolute left-4 top-1/2 -translate-y-1/2 text-[#716f6f]" />
                         <select
-                            className="w-full px-12 py-3 rounded-full  
+                            className="w-full bg-white px-12 py-3 rounded-full  
                          text-[#1F1F1F] dark:text-gray-500 appearance-none
                          border border-gray-300 dark:border-gray-700
                          focus:outline-none focus:ring-2 focus:ring-[#F57C00]
@@ -55,7 +52,7 @@ export default function HeroSection() {
                     <div className="relative w-full md:w-1/3 mx-auto">
                         <FaGlobe className="absolute left-4 top-1/2 -translate-y-1/2 text-[#716f6f]" />
                         <select
-                            className="w-full px-12 py-3 rounded-full 
+                            className="w-full bg-white px-12 py-3 rounded-full 
                          text-[#1F1F1F] dark:text-gray-500 appearance-none
                          border border-gray-300 dark:border-gray-700
                          focus:outline-none focus:ring-2 focus:ring-[#F57C00]
@@ -73,7 +70,7 @@ export default function HeroSection() {
                     <div className="relative w-full md:w-1/3 mx-auto">
                         <FaTheaterMasks className="absolute left-4 top-1/2 -translate-y-1/2 text-[#716f6f]" />
                         <select
-                            className="w-full px-12 py-3 rounded-full 
+                            className="w-full bg-white px-12 py-3 rounded-full 
                          text-[#1F1F1F] dark:text-gray-500 appearance-none
                          border border-gray-300 dark:border-gray-700
                          focus:outline-none focus:ring-2 focus:ring-[#F57C00]
