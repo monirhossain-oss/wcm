@@ -59,8 +59,6 @@ h5,
 h6 {
   font-family: var(--font-heading);
   font-weight: 600;
-  /* 600–700 as per design system */
-  color: var(--color-text);
 }
 
 /* Mono for numbers/tables */
