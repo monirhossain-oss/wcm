@@ -43,7 +43,7 @@ const TrendingListings = () => {
                         Trending listings
                     </h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Discover what's popular right now
+                        Discover whats popular right now
                     </p>
                 </div>
 

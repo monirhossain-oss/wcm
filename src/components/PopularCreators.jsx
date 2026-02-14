@@ -110,7 +110,7 @@ export default function PopularCreators() {
         >
             <div className="max-w-7xl mx-auto px-4">
                 {/* Title */}
-                <div className="mb-10">
+                <div className="mb-4">
                     <h2
                         className="text-3xl font-semibold"
                         style={{ color: "var(--color-foreground)" }}
