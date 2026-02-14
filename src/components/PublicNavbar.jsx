@@ -96,7 +96,7 @@ const PublicNavbar = ({ isLoggedIn }) => {
             </Link>
           ) : (
             <Link
-              href="/login"
+              href="/auth/login"
               className="hidden md:block px-4 py-2 rounded-lg border border-[#F57C00] text-[#F57C00] text-sm font-medium hover:bg-[#F57C00] hover:text-white transition"
             >
               Login
@@ -143,7 +143,7 @@ const PublicNavbar = ({ isLoggedIn }) => {
             </Link>
           ) : (
             <Link
-              href="/login"
+              href="/auth/login"
               className="mt-4 px-4 py-2 rounded-lg border border-[#F57C00] text-[#F57C00] text-center"
             >
               Login
