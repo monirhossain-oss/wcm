@@ -15,48 +15,45 @@ export default function LoginForm() {
 
   const onSubmit = (data) => {
     console.log("Login Data:", data);
-    alert("Check console for submitted data!");
-    // router.push("/dashboard"); // Uncomment later when backend ready
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen">
-      {/* Left Side */}
-      <div className="relative w-full lg:w-5/12 mb-8 lg:mb-0">
+    <div className="relative min-h-screen w-full overflow-hidden">
+
+      {/* 🔹 Background Image */}
+      <Image
+        src="/register.jpg"
+        alt="Login Background"
+        fill
+        priority
+        className="object-cover scale-110 blur-md"
+      />
+
+      {/* 🔹 Dark Overlay */}
+      <div className="absolute inset-0 bg-black/40"></div>
+
+      {/* 🔹 Logo (same position) */}
+      <div
+        className="absolute top-4 left-4 cursor-pointer z-20"
+        onClick={() => router.push("/")}
+      >
         <Image
-          src="/register.jpg"
-          alt="Login Background"
-          fill
-          className="object-cover brightness-50"
+          src="/wc,-web-logo.png"
+          alt="Logo"
+          width={90}
+          height={90}
+          className="h-auto w-auto brightness-125 drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]"
         />
-
-        {/* Logo */}
-        <div
-          className="absolute top-4 left-4 cursor-pointer"
-          onClick={() => router.push("/")}
-        >
-          <h1 className="text-xl font-semibold text-[#F57C00]">WCM</h1>
-        </div>
-
-        {/* Overlay Text */}
-        <div className="absolute bottom-16 left-6 lg:left-12 max-w-xs">
-          <h1 className="text-4xl font-bold text-white drop-shadow-lg">
-            Welcome Back!
-          </h1>
-          <p className="mt-2 text-lg text-white drop-shadow-md">
-            Login to continue and discover amazing content.
-          </p>
-        </div>
       </div>
 
-      {/* Right Side Form */}
-      <div className="w-full lg:w-7/12 flex items-center justify-center px-4 lg:px-8">
-        <div className="w-full max-w-lg">
+      {/* 🔹 Centered Login Form */}
+      <div className="relative z-10 min-h-screen mt-20 md:mt-0 flex items-center justify-center px-4">
+        <div className="w-full max-w-md  backdrop-blur-xl rounded-2xl shadow-2xl p-8">
+
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-4xl mt-8 font-extrabold text-center mb-2">
-              Welcome Back             </h1>
-            <p className="text-sm text-center">
+          <div className="mb-6 text-center">
+            <h1 className="text-3xl font-extrabold mb-2">Welcome Back</h1>
+            <p className="text-sm">
               Don't have an account?{" "}
               <a
                 href="/auth/register"
@@ -72,12 +69,12 @@ export default function LoginForm() {
 
             {/* Email */}
             <div>
-              <label className="block font-medium mb-1">Enter Your Email</label>
+              <label className="block font-medium mb-1">Email</label>
               <input
-                placeholder="Enter Your Email"
                 type="email"
+                placeholder="Enter your email"
                 {...register("email", { required: "Email required" })}
-                className="w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               />
               {errors.email && (
                 <p className="text-red-600 text-sm">{errors.email.message}</p>
@@ -86,39 +83,35 @@ export default function LoginForm() {
 
             {/* Password */}
             <div>
-              <label className="block font-medium mb-1">Enter Your Password</label>
+              <label className="block font-medium mb-1">Password</label>
               <input
-              placeholder="Enter Your Password"
                 type="password"
+                placeholder="Enter your password"
                 {...register("password", { required: "Password required" })}
-                className="w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
               />
               {errors.password && (
                 <p className="text-red-600 text-sm">{errors.password.message}</p>
               )}
             </div>
 
-            {/* Submit Button */}
+            {/* Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full cursor-pointer py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition"
+              className="w-full py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition"
             >
               {isSubmitting ? "Logging in..." : "Login"}
             </button>
           </form>
 
-          {/* Terms & Privacy */}
-          <p className="text-xs text-center text-gray-500 mt-4">
+          {/* Footer */}
+          <p className="text-xs text-center text-gray-50 mt-4">
             By joining, you agree to the{" "}
-            <a href="/terms" className="underline">
-              Terms
-            </a>{" "}
-            and{" "}
-            <a href="/privacy" className="underline">
-              Privacy Policy
-            </a>.
+            <a href="/terms" className="underline">Terms</a> and{" "}
+            <a href="/privacy" className="underline">Privacy Policy</a>.
           </p>
+
         </div>
       </div>
     </div>

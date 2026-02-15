@@ -1,10 +1,11 @@
+import Link from 'next/link';
 import React from 'react'
 import { FaUtensils, FaChevronDown, FaGlobe, FaTheaterMasks } from "react-icons/fa";
 
 export default function HeroSection() {
     return (
         <section className="bg-[#F2F2F2] dark:bg-[#0a0a0a]">
-            <div className="max-w-7xl mx-auto px-6 pt-20 pb-8 md:pt-20 flex flex-col items-center text-center">
+            <div className="max-w-7xl mx-auto px-6 pt-20 pb-8 md:pt-24 flex flex-col items-center text-center">
 
                 {/* Heading */}
                 <h1 className="text-5xl md:text-6xl font-semibold text-[#1F1F1F] dark:text-gray-100">
@@ -19,13 +20,21 @@ export default function HeroSection() {
 
                 {/* CTA Buttons */}
                 <div className="mt-4 flex py-4 sm:flex-row gap-3 sm:gap-4">
-                    <button className="px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base cursor-pointer rounded-lg bg-[#F57C00] text-white font-medium hover:opacity-90 transition">
-                        Explore Products
-                    </button>
+                    <div className="flex gap-4">
+                        {/* Explore Products */}
+                        <Link href="/products">
+                            <button className="px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base cursor-pointer rounded-lg bg-[#F57C00] text-white font-medium hover:opacity-90 transition">
+                                Explore Products
+                            </button>
+                        </Link>
 
-                    <button className="px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base cursor-pointer rounded-lg border border-[#7A1E1E] text-[#7A1E1E] font-medium hover:bg-[#7A1E1E] hover:text-white transition">
-                        Become a Creator
-                    </button>
+                        {/* Become a Creator */}
+                        <Link href="/become-creator">
+                            <button className="px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base cursor-pointer rounded-lg border border-[#7A1E1E] text-[#7A1E1E] font-medium hover:bg-[#7A1E1E] hover:text-white transition">
+                                Become a Creator
+                            </button>
+                        </Link>
+                    </div>
                 </div>
                 {/* Filters / Selects */}
                 <div className="max-w-3xl w-full mx-auto py-4 flex flex-col md:flex-row gap-4">
