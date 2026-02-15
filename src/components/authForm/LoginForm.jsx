@@ -38,7 +38,7 @@ export default function LoginForm() {
         onClick={() => router.push("/")}
       >
         <Image
-          src="/wc,-web-logo.png"
+          src="/World_Culture_Marketplace_logo.png"
           alt="Logo"
           width={90}
           height={90}

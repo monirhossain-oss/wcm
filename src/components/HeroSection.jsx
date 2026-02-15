@@ -5,7 +5,7 @@ import { FaUtensils, FaChevronDown, FaGlobe, FaTheaterMasks } from "react-icons/
 export default function HeroSection() {
     return (
         <section className="bg-[#F2F2F2] dark:bg-[#0a0a0a]">
-            <div className="max-w-7xl mx-auto px-6 pt-20 pb-8 md:pt-24 flex flex-col items-center text-center">
+            <div className="max-w-7xl mx-auto px-6 pt-28 pb-8 md:pt-28 flex flex-col items-center text-center">
 
                 {/* Heading */}
                 <h1 className="text-5xl md:text-6xl font-semibold text-[#1F1F1F] dark:text-gray-100">

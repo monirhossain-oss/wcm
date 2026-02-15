@@ -13,17 +13,17 @@ const PublicNavbar = ({ isLoggedIn }) => {
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] border-b border-[#F2F2F2] dark:border-[#1F1F1F] z-50">
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex items-center justify-between px-6 py-1">
 
         {/* Left */}
         <div className="flex items-center space-x-2">
           <Link href="/" className="cursor-pointer">
             <Image
-              src="/wc,-web-logo.png"
+              src="/World_Culture_Marketplace_logo.png"
               alt="Logo"
               width={100}
               height={100}
-              className="brightness-125"
+              className="brightness-125 h-auto w-auto"
             />
           </Link>
         </div>
