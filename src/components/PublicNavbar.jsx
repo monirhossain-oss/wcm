@@ -16,8 +16,8 @@ const PublicNavbar = () => {
   const menuItems = ['Discover', 'Cultures', 'Categories', 'Regions', 'Creators'];
 
   const getDashboardLink = () => {
-    if (user?.role === 'admin') return '/admin/dashboard';
-    if (user?.role === 'creator') return '/creator/dashboard';
+    if (user?.role === 'admin') return '/admin';
+    if (user?.role === 'creator') return '/creator';
     return '/profile';
   };
 

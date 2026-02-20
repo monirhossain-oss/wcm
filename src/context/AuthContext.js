@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
   withCredentials: true,
 });
 
@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await api.get('/users/me');
+        const res = await api.get('/api/users/me');
         setUser(res.data);
       } catch (err) {
         setUser(null);
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
 
   const registerUser = async (userData) => {
     try {
-      const res = await api.post('/users/register', userData);
+      const res = await api.post('/api/users/register', userData);
       return { success: true, message: res.data.message };
     } catch (err) {
       return {
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginUser = async (credentials) => {
     try {
-      const res = await api.post('/users/login', credentials);
+      const res = await api.post('/api/users/login', credentials);
       setUser(res.data.user);
       return { success: true, message: res.data.message };
     } catch (err) {
@@ -55,9 +55,9 @@ export const AuthProvider = ({ children }) => {
 
   const logoutUser = async () => {
     try {
-      await api.post('/users/logout');
+      await api.post('/api/users/logout');
       setUser(null);
-      window.location.href = '/auth/login'; 
+      window.location.href = '/auth/login';
     } catch (err) {
       console.error('Logout failed:', err);
     }
