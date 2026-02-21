@@ -23,7 +23,7 @@ import {
 } from 'react-icons/fi';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
   withCredentials: true,
 });
 
@@ -85,7 +85,7 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setUser(res.data.user);
+      setUser(res?.data?.user);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
       setIsEditing(false);
       setPreviews({ profile: null, cover: null });
