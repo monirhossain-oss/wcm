@@ -43,12 +43,20 @@ export default function LoginForm() {
 
       <div className="absolute top-4 left-4 cursor-pointer z-20" onClick={() => router.push('/')}>
         <Image
-          src="/World_Culture_Marketplace_logo.png"
-          alt="Logo"
-          width={90}
-          height={90}
-          className="h-auto w-auto brightness-125 drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]"
-        />
+              src="/wc,-web-logo.png" 
+              alt="Logo Light"
+              width={100}
+              height={100}
+              className="dark:hidden brightness-125 h-auto w-auto"
+            />
+            {/* Dark Mode Logo */}
+            <Image
+              src="/World_Culture_Marketplace_logo-removebg-preview.png" 
+              alt="Logo Dark"
+              width={100}
+              height={100}
+              className="hidden dark:block brightness-125 h-auto w-auto"
+            />
       </div>
 
       <div className="relative z-10 min-h-screen mt-20 md:mt-0 flex items-center justify-center px-4">

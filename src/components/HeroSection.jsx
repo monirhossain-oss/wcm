@@ -13,7 +13,7 @@ export default function HeroSection() {
     const [currentImage, setCurrentImage] = useState(0);
     const [mounted, setMounted] = useState(false);
 
-    // Hydration mismatch এড়াতে মাউন্ট হওয়া পর্যন্ত অপেক্ষা করা
+    // Hydration mismatch 
     useEffect(() => {
         setMounted(true);
         const timer = setInterval(() => {
