@@ -25,17 +25,27 @@ const PublicNavbar = () => {
     <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] border-b border-[#F2F2F2] dark:border-[#1F1F1F] z-50">
       <div className="flex items-center justify-between px-6 py-1">
         {/* Left: Logo */}
-        <div className="flex items-center space-x-2">
-          <Link href="/" className="cursor-pointer">
-            <Image
-              src="/World_Culture_Marketplace_logo.png"
-              alt="Logo"
-              width={100}
-              height={100}
-              className="brightness-125 h-auto w-auto"
-            />
-          </Link>
-        </div>
+        {/* Left: Logo */}
+<div className="flex items-center space-x-2">
+  <Link href="/" className="cursor-pointer">
+    {/* Light Mode Logo */}
+    <Image
+      src="/wc,-web-logo.png" // আপনার লাইট মোড লোগোর পাথ
+      alt="Logo Light"
+      width={100}
+      height={100}
+      className="dark:hidden brightness-125 h-auto w-auto"
+    />
+    {/* Dark Mode Logo */}
+    <Image
+      src="/World_Culture_Marketplace_logo-removebg-preview.png" // আপনার ডার্ক মোড লোগোর পাথ
+      alt="Logo Dark"
+      width={100}
+      height={100}
+      className="hidden dark:block brightness-125 h-auto w-auto"
+    />
+  </Link>
+</div>
 
         {/* Center: Menu or Search */}
         <div className="flex-1 flex justify-center">
