@@ -71,7 +71,7 @@ export default function UsersPage() {
           <input
             type="text"
             placeholder="Search identity..."
-            className="pl-11 pr-6 py-3 bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:border-orange-500/50 w-full md:w-72 transition-all shadow-sm"
+            className="pl-11 pr-6 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:border-orange-500/50 w-full md:w-72 transition-all shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -79,11 +79,11 @@ export default function UsersPage() {
       </div>
 
       {/* 🔹 Users Table Container */}
-      <div className="bg-white dark:bg-[#0c0c0c] rounded-2xl border border-gray-100 dark:border-white/5 overflow-hidden shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
+      <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 dark:bg-white/20 border-b border-gray-100 dark:border-white/5">
+              <tr className="bg-gray-50/50 dark:bg-white/20 border-b border-gray-100 dark:border-white/10">
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">
                   Identity
                 </th>
@@ -105,10 +105,7 @@ export default function UsersPage() {
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td
-                      colSpan="5"
-                      className="px-8 py-8 h-10 bg-gray-50/30 dark:bg-white/10"
-                    ></td>
+                    <td colSpan="5" className="px-8 py-8 h-10 bg-gray-50/30 dark:bg-white/10"></td>
                   </tr>
                 ))
               ) : filteredUsers.length > 0 ? (

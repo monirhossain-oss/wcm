@@ -15,6 +15,7 @@ import {
   FiEdit,
   FiUser,
 } from 'react-icons/fi';
+import Image from 'next/image';
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
@@ -73,11 +74,18 @@ export default function AdminLayout({ children }) {
     <>
       <div className="p-6">
         <Link href="/" className="flex items-center gap-3 font-black text-lg tracking-tighter">
-          <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
+          {/* <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
             <FiShield size={20} />
           </div>
           <span className="text-[#1f1f1f] dark:text-white uppercase">WCM</span>
-          <span className="text-orange-500 uppercase font-black">Admin</span>
+          <span className="text-orange-500 uppercase font-black">Admin</span> */}
+          <Image
+            src="/wc,-web-logo.png"
+            alt="Logo"
+            width={100}
+            height={100}
+            className="brightness-125 h-auto w-auto"
+          />
         </Link>
       </div>
 
@@ -106,7 +114,7 @@ export default function AdminLayout({ children }) {
         })}
       </nav>
 
-      <div className="p-6 border-t border-gray-100 dark:border-white/5">
+      <div className="p-6 border-t border-gray-100 dark:border-white/10">
         <Link
           href="/profile"
           className="flex items-center gap-2 text-[9px] font-black text-gray-400 hover:text-orange-500 transition-colors uppercase tracking-widest"
@@ -120,13 +128,13 @@ export default function AdminLayout({ children }) {
   return (
     <div className="h-screen bg-gray-50/50 dark:bg-[#0a0a0a] flex overflow-hidden">
       {/* Sidebar - Light mode border fixed */}
-      <aside className="w-64 bg-white dark:bg-[#0c0c0c] border-r border-gray-100 dark:border-white/5 hidden lg:flex flex-col">
+      <aside className="w-64 bg-white dark:bg-white/5 border-r border-gray-100 dark:border-white/10 hidden lg:flex flex-col">
         <SidebarContent />
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
         {/* Header - Light mode border fixed */}
-        <header className="h-20 bg-white/80 dark:bg-[#0c0c0c]/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-6 md:px-10 z-40">
+        <header className="h-20 bg-white/80 dark:bg-white/5 backdrop-blur-md border-b border-gray-100 dark:border-white/10 flex items-center justify-between px-6 md:px-10 z-40">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -166,7 +174,7 @@ export default function AdminLayout({ children }) {
 
               {isDropdownOpen && (
                 <div className="absolute right-0 top-full mt-4 w-60 bg-white dark:bg-[#111] border border-gray-100 dark:border-white/10 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] p-2 animate-in fade-in zoom-in-95 duration-200">
-                  <div className="p-4 border-b border-gray-50 dark:border-white/5 mb-2">
+                  <div className="p-4 border-b border-gray-50 dark:border-white/10 mb-2">
                     <p className="text-[10px] font-black uppercase text-[#1f1f1f] dark:text-white">
                       {user?.email}
                     </p>
@@ -185,7 +193,7 @@ export default function AdminLayout({ children }) {
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/5 transition-all mt-1"
                   >
-                    <FiLogOut size={16} /> Exit Terminal
+                    <FiLogOut size={16} /> Logout
                   </button>
                 </div>
               )}
@@ -206,7 +214,7 @@ export default function AdminLayout({ children }) {
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setIsSidebarOpen(false)}
           />
-          <aside className="absolute left-0 top-0 h-full w-64 bg-white dark:bg-[#0c0c0c] flex flex-col animate-in slide-in-from-left duration-300 shadow-2xl">
+          <aside className="absolute left-0 top-0 h-full w-64 bg-white dark:bg-white/5 flex flex-col animate-in slide-in-from-left duration-300 shadow-2xl">
             <SidebarContent />
           </aside>
         </div>
