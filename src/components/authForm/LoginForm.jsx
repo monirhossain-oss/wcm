@@ -17,18 +17,17 @@ export default function LoginForm() {
     formState: { errors, isSubmitting },
   } = useForm();
 
-  const onSubmit = async (data) => {
-    setServerError(''); 
+const onSubmit = async (data) => {
+  setServerError('');
 
-    const result = await loginUser(data);
+  const result = await loginUser(data);
 
-    if (result.success) {
-      router.push('/');
-      router.refresh(); 
-    } else {
-      setServerError(result.message);
-    }
-  };
+  if (result.success) {
+    window.location.href = '/';
+  } else {
+    setServerError(result.message);
+  }
+};
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
@@ -57,7 +56,7 @@ export default function LoginForm() {
             <h1 className="text-3xl font-extrabold mb-2 text-foreground">Welcome Back</h1>
             <p className="text-sm text-text">
               Don't have an account?{' '}
-              <a href="/auth/register" className="underline text-[var(--color-primary)]">
+              <a href="/auth/register" className="underline text-primary">
                 Register
               </a>
             </p>
@@ -76,7 +75,7 @@ export default function LoginForm() {
                 type="email"
                 placeholder="Enter your email"
                 {...register('email', { required: 'Email required' })}
-                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
+                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background text-foreground"
               />
               {errors.email && <p className="text-error text-sm mt-1">{errors.email.message}</p>}
             </div>
@@ -87,7 +86,7 @@ export default function LoginForm() {
                 type="password"
                 placeholder="Enter your password"
                 {...register('password', { required: 'Password required' })}
-                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
+                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background text-foreground"
               />
               {errors.password && (
                 <p className="text-error text-sm mt-1">{errors.password.message}</p>
