@@ -1,101 +1,115 @@
+'use client';
 import Link from 'next/link';
-import React from 'react'
+import React, { useState, useEffect } from 'react';
 import { FaUtensils, FaChevronDown, FaGlobe, FaTheaterMasks } from "react-icons/fa";
 
 export default function HeroSection() {
+    const images = [
+        "https://i.ibb.co.com/6RXQcNcM/15-4-11zon-min-2048x1365-1-1170x550.webp",
+        "https://i.ibb.co.com/ycFMBh0N/photo-1589463349208-95817c91f971.avif",
+        "https://i.ibb.co.com/JRMkRJqG/abstract-silhouettes-front-view-geometric-260nw-2496928155.webp"
+    ];
+
+    const [currentImage, setCurrentImage] = useState(0);
+    const [mounted, setMounted] = useState(false);
+
+    // Hydration mismatch এড়াতে মাউন্ট হওয়া পর্যন্ত অপেক্ষা করা
+    useEffect(() => {
+        setMounted(true);
+        const timer = setInterval(() => {
+            setCurrentImage((prev) => (prev + 1) % images.length);
+        }, 8000);
+        return () => clearInterval(timer);
+    }, [images.length]);
+
+    if (!mounted) return null;
+
     return (
-        <section className="bg-[#F2F2F2] dark:bg-[#0a0a0a]">
-            <div className="max-w-7xl mx-auto px-6 pt-28 pb-8 md:pt-28 flex flex-col items-center text-center">
+        <section className="relative overflow-hidden min-h-[750px] flex items-center transition-colors duration-500">
+            
+            {/* Background Slider */}
+            {images.map((img, index) => (
+                <div
+                    key={index}
+                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out -z-10 ${index === currentImage ? "opacity-100" : "opacity-0"}`}
+                    style={{
+                        backgroundImage: `url(${img})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                    }}
+                >
+                    {/* Gradient Overlay - Fixed for Hydration Error */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/70 dark:from-transparent dark:via-black/40 dark:to-black/90 transition-all duration-500" />
+                </div>
+            ))}
+
+            <div className="max-w-7xl mx-auto px-6 pt-32 pb-12 flex flex-col items-center text-center w-full">
 
                 {/* Heading */}
-                <h1 className="text-5xl md:text-6xl font-semibold text-[#1F1F1F] dark:text-gray-100">
-                    Discover <br /> culture <span className="text-[#7A1E1E]">worldwide</span>
+                <h1 className="text-5xl md:text-7xl font-bold text-white drop-shadow-lg leading-tight">
+                    Discover <br /> culture <span className="text-[#F57C00]">worldwide</span>
                 </h1>
 
                 {/* Subheading */}
-                <p className="mt-6 max-w-2xl text-lg text-[#1F1F1F]/80 dark:text-gray-300">
+                <p className="mt-6 max-w-2xl text-lg md:text-xl text-gray-100 font-medium drop-shadow-md">
                     Explore authentic products, stories, and experiences from creators
                     around the world — crafted with culture, passion, and purpose.
                 </p>
 
                 {/* CTA Buttons */}
-                <div className="mt-4 flex py-4 sm:flex-row gap-3 sm:gap-4">
-                    <div className="flex gap-4">
-                        {/* Explore Products */}
-                        <Link href="/products">
-                            <button className="px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base cursor-pointer rounded-lg bg-[#F57C00] text-white font-medium hover:opacity-90 transition">
-                                Explore Products
-                            </button>
-                        </Link>
+                <div className="mt-8 flex py-4 sm:flex-row gap-4">
+                    <Link href="/products">
+                        <button className="px-8 py-3 cursor-pointer rounded-lg bg-[#F57C00] text-white font-bold hover:scale-105 transition-all shadow-xl">
+                            Explore Products
+                        </button>
+                    </Link>
 
-                        {/* Become a Creator */}
-                        <Link href="/become-creator">
-                            <button className="px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base cursor-pointer rounded-lg border border-[#7A1E1E] text-[#7A1E1E] font-medium hover:bg-[#7A1E1E] hover:text-white transition">
-                                Become a Creator
-                            </button>
-                        </Link>
-                    </div>
+                    <Link href="/become-creator">
+                        <button className="px-8 py-3 cursor-pointer rounded-lg border border-[#7A1E1E] text-[#7A1E1E] bg-white/90 font-medium hover:bg-[#7A1E1E] hover:text-white transition-all shadow-lg">
+                            Become a Creator
+                        </button>
+                    </Link>
                 </div>
-                {/* Filters / Selects */}
-                <div className="max-w-3xl w-full mx-auto py-4 flex flex-col md:flex-row gap-4">
 
+                {/* Filters / Selects */}
+                <div className="max-w-4xl w-full mx-auto mt-20 py-4 flex flex-col md:flex-row gap-4">
                     {/* Category */}
-                    <div className="relative w-full md:w-1/3 mx-auto">
-                        <FaUtensils className="absolute left-4 top-1/2 -translate-y-1/2 text-[#716f6f]" />
-                        <select
-                            className="w-full bg-white px-12 py-3 rounded-full  
-                         text-[#1F1F1F] dark:text-gray-500 appearance-none
-                         border border-gray-300 dark:border-gray-700
-                         focus:outline-none focus:ring-2 focus:ring-[#F57C00]
-                         transition duration-200"
-                        >
-                            <option value="">Category</option>
-                            <option value="food">Food</option>
-                            <option value="art">Art</option>
-                            <option value="music">Music</option>
+                    <div className="relative w-full md:w-1/3">
+                        <FaUtensils className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 z-10" />
+                        <select className="w-full bg-black/40 dark:bg-black/60 backdrop-blur-xl px-12 py-4 rounded-full text-white appearance-none border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#F57C00] transition-all cursor-pointer shadow-2xl font-medium">
+                            <option value="" className="bg-gray-900">Category</option>
+                            <option value="food" className="bg-gray-900">Food</option>
+                            <option value="art" className="bg-gray-900">Art</option>
+                            <option value="music" className="bg-gray-900">Music</option>
                         </select>
-                        <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#716f6f] dark:text-gray-200" />
+                        <FaChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-300 z-10" />
                     </div>
 
                     {/* Region */}
-                    <div className="relative w-full md:w-1/3 mx-auto">
-                        <FaGlobe className="absolute left-4 top-1/2 -translate-y-1/2 text-[#716f6f]" />
-                        <select
-                            className="w-full bg-white px-12 py-3 rounded-full 
-                         text-[#1F1F1F] dark:text-gray-500 appearance-none
-                         border border-gray-300 dark:border-gray-700
-                         focus:outline-none focus:ring-2 focus:ring-[#F57C00]
-                         transition duration-200"
-                        >
-                            <option value="">Region</option>
-                            <option value="asia">Asia</option>
-                            <option value="europe">Europe</option>
-                            <option value="africa">Africa</option>
+                    <div className="relative w-full md:w-1/3">
+                        <FaGlobe className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 z-10" />
+                        <select className="w-full bg-black/40 dark:bg-black/60 backdrop-blur-xl px-12 py-4 rounded-full text-white appearance-none border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#F57C00] transition-all cursor-pointer shadow-2xl font-medium">
+                            <option value="" className="bg-gray-900">Region</option>
+                            <option value="asia" className="bg-gray-900">Asia</option>
+                            <option value="europe" className="bg-gray-900">Europe</option>
+                            <option value="africa" className="bg-gray-900">Africa</option>
                         </select>
-                        <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#716f6f] dark:text-gray-200" />
+                        <FaChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-300 z-10" />
                     </div>
 
                     {/* Cultural */}
-                    <div className="relative w-full md:w-1/3 mx-auto">
-                        <FaTheaterMasks className="absolute left-4 top-1/2 -translate-y-1/2 text-[#716f6f]" />
-                        <select
-                            className="w-full bg-white px-12 py-3 rounded-full 
-                         text-[#1F1F1F] dark:text-gray-500 appearance-none
-                         border border-gray-300 dark:border-gray-700
-                         focus:outline-none focus:ring-2 focus:ring-[#F57C00]
-                         transition duration-200"
-                        >
-                            <option value="">Cultural</option>
-                            <option value="traditional">Traditional</option>
-                            <option value="modern">Modern</option>
-                            <option value="fusion">Fusion</option>
+                    <div className="relative w-full md:w-1/3">
+                        <FaTheaterMasks className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 z-10" />
+                        <select className="w-full bg-black/40 dark:bg-black/60 backdrop-blur-xl px-12 py-4 rounded-full text-white appearance-none border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#F57C00] transition-all cursor-pointer shadow-2xl font-medium">
+                            <option value="" className="bg-gray-900">Cultural</option>
+                            <option value="traditional" className="bg-gray-900">Traditional</option>
+                            <option value="modern" className="bg-gray-900">Modern</option>
+                            <option value="fusion" className="bg-gray-900">Fusion</option>
                         </select>
-                        <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#716f6f] dark:text-gray-200" />
+                        <FaChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-300 z-10" />
                     </div>
-
                 </div>
-
             </div>
         </section>
-    )
+    );
 }
