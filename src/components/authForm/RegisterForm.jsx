@@ -1,11 +1,15 @@
-"use client";
+'use client';
 
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
+import { useState } from 'react';
 
 export default function RegisterForm() {
   const router = useRouter();
+  const { registerUser } = useAuth(); 
+  const [serverError, setServerError] = useState('');
 
   const {
     register,
@@ -13,19 +17,34 @@ export default function RegisterForm() {
     formState: { errors, isSubmitting },
   } = useForm();
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
+    setServerError('');
+
     if (data.password !== data.password_confirmation) {
-      alert("Passwords do not match");
+      setServerError('Passwords do not match');
       return;
     }
 
-    console.log("Register Data:", data);
+    const payload = {
+      firstName: data.first_name,
+      lastName: data.last_name,
+      username: data.username,
+      email: data.email,
+      password: data.password,
+    };
+
+    const result = await registerUser(payload);
+
+    if (result.success) {
+      alert('Registration Successful! Please login.');
+      router.push('/auth/login');
+    } else {
+      setServerError(result.message);
+    }
   };
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-
-      {/* 🔹 Background Image */}
       <Image
         src="/register.jpg"
         alt="Register Background"
@@ -33,15 +52,10 @@ export default function RegisterForm() {
         priority
         className="object-cover scale-110 blur-md"
       />
-
-      {/* 🔹 Dark Overlay */}
       <div className="absolute inset-0 bg-black/40"></div>
 
-      {/* 🔹 Logo */}
-      <div
-        className="absolute top-4 left-4 cursor-pointer z-20"
-        onClick={() => router.push("/")}
-      >
+      {/* Logo */}
+      <div className="absolute top-4 left-4 cursor-pointer z-20" onClick={() => router.push('/')}>
         <Image
           src="/World_Culture_Marketplace_logo.png"
           alt="Logo"
@@ -51,116 +65,110 @@ export default function RegisterForm() {
         />
       </div>
 
-      {/* 🔹 Centered Register Form */}
       <div className="relative mt-24 z-10 min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md backdrop-blur-xl bg-white/90 dark:bg-black/60 rounded-2xl shadow-2xl p-8">
-
-          {/* Header */}
           <div className="mb-6 text-center">
-            <h1 className="text-3xl font-extrabold mb-2">
-              Create Account
-            </h1>
-            <p className="text-sm">
-              Already have an account?{" "}
-              <a
-                href="/auth/login"
-                className="underline text-[var(--color-primary)]"
-              >
+            <h1 className="text-3xl font-extrabold mb-2 text-foreground">Create Account</h1>
+            <p className="text-sm text-text">
+              Already have an account?{' '}
+              <a href="/auth/login" className="underline text-[var(--color-primary)]">
                 Login
               </a>
             </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Server Error Message */}
+          {serverError && (
+            <div className="alert-error text-center mb-4 py-2 rounded text-sm">{serverError}</div>
+          )}
 
-            {/* Name Row */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex gap-3">
               <div className="flex-1">
                 <input
                   placeholder="First name"
-                  {...register("first_name", { required: "Required" })}
-                  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                  {...register('first_name', { required: 'Required' })}
+                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
                 />
                 {errors.first_name && (
-                  <p className="text-red-600 text-xs">{errors.first_name.message}</p>
+                  <p className="text-error text-xs mt-1">{errors.first_name.message}</p>
                 )}
               </div>
-
               <div className="flex-1">
                 <input
                   placeholder="Last name"
-                  {...register("last_name", { required: "Required" })}
-                  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                  {...register('last_name', { required: 'Required' })}
+                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
                 />
                 {errors.last_name && (
-                  <p className="text-red-600 text-xs">{errors.last_name.message}</p>
+                  <p className="text-error text-xs mt-1">{errors.last_name.message}</p>
                 )}
               </div>
             </div>
 
-            {/* Username */}
             <div>
               <input
                 placeholder="Username"
-                {...register("username", { required: "Username required" })}
-                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                {...register('username', { required: 'Username required' })}
+                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
               />
               {errors.username && (
-                <p className="text-red-600 text-xs">{errors.username.message}</p>
+                <p className="text-error text-xs mt-1">{errors.username.message}</p>
               )}
             </div>
 
-            {/* Email */}
             <div>
               <input
                 type="email"
                 placeholder="Email address"
-                {...register("email", { required: "Email required" })}
-                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                {...register('email', { required: 'Email required' })}
+                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
               />
-              {errors.email && (
-                <p className="text-red-600 text-xs">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-error text-xs mt-1">{errors.email.message}</p>}
             </div>
 
-            {/* Password */}
-            <div>
-              <input
-                type="password"
-                placeholder="Password"
-                {...register("password", { required: "Password required", minLength: 6 })}
-                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-              />
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <input
+                  type="password"
+                  placeholder="Password"
+                  {...register('password', {
+                    required: 'Required',
+                    minLength: { value: 6, message: 'Min 6 chars' },
+                  })}
+                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
+                />
+              </div>
+              <div className="flex-1">
+                <input
+                  type="password"
+                  placeholder="Confirm"
+                  {...register('password_confirmation', { required: 'Required' })}
+                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
+                />
+              </div>
             </div>
 
-            {/* Confirm Password */}
-            <div>
-              <input
-                type="password"
-                placeholder="Confirm password"
-                {...register("password_confirmation", { required: "Confirm password" })}
-                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-              />
-            </div>
-
-            {/* Submit */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition"
+              className={`w-full py-2 rounded-lg btn-primary transition font-bold ${isSubmitting ? 'btn-disabled' : 'hover:opacity-90'}`}
             >
-              {isSubmitting ? "Creating..." : "Register"}
+              {isSubmitting ? 'Creating...' : 'Register'}
             </button>
           </form>
 
-          {/* Footer */}
-          <p className="text-xs text-center text-gray-50 mt-4">
-            By joining, you agree to the{" "}
-            <a href="/terms" className="underline">Terms</a> and{" "}
-            <a href="/privacy" className="underline">Privacy Policy</a>.
+          <p className="text-[10px] text-center text-text mt-4">
+            By joining, you agree to the{' '}
+            <a href="/terms" className="underline">
+              Terms
+            </a>{' '}
+            and{' '}
+            <a href="/privacy" className="underline">
+              Privacy Policy
+            </a>
+            .
           </p>
-
         </div>
       </div>
     </div>
