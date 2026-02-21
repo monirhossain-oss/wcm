@@ -4,13 +4,15 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_API_BASE_URL,
-        port: '',
-        pathname: '/uploads/**',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
       },
     ],
+    domains: ['wcm-server.onrender.com', 'localhost', 'res.cloudinary.com'],
   },
-  reactCompiler: true,
 };
 
 export default nextConfig;
