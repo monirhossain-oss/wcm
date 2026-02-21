@@ -67,11 +67,11 @@ export default function CreatorRequestsPage() {
       </div>
 
       {/* 🔹 Table Container */}
-      <div className="bg-white dark:bg-[#0c0c0c] rounded-2xl border border-gray-100 dark:border-white/5 overflow-hidden shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
+      <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 dark:bg-white/20 border-b border-gray-100 dark:border-white/5">
+              <tr className="bg-gray-50/50 dark:bg-white/20 border-b border-gray-100 dark:border-white/10">
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">
                   Applicant
                 </th>
@@ -90,10 +90,7 @@ export default function CreatorRequestsPage() {
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td
-                      colSpan="4"
-                      className="px-8 py-8 h-10 bg-gray-50/30 dark:bg-white/10"
-                    ></td>
+                    <td colSpan="4" className="px-8 py-8 h-10 bg-gray-50/30 dark:bg-white/10"></td>
                   </tr>
                 ))
               ) : requests.length > 0 ? (

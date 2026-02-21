@@ -112,7 +112,7 @@ export default function ProfilePage() {
   const InfoRow = ({ label, value, icon: Icon }) => (
     <div className="flex items-center justify-between py-4 border-b border-ui last:border-0 group transition-all">
       <div className="flex items-center gap-4">
-        <div className="p-2.5 bg-ui rounded-xl text-text group-hover:text-orange-500 transition-colors">
+        <div className="p-2.5 bg-ui rounded-lg text-text group-hover:text-orange-500 transition-colors">
           <Icon size={18} />
         </div>
         <div>
@@ -149,7 +149,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Side: Avatar Card */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white dark:bg-[#111] rounded-[2.5rem] border border-ui shadow-sm overflow-hidden flex flex-col items-center group/card">
+            <div className="bg-white dark:bg-[#111] rounded-2xl border border-ui shadow-sm overflow-hidden flex flex-col items-center group/card">
               <div className="h-32 w-full bg-ui relative">
                 <img
                   src={
@@ -209,11 +209,11 @@ export default function ProfilePage() {
                   @{user.username}
                 </p>
                 <div className="mt-8 w-full grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-ui rounded-2xl text-[10px] font-black uppercase tracking-tighter">
+                  <div className="p-3 bg-ui rounded-lg text-[10px] font-black uppercase tracking-tighter">
                     <p className="text-gray-400 mb-1 font-normal">Role</p>
                     {user.role}
                   </div>
-                  <div className="p-3 bg-ui rounded-2xl text-[10px] font-black uppercase tracking-tighter">
+                  <div className="p-3 bg-ui rounded-lg text-[10px] font-black uppercase tracking-tighter">
                     <p className="text-gray-400 mb-1 font-normal">Status</p>
                     <span className="text-success">{user.status}</span>
                   </div>
@@ -224,8 +224,8 @@ export default function ProfilePage() {
 
           {/* Right Side: Information / Form */}
           <div className="lg:col-span-8">
-            <div className="bg-white dark:bg-[#111] rounded-[2.5rem] border border-ui shadow-sm overflow-hidden min-h-125">
-              <div className="px-10 py-8 border-b border-ui flex items-center justify-between bg-[#fcfcfc] dark:bg-[#151515]">
+            <div className="bg-white dark:bg-[#111] rounded-2xl border border-ui shadow-sm overflow-hidden min-h-125">
+              <div className="px-5 py-3 md:px-10 md:py-8 border-b border-ui flex items-center justify-between bg-[#fcfcfc] dark:bg-[#151515]">
                 <div>
                   <h3 className="text-xl font-black uppercase tracking-tight">Personal Details</h3>
                   <p className="text-[11px] font-bold text-gray-400 tracking-wider">
@@ -238,7 +238,7 @@ export default function ProfilePage() {
                     if (isEditing) reset();
                     setPreviews({ profile: null, cover: null });
                   }}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-black text-[10px] tracking-widest transition-all ${isEditing ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-black text-white dark:bg-white dark:text-black hover:scale-105'}`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-black text-[10px]  whitespace-nowrap tracking-widest transition-all ${isEditing ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-black text-white dark:bg-white dark:text-black hover:scale-105'}`}
                 >
                   {isEditing ? (
                     <>
@@ -252,10 +252,10 @@ export default function ProfilePage() {
                 </button>
               </div>
 
-              <div className="p-10">
+              <div className="px-5 py-4 md:px-10 md:py-8">
                 {message.text && (
                   <div
-                    className={`mb-8 p-5 rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center gap-3 animate-in fade-in slide-in-from-top-4 ${message.type === 'success' ? 'bg-green-500 text-white shadow-lg shadow-green-500/20' : 'bg-red-500 text-white shadow-lg shadow-red-500/20'}`}
+                    className={`mb-8 p-5 rounded-lg text-[11px] font-black uppercase tracking-widest flex items-center gap-3 animate-in fade-in slide-in-from-top-4 ${message.type === 'success' ? 'bg-green-500 text-white shadow-lg shadow-green-500/20' : 'bg-red-500 text-white shadow-lg shadow-red-500/20'}`}
                   >
                     <FiCheck /> {message.text}
                   </div>
@@ -308,7 +308,7 @@ export default function ProfilePage() {
                         </label>
                         <input
                           {...register('firstName')}
-                          className="w-full rounded-2xl px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold"
+                          className="w-full rounded-lg px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold"
                         />
                       </div>
                       <div className="space-y-2">
@@ -317,7 +317,7 @@ export default function ProfilePage() {
                         </label>
                         <input
                           {...register('lastName')}
-                          className="w-full rounded-2xl px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold"
+                          className="w-full rounded-lg px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold"
                         />
                       </div>
                     </div>
@@ -327,7 +327,7 @@ export default function ProfilePage() {
                       </label>
                       <input
                         {...register('displayName')}
-                        className="w-full rounded-2xl px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold"
+                        className="w-full rounded-lg px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold"
                       />
                     </div>
                     <div className="space-y-2">
@@ -337,7 +337,7 @@ export default function ProfilePage() {
                       <textarea
                         {...register('bio')}
                         rows={4}
-                        className="w-full rounded-2xl px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold resize-none"
+                        className="w-full rounded-lg px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold resize-none"
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -347,7 +347,7 @@ export default function ProfilePage() {
                         </label>
                         <input
                           {...register('country')}
-                          className="w-full rounded-2xl px-6 py-4 bg-ui border-2 border-transparent focus:border-orange-500 transition-all outline-none text-sm font-bold"
+                          className="w-full rounded-lg px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 dark:bg-black transition-all outline-none text-sm font-bold"
                         />
                       </div>
                       <div className="space-y-2">
@@ -356,7 +356,7 @@ export default function ProfilePage() {
                         </label>
                         <input
                           {...register('language')}
-                          className="w-full rounded-2xl px-6 py-4 bg-ui border-2 border-transparent focus:border-orange-500 transition-all outline-none text-sm font-bold"
+                          className="w-full rounded-lg px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 dark:bg-black transition-all outline-none text-sm font-bold"
                         />
                       </div>
                     </div>
@@ -364,7 +364,7 @@ export default function ProfilePage() {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full md:w-auto px-12 py-4 rounded-2xl bg-orange-500 text-white font-black text-xs tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-orange-500/20 active:scale-95 uppercase"
+                        className="w-full md:w-auto px-12 py-4 rounded-lg bg-orange-500 text-white font-black text-xs tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-orange-500/20 active:scale-95 uppercase"
                       >
                         {isSubmitting ? 'Syncing...' : 'Save Profile Changes'}
                       </button>

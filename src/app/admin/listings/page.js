@@ -98,7 +98,7 @@ export default function AdminListings() {
         ].map((stat, i) => (
           <div
             key={i}
-            className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 p-6 rounded-3xl shadow-sm"
+            className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 p-6 rounded-3xl shadow-sm"
           >
             <div className="flex justify-between items-start">
               <div>
@@ -116,7 +116,7 @@ export default function AdminListings() {
       </div>
 
       {/* 🔹 Header & Filter Section */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white dark:bg-[#0c0c0c] p-6 rounded-3xl border border-gray-100 dark:border-white/5">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white dark:bg-white/5 p-6 rounded-3xl border border-gray-100 dark:border-white/10">
         <div>
           <h2 className="text-xl font-black uppercase tracking-tighter italic dark:text-white">
             System <span className="text-orange-500">Moderation</span>
@@ -144,11 +144,11 @@ export default function AdminListings() {
       </div>
 
       {/* 🔹 Enhanced Table */}
-      <div className="bg-white dark:bg-[#0c0c0c] rounded-3xl border border-gray-100 dark:border-white/5 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-gray-50 dark:border-white/5 text-[9px] font-black uppercase tracking-widest text-gray-400">
+              <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-gray-50 dark:border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-400">
                 <th className="px-8 py-6">Media Asset</th>
                 <th className="px-6 py-6">Protocol Identity</th>
                 <th className="px-6 py-6">Geographic Origin</th>
@@ -220,7 +220,7 @@ export default function AdminListings() {
             onClick={() => setViewItem(null)}
           />
 
-          <div className="relative w-full max-w-6xl bg-white dark:bg-[#0a0a0a] rounded-3xl border border-gray-200 dark:border-white/5 shadow-2xl overflow-hidden flex flex-col lg:flex-row h-full max-h-[85vh] animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-6xl bg-white dark:bg-[#0a0a0a] rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col lg:flex-row h-full max-h-[85vh] animate-in zoom-in-95 duration-300">
             {/* Visual Section (Left) */}
             <div className="lg:w-1/2 relative h-64 lg:h-auto bg-gray-900 shrink-0">
               <img
@@ -268,7 +268,7 @@ export default function AdminListings() {
               <div className="space-y-8 flex-1 flex flex-col">
                 {/* Geographic & Meta Grid */}
                 <div className="grid grid-cols-2 gap-4 shrink-0">
-                  <div className="p-6 bg-gray-50 dark:bg-white/3 rounded-2xl border border-gray-100 dark:border-white/5">
+                  <div className="p-6 bg-gray-50 dark:bg-white/3 rounded-2xl border border-gray-100 dark:border-white/10">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
                       Geographic Origin
                     </p>
@@ -276,7 +276,7 @@ export default function AdminListings() {
                       <FiGlobe size={16} /> {viewItem.country}
                     </div>
                   </div>
-                  <div className="p-6 bg-gray-50 dark:bg-white/3 rounded-2xl border border-gray-100 dark:border-white/5">
+                  <div className="p-6 bg-gray-50 dark:bg-white/3 rounded-2xl border border-gray-100 dark:border-white/10">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
                       Protocol Region
                     </p>
@@ -302,7 +302,7 @@ export default function AdminListings() {
 
                 {/* Tradition & Creator Row */}
                 <div className="grid grid-cols-2 gap-4 shrink-0">
-                  <div className="flex items-center gap-3 px-5 py-4 bg-gray-50 dark:bg-white/2 rounded-xl border border-gray-100 dark:border-white/5">
+                  <div className="flex items-center gap-3 px-5 py-4 bg-gray-50 dark:bg-white/2 rounded-xl border border-gray-100 dark:border-white/10">
                     <FiShield className="text-orange-500" size={18} />
                     <div>
                       <p className="text-[9px] font-black uppercase text-gray-400">Tradition</p>
@@ -311,7 +311,7 @@ export default function AdminListings() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 px-5 py-4 bg-gray-50 dark:bg-white/2 rounded-xl border border-gray-100 dark:border-white/5">
+                  <div className="flex items-center gap-3 px-5 py-4 bg-gray-50 dark:bg-white/2 rounded-xl border border-gray-100 dark:border-white/10">
                     <FiActivity className="text-orange-500" size={18} />
                     <div>
                       <p className="text-[9px] font-black uppercase text-gray-400">Node Creator</p>
@@ -324,7 +324,7 @@ export default function AdminListings() {
               </div>
 
               {/* Footer Actions */}
-              <div className="mt-8 pt-8 border-t border-gray-100 dark:border-white/5 shrink-0">
+              <div className="mt-8 pt-8 border-t border-gray-100 dark:border-white/10 shrink-0">
                 <a
                   href={viewItem.externalUrl}
                   target="_blank"

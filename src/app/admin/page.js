@@ -58,7 +58,7 @@ export default function AdminDashboard() {
       {/* 🔹 Metrics Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* বর্ডার gray-50 বা gray-100 ব্যবহার করে সফট করা হয়েছে */}
-        <div className="bg-white dark:bg-[#0c0c0c] p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)]">
+        <div className="bg-white dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/10 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)]">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
             Global Citizens
           </p>
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#0c0c0c] p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)]">
+        <div className="bg-white dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/10 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)]">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
             Active Artifacts
           </p>
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#0c0c0c] p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)]">
+        <div className="bg-white dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/10 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)]">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
             Pending Protocols
           </p>
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* 🔹 Chart Area */}
-        <div className="lg:col-span-8 bg-white dark:bg-[#0c0c0c] rounded-2xl border border-gray-100 dark:border-white/5 p-8 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)]">
+        <div className="lg:col-span-8 bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 p-8 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)]">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-xs font-black uppercase tracking-widest">Platform Growth</h3>
             <span className="text-[9px] font-bold text-gray-400 uppercase">Acquisition Node</span>
@@ -152,7 +152,7 @@ export default function AdminDashboard() {
 
         {/* 🔹 Task List */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] flex flex-col h-full">
+          <div className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] flex flex-col h-full">
             <div className="flex items-center justify-between mb-6">
               <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-gray-400">
                 Action Required
@@ -200,7 +200,7 @@ export default function AdminDashboard() {
               )}
             </div>
 
-            <div className="mt-6 pt-6 border-t border-gray-50 dark:border-white/5">
+            <div className="mt-6 pt-6 border-t border-gray-50 dark:border-white/10">
               <div className="flex justify-between items-center text-[9px] font-black uppercase">
                 <span className="text-gray-400 tracking-widest">System Health</span>
                 <span className="text-green-500">Optimal</span>

@@ -66,7 +66,7 @@ export default function AddListing() {
   return (
     <div className="max-w-6xl mx-auto py-4 animate-in fade-in duration-700">
       {/* 🔹 Header Section */}
-      <div className="mb-8 border-b border-gray-100 dark:border-white/5 pb-6">
+      <div className="mb-8 border-b border-gray-100 dark:border-white/10 pb-6">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
           Deploy <span className="text-orange-500">Artifact</span>
         </h2>
@@ -133,7 +133,7 @@ export default function AddListing() {
               <input
                 type="text"
                 placeholder="Enter a descriptive name for your work"
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
               />
@@ -146,7 +146,7 @@ export default function AddListing() {
               <input
                 type="text"
                 placeholder="e.g. South Asia"
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
                 onChange={(e) => setFormData({ ...formData, region: e.target.value })}
                 required
               />
@@ -159,7 +159,7 @@ export default function AddListing() {
               <input
                 type="text"
                 placeholder="e.g. Bangladesh"
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
                 onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                 required
               />
@@ -171,7 +171,7 @@ export default function AddListing() {
               </label>
               <textarea
                 placeholder="Tell the story and historical context of this artifact..."
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 h-32 resize-none transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 h-32 resize-none transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 required
               />
@@ -180,7 +180,7 @@ export default function AddListing() {
         </div>
 
         {/* 🔹 Footer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/5 rounded-2xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-2xl">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
               Tradition
@@ -188,7 +188,7 @@ export default function AddListing() {
             <input
               type="text"
               placeholder="e.g. Jamdani Weaving"
-              className="w-full bg-white dark:bg-[#0c0c0c] border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
               onChange={(e) => setFormData({ ...formData, tradition: e.target.value })}
               required
             />
@@ -200,7 +200,7 @@ export default function AddListing() {
             <input
               type="text"
               placeholder="heritage, silk, handmade"
-              className="w-full bg-white dark:bg-[#0c0c0c] border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
               onChange={(e) => setFormData({ ...formData, culturalTags: e.target.value })}
             />
           </div>
@@ -211,7 +211,7 @@ export default function AddListing() {
             <input
               type="url"
               placeholder="https://example.com/source"
-              className="w-full bg-white dark:bg-[#0c0c0c] border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
               onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
               required
             />
