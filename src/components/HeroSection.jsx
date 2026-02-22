@@ -29,7 +29,7 @@ useEffect(() => {
 
     const timer = setInterval(() => {
         setCurrentImage((prev) => (prev + 1) % images.length);
-    }, 8000);
+    }, 3000);
 
     return () => clearInterval(timer);
 }, [mounted, images.length]);
@@ -84,8 +84,8 @@ if (!mounted) return null;
                 </button>
             ) : (
                 <Link href="/become-creator">
-                    <button className="px-8 py-3 border border-[#7A1E1E] text-[#7A1E1E] bg-white rounded-lg">
-                        Become a Creator
+                   <button className="px-8 py-3 border font-bold border-[#7A1E1E] text-[#7A1E1E] bg-white dark:bg-zinc-900 dark:text-white rounded-lg transition-all duration-300 hover:scale-105 hover:bg-[#7A1E1E] hover:text-white shadow-md active:scale-95">
+                    Become a Creator
                     </button>
                 </Link>
             )}

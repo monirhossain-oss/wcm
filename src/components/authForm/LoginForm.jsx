@@ -31,14 +31,14 @@ const onSubmit = async (data) => {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      <Image
-        src="/register.jpg"
-        alt="Login Background"
-        fill
-        priority
-        className="object-cover scale-110 blur-md"
-      />
-      <div className="absolute inset-0 bg-black/40"></div>
+       <Image
+              src="/Background.jpeg"
+              alt="Register Background"
+              fill
+              priority
+              className="object-cover scale-110 blur-md"
+            />
+            <div className="absolute inset-0 bg-black/40"></div>
 
       <div className="absolute top-4 left-4 cursor-pointer z-20" onClick={() => router.push('/')}>
         <Image
@@ -50,13 +50,13 @@ const onSubmit = async (data) => {
             />
             {/* Dark Mode Logo */}
             <Image
-              src="/World_Culture_Marketplace_logo-removebg-preview.png" 
-              alt="Logo Dark"
-              width={100}
-              height={100}
-              className="hidden dark:block brightness-125 h-auto w-auto"
-            />
-      </div>
+                         src="/wc,-web-white.png" 
+                         alt="Logo Dark"
+                         width={100}
+                         height={100}
+                         className="hidden dark:block brightness-125 h-auto w-auto"
+                       />
+            </div>
 
       <div className="relative z-10 min-h-screen mt-20 md:mt-0 flex items-center justify-center px-4">
         <div className="w-full max-w-md backdrop-blur-xl bg-white/90 dark:bg-black/60 rounded-2xl shadow-2xl p-8">
@@ -76,39 +76,44 @@ const onSubmit = async (data) => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <label className="block font-medium mb-1 text-foreground">Email</label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                {...register('email', { required: 'Email required' })}
-                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background text-foreground"
-              />
-              {errors.email && <p className="text-error text-sm mt-1">{errors.email.message}</p>}
-            </div>
+          <form 
+  onSubmit={handleSubmit(onSubmit)} 
+  className="space-y-4 backdrop-blur-md bg-white/10 dark:bg-black/20 p-6 rounded-xl border border-white/20 shadow-xl"
+>
+ 
+  
+  <div>
+    <label className="block font-medium mb-1 text-foreground">Email</label>
+    <input
+      type="email"
+      placeholder="Enter your email"
+      {...register('email', { required: 'Email required' })}
+      className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground backdrop-blur-sm"
+    />
+    {errors.email && <p className="text-error text-sm mt-1">{errors.email.message}</p>}
+  </div>
 
-            <div>
-              <label className="block font-medium mb-1 text-foreground">Password</label>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                {...register('password', { required: 'Password required' })}
-                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background text-foreground"
-              />
-              {errors.password && (
-                <p className="text-error text-sm mt-1">{errors.password.message}</p>
-              )}
-            </div>
+  <div>
+    <label className="block font-medium mb-1 text-foreground">Password</label>
+    <input
+      type="password"
+      placeholder="Enter your password"
+      {...register('password', { required: 'Password required' })}
+      className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground backdrop-blur-sm"
+    />
+    {errors.password && (
+      <p className="text-error text-sm mt-1">{errors.password.message}</p>
+    )}
+  </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full py-2 rounded-lg btn-primary text-white transition font-bold ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'}`}
-            >
-              {isSubmitting ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
+  <button
+    type="submit"
+    disabled={isSubmitting}
+    className={`w-full py-2 rounded-lg btn-primary text-white transition font-bold ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'}`}
+  >
+    {isSubmitting ? 'Logging in...' : 'Login'}
+  </button>
+</form>
 
           <p className="text-xs text-center text-text mt-4">
             By joining, you agree to the{' '}
