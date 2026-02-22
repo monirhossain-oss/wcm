@@ -25,27 +25,26 @@ const PublicNavbar = () => {
     <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] border-b border-[#F2F2F2] dark:border-[#1F1F1F] z-50">
       <div className="flex items-center justify-between px-6 py-1">
         {/* Left: Logo */}
-        {/* Left: Logo */}
-<div className="flex items-center space-x-2">
-  <Link href="/" className="cursor-pointer">
-    {/* Light Mode Logo */}
-    <Image
-      src="/wc,-web-logo.png" 
-      alt="Logo Light"
-      width={100}
-      height={100}
-      className="dark:hidden brightness-125 h-auto w-auto"
-    />
-    {/* Dark Mode Logo */}
-    <Image
-                                     src="/wc,-web-white.png" 
-                                     alt="Logo Dark"
-                                     width={100}
-                                     height={100}
-                                     className="hidden dark:block brightness-125 h-auto w-auto"
-                                   />
-  </Link>
-</div>
+        <div className="flex items-center space-x-2">
+          <Link href="/" className="cursor-pointer">
+            {/* Light Mode Logo */}
+            <Image
+              src="/wc,-web-logo.png"
+              alt="Logo Light"
+              width={100}
+              height={100}
+              className="dark:hidden brightness-125 h-auto w-auto"
+            />
+            {/* Dark Mode Logo */}
+            <Image
+                                             src="/wc,-web-white.png" 
+                                             alt="Logo Dark"
+                                             width={100}
+                                             height={100}
+                                             className="hidden dark:block brightness-125 h-auto w-auto"
+                                           />
+          </Link>
+        </div>
 
         {/* Center: Menu or Search */}
         <div className="flex-1 flex justify-center">
@@ -116,9 +115,9 @@ const PublicNavbar = () => {
                     onClick={() => setIsProfileOpen(false)}
                   >
                     {user?.role === 'admin'
-                      ? 'Admin'
+                      ? 'Admin Dashboard'
                       : user?.role === 'creator'
-                        ? 'Creator'
+                        ? 'Creator Dashboard'
                         : 'Profile'}
                   </Link>
                   <button
@@ -131,7 +130,6 @@ const PublicNavbar = () => {
               )}
             </div>
           ) : (
-            
             <Link
               href="/auth/login"
               className="hidden md:block px-6 py-2 rounded-lg border border-[#F57C00] text-[#F57C00] text-sm font-bold hover:bg-[#F57C00] hover:text-white transition-all"
@@ -176,9 +174,9 @@ const PublicNavbar = () => {
             <>
               <Link href={getDashboardLink()} onClick={() => setIsMobileDrawerOpen(false)}>
                 {user?.role === 'admin'
-                  ? 'Admin'
+                  ? 'Admin Dashboard'
                   : user?.role === 'creator'
-                    ? 'Creator'
+                    ? 'Creator Dashboard'
                     : 'Profile'}
               </Link>
               <button onClick={logoutUser} className="text-left text-red-500">
