@@ -46,7 +46,7 @@ export default function RegisterForm() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       <Image
-        src="/register.jpg"
+        src="/Background.jpeg"
         alt="Register Background"
         fill
         priority
@@ -65,7 +65,7 @@ export default function RegisterForm() {
            />
            {/* Dark Mode Logo */}
            <Image
-             src="/World_Culture_Marketplace_logo-removebg-preview.png" 
+             src="/wc,-web-white.png" 
              alt="Logo Dark"
              width={100}
              height={100}
@@ -90,7 +90,7 @@ export default function RegisterForm() {
             <div className="alert-error text-center mb-4 py-2 rounded text-sm">{serverError}</div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 backdrop-blur-md bg-white/10 dark:bg-black/30 p-6 rounded-2xl border border-white/20 shadow-2xl">
             <div className="flex gap-3">
               <div className="flex-1">
                 <input
