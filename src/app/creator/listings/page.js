@@ -4,15 +4,14 @@ import axios from 'axios';
 import {
   FiEdit2,
   FiTrash2,
-  FiExternalLink,
   FiMapPin,
-  FiClock,
-  FiCheckCircle,
-  FiAlertCircle,
   FiX,
   FiUploadCloud,
-  FiTag,
-  FiBox,
+  FiImage,
+  FiRefreshCw,
+  FiEye,
+  FiHeart,
+  FiExternalLink,
 } from 'react-icons/fi';
 
 const api = axios.create({
@@ -24,11 +23,12 @@ export default function MyListings() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Edit States
+  // States for Modals
   const [editingItem, setEditingItem] = useState(null);
+  const [viewingItem, setViewingItem] = useState(null); // 🔹 For View Modal
+
   const [editFormData, setEditFormData] = useState({});
   const [editImage, setEditImage] = useState(null);
-  const [tagInput, setTagInput] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
@@ -46,55 +46,27 @@ export default function MyListings() {
     }
   };
 
-  // 🛠️ Tag Logic
-  const handleTagAdd = (e) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const val = tagInput.trim().replace(',', '');
-      if (val && !editFormData.culturalTags.includes(val)) {
-        setEditFormData({
-          ...editFormData,
-          culturalTags: [...editFormData.culturalTags, val],
-        });
-      }
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tagToRemove) => {
-    setEditFormData({
-      ...editFormData,
-      culturalTags: editFormData.culturalTags.filter((t) => t !== tagToRemove),
-    });
-  };
-
-  // 🔓 Edit Modal Open
   const openEditModal = (item) => {
     setEditingItem(item);
     setEditFormData({
       title: item.title,
+      description: item.description || '',
       externalUrl: item.externalUrl,
       region: item.region,
       country: item.country,
       tradition: item.tradition,
-      culturalTags: [...item.culturalTags], // array copy
+      culturalTags: [...item.culturalTags],
     });
     setEditImage(null);
-    setTagInput('');
   };
 
-  // 💾 Update Submission
   const handleUpdate = async (e) => {
     e.preventDefault();
     setUpdateLoading(true);
     const data = new FormData();
-
     Object.keys(editFormData).forEach((key) => {
-      if (key === 'culturalTags') {
-        data.append(key, editFormData[key].join(','));
-      } else {
-        data.append(key, editFormData[key]);
-      }
+      if (key === 'culturalTags') data.append(key, editFormData[key].join(','));
+      else data.append(key, editFormData[key]);
     });
     if (editImage) data.append('image', editImage);
 
@@ -102,7 +74,6 @@ export default function MyListings() {
       const res = await api.put(`/api/listings/update/${editingItem._id}`, data);
       setListings(listings.map((l) => (l._id === editingItem._id ? res.data.updatedListing : l)));
       setEditingItem(null);
-      alert('Updated Successfully!');
     } catch (err) {
       alert(err.response?.data?.message || 'Update failed');
     } finally {
@@ -122,249 +93,358 @@ export default function MyListings() {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center min-h-100">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-700 pb-20">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+    <div className="space-y-6 animate-in fade-in duration-1000">
+      {/* 🔹 Header Section */}
+      <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-6">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500 mb-2">
-            Creator Workspace
-          </p>
-          <h2 className="text-4xl font-black uppercase tracking-tighter">
-            My <span className="text-gray-300">Collections</span>
+          <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
+            Management <span className="text-orange-500">Inventory</span>
           </h2>
-        </div>
-        <div className="bg-white dark:bg-[#111] px-8 py-4 rounded-3xl border border-ui flex items-center gap-4">
-          <FiBox className="text-orange-500" size={20} />
-          <div>
-            <p className="text-xl font-black leading-none">{listings.length}</p>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-              Total Artifacts
-            </p>
-          </div>
+          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">
+            Total Indexed Nodes: {listings.length}
+          </p>
         </div>
       </div>
 
-      {/* Listings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {listings.map((item) => (
-          <div
-            key={item._id}
-            className="bg-white dark:bg-[#111] border border-ui rounded-[3rem] overflow-hidden group hover:border-orange-500 transition-all duration-500 shadow-xl shadow-black/5 hover:shadow-orange-500/10"
-          >
-            <div className="relative h-60 overflow-hidden">
-              <img
-                src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute top-6 left-6">
-                <span
-                  className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md border border-white/20 ${
-                    item.status === 'approved'
-                      ? 'bg-green-500/80 text-white'
-                      : 'bg-orange-500/80 text-white'
-                  }`}
+      {/* 📊 Table Interface */}
+      <div className="bg-white dark:bg-white/10 border border-gray-100 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50/50 dark:bg-black/20 border-b border-gray-100 dark:border-white/5">
+                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
+                  Media
+                </th>
+                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
+                  Identity
+                </th>
+                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
+                  Status
+                </th>
+                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-right">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50 dark:divide-white/5">
+              {listings.map((item) => (
+                <tr
+                  key={item._id}
+                  className="group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors"
                 >
-                  {item.status}
-                </span>
-              </div>
-            </div>
+                  <td className="px-6 py-4">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-100 dark:border-white/10">
+                      <img
+                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
+                        alt=""
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-[11px] font-black uppercase text-[#1f1f1f] dark:text-white">
+                      {item.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[8px] text-gray-400 font-bold uppercase italic">
+                        {item.tradition}
+                      </span>
+                      <span className="flex items-center gap-1 text-[8px] text-orange-500 font-black">
+                        <FiHeart size={8} /> {item.favorites?.length || 0}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span
+                      className={`px-2.5 py-1 rounded-md text-[8px] font-black uppercase tracking-tighter ${
+                        item.status === 'approved'
+                          ? 'bg-green-500/10 text-green-500'
+                          : 'bg-orange-500/10 text-orange-500'
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setViewingItem(item)}
+                        title="View"
+                        className="p-2.5 bg-gray-100 dark:bg-white/10 rounded-lg hover:bg-blue-500 hover:text-white transition-all"
+                      >
+                        <FiEye size={12} />
+                      </button>
+                      <button
+                        onClick={() => openEditModal(item)}
+                        title="Edit"
+                        className="p-2.5 bg-gray-100 dark:bg-white/10 rounded-lg hover:bg-orange-500 hover:text-white transition-all"
+                      >
+                        <FiEdit2 size={12} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        title="Delete"
+                        className="p-2.5 bg-gray-100 dark:bg-white/10 rounded-lg text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                      >
+                        <FiTrash2 size={12} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-            <div className="p-8 space-y-6">
-              <div>
-                <h3 className="text-base font-black uppercase truncate tracking-tight mb-2">
-                  {item.title}
-                </h3>
-                <p className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                  <FiMapPin className="text-orange-500" /> {item.country} / {item.region}
-                </p>
-              </div>
+      {/* 👁️ 🔹 Artifact View Modal (Details) */}
+      {viewingItem && (
+        <div className="fixed inset-0 z-110 flex items-center justify-center p-4 md:p-6">
+          <div
+            className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            onClick={() => setViewingItem(null)}
+          />
+          <div className="relative w-full max-w-4xl bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[85vh]">
+            <button
+              onClick={() => setViewingItem(null)}
+              className="absolute top-6 right-6 z-10 p-3 bg-black/20 hover:bg-red-500 text-white rounded-2xl transition-all"
+            >
+              <FiX size={20} />
+            </button>
 
-              <div className="flex flex-wrap gap-1.5 h-6 overflow-hidden">
-                {item.culturalTags.map((tag, i) => (
-                  <span
-                    key={i}
-                    className="px-2 py-1 bg-ui rounded-md text-[8px] font-black uppercase text-gray-500"
-                  >
-                    #{tag}
+            <div className="overflow-y-auto scrollbar-hide">
+              <div className="relative h-[40vh] w-full">
+                <img
+                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${viewingItem.image}`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-8 bg-linear-to-t from-black/80 to-transparent">
+                  <span className="px-3 py-1 bg-orange-500 text-white text-[8px] font-black uppercase rounded-lg tracking-widest">
+                    {viewingItem.status} node
                   </span>
-                ))}
+                  <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter mt-2">
+                    {viewingItem.title}
+                  </h3>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3 pt-6 border-t border-ui">
-                <button
-                  onClick={() => openEditModal(item)}
-                  className="flex-1 bg-black dark:bg-white text-white dark:text-black py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-500 hover:text-white transition-all"
-                >
-                  <FiEdit2 size={14} /> Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(item._id)}
-                  className="p-4 bg-ui text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all"
-                >
-                  <FiTrash2 size={16} />
-                </button>
+              <div className="p-8 md:p-12 grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div className="md:col-span-2 space-y-6">
+                  <div className="space-y-2">
+                    <h4 className="text-[10px] font-black uppercase text-orange-500 tracking-widest">
+                      Historical context
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                      {viewingItem.description || 'No description provided for this protocol.'}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {viewingItem.culturalTags?.map((tag, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg text-[9px] font-bold text-gray-500 uppercase"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-6 bg-gray-50 dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/5 h-fit">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black uppercase text-gray-400">
+                      Popularity
+                    </span>
+                    <div className="flex items-center gap-1.5 text-orange-500 font-black text-sm">
+                      <FiHeart size={16} fill="currentColor" />
+                      {viewingItem.favorites?.length || 0}
+                    </div>
+                  </div>
+                  <hr className="border-gray-200 dark:border-white/5" />
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <FiMapPin className="text-orange-500" />
+                      <div>
+                        <p className="text-[8px] font-black text-gray-400 uppercase">Location</p>
+                        <p className="text-[10px] font-bold dark:text-white uppercase">
+                          {viewingItem.country}, {viewingItem.region}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <FiRefreshCw className="text-orange-500" />
+                      <div>
+                        <p className="text-[8px] font-black text-gray-400 uppercase">Tradition</p>
+                        <p className="text-[10px] font-bold dark:text-white uppercase">
+                          {viewingItem.tradition}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <a
+                    href={viewingItem.externalUrl}
+                    target="_blank"
+                    className="flex items-center justify-center gap-2 w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-xl text-[9px] font-black uppercase mt-4 hover:bg-orange-500 transition-colors"
+                  >
+                    External Reference <FiExternalLink />
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
-      {/* 🔹 Glassmorphism Edit Modal */}
+      {/* Edit Modal */}
       {editingItem && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-6">
           <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300"
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => setEditingItem(null)}
           />
-
-          <div className="relative w-full max-w-3xl bg-white dark:bg-[#0c0c0c] rounded-[3.5rem] border border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            {/* Modal Header */}
-            <div className="px-10 py-8 border-b border-ui/50 flex justify-between items-center">
-              <div>
-                <h3 className="text-2xl font-black uppercase tracking-tighter italic">
-                  Refine <span className="text-orange-500">Artifact</span>
-                </h3>
-                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-1">
-                  Updating global repository
-                </p>
-              </div>
+          <div className="relative w-full max-w-5xl bg-white dark:bg-[#0c0c0c] rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[90vh]">
+            <div className="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-black/20 shrink-0">
+              <h3 className="text-lg font-black uppercase italic text-[#1f1f1f] dark:text-white">
+                Modify <span className="text-orange-500">Protocol</span>
+              </h3>
               <button
                 onClick={() => setEditingItem(null)}
-                className="h-12 w-12 bg-ui rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                className="p-2 hover:bg-red-500 hover:text-white rounded-lg transition-all"
               >
-                <FiX size={24} />
+                <FiX size={18} />
               </button>
             </div>
-
             <form
               onSubmit={handleUpdate}
-              className="p-10 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar"
+              className="p-8 space-y-6 overflow-y-auto scrollbar-hide flex-1"
             >
-              {/* Image Upload UI */}
-              <div className="group relative h-56 bg-ui rounded-[2.5rem] border-2 border-dashed border-ui hover:border-orange-500 transition-all overflow-hidden">
-                <img
-                  src={
-                    editImage
-                      ? URL.createObjectURL(editImage)
-                      : `${process.env.NEXT_PUBLIC_API_BASE_URL}${editingItem.image}`
-                  }
-                  className="w-full h-full object-cover opacity-40 group-hover:opacity-20 transition-opacity"
-                />
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="p-4 bg-white/10 backdrop-blur-md rounded-3xl mb-3 group-hover:bg-orange-500 transition-all group-hover:scale-110">
-                    <FiUploadCloud size={28} />
+              {/* ফর্ম কন্টেন্ট আগের মতো থাকবে */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="lg:col-span-4 space-y-3">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1 flex items-center gap-2">
+                    <FiImage className="text-orange-500" /> Source Asset
+                  </label>
+                  <div className="relative h-64 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden group">
+                    <img
+                      src={
+                        editImage
+                          ? URL.createObjectURL(editImage)
+                          : `${process.env.NEXT_PUBLIC_API_BASE_URL}${editingItem.image}`
+                      }
+                      className="w-full h-full object-cover group-hover:opacity-40 transition-opacity"
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
+                      <FiUploadCloud size={24} className="text-orange-500 mb-1" />
+                      <p className="text-[9px] font-black uppercase">Replace Image</p>
+                    </div>
+                    <input
+                      type="file"
+                      onChange={(e) => setEditImage(e.target.files[0])}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-widest">
-                    Replace Visual Media
-                  </p>
                 </div>
-                <input
-                  type="file"
-                  onChange={(e) => setEditImage(e.target.files[0])}
-                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                />
+                <div className="lg:col-span-8 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2 space-y-1.5">
+                      <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.title}
+                        className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white"
+                        onChange={(e) =>
+                          setEditFormData({ ...editFormData, title: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase ml-1 text-orange-500">
+                        Region
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.region}
+                        className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white"
+                        onChange={(e) =>
+                          setEditFormData({ ...editFormData, region: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+                        Country
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.country}
+                        className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white"
+                        onChange={(e) =>
+                          setEditFormData({ ...editFormData, country: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+                      Description
+                    </label>
+                    <textarea
+                      value={editFormData.description}
+                      className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white h-32 resize-none"
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, description: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* Form Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">
-                    Artifact Title
-                  </label>
-                  <input
-                    type="text"
-                    value={editFormData.title}
-                    className="w-full bg-ui/50 p-5 rounded-2xl text-[11px] font-bold outline-none border border-transparent focus:border-orange-500 transition-all"
-                    onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50/50 dark:bg-white/10 rounded-2xl border border-gray-100 dark:border-white/5">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
                     External URL
                   </label>
                   <input
                     type="text"
                     value={editFormData.externalUrl}
-                    className="w-full bg-ui/50 p-5 rounded-2xl text-[11px] font-bold outline-none border border-transparent focus:border-orange-500 transition-all"
+                    className="w-full bg-white dark:bg-[#0c0c0c] border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                     onChange={(e) =>
                       setEditFormData({ ...editFormData, externalUrl: e.target.value })
                     }
-                    required
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">
-                    Region
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+                    Tradition
                   </label>
                   <input
                     type="text"
-                    value={editFormData.region}
-                    className="w-full bg-ui/50 p-5 rounded-2xl text-[11px] font-bold outline-none border border-transparent focus:border-orange-500 transition-all"
-                    onChange={(e) => setEditFormData({ ...editFormData, region: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">
-                    Country
-                  </label>
-                  <input
-                    type="text"
-                    value={editFormData.country}
-                    className="w-full bg-ui/50 p-5 rounded-2xl text-[11px] font-bold outline-none border border-transparent focus:border-orange-500 transition-all"
-                    onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })}
-                    required
+                    value={editFormData.tradition}
+                    className="w-full bg-white dark:bg-[#0c0c0c] border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                    onChange={(e) =>
+                      setEditFormData({ ...editFormData, tradition: e.target.value })
+                    }
                   />
                 </div>
               </div>
 
-              {/* 🏷️ Interactive Tag System */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4 flex items-center gap-2">
-                  <FiTag className="text-orange-500" /> Cultural Meta Tags
-                </label>
-                <div className="min-h-30 w-full bg-ui/20 border border-ui rounded-[2.5rem] p-6 focus-within:border-orange-500 transition-all">
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {editFormData.culturalTags?.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="hover:text-red-500 transition-colors"
-                        >
-                          <FiX size={14} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <input
-                    type="text"
-                    value={tagInput}
-                    onKeyDown={handleTagAdd}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    placeholder="Type tag and press Enter..."
-                    className="w-full bg-transparent outline-none text-[11px] font-bold placeholder:text-gray-500"
-                  />
-                </div>
+              <div className="pt-4">
+                <button
+                  disabled={updateLoading}
+                  className="w-full h-16 bg-orange-600 hover:bg-orange-500 text-white rounded-2xl font-black text-[11px] tracking-[0.4em] uppercase transition-all shadow-lg flex items-center justify-center gap-3"
+                >
+                  {updateLoading ? <FiRefreshCw className="animate-spin" /> : 'Synchronize Node'}
+                </button>
               </div>
-
-              <button
-                disabled={updateLoading}
-                className="w-full py-6 bg-orange-500 text-white rounded-4xl font-black text-[12px] uppercase tracking-[0.4em] hover:bg-orange-600 transition-all shadow-[0_20px_40px_rgba(249,115,22,0.3)] active:scale-95 disabled:opacity-50"
-              >
-                {updateLoading ? 'Synchronizing State...' : 'Commit Changes'}
-              </button>
             </form>
           </div>
         </div>

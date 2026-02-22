@@ -12,7 +12,6 @@ import {
   FiX,
   FiCheck,
   FiCalendar,
-  FiShield,
   FiArrowLeft,
   FiExternalLink,
   FiCamera,
@@ -23,7 +22,7 @@ import {
 } from 'react-icons/fi';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
   withCredentials: true,
 });
 
@@ -85,7 +84,7 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setUser(res.data.user);
+      setUser(res?.data?.user);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
       setIsEditing(false);
       setPreviews({ profile: null, cover: null });
@@ -297,79 +296,92 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   /* 🔹 Edit Mode (Form View) */
-                  <form
-                    onSubmit={handleSubmit(onSubmit)}
-                    className="space-y-6 animate-in zoom-in-95 duration-300"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                          First Name
-                        </label>
-                        <input
-                          {...register('firstName')}
-                          className="w-full rounded-2xl px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                          Last Name
-                        </label>
-                        <input
-                          {...register('lastName')}
-                          className="w-full rounded-2xl px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                        Display Name (Visible to public)
-                      </label>
-                      <input
-                        {...register('displayName')}
-                        className="w-full rounded-2xl px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                        Professional Bio
-                      </label>
-                      <textarea
-                        {...register('bio')}
-                        rows={4}
-                        className="w-full rounded-2xl px-6 py-4 bg-ui border border-white/50 focus:border-orange-500 focus:bg-white dark:focus:bg-black bg-black transition-all outline-none text-sm font-bold resize-none"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                          Country
-                        </label>
-                        <input
-                          {...register('country')}
-                          className="w-full rounded-2xl px-6 py-4 bg-ui border-2 border-transparent focus:border-orange-500 transition-all outline-none text-sm font-bold"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                          Language
-                        </label>
-                        <input
-                          {...register('language')}
-                          className="w-full rounded-2xl px-6 py-4 bg-ui border-2 border-transparent focus:border-orange-500 transition-all outline-none text-sm font-bold"
-                        />
-                      </div>
-                    </div>
-                    <div className="pt-6">
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full md:w-auto px-12 py-4 rounded-2xl bg-orange-500 text-white font-black text-xs tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-orange-500/20 active:scale-95 uppercase"
-                      >
-                        {isSubmitting ? 'Syncing...' : 'Save Profile Changes'}
-                      </button>
-                    </div>
-                  </form>
+                 <form
+  onSubmit={handleSubmit(onSubmit)}
+  className="space-y-6 animate-in zoom-in-95 duration-300"
+>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {/* First Name */}
+    <div className="space-y-2">
+      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+        First Name
+      </label>
+      <input
+        {...register('firstName')}
+        
+        className="w-full rounded-2xl px-6 py-4 border border-white/50 focus:border-orange-500 bg-white dark:bg-black text-black dark:text-white transition-all outline-none text-sm font-bold shadow-sm"
+      />
+    </div>
+
+    {/* Last Name */}
+    <div className="space-y-2">
+      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+        Last Name
+      </label>
+      <input
+        {...register('lastName')}
+        className="w-full rounded-2xl px-6 py-4 border border-white/50 focus:border-orange-500 bg-white dark:bg-black text-black dark:text-white transition-all outline-none text-sm font-bold shadow-sm"
+      />
+    </div>
+  </div>
+
+  {/* Display Name */}
+  <div className="space-y-2">
+    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+      Display Name 
+    </label>
+    <input
+      {...register('displayName')}
+      className="w-full rounded-2xl px-6 py-4 border border-white/50 focus:border-orange-500 bg-white dark:bg-black text-black dark:text-white transition-all outline-none text-sm font-bold shadow-sm"
+    />
+  </div>
+
+  {/* Bio */}
+  <div className="space-y-2">
+    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+      Professional Bio
+    </label>
+    <textarea
+      {...register('bio')}
+      rows={4}
+      className="w-full rounded-2xl px-6 py-4 border border-white/50 focus:border-orange-500 bg-white dark:bg-black text-black dark:text-white transition-all outline-none text-sm font-bold resize-none shadow-sm"
+    />
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {/* Country */}
+    <div className="space-y-2">
+    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+      Country 
+    </label>
+    <input
+      {...register('displayName')}
+      className="w-full rounded-2xl px-6 py-4 border border-white/50 focus:border-orange-500 bg-white dark:bg-black text-black dark:text-white transition-all outline-none text-sm font-bold shadow-sm"
+    />
+  </div>
+
+    {/* Language */}
+  <div className="space-y-2">
+    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+      Language 
+    </label>
+    <input
+      {...register('displayName')}
+      className="w-full rounded-2xl px-6 py-4 border border-white/50 focus:border-orange-500 bg-white dark:bg-black text-black dark:text-white transition-all outline-none text-sm font-bold shadow-sm"
+    />
+  </div>
+  </div>
+
+  <div className="pt-6">
+    <button
+      type="submit"
+      disabled={isSubmitting}
+      className="w-full md:w-auto px-12 py-4 rounded-2xl bg-orange-500 text-white font-black text-xs tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-orange-500/20 active:scale-95 uppercase"
+    >
+      {isSubmitting ? 'Syncing...' : 'Save Profile Changes'}
+    </button>
+  </div>
+</form>
                 )}
               </div>
             </div>

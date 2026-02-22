@@ -1,4 +1,5 @@
 'use client';
+import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import { FaUtensils, FaChevronDown, FaGlobe, FaTheaterMasks } from "react-icons/fa";
@@ -11,19 +12,29 @@ export default function HeroSection() {
     ];
 
     const [currentImage, setCurrentImage] = useState(0);
-    const [mounted, setMounted] = useState(false);
+const [mounted, setMounted] = useState(false);
+const {user} = useAuth();
+const isCreator = user?.role === 'creator';
+console.log(user?.role)
 
-    // Hydration mismatch 
-    useEffect(() => {
-        setMounted(true);
-        const timer = setInterval(() => {
-            setCurrentImage((prev) => (prev + 1) % images.length);
-        }, 8000);
-        return () => clearInterval(timer);
-    }, [images.length]);
 
-    if (!mounted) return null;
+// 1. Handle Hydration (runs once after mount)
+useEffect(() => {
+    setMounted(true);
+}, []);
 
+// 2. Handle Timer (only runs if mounted and images change)
+useEffect(() => {
+    if (!mounted) return;
+
+    const timer = setInterval(() => {
+        setCurrentImage((prev) => (prev + 1) % images.length);
+    }, 8000);
+
+    return () => clearInterval(timer);
+}, [mounted, images.length]);
+
+if (!mounted) return null;
     return (
         <section className="relative overflow-hidden min-h-[750px] flex items-center transition-colors duration-500">
             
@@ -64,11 +75,20 @@ export default function HeroSection() {
                         </button>
                     </Link>
 
-                    <Link href="/become-creator">
-                        <button className="px-8 py-3 cursor-pointer rounded-lg border border-[#7A1E1E] text-[#7A1E1E] bg-white/90 font-medium hover:bg-[#7A1E1E] hover:text-white transition-all shadow-lg">
-                            Become a Creator
-                        </button>
-                    </Link>
+            {isCreator ? (
+                <button 
+                    disabled 
+                    className="px-8 py-3 rounded-lg bg-gray-300 text-gray-500 cursor-not-allowed"
+                >
+                    Already a Creator
+                </button>
+            ) : (
+                <Link href="/become-creator">
+                    <button className="px-8 py-3 border border-[#7A1E1E] text-[#7A1E1E] bg-white rounded-lg">
+                        Become a Creator
+                    </button>
+                </Link>
+            )}
                 </div>
 
                 {/* Filters / Selects */}

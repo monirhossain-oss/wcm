@@ -1,274 +1,232 @@
 'use client';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { FiTrendingUp, FiBox, FiClock, FiPlus, FiActivity, FiArrowUpRight } from 'react-icons/fi';
 import Link from 'next/link';
+import axios from 'axios';
 import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts';
+  FiBox,
+  FiTrendingUp,
+  FiClock,
+  FiCheckCircle,
+  FiArrowRight,
+  FiStar,
+  FiActivity,
+} from 'react-icons/fi';
+import { AreaChart, Area, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   withCredentials: true,
 });
 
+// ডামি চার্ট ডেটা (আপনার আর্টওয়ার্ক ভিউ বা ইন্টারঅ্যাকশন দেখাবে)
+const performanceData = [
+  { name: 'Mon', views: 120 },
+  { name: 'Tue', views: 340 },
+  { name: 'Wed', views: 250 },
+  { name: 'Thu', views: 580 },
+  { name: 'Fri', views: 490 },
+  { name: 'Sat', views: 800 },
+  { name: 'Sun', views: 720 },
+];
+
 export default function CreatorDashboard() {
-  const [listings, setListings] = useState([]);
+  const [stats, setStats] = useState({ total: 0, approved: 0, pending: 0, recent: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchListings = async () => {
+    const fetchCreatorStats = async () => {
       try {
-        const res = await api.get('/api/listings/my-listings');
-        setListings(res.data);
+        const res = await api.get('/api/listings/my-listings'); // আপনার ক্রিয়েটর লিস্টিং এন্ডপয়েন্ট
+        const listings = res.data;
+
+        setStats({
+          total: listings.length,
+          approved: listings.filter((l) => l.status === 'approved').length,
+          pending: listings.filter((l) => l.status === 'pending').length,
+          recent: listings.slice(0, 5), // শেষ ৫টি লিস্টিং
+        });
       } catch (err) {
-        console.error(err);
+        console.error('Creator Stats Error:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchListings();
+    fetchCreatorStats();
   }, []);
-
-  // 📊 Chart Data Preparation
-  const statusData = [
-    {
-      name: 'Approved',
-      value: listings.filter((l) => l.status === 'approved').length,
-      color: '#f97316',
-    },
-    {
-      name: 'Pending',
-      value: listings.filter((l) => l.status === 'pending').length,
-      color: '#444',
-    },
-    {
-      name: 'Rejected',
-      value: listings.filter((l) => l.status === 'rejected').length,
-      color: '#ef4444',
-    },
-  ];
-
-  // লিস্টিং ক্রিয়েশন টাইমলাইন (সিমুলেটেড মান)
-  const timelineData = [
-    { name: 'Jan', count: 4 },
-    { name: 'Feb', count: 7 },
-    { name: 'Mar', count: listings.length }, // Current
-  ];
-
-  const stats = [
-    { label: 'Total Listings', value: listings.length, icon: FiBox, trend: '+12%' },
-    { label: 'Approved', value: statusData[0].value, icon: FiTrendingUp, trend: 'Success' },
-    { label: 'In Review', value: statusData[1].value, icon: FiClock, trend: 'Pending' },
-  ];
 
   if (loading)
     return (
-      <div className="h-96 flex items-center justify-center font-black uppercase text-[10px] tracking-widest animate-pulse">
-        Analyzing Studio Data...
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      {/* 🚀 Top Stats Row */}
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* 🔹 Metrics Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat, i) => (
-          <div
-            key={i}
-            className="bg-white dark:bg-[#111] p-8 rounded-[3rem] border border-ui group hover:border-orange-500 transition-all duration-500 relative overflow-hidden"
-          >
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-6">
-                <div className="p-4 bg-ui rounded-2xl group-hover:bg-orange-500 group-hover:text-white transition-all">
-                  <stat.icon size={22} />
-                </div>
-                <span className="text-[9px] font-black px-3 py-1 bg-ui rounded-full uppercase tracking-tighter flex items-center gap-1">
-                  <FiArrowUpRight /> {stat.trend}
-                </span>
-              </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                {stat.label}
-              </p>
-              <h2 className="text-5xl font-black mt-2 tracking-tighter">{stat.value}</h2>
-            </div>
-            {/* Background Accent */}
-            <div className="absolute -bottom-4 -right-4 text-ui opacity-5 group-hover:text-orange-500 transition-colors">
-              <stat.icon size={120} />
+        {/* Total Assets */}
+        <div className="bg-white dark:bg-[#0c0c0c] p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.02)]">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            Total Artifacts
+          </p>
+          <div className="flex items-end justify-between mt-2">
+            <h3 className="text-4xl font-black tracking-tighter text-[#1f1f1f] dark:text-white">
+              {stats.total}
+            </h3>
+            <div className="p-2 bg-orange-500/10 text-orange-500 rounded-lg">
+              <FiBox size={16} />
             </div>
           </div>
-        ))}
+        </div>
+
+        {/* Verified Assets */}
+        <div className="bg-white dark:bg-[#0c0c0c] p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.02)]">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            Verified Nodes
+          </p>
+          <div className="flex items-end justify-between mt-2">
+            <h3 className="text-4xl font-black tracking-tighter text-[#1f1f1f] dark:text-white">
+              {stats.approved}
+            </h3>
+            <div className="text-green-500 text-[10px] font-black flex items-center gap-1 mb-1">
+              <FiCheckCircle /> Success
+            </div>
+          </div>
+        </div>
+
+        {/* Pending Approval */}
+        <div className="bg-white dark:bg-[#0c0c0c] p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.02)]">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            In Review
+          </p>
+          <div className="flex items-end justify-between mt-2">
+            <h3 className="text-4xl font-black tracking-tighter text-[#1f1f1f] dark:text-white">
+              {stats.pending}
+            </h3>
+            <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
+              <FiClock size={16} />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* 📈 Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Growth Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-[#111] border border-ui rounded-[3.5rem] p-10">
-          <div className="flex justify-between items-center mb-10">
-            <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-3">
-              <FiActivity className="text-orange-500" /> Publication Activity
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* 🔹 Performance Chart */}
+        <div className="lg:col-span-8 bg-white dark:bg-[#0c0c0c] rounded-2xl border border-gray-100 dark:border-white/5 p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.02)]">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-xs font-black uppercase tracking-widest text-[#1f1f1f] dark:text-white">
+              Artifact Impact
             </h3>
+            <span className="text-[9px] font-bold text-gray-400 uppercase">Interaction Node</span>
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={timelineData}>
+              <AreaChart data={performanceData}>
                 <defs>
-                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
+                  <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.1} />
                     <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#222" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#000"
+                  strokeOpacity={0.03}
+                />
                 <XAxis
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 10, fontWeight: 'bold' }}
-                  dy={10}
+                  tick={{ fontSize: 9, fontWeight: 900, fill: '#A0A0A0' }}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#111',
-                    borderRadius: '15px',
-                    border: 'none',
+                    backgroundColor: '#fff',
+                    borderRadius: '12px',
+                    border: '1px solid #f1f5f9',
                     fontSize: '10px',
-                    fontWeight: 'bold',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)',
                   }}
-                  itemStyle={{ color: '#f97316' }}
                 />
                 <Area
                   type="monotone"
-                  dataKey="count"
+                  dataKey="views"
                   stroke="#f97316"
-                  strokeWidth={4}
-                  fillOpacity={1}
-                  fill="url(#colorCount)"
+                  strokeWidth={3}
+                  fill="url(#colorViews)"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Status Distribution (Pie) */}
-        <div className="bg-white dark:bg-[#111] border border-ui rounded-[3.5rem] p-10 flex flex-col items-center justify-center">
-          <h3 className="text-sm font-black uppercase tracking-widest mb-6 text-center w-full border-b border-ui pb-4">
-            Verification
-          </h3>
-          <div className="h-48 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex gap-4 mt-6">
-            {statusData.map((s, i) => (
-              <div key={i} className="text-center">
-                <div
-                  className="w-2 h-2 rounded-full mx-auto mb-1"
-                  style={{ backgroundColor: s.color }}
-                ></div>
-                <p className="text-[8px] font-black uppercase opacity-50">{s.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ⚡ Quick Actions & Recent Items */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-black dark:bg-white p-12 rounded-[3.5rem] text-white dark:text-black flex flex-col justify-between items-start group">
-          <div>
-            <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-              <FiPlus size={24} className="text-white" />
-            </div>
-            <h3 className="text-4xl font-black uppercase tracking-tighter leading-none mb-6">
-              Create New
-              <br />
-              Masterpiece
-            </h3>
-            <p className="text-xs opacity-50 font-medium max-w-xs uppercase tracking-widest leading-loose">
-              Upload your latest cultural artifacts and reach the world.
-            </p>
-          </div>
-          <Link
-            href="/creator/add"
-            className="mt-10 px-10 py-5 bg-orange-500 rounded-4xl text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-white hover:text-black dark:hover:bg-black dark:hover:text-white transition-all shadow-xl shadow-orange-500/20"
-          >
-            Launch Collection
-          </Link>
-        </div>
-
-        <div className="bg-white dark:bg-[#111] border border-ui p-10 rounded-[3.5rem]">
-          <div className="flex justify-between items-center mb-8 border-b border-ui pb-6">
-            <h3 className="text-sm font-black uppercase tracking-widest">Live Inventory</h3>
-            <Link
-              href="/creator/listings"
-              className="text-[9px] font-black text-orange-500 uppercase tracking-widest hover:underline"
-            >
-              View All
-            </Link>
-          </div>
-          <div className="space-y-6">
-            {listings.slice(0, 4).map((item) => (
-              <div
-                key={item._id}
-                className="flex items-center justify-between group cursor-pointer"
+        {/* 🔹 Recent Activity / Inventory Status */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-2xl p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.02)] flex flex-col h-full">
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-gray-400">
+                Recent Protocols
+              </h4>
+              <Link
+                href="/creator/listings"
+                className="text-[9px] font-black text-orange-500 uppercase hover:underline"
               >
-                <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 rounded-3xl bg-ui overflow-hidden border border-ui">
-                    <img
-                      src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-black uppercase tracking-tight group-hover:text-orange-500 transition-colors">
-                      {item.title}
-                    </h4>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${item.status === 'approved' ? 'bg-green-500' : 'bg-orange-500'}`}
-                      ></span>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                        {item.status}
-                      </p>
+                Inventory
+              </Link>
+            </div>
+
+            <div className="space-y-4 flex-1">
+              {stats.recent.length > 0 ? (
+                stats.recent.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50/50 dark:bg-white/20 rounded-xl border border-transparent hover:border-gray-100 dark:hover:border-white/10 transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg overflow-hidden border border-gray-100 dark:border-white/10 shadow-sm bg-white dark:bg-white/5">
+                        <img
+                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all"
+                          alt=""
+                        />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase leading-tight text-[#1f1f1f] dark:text-white truncate w-32">
+                          {item.title}
+                        </p>
+                        <p
+                          className={`text-[8px] font-bold uppercase tracking-tighter ${
+                            item.status === 'approved' ? 'text-green-500' : 'text-orange-500'
+                          }`}
+                        >
+                          {item.status}
+                        </p>
+                      </div>
                     </div>
+                    <Link
+                      href={`/creator/listings`}
+                      className="p-2 text-gray-300 group-hover:text-orange-500 transition-colors"
+                    >
+                      <FiArrowRight size={14} />
+                    </Link>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-10 opacity-30 italic text-xs text-gray-400">
+                  No data indexed
                 </div>
-                <div className="p-3 bg-ui rounded-xl opacity-0 group-hover:opacity-100 transition-all">
-                  <FiArrowUpRight size={14} />
-                </div>
+              )}
+            </div>
+
+            {/* Status Footer */}
+            <div className="mt-6 pt-6 border-t border-gray-50 dark:border-white/5">
+              <div className="flex justify-between items-center text-[9px] font-black uppercase">
+                <span className="text-gray-400 tracking-widest">Profile Integrity</span>
+                <span className="text-green-500">Secure</span>
               </div>
-            ))}
-            {listings.length === 0 && (
-              <div className="text-center py-10 opacity-30">
-                <FiBox size={40} className="mx-auto mb-4" />
-                <p className="text-[10px] font-black uppercase tracking-widest">
-                  No listings detected
-                </p>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
