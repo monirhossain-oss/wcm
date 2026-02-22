@@ -58,10 +58,10 @@ export default function CreatorRequestsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
-            Creator <span className="text-orange-500">Approvals</span>
+            All Creator <span className="text-orange-500">Requests</span>
           </h2>
           <p className="text-[10px] font-bold text-gray-400 tracking-[0.2em] uppercase mt-1">
-            Review and verify incoming creator nodes
+            Review and verify incoming creators 
           </p>
         </div>
       </div>
@@ -76,13 +76,13 @@ export default function CreatorRequestsPage() {
                   Applicant
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">
-                  Origin/Locale
+                  Location
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">
                   Submission Date
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">
-                  Decision Terminal
+                  Actions
                 </th>
               </tr>
             </thead>

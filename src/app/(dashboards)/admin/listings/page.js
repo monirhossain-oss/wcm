@@ -150,11 +150,12 @@ export default function AdminListings() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-gray-50 dark:border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                <th className="px-8 py-6">Media Asset</th>
-                <th className="px-6 py-6">Protocol Identity</th>
-                <th className="px-6 py-6">Geographic Origin</th>
+                <th className="px-8 py-6">Image</th>
+                <th className="px-6 py-6">Name</th>
+                <th className="px-6 py-6">Title</th>
+                <th className="px-6 py-6">Location</th>
                 <th className="px-6 py-6">Status</th>
-                <th className="px-8 py-6 text-right">Operation</th>
+                <th className="px-8 py-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-white/5">
@@ -173,10 +174,12 @@ export default function AdminListings() {
                   </td>
                   <td className="px-6 py-5">
                     <p className="text-[11px] font-black uppercase dark:text-white leading-none">
-                      {item.title}
+                      {item.creatorId.firstName}
                     </p>
-                    <p className="text-[9px] text-orange-500 font-bold uppercase mt-1.5 italic tracking-tighter">
-                      {item.tradition}
+                  </td>
+                  <td className="px-6 py-5">
+                    <p className="text-[11px] font-black uppercase dark:text-white leading-none">
+                      {item.title}
                     </p>
                   </td>
                   <td className="px-6 py-5">
@@ -202,7 +205,7 @@ export default function AdminListings() {
                       onClick={() => setViewItem(item)}
                       className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/5 text-[9px] font-black uppercase rounded-xl hover:bg-orange-500 hover:text-white transition-all group/btn"
                     >
-                      Inspect{' '}
+                      View{' '}
                       <FiEye size={14} className="group-hover/btn:scale-110 transition-transform" />
                     </button>
                   </td>
