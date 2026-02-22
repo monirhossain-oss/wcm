@@ -7,13 +7,12 @@ import {
   FiUsers,
   FiCheckCircle,
   FiLayout,
-  FiShield,
   FiGrid,
   FiArrowLeft,
   FiMenu,
   FiLogOut,
-  FiEdit,
   FiUser,
+  FiX,
 } from 'react-icons/fi';
 import Image from 'next/image';
 import { FaCreativeCommonsSampling, FaTag } from 'react-icons/fa';
@@ -75,7 +74,7 @@ export default function AdminLayout({ children }) {
 
   const SidebarContent = () => (
     <>
-      <div className="p-6">
+      <div className="p-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 font-black text-lg tracking-tighter">
           <Image
             src="/wc,-web-logo.png"
@@ -85,6 +84,13 @@ export default function AdminLayout({ children }) {
             className="brightness-125 h-auto w-auto"
           />
         </Link>
+        {/* Mobile Close Button */}
+        <button
+          onClick={() => setIsSidebarOpen(false)}
+          className="lg:hidden p-2 text-gray-500 hover:text-black dark:hover:text-white"
+        >
+          <FiX size={20} />
+        </button>
       </div>
 
       <nav className="flex-1 px-4 space-y-1 mt-4">
@@ -125,14 +131,22 @@ export default function AdminLayout({ children }) {
 
   return (
     <div className="h-screen bg-gray-50/50 dark:bg-[#0a0a0a] flex overflow-hidden">
-      {/* Sidebar - Light mode border fixed */}
+      {/* 🔹 Sidebar (Desktop) */}
       <aside className="w-64 bg-white dark:bg-white/5 border-r border-gray-100 dark:border-white/10 hidden lg:flex flex-col">
         <SidebarContent />
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
-        {/* Header - Light mode border fixed */}
-        <header className="h-20 bg-white/80 dark:bg-white/5 backdrop-blur-md border-b border-gray-100 dark:border-white/10 flex items-center justify-end px-6 md:px-10 z-40">
+        {/* 🔹 Header */}
+        <header className="h-20 bg-white/80 dark:bg-white/5 backdrop-blur-md border-b border-gray-100 dark:border-white/10 flex items-center justify-between lg:justify-end px-6 md:px-10 z-40">
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="lg:hidden p-2 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-300"
+          >
+            <FiMenu size={20} />
+          </button>
+
           <div className="flex items-center gap-3" ref={dropdownRef}>
             <div className="hidden sm:flex flex-col items-end">
               <span className="text-[10px] font-black uppercase tracking-tight leading-none mb-1 text-[#1f1f1f] dark:text-white">
@@ -184,20 +198,20 @@ export default function AdminLayout({ children }) {
           </div>
         </header>
 
-        {/* Main Area */}
+        {/* 🔹 Main Area */}
         <main className="flex-1 overflow-y-auto scrollbar-hide p-6 md:p-10">
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
 
-      {/* Mobile Sidebar */}
+      {/* 🔹 Mobile Sidebar */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-100 lg:hidden">
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={() => setIsSidebarOpen(false)}
           />
-          <aside className="absolute left-0 top-0 h-full w-64 bg-white dark:bg-white/5 flex flex-col animate-in slide-in-from-left duration-300 shadow-2xl">
+          <aside className="absolute left-0 top-0 h-full w-72 bg-white dark:bg-[#0a0a0a] flex flex-col animate-in slide-in-from-left duration-300 shadow-2xl border-r border-gray-100 dark:border-white/10">
             <SidebarContent />
           </aside>
         </div>
