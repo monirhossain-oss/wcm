@@ -25,7 +25,7 @@ const Footer = () => {
                             />
                             {/* Dark Mode Logo */}
                             <Image
-                                src="/World_Culture_Marketplace_logo-removebg-preview.png"
+                                src="/wc,-web-white.png"
                                 alt="Logo Dark"
                                 width={120}
                                 height={40}

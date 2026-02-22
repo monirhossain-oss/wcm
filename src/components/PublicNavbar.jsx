@@ -38,7 +38,7 @@ const PublicNavbar = () => {
     />
     {/* Dark Mode Logo */}
     <Image
-      src="/World_Culture_Marketplace_logo-removebg-preview.png"
+      src="/wc,-web-white.png"
       alt="Logo Dark"
       width={100}
       height={100}
