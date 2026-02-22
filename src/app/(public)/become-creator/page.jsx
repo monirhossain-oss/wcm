@@ -56,7 +56,7 @@ export default function UserProfileForm() {
     }
   };
 
-  if (!mounted) return null; // ক্লায়েন্ট রেন্ডার না হওয়া পর্যন্ত কিছুই দেখাবে না
+  if (!mounted) return null; 
 
   const inputStyle =
     'w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none';
@@ -65,7 +65,7 @@ export default function UserProfileForm() {
     <div className="min-h-screen mt-10 relative">
       <div
         className="absolute inset-0 lg:hidden bg-cover bg-center"
-        style={{ backgroundImage: "url('/register.jpg')" }}
+        style={{ backgroundImage: "url('/Backgroun_image.jpg')" }}
       >
         <div className="absolute inset-0 bg-black/60"></div>
       </div>
@@ -84,8 +84,8 @@ export default function UserProfileForm() {
 
       <div className="relative grid grid-cols-1 lg:grid-cols-12">
         <div
-          className="relative lg:col-span-5 hidden lg:flex items-center justify-center bg-cover bg-center"
-          style={{ backgroundImage: "url('/register.jpg')" }}
+          className="relative lg:col-span-5 hidden lg:flex items-center justify-center bg-cover  bg-center"
+          style={{ backgroundImage: "url('/Backgroun_image.jpg')" }}
         >
           <div className="absolute inset-0 bg-black/55"></div>
           <div className="relative z-10 text-white px-10">
