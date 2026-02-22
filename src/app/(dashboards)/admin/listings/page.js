@@ -60,7 +60,8 @@ export default function AdminListings() {
     approved: listings.filter((l) => l.status === 'approved').length,
   };
 
-  const filteredListings = filter === 'all' ? listings : listings.filter((l) => l.status === f);
+  const filteredListings =
+    filter === 'all' ? listings : listings.filter((l) => l.status === filter);
 
   if (loading)
     return (
@@ -163,7 +164,7 @@ export default function AdminListings() {
                   className="group hover:bg-gray-50/30 dark:hover:bg-white/10 transition-all"
                 >
                   <td className="px-8 py-5">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-orange-500/50 transition-all shadow-sm">
+                    <div className="h-9 w-9 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm flex items-center justify-center">
                       <img
                         src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
                         className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
