@@ -58,6 +58,7 @@ export default function AdminListings() {
     total: listings.length,
     pending: listings.filter((l) => l.status === 'pending').length,
     approved: listings.filter((l) => l.status === 'approved').length,
+    rejected: listings.filter((l) => l.status === 'rejected').length,
   };
 
   const filteredListings =
@@ -73,7 +74,6 @@ export default function AdminListings() {
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {console.log(stats)}
         {[
           {
             label: 'Total Listings',
