@@ -2,7 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FiCheck, FiX, FiClock, FiUser, FiCalendar, FiAlertCircle, FiGlobe } from 'react-icons/fi';
+import {
+  FiCheck,
+  FiX,
+  FiClock,
+  FiUser,
+  FiGlobe,
+  FiAlertCircle,
+  FiEye,
+  FiExternalLink,
+  FiMapPin,
+  FiInfo,
+} from 'react-icons/fi';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -13,6 +24,7 @@ export default function CreatorRequestsPage() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null); // For View Modal
 
   const fetchRequests = async () => {
     try {
@@ -31,9 +43,6 @@ export default function CreatorRequestsPage() {
   }, []);
 
   const handleAction = async (userId, action) => {
-    const confirmMsg = action === 'approve' ? 'Approve this creator?' : 'Reject this request?';
-    if (!confirm(confirmMsg)) return;
-
     try {
       setProcessingId(userId);
       const endpoint =
@@ -41,10 +50,10 @@ export default function CreatorRequestsPage() {
           ? `/api/admin/approve-creator/${userId}`
           : `/api/admin/reject-creator/${userId}`;
 
-      await api.put(endpoint, { adminComment: 'Action processed by Admin' });
+      await api.put(endpoint, { adminComment: `Request ${action}d by Admin` });
 
-      // রিকোয়েস্ট লিস্ট থেকে রিমুভ করা
       setRequests(requests.filter((req) => req._id !== userId));
+      setSelectedUser(null);
     } catch (error) {
       alert(`Failed to ${action} request`);
     } finally {
@@ -54,20 +63,20 @@ export default function CreatorRequestsPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-6">
-      {/* 🔹 Header Section */}
+      {/* 🔹 Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
-            All Creator <span className="text-orange-500">Requests</span>
+            Protocol <span className="text-orange-500">Verification</span>
           </h2>
           <p className="text-[10px] font-bold text-gray-400 tracking-[0.2em] uppercase mt-1">
-            Review and verify incoming creators 
+            Validate incoming creator access requests
           </p>
         </div>
       </div>
 
       {/* 🔹 Table Container */}
-      <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
+      <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -76,10 +85,10 @@ export default function CreatorRequestsPage() {
                   Applicant
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">
-                  Location
+                  Region
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">
-                  Submission Date
+                  Submission
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">
                   Actions
@@ -90,36 +99,33 @@ export default function CreatorRequestsPage() {
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td colSpan="4" className="px-8 py-8 h-10 bg-gray-50/30 dark:bg-white/10"></td>
+                    <td colSpan="4" className="px-8 py-8 h-12 bg-gray-50/10 dark:bg-white/5"></td>
                   </tr>
                 ))
               ) : requests.length > 0 ? (
                 requests.map((request) => (
                   <tr
                     key={request._id}
-                    className="hover:bg-gray-50/50 dark:hover:bg-white/20 transition-colors group"
+                    className="hover:bg-gray-50/50 dark:hover:bg-white/10 transition-colors group"
                   >
                     <td className="px-8 py-4">
                       <div className="flex items-center gap-4">
-                        <div className="h-9 w-9 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/10 overflow-hidden flex items-center justify-center">
-                          {request.profile?.profileImage ? (
-                            <img
-                              src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${request.profile.profileImage}`}
-                              alt="avatar"
-                              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[11px] font-black uppercase">
-                              {request.firstName?.[0]}
-                              {request.lastName?.[0]}
-                            </div>
-                          )}
+                        <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/10 overflow-hidden shadow-inner">
+                          <img
+                            src={
+                              request.profile?.profileImage
+                                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${request.profile.profileImage}`
+                                : '/default-avatar.png'
+                            }
+                            alt="avatar"
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-tight text-[#1f1f1f] dark:text-white">
                             {request.firstName} {request.lastName}
                           </p>
-                          <p className="text-[9px] font-bold text-gray-400 lowercase">
+                          <p className="text-[9px] font-bold text-orange-500 lowercase">
                             @{request.username}
                           </p>
                         </div>
@@ -128,38 +134,30 @@ export default function CreatorRequestsPage() {
                     <td className="px-8 py-4">
                       <div className="flex items-center gap-2">
                         <FiGlobe className="text-gray-400" size={12} />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">
-                          {request.profile?.country || 'N/A'} • {request.profile?.language || 'N/A'}
+                        <span className="text-[9px] font-black uppercase tracking-widest dark:text-gray-300">
+                          {request.profile?.country || 'Global'}
                         </span>
                       </div>
                     </td>
-                    <td className="px-8 py-4">
-                      <span className="text-[10px] font-bold text-gray-500 flex items-center gap-2">
-                        <FiClock size={12} className="text-orange-500" />
-                        {new Date(
-                          request.creatorRequest?.appliedAt || Date.now()
-                        ).toLocaleDateString('en-GB', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                      </span>
+                    <td className="px-8 py-4 text-[10px] font-bold text-gray-500">
+                      {new Date(request.creatorRequest?.appliedAt || Date.now()).toLocaleDateString(
+                        'en-GB'
+                      )}
                     </td>
                     <td className="px-8 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button
-                          disabled={processingId === request._id}
-                          onClick={() => handleAction(request._id, 'approve')}
-                          className="px-4 py-2 bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500 hover:text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border border-green-500/20"
+                          onClick={() => setSelectedUser(request)}
+                          className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white rounded-lg transition-all"
                         >
-                          {processingId === request._id ? '...' : 'Approve'}
+                          <FiEye size={14} />
                         </button>
                         <button
                           disabled={processingId === request._id}
-                          onClick={() => handleAction(request._id, 'reject')}
-                          className="px-4 py-2 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border border-red-500/20"
+                          onClick={() => handleAction(request._id, 'approve')}
+                          className="px-4 py-2 bg-green-500/10 text-green-600 text-[9px] font-black uppercase rounded-lg border border-green-500/20 hover:bg-green-500 hover:text-white transition-all"
                         >
-                          {processingId === request._id ? '...' : 'Reject'}
+                          {processingId === request._id ? '...' : 'Approve'}
                         </button>
                       </div>
                     </td>
@@ -167,13 +165,10 @@ export default function CreatorRequestsPage() {
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan="4"
-                    className="px-8 py-16 text-center text-gray-400 text-[10px] font-black uppercase tracking-[0.3em]"
-                  >
-                    <div className="flex flex-col items-center gap-2 opacity-50">
-                      <FiAlertCircle size={24} />
-                      <span>Zero Pending Protocols</span>
+                  <td colSpan="4" className="px-8 py-20 text-center">
+                    <div className="flex flex-col items-center gap-2 opacity-30 text-gray-400 text-[10px] font-black uppercase tracking-widest">
+                      <FiAlertCircle size={30} />
+                      <span>Zero Pending Requests</span>
                     </div>
                   </td>
                 </tr>
@@ -182,6 +177,117 @@ export default function CreatorRequestsPage() {
           </table>
         </div>
       </div>
+
+      {/* 🔹 View Details Modal (The "View" Option) */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-6">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => setSelectedUser(null)}
+          />
+
+          <div className="relative w-full max-w-2xl bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-gray-100 dark:border-white/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+            {/* Modal Cover */}
+            <div className="h-32 w-full bg-gray-100 dark:bg-white/5 relative">
+              <img
+                src={
+                  selectedUser.profile?.coverImage
+                    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${selectedUser.profile.coverImage}`
+                    : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop'
+                }
+                className="w-full h-full object-cover opacity-50"
+              />
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="absolute top-5 right-5 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-all"
+              >
+                <FiX size={18} />
+              </button>
+            </div>
+
+            <div className="p-8 -mt-16 relative">
+              <div className="flex flex-col md:flex-row md:items-end gap-6 mb-8">
+                <div className="h-28 w-28 rounded-3xl border-4 border-white dark:border-[#0a0a0a] shadow-xl overflow-hidden bg-white">
+                  <img
+                    src={
+                      selectedUser.profile?.profileImage
+                        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${selectedUser.profile.profileImage}`
+                        : '/default-avatar.png'
+                    }
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-black uppercase tracking-tighter dark:text-white">
+                    {selectedUser.firstName} {selectedUser.lastName}
+                  </h3>
+                  <p className="text-orange-500 text-xs font-black uppercase tracking-widest">
+                    @{selectedUser.username}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-gray-400">
+                      <FiMapPin size={14} />
+                    </div>
+                    <div>
+                      <p className="text-[8px] font-black text-gray-400 uppercase">Location</p>
+                      <p className="text-[10px] font-bold dark:text-white">
+                        {selectedUser.profile?.city}, {selectedUser.profile?.country}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-gray-400">
+                      <FiExternalLink size={14} />
+                    </div>
+                    <div>
+                      <p className="text-[8px] font-black text-gray-400 uppercase">
+                        Website/Social
+                      </p>
+                      <a
+                        href={selectedUser.profile?.websiteLink}
+                        target="_blank"
+                        className="text-[10px] font-bold text-orange-500 hover:underline"
+                      >
+                        {selectedUser.profile?.websiteLink || 'No link provided'}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10">
+                  <p className="text-[9px] font-black text-gray-400 uppercase mb-2 flex items-center gap-2">
+                    <FiInfo size={12} /> Bio Statement
+                  </p>
+                  <p className="text-[11px] font-medium leading-relaxed dark:text-gray-300 italic">
+                    "{selectedUser.profile?.bio || 'No bio provided for this applicant.'}"
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-6 border-t border-gray-100 dark:border-white/10">
+                <button
+                  disabled={processingId === selectedUser._id}
+                  onClick={() => handleAction(selectedUser._id, 'approve')}
+                  className="flex-1 py-4 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-green-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  Confirm Approval
+                </button>
+                <button
+                  disabled={processingId === selectedUser._id}
+                  onClick={() => handleAction(selectedUser._id, 'reject')}
+                  className="flex-1 py-4 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                >
+                  Reject Application
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
