@@ -60,10 +60,10 @@ export default function AdminLayout({ children }) {
   if (!user || user.role !== 'admin') return null;
 
   const menuItems = [
-    { name: 'Dashboard', path: '/admin', icon: FiGrid },
-    { name: 'Users', path: '/admin/users', icon: FiUsers },
-    { name: 'Approvals', path: '/admin/requests', icon: FiCheckCircle },
-    { name: 'Listings', path: '/admin/listings', icon: FiLayout },
+    { name: 'Overview', path: '/admin', icon: FiGrid },
+    { name: 'All Users', path: '/admin/users', icon: FiUsers },
+    { name: 'Creator Requests', path: '/admin/requests', icon: FiCheckCircle },
+    { name: 'All Listings', path: '/admin/listings', icon: FiLayout },
   ];
 
   const profileImage = user?.profile?.profileImage

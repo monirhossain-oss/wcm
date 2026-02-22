@@ -70,14 +70,14 @@ export default function AdminDashboard() {
       trend: '+12%',
     },
     {
-      label: 'Popular Artifacts',
+      label: 'Total Listings',
       value: stats.listings,
       icon: FiBox,
       color: 'bg-orange-500', 
       trend: '+5%',
     },
     {
-      label: 'Active Requests',
+      label: 'Active Creator Requests',
       value: stats.requests.length,
       icon: FiClock,
       color: 'bg-orange-600', 

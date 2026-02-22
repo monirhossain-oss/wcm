@@ -62,10 +62,7 @@ const Footer = () => {
                     <div>
                         <h3 className="text-lg font-bold text-[#1F1F1F] dark:text-white mb-6">Contact Us</h3>
                         <ul className="space-y-4">
-                            <li className="flex items-start space-x-3 text-sm text-gray-600 dark:text-gray-400">
-                                <FaMapMarkerAlt className="mt-1 text-[#F57C00]" />
-                                <span>123 Culture Street, Heritage Valley,<br />Global Village, World</span>
-                            </li>
+                            
                             <li className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400">
                                 <FaPhoneAlt className="text-[#F57C00]" />
                                 <span>+1 234 567 890</span>
@@ -99,7 +96,7 @@ const Footer = () => {
                 {/* Bottom Bar */}
                 <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                     <p className="text-xs text-gray-500 dark:text-gray-500 text-center md:text-left">
-                        © {currentYear} World Culture Marketplace. All rights reserved. Built with ❤️ for Heritage.
+                       {currentYear} World Culture Marketplace. All rights reserved.
                     </p>
                     <div className="flex space-x-6 text-xs text-gray-500 dark:text-gray-500">
                         <Link href="/privacy" className="hover:text-[#F57C00]">Privacy Policy</Link>

@@ -30,7 +30,7 @@ const PublicNavbar = () => {
   <Link href="/" className="cursor-pointer">
     {/* Light Mode Logo */}
     <Image
-      src="/wc,-web-logo.png" // আপনার লাইট মোড লোগোর পাথ
+      src="/wc,-web-logo.png" 
       alt="Logo Light"
       width={100}
       height={100}
@@ -38,7 +38,7 @@ const PublicNavbar = () => {
     />
     {/* Dark Mode Logo */}
     <Image
-      src="/World_Culture_Marketplace_logo-removebg-preview.png" // আপনার ডার্ক মোড লোগোর পাথ
+      src="/World_Culture_Marketplace_logo-removebg-preview.png"
       alt="Logo Dark"
       width={100}
       height={100}
@@ -131,7 +131,7 @@ const PublicNavbar = () => {
               )}
             </div>
           ) : (
-            // যদি ইউজার লগইন না থাকে
+            
             <Link
               href="/auth/login"
               className="hidden md:block px-6 py-2 rounded-lg border border-[#F57C00] text-[#F57C00] text-sm font-bold hover:bg-[#F57C00] hover:text-white transition-all"

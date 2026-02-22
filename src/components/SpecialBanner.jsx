@@ -28,17 +28,17 @@ const SpecialBanner = () => {
                     </div>
                 </div>
 
-                {/* Right Image Area - এখানে পরিবর্তন করা হয়েছে */}
+                {/* Right Image Area -*/}
                 <div className="w-full md:w-2/5 h-[400px] md:absolute md:right-0 md:h-full relative overflow-hidden">
                     <Image
                         src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=2070&auto=format&fit=crop" 
                         alt="Special Collection" 
-                        fill // এটি ইমেজকে পুরো কন্টেইনার জুড়ে ছড়িয়ে দেবে
-                        priority // ব্যানার ইমেজের জন্য ভালো পারফরম্যান্স দিবে
-                        className="object-cover" // ইমেজটি যাতে ফেটে না যায় বা স্ট্রেচ না হয়
+                        fill 
+                        priority 
+                        className="object-cover" 
                     />
                     
-                    {/* Decorative Gradient - ইমেজের বাম পাশে হালকা শ্যাডো যাতে টেক্সটের সাথে মিশে যায় */}
+                    {/* Decorative Gradient - */}
                     <div className="absolute inset-0 bg-gradient-to-r from-[#F3EFE0] dark:from-[#1a1a1a] via-transparent to-transparent hidden md:block" />
                 </div>
 

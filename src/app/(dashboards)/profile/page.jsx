@@ -12,7 +12,6 @@ import {
   FiX,
   FiCheck,
   FiCalendar,
-  FiShield,
   FiArrowLeft,
   FiExternalLink,
   FiCamera,
@@ -108,7 +107,6 @@ export default function ProfilePage() {
 
   const getFullUrl = (path) => (path ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${path}` : null);
 
-  // ডিসপ্লে রো (Row) এর জন্য ছোট একটি সাব-কম্পোনেন্ট
   const InfoRow = ({ label, value, icon: Icon }) => (
     <div className="flex items-center justify-between py-4 border-b border-ui last:border-0 group transition-all">
       <div className="flex items-center gap-4">
