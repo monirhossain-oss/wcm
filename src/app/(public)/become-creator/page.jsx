@@ -59,7 +59,7 @@ export default function UserProfileForm() {
   if (!mounted) return null; // ক্লায়েন্ট রেন্ডার না হওয়া পর্যন্ত কিছুই দেখাবে না
 
   const inputStyle =
-    'w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none';
+    'w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none';
 
   return (
     <div className="min-h-screen mt-10 relative">

@@ -101,7 +101,7 @@ export default function MyListings() {
   return (
     <div className="space-y-6 animate-in fade-in duration-1000">
       {/* 🔹 Header Section */}
-      <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-6">
+      <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/10 pb-6">
         <div>
           <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
             Management <span className="text-orange-500">Inventory</span>
@@ -113,11 +113,11 @@ export default function MyListings() {
       </div>
 
       {/* 📊 Table Interface */}
-      <div className="bg-white dark:bg-white/10 border border-gray-100 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 dark:bg-black/20 border-b border-gray-100 dark:border-white/5">
+              <tr className="bg-gray-50/50 dark:bg-black/20 border-b border-gray-100 dark:border-white/10">
                 <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
                   Media
                 </th>
@@ -210,7 +210,7 @@ export default function MyListings() {
             className="absolute inset-0 bg-black/90 backdrop-blur-md"
             onClick={() => setViewingItem(null)}
           />
-          <div className="relative w-full max-w-4xl bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[85vh]">
+          <div className="relative w-full max-w-4xl bg-white dark:bg-[#0a0a0a] rounded-xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[85vh]">
             <button
               onClick={() => setViewingItem(null)}
               className="absolute top-6 right-6 z-10 p-3 bg-black/20 hover:bg-red-500 text-white rounded-2xl transition-all"
@@ -257,7 +257,7 @@ export default function MyListings() {
                   </div>
                 </div>
 
-                <div className="space-y-6 bg-gray-50 dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/5 h-fit">
+                <div className="space-y-6 bg-gray-50 dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/10 h-fit">
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-black uppercase text-gray-400">
                       Popularity
@@ -267,7 +267,7 @@ export default function MyListings() {
                       {viewingItem.favorites?.length || 0}
                     </div>
                   </div>
-                  <hr className="border-gray-200 dark:border-white/5" />
+                  <hr className="border-gray-200 dark:border-white/10" />
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
                       <FiMapPin className="text-orange-500" />
@@ -309,8 +309,8 @@ export default function MyListings() {
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => setEditingItem(null)}
           />
-          <div className="relative w-full max-w-5xl bg-white dark:bg-[#0c0c0c] rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[90vh]">
-            <div className="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-black/20 shrink-0">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[90vh]">
+            <div className="px-8 py-6 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-black/20 shrink-0">
               <h3 className="text-lg font-black uppercase italic text-[#1f1f1f] dark:text-white">
                 Modify <span className="text-orange-500">Protocol</span>
               </h3>
@@ -408,7 +408,7 @@ export default function MyListings() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50/50 dark:bg-white/10 rounded-2xl border border-gray-100 dark:border-white/5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50/50 dark:bg-white/10 rounded-2xl border border-gray-100 dark:border-white/10">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
                     External URL
@@ -416,7 +416,7 @@ export default function MyListings() {
                   <input
                     type="text"
                     value={editFormData.externalUrl}
-                    className="w-full bg-white dark:bg-[#0c0c0c] border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                    className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                     onChange={(e) =>
                       setEditFormData({ ...editFormData, externalUrl: e.target.value })
                     }
@@ -429,7 +429,7 @@ export default function MyListings() {
                   <input
                     type="text"
                     value={editFormData.tradition}
-                    className="w-full bg-white dark:bg-[#0c0c0c] border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                    className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                     onChange={(e) =>
                       setEditFormData({ ...editFormData, tradition: e.target.value })
                     }
