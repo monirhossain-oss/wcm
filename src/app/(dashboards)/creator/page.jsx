@@ -70,14 +70,14 @@ export default function CreatorDashboard() {
 
   const creatorCards = [
     {
-      label: 'Total Artifacts',
+      label: 'Total Listings',
       value: stats.total,
       icon: FiBox,
       color: 'bg-red-800',
       trend: 'Total Indexed',
     },
     {
-      label: 'Verified Nodes',
+      label: 'Approved Listings',
       value: stats.approved,
       icon: FiCheckCircle,
       color: 'bg-orange-500',
@@ -138,7 +138,7 @@ export default function CreatorDashboard() {
         <div className="lg:col-span-8 bg-white dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-              Artifact Impact
+              Listings Impact
             </h3>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
@@ -199,13 +199,13 @@ export default function CreatorDashboard() {
         <div className="lg:col-span-4 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl p-6 shadow-sm flex flex-col h-full">
           <div className="flex items-center justify-between mb-6">
             <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-gray-400">
-              Recent Protocols
+              Recent Listings
             </h4>
             <Link
               href="/creator/listings"
               className="text-[9px] font-black text-orange-500 uppercase hover:underline italic"
             >
-              Full Inventory
+              Full Listings
             </Link>
           </div>
 

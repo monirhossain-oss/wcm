@@ -72,34 +72,41 @@ export default function AdminListings() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-      {/* 📊 Status Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {console.log(stats)}
         {[
           {
-            label: 'Total Index',
+            label: 'Total Listings',
             value: stats.total,
             icon: FiLayers,
             color: 'text-blue-500',
             bg: 'bg-blue-500/5',
           },
           {
-            label: 'Pending Review',
+            label: 'Pending Listings',
             value: stats.pending,
             icon: FiClock,
             color: 'text-orange-500',
             bg: 'bg-orange-500/5',
           },
           {
-            label: 'Live Protocols',
+            label: 'Approved Listings',
             value: stats.approved,
             icon: FiShield,
             color: 'text-green-500',
             bg: 'bg-green-500/5',
           },
+          {
+            label: 'Rejected Listings',
+            value: stats.rejected,
+            icon: FiShield,
+            color: 'text-red-500',
+            bg: 'bg-red-500/5',
+          },
         ].map((stat, i) => (
           <div
             key={i}
-            className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 p-6 rounded-3xl shadow-sm"
+            className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 p-6 rounded-2xl shadow-sm"
           >
             <div className="flex justify-between items-start">
               <div>
@@ -116,8 +123,7 @@ export default function AdminListings() {
         ))}
       </div>
 
-      {/* 🔹 Header & Filter Section */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white dark:bg-white/5 p-6 rounded-3xl border border-gray-100 dark:border-white/10">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/10">
         <div>
           <h2 className="text-xl font-black uppercase tracking-tighter italic dark:text-white">
             System <span className="text-orange-500">Moderation</span>
@@ -145,15 +151,15 @@ export default function AdminListings() {
       </div>
 
       {/* 🔹 Enhanced Table */}
-      <div className="bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-gray-50 dark:border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                <th className="px-8 py-6">Image</th>
-                <th className="px-6 py-6">Name</th>
+                <th className="px-8 py-6">Images</th>
+                <th className="px-6 py-6">Creators</th>
                 <th className="px-6 py-6">Title</th>
-                <th className="px-6 py-6">Location</th>
+                <th className="px-6 py-6">Locations</th>
                 <th className="px-6 py-6">Status</th>
                 <th className="px-8 py-6 text-right">Actions</th>
               </tr>
@@ -174,8 +180,11 @@ export default function AdminListings() {
                   </td>
                   <td className="px-6 py-5">
                     <p className="text-[11px] font-black uppercase dark:text-white leading-none">
-                      {item.creatorId.firstName}
+                      {`${item.creatorId.firstName} ${item.creatorId.lastName}`}
                     </p>
+                    <span className="text-[10px] font-semibold dark:text-white leading-none">
+                      {`${item.creatorId.email}`}
+                    </span>
                   </td>
                   <td className="px-6 py-5">
                     <p className="text-[11px] font-black uppercase dark:text-white leading-none">
@@ -224,7 +233,7 @@ export default function AdminListings() {
             onClick={() => setViewItem(null)}
           />
 
-          <div className="relative w-full max-w-6xl bg-white dark:bg-[#0a0a0a] rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col lg:flex-row h-full max-h-[85vh] animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-6xl bg-white dark:bg-[#0a0a0a] rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col lg:flex-row h-full max-h-[85vh] animate-in zoom-in-95 duration-300">
             {/* Visual Section (Left) */}
             <div className="lg:w-1/2 relative h-64 lg:h-auto bg-gray-900 shrink-0">
               <img
