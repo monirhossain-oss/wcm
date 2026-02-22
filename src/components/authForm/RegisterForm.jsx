@@ -46,31 +46,36 @@ export default function RegisterForm() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       <Image
-        src="/Background.jpeg"
+        src="/Backgroun_image.jpg"
         alt="Register Background"
         fill
         priority
-        className="object-cover scale-110 blur-md"
+        className="object-cover scale-110 "
       />
       <div className="absolute inset-0 bg-black/40"></div>
 
       {/* Logo */}
       <div className="absolute top-4 left-4 cursor-pointer z-20" onClick={() => router.push('/')}>
-       <Image
-             src="/wc,-web-logo.png" 
-             alt="Logo Light"
-             width={100}
-             height={100}
-             className="dark:hidden brightness-125 h-auto w-auto"
-           />
-           {/* Dark Mode Logo */}
-           <Image
-             src="/wc,-web-white.png" 
-             alt="Logo Dark"
-             width={100}
-             height={100}
-             className="hidden dark:block brightness-125 h-auto w-auto"
-           />
+       <>
+  {/* এই লোগোটি শুধুমাত্র লাইট মোডে দেখাবে */}
+  <Image
+    src="/wc,-web-logo.png" 
+    alt="Logo Light"
+    width={100}
+    height={100}
+    className="dark:hidden brightness-125 h-auto w-auto"
+  />
+
+  {/* এই লোগোটি শুধুমাত্র ডার্ক মোডে দেখাবে */}
+  <Image
+    src="/wc,-web-logo.png" 
+    alt="Logo Dark"
+    width={100}
+    height={100}
+    className="hidden dark:block brightness-125 h-auto w-auto"
+  />
+</>
+          
       </div>
 
       <div className="relative mt-24 z-10 min-h-screen flex items-center justify-center px-4">

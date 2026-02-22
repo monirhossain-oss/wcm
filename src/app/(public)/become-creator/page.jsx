@@ -68,7 +68,7 @@ export default function UserProfileForm() {
     }
   };
 
-  if (!mounted) return null;
+  if (!mounted) return null; 
 
   const inputStyle =
     'w-full border border-gray-100 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none transition-all';
@@ -80,7 +80,7 @@ export default function UserProfileForm() {
     <div className="min-h-screen mt-10 relative">
       <div
         className="absolute inset-0 lg:hidden bg-cover bg-center"
-        style={{ backgroundImage: "url('/register.jpg')" }}
+        style={{ backgroundImage: "url('/Backgroun_image.jpg')" }}
       >
         <div className="absolute inset-0 bg-black/60"></div>
       </div>
