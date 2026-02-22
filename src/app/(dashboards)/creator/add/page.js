@@ -68,7 +68,7 @@ export default function AddListing() {
       {/* 🔹 Header Section */}
       <div className="mb-8 border-b border-gray-100 dark:border-white/10 pb-6">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
-          Deploy <span className="text-orange-500">Artifact</span>
+          Add <span className="text-orange-500">Listing</span>
         </h2>
         <p className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mt-1">
           Add a new node to the cultural inventory
@@ -77,10 +77,9 @@ export default function AddListing() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* 🖼️ Left: Compact Image Upload */}
           <div className="lg:col-span-4">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block ml-1">
-              Visual Asset
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block ml-1">
+              Image
             </label>
             <div className="relative h-64 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center overflow-hidden group transition-all shadow-sm">
               {image ? (
@@ -127,8 +126,8 @@ export default function AddListing() {
           <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Title */}
             <div className="md:col-span-2 space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
-                Artifact Title
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
+                Listings Title
               </label>
               <input
                 type="text"
@@ -140,7 +139,7 @@ export default function AddListing() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
                 Region
               </label>
               <input
@@ -153,7 +152,7 @@ export default function AddListing() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
                 Country
               </label>
               <input
@@ -166,11 +165,11 @@ export default function AddListing() {
             </div>
 
             <div className="md:col-span-2 space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
                 Description
               </label>
               <textarea
-                placeholder="Tell the story and historical context of this artifact..."
+                placeholder="Tell the story and historical context of this Listings..."
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 h-32 resize-none transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 required
@@ -182,7 +181,7 @@ export default function AddListing() {
         {/* 🔹 Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-2xl">
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
               Tradition
             </label>
             <input
@@ -194,7 +193,7 @@ export default function AddListing() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
               Tags
             </label>
             <input
@@ -205,8 +204,8 @@ export default function AddListing() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
-              External URL
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
+              Product Link
             </label>
             <input
               type="url"

@@ -25,7 +25,7 @@ export default function MyListings() {
 
   // States for Modals
   const [editingItem, setEditingItem] = useState(null);
-  const [viewingItem, setViewingItem] = useState(null); // 🔹 For View Modal
+  const [viewingItem, setViewingItem] = useState(null);
 
   const [editFormData, setEditFormData] = useState({});
   const [editImage, setEditImage] = useState(null);
@@ -104,10 +104,10 @@ export default function MyListings() {
       <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/10 pb-6">
         <div>
           <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
-            Management <span className="text-orange-500">Inventory</span>
+            Listing <span className="text-orange-500">Management</span>
           </h2>
           <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">
-            Total Indexed Nodes: {listings.length}
+            Total Listings: {listings.length}
           </p>
         </div>
       </div>
@@ -119,10 +119,16 @@ export default function MyListings() {
             <thead>
               <tr className="bg-gray-50/50 dark:bg-black/20 border-b border-gray-100 dark:border-white/10">
                 <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  Media
+                  Images
                 </th>
                 <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  Identity
+                  Title
+                </th>
+                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
+                  Tradition
+                </th>
+                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
+                  Favoruite
                 </th>
                 <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
                   Status
@@ -148,24 +154,26 @@ export default function MyListings() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-[11px] font-black uppercase text-[#1f1f1f] dark:text-white">
+                    <p className="text-xs font-black uppercase text-[#1f1f1f] dark:text-white">
                       {item.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[8px] text-gray-400 font-bold uppercase italic">
-                        {item.tradition}
-                      </span>
-                      <span className="flex items-center gap-1 text-[8px] text-orange-500 font-black">
-                        <FiHeart size={8} /> {item.favorites?.length || 0}
-                      </span>
-                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-[10px] font-bold uppercase italic">
+                      {item.tradition}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="flex items-center gap-1 text-xs text-red-500 font-black">
+                      <FiHeart size={8} /> {item.favorites?.length || 0}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span
-                      className={`px-2.5 py-1 rounded-md text-[8px] font-black uppercase tracking-tighter ${
+                      className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-tighter ${
                         item.status === 'approved'
                           ? 'bg-green-500/10 text-green-500'
-                          : 'bg-orange-500/10 text-orange-500'
+                          : 'bg-orange-500/10 text-red-500'
                       }`}
                     >
                       {item.status}
@@ -203,7 +211,7 @@ export default function MyListings() {
         </div>
       </div>
 
-      {/* 👁️ 🔹 Artifact View Modal (Details) */}
+      {/* 👁️ 🔹 Listings View Modal (Details) */}
       {viewingItem && (
         <div className="fixed inset-0 z-110 flex items-center justify-center p-4 md:p-6">
           <div

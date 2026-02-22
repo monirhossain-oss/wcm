@@ -59,9 +59,9 @@ export default function CreatorLayout({ children }) {
   if (!user || user.role !== 'creator') return null;
 
   const navItems = [
-    { name: 'Dashboard', path: '/creator', icon: FiGrid },
+    { name: 'Overview', path: '/creator', icon: FiGrid },
     { name: 'My Listings', path: '/creator/listings', icon: FiList },
-    { name: 'Add Artifact', path: '/creator/add', icon: FiPlus },
+    { name: 'Add Listings', path: '/creator/add', icon: FiPlus },
   ];
 
   const profileImage = user?.profile?.profileImage
@@ -72,11 +72,6 @@ export default function CreatorLayout({ children }) {
     <>
       <div className="p-6">
         <Link href="/" className="flex items-center gap-3 font-black text-lg tracking-tighter">
-          {/* <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
-            <FiShield size={20} />
-          </div>
-          <span className="text-[#1f1f1f] dark:text-white uppercase italic">Creator</span>
-          <span className="text-orange-500 uppercase font-black">Node</span> */}
           <Image
             src="/wc,-web-logo.png"
             alt="Logo"
@@ -132,41 +127,26 @@ export default function CreatorLayout({ children }) {
 
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
         {/* 🔹 Header */}
-        <header className="h-20 bg-white/80 dark:bg-white/5 backdrop-blur-md border-b border-gray-100 dark:border-white/10 flex items-center justify-between px-6 md:px-10 z-40">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="p-2.5 bg-gray-50 dark:bg-white/5 rounded-lg lg:hidden"
-            >
-              <FiMenu size={18} />
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <h1 className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-400">
-                Creator Identity Active
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-5" ref={dropdownRef}>
+        <header className="h-20 bg-white/80 dark:bg-white/5 backdrop-blur-md border-b border-gray-100 dark:border-white/10 flex items-center justify-end px-6 md:px-10 z-40">
+          <div className="flex items-center gap-3" ref={dropdownRef}>
             <div className="hidden sm:flex flex-col items-end">
               <span className="text-[10px] font-black uppercase tracking-tight leading-none mb-1 text-[#1f1f1f] dark:text-white">
                 {user?.firstName} {user?.lastName}
               </span>
               <span className="text-[8px] font-bold text-orange-500 uppercase bg-orange-500/10 px-2 py-0.5 rounded-md">
-                Verified Creator
+                {user?.role}
               </span>
             </div>
 
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="h-11 w-11 rounded-xl bg-gray-100 dark:bg-white/5 p-0.5 border border-transparent hover:border-orange-500 transition-all overflow-hidden shadow-sm"
+                className="h-11 w-11 rounded-full bg-gray-100 dark:bg-white/5 p-0.5 border border-transparent hover:border-orange-500 transition-all overflow-hidden shadow-sm"
               >
                 <img
                   src={profileImage}
                   alt="creator"
-                  className="w-full h-full object-cover rounded-[10px]"
+                  className="w-full h-full object-cover rounded-full"
                 />
               </button>
 
