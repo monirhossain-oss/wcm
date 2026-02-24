@@ -40,7 +40,6 @@ export default function ProfilePage() {
     formState: { isSubmitting },
   } = useForm();
 
-  // ইউজার ডাটা দিয়ে ফর্ম ইনিশিয়ালাইজ করা
   useEffect(() => {
     if (user) {
       reset({
@@ -64,7 +63,6 @@ export default function ProfilePage() {
       setMessage({ type: '', text: '' });
       const formData = new FormData();
 
-      // টেক্সট ডাটা অ্যাপেন্ড করা
       formData.append('firstName', data.firstName);
       formData.append('lastName', data.lastName);
       formData.append('displayName', data.displayName);
@@ -72,22 +70,20 @@ export default function ProfilePage() {
       formData.append('country', data.country);
       formData.append('language', data.language);
 
-      // ইমেজ ফাইল অ্যাপেন্ড করা (সঠিক নেম ব্যবহার করা হয়েছে যা কন্ট্রোলারে আছে)
-      const profileFileInput = document.querySelector('input[name="profileImageCustom"]');
-      const coverFileInput = document.querySelector('input[name="coverImageCustom"]');
+      const profileFile = document.querySelector('input[name="profileImageCustom"]').files[0];
+      const coverFile = document.querySelector('input[name="coverImageCustom"]').files[0];
 
-      if (profileFileInput?.files[0]) {
-        formData.append('profileImage', profileFileInput.files[0]);
+      if (profileFile) {
+        formData.append('profileImage', profileFile);
       }
-      if (coverFileInput?.files[0]) {
-        formData.append('coverImage', coverFileInput.files[0]);
+      if (coverFile) {
+        formData.append('coverImage', coverFile);
       }
 
       const res = await api.put('/api/users/update-profile', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      // সাকসেস হলে স্টেট আপডেট
       setUser(res.data.user);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
       setIsEditing(false);
