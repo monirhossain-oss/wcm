@@ -1,18 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import {
   FiUploadCloud,
+  FiX,
+  FiArrowRight,
+  FiTag,
+  FiGrid,
+  FiLoader,
+  FiSearch,
+  FiChevronDown,
+  FiCheck,
   FiMapPin,
   FiGlobe,
-  FiType,
   FiLink,
-  FiFileText,
-  FiTag,
-  FiX,
-  FiImage,
-  FiArrowRight,
 } from 'react-icons/fi';
 
 const api = axios.create({
@@ -28,60 +30,105 @@ export default function AddListing() {
     region: '',
     country: '',
     tradition: '',
-    culturalTags: '',
+    category: '',
+    culturalTags: [],
   });
+
+  const [metaData, setMetaData] = useState({ categories: [], tags: [] });
+  const [metaLoading, setMetaLoading] = useState(true);
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Dropdown States
+  const [showCatDrop, setShowCatDrop] = useState(false);
+  const [catSearch, setCatSearch] = useState('');
+  const [showTagDrop, setShowTagDrop] = useState(false);
+  const [tagSearch, setTagSearch] = useState('');
+
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchMeta = async () => {
+      try {
+        const res = await api.get('/api/listings/meta-data');
+        setMetaData(res.data);
+      } catch (err) {
+        console.error('Meta-data load failed');
+      } finally {
+        setMetaLoading(false);
+      }
+    };
+    fetchMeta();
+  }, []);
+
+  const filteredCats = metaData.categories.filter((c) =>
+    c.title.toLowerCase().includes(catSearch.toLowerCase())
+  );
+  const filteredTags = metaData.tags.filter((t) =>
+    t.title.toLowerCase().includes(tagSearch.toLowerCase())
+  );
+
+  const handleTagToggle = (tagId) => {
+    setFormData((prev) => {
+      const isSelected = prev.culturalTags.includes(tagId);
+      if (isSelected)
+        return { ...prev, culturalTags: prev.culturalTags.filter((id) => id !== tagId) };
+      if (prev.culturalTags.length >= 5) {
+        alert('Maximum 5 tags allowed');
+        return prev;
+      }
+      return { ...prev, culturalTags: [...prev.culturalTags, tagId] };
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!image || !formData.category) return alert('Image and Category are required');
     setLoading(true);
-
     try {
       const data = new FormData();
-      Object.keys(formData).forEach((key) => data.append(key, formData[key]));
-
-      if (image) {
-        data.append('image', image);
-      } else {
-        alert('Please select an image first');
-        setLoading(false);
-        return;
-      }
-
-      await api.post('/api/listings/add', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      Object.keys(formData).forEach((key) => {
+        if (key === 'culturalTags')
+          formData[key].forEach((tag) => data.append('culturalTags', tag));
+        else data.append(key, formData[key]);
       });
-
+      data.append('image', image);
+      await api.post('/api/listings/add', data);
       router.push('/creator/listings');
     } catch (err) {
-      console.error(err);
       alert(err.response?.data?.message || 'Error creating listing');
     } finally {
       setLoading(false);
     }
   };
 
+  if (metaLoading)
+    return (
+      <div className="flex justify-center p-20">
+        <FiLoader className="animate-spin text-orange-500" size={30} />
+      </div>
+    );
+
   return (
-    <div className="max-w-6xl mx-auto py-4 animate-in fade-in duration-700">
-      {/* 🔹 Header Section */}
+    <div className="max-w-6xl mx-auto py-4 animate-in fade-in duration-700 pb-20">
+      {/* Header */}
       <div className="mb-8 border-b border-gray-100 dark:border-white/10 pb-6">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
           Add <span className="text-orange-500">Listing</span>
         </h2>
         <p className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mt-1">
-          Add a new node to the cultural inventory
+          Submit to the cultural archive
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left: Image Upload */}
           <div className="lg:col-span-4">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block ml-1">
-              Image
+              Media
             </label>
-            <div className="relative h-64 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center overflow-hidden group transition-all shadow-sm">
+            <div className="relative md:h-86 w-full max-md:aspect-video bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center overflow-hidden shadow-sm group">
               {image ? (
                 <div className="absolute inset-0 w-full h-full p-2">
                   <div className="relative w-full h-full rounded-xl overflow-hidden">
@@ -95,7 +142,7 @@ export default function AddListing() {
                         e.preventDefault();
                         setImage(null);
                       }}
-                      className="absolute top-2 right-2 p-2 bg-black/60 backdrop-blur-md text-white rounded-lg hover:bg-red-500 transition-all z-10"
+                      className="absolute top-2 right-2 p-2 bg-black/60 text-white rounded-lg hover:bg-red-500 z-20"
                     >
                       <FiX size={14} />
                     </button>
@@ -104,11 +151,8 @@ export default function AddListing() {
               ) : (
                 <div className="text-center p-6">
                   <FiUploadCloud size={24} className="text-orange-500 mx-auto mb-2" />
-                  <p className="text-[10px] font-black uppercase tracking-tight text-gray-600 dark:text-gray-300">
+                  <p className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-300">
                     Upload Image
-                  </p>
-                  <p className="text-[8px] font-bold text-gray-400 mt-1 uppercase tracking-tighter">
-                    JPG, PNG (MAX 5MB)
                   </p>
                 </div>
               )}
@@ -122,117 +166,197 @@ export default function AddListing() {
             </div>
           </div>
 
-          {/* 📝 Right: Form Details */}
+          {/* Right: Primary Details */}
           <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Title */}
             <div className="md:col-span-2 space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-                Listings Title
+                Listing Title
               </label>
               <input
                 type="text"
-                placeholder="Enter a descriptive name for your work"
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
+                required
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                placeholder="Descriptive name..."
               />
             </div>
 
+            <div className="space-y-2 relative">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
+                <FiGrid size={10} /> Category
+              </label>
+              <div
+                onClick={() => setShowCatDrop(!showCatDrop)}
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold dark:text-white flex justify-between items-center cursor-pointer hover:border-orange-500/50"
+              >
+                {formData.category
+                  ? metaData.categories.find((c) => c._id === formData.category)?.title
+                  : 'Select Category'}
+                <FiChevronDown
+                  className={`${showCatDrop ? 'rotate-180' : ''} transition-transform`}
+                />
+              </div>
+              {showCatDrop && (
+                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                  <div className="p-2 border-b dark:border-white/10 flex items-center gap-2 bg-gray-50 dark:bg-white/5">
+                    <FiSearch className="text-gray-400" size={12} />
+                    <input
+                      autoFocus
+                      placeholder="Search..."
+                      className="w-full bg-transparent text-[10px] font-bold outline-none dark:text-white"
+                      onChange={(e) => setCatSearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="max-h-40 overflow-y-auto">
+                    {filteredCats.map((cat) => (
+                      <div
+                        key={cat._id}
+                        onClick={() => {
+                          setFormData({ ...formData, category: cat._id });
+                          setShowCatDrop(false);
+                        }}
+                        className="p-3 text-[10px] font-bold uppercase hover:bg-orange-500 hover:text-white cursor-pointer transition-colors dark:text-gray-300 border-b last:border-0 dark:border-white/5"
+                      >
+                        {cat.title}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-                Region
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
+                <FiGlobe size={10} /> Region
               </label>
               <input
                 type="text"
-                placeholder="e.g. South Asia"
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
+                required
                 onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-                Country
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Bangladesh"
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                required
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                placeholder="e.g. South Asia"
               />
             </div>
 
             <div className="md:col-span-2 space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-                Description
+                Story & Description
               </label>
               <textarea
-                placeholder="Tell the story and historical context of this Listings..."
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 h-32 resize-none transition-all text-[#1f1f1f] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 required
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 h-39 resize-none dark:text-white placeholder:text-gray-400"
+                placeholder="Tell the cultural story..."
               />
             </div>
           </div>
         </div>
 
-        {/* 🔹 Footer Grid */}
+        {/* Bottom Section: Tradition, Tags, and URL */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-2xl">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-              Tradition
+              Tradition & Country
             </label>
-            <input
-              type="text"
-              placeholder="e.g. Jamdani Weaving"
-              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
-              onChange={(e) => setFormData({ ...formData, tradition: e.target.value })}
-              required
-            />
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                required
+                onChange={(e) => setFormData({ ...formData, tradition: e.target.value })}
+                className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-xl text-xs font-bold dark:text-white outline-none focus:border-orange-500"
+                placeholder="Tradition (e.g. Jamdani)"
+              />
+              <input
+                type="text"
+                required
+                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-xl text-xs font-bold dark:text-white outline-none focus:border-orange-500"
+                placeholder="Country (e.g. Bangladesh)"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-              Tags
+
+          <div className="space-y-2 relative">
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
+              <FiTag size={10} /> Select Tags
             </label>
-            <input
-              type="text"
-              placeholder="heritage, silk, handmade"
-              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
-              onChange={(e) => setFormData({ ...formData, culturalTags: e.target.value })}
-            />
+            <div
+              onClick={() => setShowTagDrop(!showTagDrop)}
+              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-xl text-[10px] font-bold dark:text-white flex flex-wrap gap-1 min-h-23 cursor-pointer align-top"
+            >
+              {formData.culturalTags.length === 0 && (
+                <span className="text-gray-400">Add up to 5 tags...</span>
+              )}
+              {formData.culturalTags.map((tId) => (
+                <span
+                  key={tId}
+                  className="bg-orange-500 text-white px-2 py-1 h-fit rounded-md flex items-center gap-1 animate-in zoom-in-95"
+                >
+                  {metaData.tags.find((t) => t._id === tId)?.title}
+                  <FiX
+                    size={10}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTagToggle(tId);
+                    }}
+                  />
+                </span>
+              ))}
+            </div>
+            {showTagDrop && (
+              <div className="absolute bottom-full mb-2 z-50 w-full bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-2">
+                <div className="p-2 border-b dark:border-white/10 flex items-center gap-2 bg-gray-50 dark:bg-white/5">
+                  <FiSearch className="text-gray-400" size={12} />
+                  <input
+                    autoFocus
+                    placeholder="Search tags..."
+                    className="w-full bg-transparent text-[10px] font-bold outline-none dark:text-white"
+                    onChange={(e) => setTagSearch(e.target.value)}
+                  />
+                </div>
+                <div className="max-h-40 overflow-y-auto grid grid-cols-1 p-1 gap-1">
+                  {filteredTags.map((tag) => (
+                    <div
+                      key={tag._id}
+                      onClick={() => handleTagToggle(tag._id)}
+                      className={`p-2 rounded-lg text-[9px] font-black uppercase cursor-pointer flex justify-between items-center ${formData.culturalTags.includes(tag._id) ? 'bg-orange-500 text-white' : 'dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                    >
+                      {tag.title} {formData.culturalTags.includes(tag._id) && <FiCheck />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-              Product Link
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
+              <FiLink size={10} /> External Source
             </label>
-            <input
-              type="url"
-              placeholder="https://example.com/source"
-              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
-              onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
-              required
-            />
+            <div className="h-23 flex flex-col justify-end">
+              <input
+                type="url"
+                required
+                onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
+                className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold dark:text-white outline-none focus:border-orange-500"
+                placeholder="https://source-link.com"
+              />
+            </div>
           </div>
         </div>
 
-        {/* 🚀 Submit Button */}
-        <div className="pt-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-16 bg-orange-600 hover:bg-orange-500 text-white rounded-2xl font-black text-[11px] tracking-[0.3em] uppercase transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] flex items-center justify-center gap-3"
-          >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-            ) : (
-              <>
-                Confirm Publication <FiArrowRight size={16} />
-              </>
-            )}
-          </button>
-        </div>
+        <button
+          disabled={loading}
+          className="w-full h-16 bg-orange-600 hover:bg-orange-500 text-white rounded-2xl font-black text-[11px] tracking-[0.3em] uppercase transition-all flex items-center justify-center gap-3 shadow-lg shadow-orange-500/20 active:scale-[0.98]"
+        >
+          {loading ? (
+            <FiLoader className="animate-spin" />
+          ) : (
+            <>
+              Confirm Publication <FiArrowRight />
+            </>
+          )}
+        </button>
       </form>
     </div>
   );

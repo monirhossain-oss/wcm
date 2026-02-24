@@ -64,8 +64,8 @@ export default function AdminLayout({ children }) {
     { name: 'All Users', path: '/admin/users', icon: FiUsers },
     { name: 'Creator Requests', path: '/admin/requests', icon: FiCheckCircle },
     { name: 'All Listings', path: '/admin/listings', icon: FiLayout },
-    { name: 'Add Tags', path: '/admin/tags', icon: FaTag },
-    { name: 'Add Categories', path: '/admin/categories', icon: FaCreativeCommonsSampling },
+    { name: 'Tag Management', path: '/admin/tags', icon: FaTag },
+    { name: 'Categorie Management', path: '/admin/categories', icon: FaCreativeCommonsSampling },
   ];
 
   const profileImage = user?.profile?.profileImage
@@ -76,22 +76,21 @@ export default function AdminLayout({ children }) {
     <>
       <div className="p-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 font-black text-lg tracking-tighter">
-          
-         <Image
-            src="/wc,-web-logo.png" 
+          <Image
+            src="/wc,-web-logo.png"
             alt="Logo Light"
             width={100}
             height={100}
             className="dark:hidden brightness-125 h-auto w-auto"
           />
-         <Image
-                                 src="/wc,-web-white.png" 
-                                 alt="Logo Dark"
-                                 width={100}
-                                 height={100}
-                                 className="hidden dark:block brightness-125 h-auto w-auto"
-                               />
-                               </Link>
+          <Image
+            src="/wc,-web-white.png"
+            alt="Logo Dark"
+            width={100}
+            height={100}
+            className="hidden dark:block brightness-125 h-auto w-auto"
+          />
+        </Link>
         {/* Mobile Close Button */}
         <button
           onClick={() => setIsSidebarOpen(false)}
