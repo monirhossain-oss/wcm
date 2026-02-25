@@ -5,11 +5,15 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterForm() {
   const router = useRouter();
   const { registerUser } = useAuth(); 
   const [serverError, setServerError] = useState('');
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -54,28 +58,9 @@ export default function RegisterForm() {
       />
       <div className="absolute inset-0 bg-black/40"></div>
 
-      {/* Logo */}
       <div className="absolute top-4 left-4 cursor-pointer z-20" onClick={() => router.push('/')}>
-       <>
-  {/* এই লোগোটি শুধুমাত্র লাইট মোডে দেখাবে */}
-  <Image
-    src="/wc,-web-logo.png" 
-    alt="Logo Light"
-    width={100}
-    height={100}
-    className="dark:hidden brightness-125 h-auto w-auto"
-  />
-
-  {/* এই লোগোটি শুধুমাত্র ডার্ক মোডে দেখাবে */}
-  <Image
-    src="/wc,-web-logo.png" 
-    alt="Logo Dark"
-    width={100}
-    height={100}
-    className="hidden dark:block brightness-125 h-auto w-auto"
-  />
-</>
-          
+        <Image src="/wc,-web-logo.png" alt="Logo Light" width={100} height={100} className="dark:hidden brightness-125 h-auto w-auto" />
+        <Image src="/wc,-web-logo.png" alt="Logo Dark" width={100} height={100} className="hidden dark:block brightness-125 h-auto w-auto" />
       </div>
 
       <div className="relative mt-24 z-10 min-h-screen flex items-center justify-center px-4">
@@ -84,103 +69,116 @@ export default function RegisterForm() {
             <h1 className="text-3xl font-extrabold mb-2 text-foreground">Create Account</h1>
             <p className="text-sm text-text">
               Already have an account?{' '}
-              <a href="/auth/login" className="underline text-[var(--color-primary)]">
-                Login
-              </a>
+              <a href="/auth/login" className="underline text-amber-500 font-medium hover:opacity-80 transition-opacity">Login</a>
             </p>
           </div>
 
-          {/* Server Error Message */}
           {serverError && (
-            <div className="alert-error text-center mb-4 py-2 rounded text-sm">{serverError}</div>
+            <div className="alert-error text-center mb-4 py-2 rounded text-sm bg-red-100 text-red-600 border border-red-200">{serverError}</div>
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 backdrop-blur-md bg-white/10 dark:bg-black/30 p-6 rounded-2xl border border-white/20 shadow-2xl">
+            
+            {/* Name Section */}
             <div className="flex gap-3">
-              <div className="flex-1">
+              <div className="flex-1 space-y-1">
+                <label className="text-xs font-semibold text-foreground/90 ml-1">First Name</label>
                 <input
-                  placeholder="First name"
+                  placeholder="John"
                   {...register('first_name', { required: 'Required' })}
-                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
+                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground"
                 />
-                {errors.first_name && (
-                  <p className="text-error text-xs mt-1">{errors.first_name.message}</p>
-                )}
+                {errors.first_name && <p className="text-error text-[10px] mt-1 ml-1">{errors.first_name.message}</p>}
               </div>
-              <div className="flex-1">
+              <div className="flex-1 space-y-1">
+                <label className="text-xs font-semibold text-foreground/90 ml-1">Last Name</label>
                 <input
-                  placeholder="Last name"
+                  placeholder="Doe"
                   {...register('last_name', { required: 'Required' })}
-                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
+                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground"
                 />
-                {errors.last_name && (
-                  <p className="text-error text-xs mt-1">{errors.last_name.message}</p>
-                )}
+                {errors.last_name && <p className="text-error text-[10px] mt-1 ml-1">{errors.last_name.message}</p>}
               </div>
             </div>
 
-            <div>
+            {/* Username Section */}
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-foreground/90 ml-1">Username</label>
               <input
-                placeholder="Username"
+                placeholder="johndoe123"
                 {...register('username', { required: 'Username required' })}
-                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
+                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground"
               />
-              {errors.username && (
-                <p className="text-error text-xs mt-1">{errors.username.message}</p>
-              )}
+              {errors.username && <p className="text-error text-[10px] mt-1 ml-1">{errors.username.message}</p>}
             </div>
 
-            <div>
+            {/* Email Section */}
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-foreground/90 ml-1">Email Address</label>
               <input
                 type="email"
-                placeholder="Email address"
+                placeholder="email@example.com"
                 {...register('email', { required: 'Email required' })}
-                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
+                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground"
               />
-              {errors.email && <p className="text-error text-xs mt-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-error text-[10px] mt-1 ml-1">{errors.email.message}</p>}
             </div>
 
+            {/* Password Section */}
             <div className="flex gap-3">
-              <div className="flex-1">
-                <input
-                  type="password"
-                  placeholder="Password"
-                  {...register('password', {
-                    required: 'Required',
-                    minLength: { value: 6, message: 'Min 6 chars' },
-                  })}
-                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
-                />
+              <div className="flex-1 space-y-1">
+                <label className="text-xs font-semibold text-foreground/90 ml-1">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••"
+                    {...register('password', {
+                      required: 'Required',
+                      minLength: { value: 6, message: 'Min 6 chars' },
+                    })}
+                    className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground pr-9"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
-              <div className="flex-1">
-                <input
-                  type="password"
-                  placeholder="Confirm"
-                  {...register('password_confirmation', { required: 'Required' })}
-                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none bg-background text-foreground"
-                />
+
+              <div className="flex-1 space-y-1">
+                <label className="text-xs font-semibold text-foreground/90 ml-1">Confirm</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="••••••"
+                    {...register('password_confirmation', { required: 'Required' })}
+                    className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground pr-9"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full py-2 rounded-lg btn-primary transition font-bold ${isSubmitting ? 'btn-disabled' : 'hover:opacity-90'}`}
+              className={`w-full py-2.5 mt-2 rounded-lg btn-primary transition font-bold shadow-lg ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90 active:scale-[0.98]'}`}
             >
-              {isSubmitting ? 'Creating...' : 'Register'}
+              {isSubmitting ? 'Creating Account...' : 'Register'}
             </button>
           </form>
 
-          <p className="text-[10px] text-center text-text mt-4">
-            By joining, you agree to the{' '}
-            <a href="/terms" className="underline">
-              Terms
-            </a>{' '}
-            and{' '}
-            <a href="/privacy" className="underline">
-              Privacy Policy
-            </a>
-            .
+          <p className="text-[10px] text-center text-text/70 mt-4">
+            By joining, you agree to the <a href="/terms" className="underline hover:text-primary">Terms</a> and <a href="/privacy" className="underline hover:text-primary">Privacy Policy</a>.
           </p>
         </div>
       </div>
