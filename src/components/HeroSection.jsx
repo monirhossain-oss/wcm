@@ -34,7 +34,7 @@ export default function HeroSection() {
 
   if (!mounted) return null;
   return (
-    <section className="relative overflow-hidden min-h-[750px] flex items-center transition-colors duration-500">
+    <section className="relative overflow-hidden min-h-187.5 flex items-center transition-colors duration-500">
       {/* Background Slider */}
       {images.map((img, index) => (
         <div

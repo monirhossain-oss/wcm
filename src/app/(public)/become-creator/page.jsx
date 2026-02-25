@@ -90,6 +90,7 @@ export default function UserProfileForm() {
       setServerError('');
       const formData = new FormData();
       formData.append('displayName', data.display_name);
+      formData.append('username', user?.username);
       formData.append('bio', data.bio);
       formData.append('country', data.country);
       formData.append('city', data.city);
