@@ -83,7 +83,6 @@ export default function ProfilePage() {
       ];
       fields.forEach((field) => formData.append(field, data[field] || ''));
 
-      // আপনার দেওয়া নতুন নিয়মে ইমেজ হ্যান্ডেলিং (Custom Input Selection)
       const profileFile = document.querySelector('input[name="profileImageCustom"]')?.files[0];
       const coverFile = document.querySelector('input[name="coverImageCustom"]')?.files[0];
 
@@ -277,8 +276,10 @@ export default function ProfilePage() {
                       icon={FiUser}
                     />
                     <InfoRow label="Display Name" value={user.profile?.displayName} icon={FiType} />
-                    <InfoRow label="Location" value={user.profile?.country} icon={FiMapPin} />
+                    <InfoRow label="Country" value={user.profile?.country} icon={FiMapPin} />
+                    <InfoRow label="City" value={user.profile?.city} icon={FiMapPin} />
                     <InfoRow label="Language" value={user.profile?.language} icon={FiGlobe} />
+                    <InfoRow label="Social Link" value={user.profile?.socialLink} icon={FiLink} />
                     <div className="md:col-span-2 mt-8 p-6 bg-gray-50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                         <FiInfo /> Professional Bio
@@ -290,31 +291,77 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    {/* First & Last Name */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <InputField label="First Name" name="firstName" register={register} />
-                      <InputField label="Last Name" name="lastName" register={register} />
+                      <InputField
+                        label="First Name"
+                        name="firstName"
+                        register={register}
+                        placeholder="e.g. John"
+                      />
+                      <InputField
+                        label="Last Name"
+                        name="lastName"
+                        register={register}
+                        placeholder="e.g. Doe"
+                      />
                     </div>
-                    <InputField label="Display Name" name="displayName" register={register} />
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest ml-1">
+
+                    {/* Display Name */}
+                    <InputField
+                      label="Public Display Name"
+                      name="displayName"
+                      register={register}
+                      placeholder="How others will see your name"
+                    />
+
+                    {/* Professional Bio */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.15em] ml-1">
                         Professional Bio
                       </label>
                       <textarea
                         {...register('bio')}
                         rows={3}
-                        className="w-full rounded-xl px-5 py-4 border border-gray-100 dark:border-white/10 bg-white/20 dark:bg-white/5 text-xs font-bold focus:ring-2 focus:ring-orange-500 outline-none resize-none"
+                        placeholder="Tell us a bit about your professional journey..."
+                        className="w-full rounded-xl px-5 py-4 border border-gray-100 dark:border-white/10 bg-white/20 dark:bg-white/5 text-xs font-bold focus:ring-2 focus:ring-orange-500 outline-none resize-none backdrop-blur-md transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600"
                       />
                     </div>
+
+                    {/* Location & Language */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <InputField label="Country" name="country" register={register} />
-                      <InputField label="City" name="city" register={register} />
-                      <InputField label="Language" name="language" register={register} />
+                      <InputField
+                        label="Country"
+                        name="country"
+                        register={register}
+                        placeholder="Country Name"
+                      />
+                      <InputField
+                        label="City / Region"
+                        name="city"
+                        register={register}
+                        placeholder="Your City"
+                      />
+                      <InputField
+                        label="Native Language"
+                        name="language"
+                        register={register}
+                        placeholder="e.g. English, Bengali"
+                      />
                     </div>
+                    <InputField
+                      label="Social Link"
+                      name="socialLink"
+                      register={register}
+                      placeholder="Your social media link"
+                    />
+
+                    {/* Submit Button */}
                     <div className="pt-4">
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full md:w-auto px-12 py-4 rounded-xl bg-orange-500 text-white font-black text-[10px] tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-orange-500/20 active:scale-95 disabled:bg-gray-400"
+                        className="w-full md:w-auto px-12 py-4 rounded-xl bg-orange-500 text-white font-black text-[10px] tracking-[0.2em] hover:bg-orange-600 transition-all shadow-xl shadow-orange-500/20 active:scale-95 disabled:bg-gray-400 uppercase"
                       >
                         {isSubmitting ? 'SYNCHRONIZING...' : 'SAVE CHANGES'}
                       </button>
@@ -349,14 +396,15 @@ const InfoRow = ({ label, value, icon: Icon }) => (
   </div>
 );
 
-const InputField = ({ label, name, register }) => (
-  <div className="space-y-1.5">
-    <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest ml-1">
+const InputField = ({ label, name, register, placeholder }) => (
+  <div className="space-y-2">
+    <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.15em] ml-1">
       {label}
     </label>
     <input
       {...register(name)}
-      className="w-full rounded-xl px-5 py-4 border border-gray-100 dark:border-white/10 bg-white/20 dark:bg-white/5 text-xs font-bold focus:ring-2 focus:ring-orange-500 outline-none"
+      placeholder={placeholder}
+      className="w-full rounded-xl px-5 py-4 border border-gray-100 dark:border-white/10 bg-white/20 dark:bg-white/5 text-xs font-bold focus:ring-2 focus:ring-orange-500 outline-none backdrop-blur-md transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600"
     />
   </div>
 );

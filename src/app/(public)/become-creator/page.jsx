@@ -18,12 +18,25 @@ export default function UserProfileForm() {
   const [serverError, setServerError] = useState('');
   const [mounted, setMounted] = useState(false);
 
-  // ইমেজ প্রিভিউ স্টেট
   const [previews, setPreviews] = useState({ profile: null, cover: null });
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!user || user.role !== 'user') {
+      router.push('/profile');
+    }
+  }, [user, router]);
+
+  if (!user || user.role !== 'user') {
+    return (
+      <div className="min-h-screen flex items-center justify-center animate-pulse font-black uppercase tracking-widest text-orange-500">
+        Redirecting to Profile...
+      </div>
+    );
+  }
 
   const {
     register,
@@ -32,7 +45,6 @@ export default function UserProfileForm() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm({
-    // রিফ্রেশ করলেও যেন এরর না আসে সেজন্য defaultValues হ্যান্ডেল করা হয়েছে
     defaultValues: {
       display_name: user?.profile?.displayName || '',
       bio: user?.profile?.bio || '',
@@ -44,7 +56,6 @@ export default function UserProfileForm() {
     },
   });
 
-  // ডাটাবেসে ছবি থাকলে তা প্রিভিউতে সেট করা
   useEffect(() => {
     if (user?.profile) {
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -52,7 +63,6 @@ export default function UserProfileForm() {
         profile: user.profile.profileImage ? `${baseUrl}${user.profile.profileImage}` : null,
         cover: user.profile.coverImage ? `${baseUrl}${user.profile.coverImage}` : null,
       });
-      // ফর্ম ফিল্ডগুলো আপডেট করা
       reset({
         display_name: user.profile.displayName || '',
         bio: user.profile.bio || '',
@@ -65,7 +75,6 @@ export default function UserProfileForm() {
     }
   }, [user, reset]);
 
-  // নতুন ছবি সিলেক্ট করলে প্রিভিউ দেখানো
   const handleImagePreview = (e, type) => {
     const file = e.target.files[0];
     if (file) {
@@ -237,7 +246,6 @@ export default function UserProfileForm() {
                     <div
                       className={`relative flex flex-col items-center z-10 ${previews.profile ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}
                     >
-                      <FiCamera size={20} className="text-orange-500" />
                       <span className="text-[9px] font-black uppercase text-white mt-1">
                         Change Image
                       </span>
@@ -269,7 +277,6 @@ export default function UserProfileForm() {
                     <div
                       className={`relative flex flex-col items-center z-10 ${previews.cover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}
                     >
-                      <FiCamera size={20} className="text-orange-500" />
                       <span className="text-[9px] font-black uppercase text-white mt-1">
                         Update Cover
                       </span>
@@ -286,34 +293,62 @@ export default function UserProfileForm() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <input
-                  {...register('country', { required: true })}
-                  placeholder="Country"
-                  className={inputStyle}
-                />
-                <input
-                  {...register('city', { required: true })}
-                  placeholder="City"
-                  className={inputStyle}
-                />
-                <input
-                  {...register('language', { required: true })}
-                  placeholder="Language"
-                  className={inputStyle}
-                />
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+                    Country
+                  </label>
+                  <input
+                    {...register('country', { required: true })}
+                    placeholder="e.g. Bangladesh"
+                    className={inputStyle}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+                    City
+                  </label>
+                  <input
+                    {...register('city', { required: true })}
+                    placeholder="e.g. Dhaka"
+                    className={inputStyle}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+                    Language
+                  </label>
+                  <input
+                    {...register('language', { required: true })}
+                    placeholder="e.g. English, Bengali"
+                    className={inputStyle}
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <input
-                  {...register('social_link')}
-                  placeholder="Social Link"
-                  className={inputStyle}
-                />
-                <input
-                  {...register('website_link')}
-                  placeholder="Website Link"
-                  className={inputStyle}
-                />
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+                    Social Link
+                  </label>
+                  <input
+                    {...register('social_link')}
+                    placeholder="Instagram or Facebook URL"
+                    className={inputStyle}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">
+                    Website Link
+                  </label>
+                  <input
+                    {...register('website_link')}
+                    placeholder="https://yourwebsite.com"
+                    className={inputStyle}
+                  />
+                </div>
               </div>
 
               <button
