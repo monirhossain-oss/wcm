@@ -76,10 +76,10 @@ const TrendingListings = () => {
     <div className="max-w-7xl mx-auto px-4 py-6 relative">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-black uppercase tracking-tighter text-gray-900 dark:text-white">
             Trending listings
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
             Discover what's popular right now
           </p>
         </div>
@@ -89,10 +89,10 @@ const TrendingListings = () => {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
+              className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-full transition-all ${
                 filter === f
-                  ? 'bg-[#F57C00] text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                  : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'
               }`}
             >
               {f}
@@ -102,7 +102,7 @@ const TrendingListings = () => {
       </div>
 
       <div className="relative">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
           {loading ? (
             [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
           ) : listings.length > 0 ? (
@@ -112,34 +112,48 @@ const TrendingListings = () => {
               return (
                 <div
                   key={item._id}
-                  className="bg-white dark:bg-[#0a0a0a] shadow rounded-lg overflow-hidden relative border dark:border-white/5"
+                  className="bg-white dark:bg-white/5 rounded-lg overflow-hidden relative border border-gray-100 dark:border-white/10 transition-all hover:shadow-2xl group flex flex-col"
                 >
                   {item.status === 'approved' && item.isPromoted && (
-                    <span className="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded z-10 uppercase">
+                    <span className="absolute top-3 left-3 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full z-10 uppercase tracking-tighter shadow-xl">
                       Promoted
                     </span>
                   )}
-                  <img
-                    src={`${API_BASE_URL}${item.image}`}
-                    alt={item.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-4">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+
+                  <div className="relative w-full overflow-hidden bg-gray-50 dark:bg-white/5">
+                    <img
+                      src={`${API_BASE_URL}${item.image}`}
+                      alt={item.title}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://placehold.co/600x400/0a0a0a/white?text=No+Image';
+                      }}
+                      className="w-full h-auto min-h-40 max-h-60 object-contain"
+                    />
+                  </div>
+
+                  <div className="p-5 flex flex-col grow bg-white dark:bg-[#0a0a0a]">
+                    <h3 className="text-lg line-clamp-2 font-black text-gray-900 dark:text-white tracking-tight truncate">
                       {item.title}
                     </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase font-bold tracking-tighter italic">
+                    <p className="text-[9px] text-orange-500 mt-3 font-black tracking-[0.15em] italic">
                       {item.tradition}
                     </p>
-                    <div className="flex items-center justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
-                      <span className="font-medium">@{item.creatorId?.username || 'user'}</span>
+
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-[10px] font-black text-gray-400 tracking-widest">
+                        @{item.creatorId?.username || 'user'}
+                      </span>
                       <button
                         onClick={() => handleToggleFavorite(item._id)}
-                        className="flex items-center space-x-1.5 hover:scale-110 transition-transform active:scale-90"
+                        className="flex items-center gap-1.5 transition-all active:scale-75 group/fav"
                       >
-                        {/* icon logic */}
-                        <FaHeart className={isLiked ? 'text-red-500' : 'text-gray-300'} />
-                        <span className={isLiked ? 'text-red-500 font-bold' : ''}>
+                        <FaHeart
+                          className={`text-sm transition-colors ${isLiked ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'text-gray-300 dark:text-white/10 group-hover/fav:text-red-400'}`}
+                        />
+                        <span
+                          className={`text-[10px] font-black ${isLiked ? 'text-red-500' : 'text-gray-400'}`}
+                        >
                           {item.favoritesCount || 0}
                         </span>
                       </button>
@@ -149,7 +163,7 @@ const TrendingListings = () => {
               );
             })
           ) : (
-            <div className="col-span-full py-20 text-center text-gray-500 font-bold uppercase tracking-widest">
+            <div className="col-span-full py-20 text-center text-gray-500 text-xs font-black uppercase tracking-[0.3em]">
               No listings found for "{filter}".
             </div>
           )}
