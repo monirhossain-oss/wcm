@@ -15,6 +15,7 @@ export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
   const isCreator = user?.role === 'creator';
+  const isAdmin = user?.role === 'admin';
   console.log(user?.role);
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export default function HeroSection() {
 
   if (!mounted) return null;
   return (
-    <section className="relative overflow-hidden min-h-[750px] flex items-center transition-colors duration-500">
+    <section className="relative overflow-hidden min-h-187.5 flex items-center transition-colors duration-500">
       {/* Background Slider */}
       {images.map((img, index) => (
         <div
@@ -70,16 +71,16 @@ export default function HeroSection() {
             </button>
           </Link>
 
-          {isCreator ? (
+          {isCreator || isAdmin ? (
             <button
               disabled
               className="px-8 py-3 rounded-lg bg-gray-300 text-gray-500 cursor-not-allowed"
             >
-              Already a Creator
+              {isAdmin ? 'Admin Access Active' : 'Creator Mode Active'}
             </button>
           ) : (
             <Link href={user ? `/become-creator` : `/auth/login`}>
-              <button className="px-8 py-3 border border-[#7A1E1E] text-[#7A1E1E] bg-white rounded-lg">
+              <button className="px-8 py-3 border border-[#7A1E1E] text-[#7A1E1E] bg-white rounded-lg cursor-pointer">
                 Become a Creator
               </button>
             </Link>
