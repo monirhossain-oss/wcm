@@ -17,6 +17,11 @@ import {
   FiCheck,
   FiGrid,
   FiTag,
+  FiPlus,
+  FiAlertCircle,
+  FiLink,
+  FiGlobe,
+  FiShield,
 } from 'react-icons/fi';
 
 const api = axios.create({
@@ -74,7 +79,7 @@ export default function MyListings() {
     setEditFormData({
       title: item.title,
       description: item.description || '',
-      externalUrl: item.externalUrl,
+      externalUrls: item.externalUrls?.length > 0 ? item.externalUrls : [''], // 🔹 Updated to array
       region: item.region,
       country: item.country,
       tradition: item.tradition,
@@ -82,6 +87,22 @@ export default function MyListings() {
       culturalTags: item.culturalTags?.map((t) => t._id || t) || [],
     });
     setEditImage(null);
+  };
+
+  // 🔹 Dynamic URL Handlers
+  const handleUrlChange = (index, value) => {
+    const newUrls = [...editFormData.externalUrls];
+    newUrls[index] = value;
+    setEditFormData({ ...editFormData, externalUrls: newUrls });
+  };
+
+  const addUrlField = () => {
+    setEditFormData({ ...editFormData, externalUrls: [...editFormData.externalUrls, ''] });
+  };
+
+  const removeUrlField = (index) => {
+    const newUrls = editFormData.externalUrls.filter((_, i) => i !== index);
+    setEditFormData({ ...editFormData, externalUrls: newUrls });
   };
 
   const handleTagToggle = (tagId) => {
@@ -101,9 +122,11 @@ export default function MyListings() {
       const data = new FormData();
       Object.keys(editFormData).forEach((key) => {
         if (key === 'culturalTags') {
-          // ব্যাকেন্ড স্ট্রিং এক্সপেক্ট করলে: data.append(key, editFormData[key].join(','));
-          // অথবা মাল্টিপল অ্যাপেন্ড:
           editFormData[key].forEach((t) => data.append('culturalTags', t));
+        } else if (key === 'externalUrls') {
+          editFormData[key].forEach((url) => {
+            if (url.trim()) data.append('externalUrls', url);
+          });
         } else {
           data.append(key, editFormData[key]);
         }
@@ -209,13 +232,23 @@ export default function MyListings() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span
-                      className={`px-2 py-1 rounded text-[9px] font-black uppercase ${item.status === 'approved' ? 'bg-green-500/10 text-green-500' : 'bg-orange-500/10 text-orange-600'}`}
-                    >
-                      {item.status}
-                    </span>
+                    <div className="flex flex-col items-center gap-1">
+                      <span
+                        className={`px-2 py-1 rounded text-[9px] font-black uppercase ${item.status === 'approved' ? 'bg-green-500/10 text-green-500' : item.status === 'rejected' ? 'bg-red-500/10 text-red-500' : 'bg-orange-500/10 text-orange-600'}`}
+                      >
+                        {item.status}
+                      </span>
+                      {item.status === 'rejected' && item.rejectionReason && (
+                        <span
+                          className="text-[7px] font-bold text-red-400 uppercase italic max-w-[80px] truncate"
+                          title={item.rejectionReason}
+                        >
+                          Reason Attached
+                        </span>
+                      )}
+                    </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => setViewingItem(item)}
@@ -244,50 +277,156 @@ export default function MyListings() {
         </div>
       </div>
 
-      {/* View Modal - Simplified & Rounded */}
+      {/* View Modal */}
       {viewingItem && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => setViewingItem(null)}
           />
-          <div className="relative w-full max-w-2xl bg-white dark:bg-[#0a0a0a] rounded-2xl overflow-hidden animate-in zoom-in-95 shadow-2xl">
-            <div className="relative h-64">
-              <img
-                src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${viewingItem.image}`}
-                className="w-full h-full object-cover"
-              />
-              <button
-                onClick={() => setViewingItem(null)}
-                className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-lg hover:bg-red-500 transition-colors"
-              >
-                <FiX />
-              </button>
-            </div>
-            <div className="p-8">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-2xl font-black uppercase italic dark:text-white tracking-tighter">
-                  {viewingItem.title}
-                </h3>
-                <span className="text-xs font-black text-orange-500 uppercase">
-                  @{viewingItem.country}
-                </span>
+          <div className="relative w-full max-w-2xl bg-white dark:bg-[#0a0a0a] rounded-3xl overflow-hidden animate-in zoom-in-95 shadow-2xl border dark:border-white/10 flex flex-col max-h-[90vh]">
+            {/* 🔹 Rejection Header Alert (যদি থাকে) */}
+            {viewingItem.status === 'rejected' && viewingItem.rejectionReason && (
+              <div className="bg-red-500 p-3 flex items-center gap-3 text-white shrink-0">
+                <FiAlertCircle size={18} className="animate-pulse" />
+                <div>
+                  <p className="text-[8px] font-black uppercase tracking-widest opacity-80">
+                    Rejection Feedback
+                  </p>
+                  <p className="text-[10px] font-bold uppercase">{viewingItem.rejectionReason}</p>
+                </div>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6">
-                {viewingItem.description}
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10">
-                  <p className="text-[8px] font-black text-gray-400 uppercase mb-1">Tradition</p>
-                  <p className="text-xs font-bold dark:text-white uppercase">
-                    {viewingItem.tradition}
+            )}
+
+            <div className="overflow-y-auto scrollbar-hide">
+              {/* Media Section */}
+              <div className="relative h-72 shrink-0">
+                <img
+                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${viewingItem.image}`}
+                  className="w-full h-full object-cover"
+                  alt={viewingItem.title}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <button
+                  onClick={() => setViewingItem(null)}
+                  className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-xl hover:bg-red-500 transition-all z-20"
+                >
+                  <FiX size={20} />
+                </button>
+
+                <div className="absolute bottom-6 left-8">
+                  <span className="text-[10px] font-black bg-orange-500 text-white px-3 py-1 rounded-md uppercase tracking-widest mb-2 inline-block">
+                    {viewingItem.category?.title || 'Protocol'}
+                  </span>
+                  <h3 className="text-3xl font-black uppercase italic text-white tracking-tighter leading-none">
+                    {viewingItem.title}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="p-8 space-y-8">
+                {/* Status & Engagement Info */}
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-white/5 rounded-lg border dark:border-white/10">
+                    <div
+                      className={`w-2 h-2 rounded-full ${viewingItem.status === 'approved' ? 'bg-green-500' : viewingItem.status === 'rejected' ? 'bg-red-500' : 'bg-orange-500'}`}
+                    />
+                    <span className="text-[10px] font-black uppercase dark:text-gray-300">
+                      {viewingItem.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-white/5 rounded-lg border dark:border-white/10">
+                    <FiHeart className="text-red-500" size={12} />
+                    <span className="text-[10px] font-black uppercase dark:text-gray-300">
+                      {viewingItem.favorites?.length || 0} Favorites
+                    </span>
+                  </div>
+                </div>
+
+                {/* Core Details Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10">
+                    <p className="text-[8px] font-black text-gray-400 uppercase mb-1 tracking-widest flex items-center gap-1">
+                      <FiGlobe size={10} /> Origin & Country
+                    </p>
+                    <p className="text-xs font-bold dark:text-white uppercase italic">
+                      {viewingItem.country}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10">
+                    <p className="text-[8px] font-black text-gray-400 uppercase mb-1 tracking-widest flex items-center gap-1">
+                      <FiMapPin size={10} /> Region
+                    </p>
+                    <p className="text-xs font-bold dark:text-white uppercase italic">
+                      {viewingItem.region || 'N/A'}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 md:col-span-2">
+                    <p className="text-[8px] font-black text-gray-400 uppercase mb-1 tracking-widest flex items-center gap-1">
+                      <FiShield size={10} /> Cultural Tradition
+                    </p>
+                    <p className="text-xs font-bold dark:text-white uppercase italic text-orange-500">
+                      {viewingItem.tradition}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                    Analysis & Narrative
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                    {viewingItem.description}
                   </p>
                 </div>
-                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10">
-                  <p className="text-[8px] font-black text-gray-400 uppercase mb-1">Region</p>
-                  <p className="text-xs font-bold dark:text-white uppercase">
-                    {viewingItem.region}
-                  </p>
+
+                {/* 🔹 Cultural Tags */}
+                {viewingItem.culturalTags?.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                      Identity Tags
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {viewingItem.culturalTags.map((tag) => (
+                        <span
+                          key={tag._id}
+                          className="px-3 py-1 bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 rounded-full text-[9px] font-black uppercase tracking-tighter"
+                        >
+                          # {tag.title}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 🔹 External Verification URLs */}
+                <div className="space-y-3 pb-4">
+                  <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                    External Sources
+                  </h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    {viewingItem.externalUrls?.length > 0 ? (
+                      viewingItem.externalUrls.map((url, index) => (
+                        <a
+                          key={index}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 border dark:border-white/10 rounded-xl group hover:bg-orange-500/5 transition-all"
+                        >
+                          <span className="text-[10px] font-bold dark:text-gray-300 truncate pr-4">
+                            {url}
+                          </span>
+                          <FiExternalLink className="text-orange-500 group-hover:scale-110 transition-transform" />
+                        </a>
+                      ))
+                    ) : (
+                      <p className="text-[10px] text-gray-500 italic">
+                        No external sources linked.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -295,14 +434,27 @@ export default function MyListings() {
         </div>
       )}
 
-      {/* Edit Modal - Matches AddListing Style */}
+      {/* Edit Modal */}
       {editingItem && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => setEditingItem(null)}
           />
-          <div className="relative w-full max-w-5xl bg-white dark:bg-[#0f0f0f] rounded-3xl border border-gray-100 dark:border-white/10 shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-[#0f0f0f] rounded-3xl border border-gray-100 dark:border-white/10 shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4">
+            {/* 🔹 Rejection Alert in Edit Modal */}
+            {editingItem.status === 'rejected' && editingItem.rejectionReason && (
+              <div className="bg-red-500 p-4 flex items-center gap-3 text-white">
+                <FiAlertCircle size={20} className="animate-pulse" />
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-widest opacity-80">
+                    Rejection Reason
+                  </p>
+                  <p className="text-xs font-bold uppercase">{editingItem.rejectionReason}</p>
+                </div>
+              </div>
+            )}
+
             <div className="p-6 border-b dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-black/20">
               <h3 className="text-lg font-black uppercase italic dark:text-white">
                 Edit <span className="text-orange-500">Protocol</span>
@@ -319,7 +471,7 @@ export default function MyListings() {
               onSubmit={handleUpdate}
               className="p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 max-h-[80vh] overflow-y-auto scrollbar-hide"
             >
-              {/* Left: Image */}
+              {/* Left: Image Asset */}
               <div className="lg:col-span-4">
                 <label className="text-[10px] font-black uppercase text-gray-400 ml-1 mb-2 block">
                   Media Asset
@@ -350,7 +502,7 @@ export default function MyListings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="md:col-span-2 space-y-1.5">
                     <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
-                      Listing Title
+                      Title
                     </label>
                     <input
                       type="text"
@@ -375,31 +527,19 @@ export default function MyListings() {
                       <FiChevronDown />
                     </div>
                     {showCatDrop && (
-                      <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden animate-in zoom-in-95">
-                        <div className="p-2 border-b dark:border-white/10 bg-gray-50 dark:bg-white/5 flex items-center gap-2">
-                          <FiSearch size={12} className="text-gray-400" />
-                          <input
-                            placeholder="Search..."
-                            className="w-full bg-transparent text-[10px] font-bold outline-none dark:text-white"
-                            onChange={(e) => setCatSearch(e.target.value)}
-                          />
-                        </div>
-                        <div className="max-h-40 overflow-y-auto">
-                          {metaData.categories
-                            .filter((c) => c.title.toLowerCase().includes(catSearch.toLowerCase()))
-                            .map((cat) => (
-                              <div
-                                key={cat._id}
-                                onClick={() => {
-                                  setEditFormData({ ...editFormData, category: cat._id });
-                                  setShowCatDrop(false);
-                                }}
-                                className="p-3 text-[10px] font-bold uppercase hover:bg-orange-500 hover:text-white cursor-pointer transition-colors dark:text-gray-300 border-b last:border-0 dark:border-white/5"
-                              >
-                                {cat.title}
-                              </div>
-                            ))}
-                        </div>
+                      <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a1a] border dark:border-white/10 rounded-xl shadow-xl overflow-hidden animate-in zoom-in-95">
+                        {metaData.categories.map((cat) => (
+                          <div
+                            key={cat._id}
+                            onClick={() => {
+                              setEditFormData({ ...editFormData, category: cat._id });
+                              setShowCatDrop(false);
+                            }}
+                            className="p-3 text-[10px] font-bold uppercase hover:bg-orange-500 hover:text-white cursor-pointer transition-colors dark:text-gray-300 border-b last:border-0 dark:border-white/5"
+                          >
+                            {cat.title}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -412,37 +552,72 @@ export default function MyListings() {
                       type="text"
                       value={editFormData.region}
                       onChange={(e) => setEditFormData({ ...editFormData, region: e.target.value })}
-                      className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                      className="w-full bg-white dark:bg-white/10 border p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
-                    Story & Description
+                    Description
                   </label>
                   <textarea
-                    rows={4}
+                    rows={3}
                     value={editFormData.description}
                     onChange={(e) =>
                       setEditFormData({ ...editFormData, description: e.target.value })
                     }
-                    className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white resize-none"
+                    className="w-full bg-white dark:bg-white/10 border p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white resize-none"
                   />
                 </div>
 
-                {/* Tags Searchable Dropdown */}
+                {/* 🔹 Multiple External URLs (Update Section) */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between ml-1">
+                    <label className="text-[10px] font-black uppercase text-gray-400 flex items-center gap-1">
+                      <FiLink size={10} /> External Sources
+                    </label>
+                    <button
+                      type="button"
+                      onClick={addUrlField}
+                      className="text-orange-500 hover:text-orange-600 transition-colors"
+                    >
+                      <FiPlus size={14} />
+                    </button>
+                  </div>
+                  <div className="max-h-24 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                    {editFormData.externalUrls?.map((url, index) => (
+                      <div key={index} className="relative group">
+                        <input
+                          type="url"
+                          value={url}
+                          onChange={(e) => handleUrlChange(index, e.target.value)}
+                          className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 pr-8 rounded-xl text-[10px] font-bold dark:text-white outline-none focus:border-orange-500"
+                          placeholder="https://..."
+                        />
+                        {editFormData.externalUrls.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeUrlField(index)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <FiX size={12} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tags */}
                 <div className="relative space-y-1.5">
                   <label className="text-[10px] font-black uppercase text-gray-400 ml-1 flex items-center gap-1">
                     <FiTag size={10} /> Cultural Tags
                   </label>
                   <div
                     onClick={() => setShowTagDrop(!showTagDrop)}
-                    className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-3 rounded-xl text-[10px] font-bold dark:text-white flex flex-wrap gap-1 min-h-15 cursor-pointer"
+                    className="w-full bg-white dark:bg-white/10 border p-3 rounded-xl text-[10px] font-bold dark:text-white flex flex-wrap gap-1 min-h-12 cursor-pointer"
                   >
-                    {editFormData.culturalTags?.length === 0 && (
-                      <span className="text-gray-400">Search tags...</span>
-                    )}
                     {editFormData.culturalTags?.map((tId) => (
                       <span
                         key={tId}
@@ -459,51 +634,6 @@ export default function MyListings() {
                       </span>
                     ))}
                   </div>
-                  {showTagDrop && (
-                    <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden animate-in slide-in-from-top-2">
-                      <div className="p-2 border-b dark:border-white/10 bg-gray-50 dark:bg-white/5 flex items-center gap-2">
-                        <FiSearch size={12} className="text-gray-400" />
-                        <input
-                          placeholder="Search tags..."
-                          className="w-full bg-transparent text-[10px] font-bold outline-none dark:text-white"
-                          onChange={(e) => setTagSearch(e.target.value)}
-                        />
-                      </div>
-                      <div className="max-h-40 overflow-y-auto p-2 grid grid-cols-2 gap-1">
-                        {metaData.tags
-                          .filter((t) => t.title.toLowerCase().includes(tagSearch.toLowerCase()))
-                          .map((tag) => (
-                            <div
-                              key={tag._id}
-                              onClick={() => handleTagToggle(tag._id)}
-                              className={`p-2 rounded-lg text-[9px] font-black uppercase cursor-pointer flex justify-between items-center transition-all ${editFormData.culturalTags.includes(tag._id) ? 'bg-orange-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-white/5 dark:text-gray-400'}`}
-                            >
-                              {tag.title}{' '}
-                              {editFormData.culturalTags.includes(tag._id) && <FiCheck />}
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <input
-                    type="text"
-                    placeholder="Country"
-                    value={editFormData.country}
-                    onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })}
-                    className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none dark:text-white"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Tradition"
-                    value={editFormData.tradition}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, tradition: e.target.value })
-                    }
-                    className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none dark:text-white"
-                  />
                 </div>
 
                 <div className="pt-4">

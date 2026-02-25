@@ -15,6 +15,7 @@ import {
   FiMapPin,
   FiGlobe,
   FiLink,
+  FiPlus,
 } from 'react-icons/fi';
 
 const api = axios.create({
@@ -26,7 +27,7 @@ export default function AddListing() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    externalUrl: '',
+    externalUrls: [''], // 🔹 Changed to array for multiple links
     region: '',
     country: '',
     tradition: '',
@@ -61,6 +62,22 @@ export default function AddListing() {
     fetchMeta();
   }, []);
 
+  // 🔹 Dynamic URL Handlers
+  const handleUrlChange = (index, value) => {
+    const newUrls = [...formData.externalUrls];
+    newUrls[index] = value;
+    setFormData({ ...formData, externalUrls: newUrls });
+  };
+
+  const addUrlField = () => {
+    setFormData({ ...formData, externalUrls: [...formData.externalUrls, ''] });
+  };
+
+  const removeUrlField = (index) => {
+    const newUrls = formData.externalUrls.filter((_, i) => i !== index);
+    setFormData({ ...formData, externalUrls: newUrls });
+  };
+
   const filteredCats = metaData.categories.filter((c) =>
     c.title.toLowerCase().includes(catSearch.toLowerCase())
   );
@@ -88,9 +105,16 @@ export default function AddListing() {
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
-        if (key === 'culturalTags')
+        if (key === 'culturalTags') {
           formData[key].forEach((tag) => data.append('culturalTags', tag));
-        else data.append(key, formData[key]);
+        } else if (key === 'externalUrls') {
+          // 🔹 Sending multiple URLs
+          formData[key].forEach((url) => {
+            if (url.trim()) data.append('externalUrls', url);
+          });
+        } else {
+          data.append(key, formData[key]);
+        }
       });
       data.append('image', image);
       await api.post('/api/listings/add', data);
@@ -175,6 +199,7 @@ export default function AddListing() {
               <input
                 type="text"
                 required
+                value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                 placeholder="Descriptive name..."
@@ -232,6 +257,7 @@ export default function AddListing() {
               <input
                 type="text"
                 required
+                value={formData.region}
                 onChange={(e) => setFormData({ ...formData, region: e.target.value })}
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                 placeholder="e.g. South Asia"
@@ -244,6 +270,7 @@ export default function AddListing() {
               </label>
               <textarea
                 required
+                value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 h-39 resize-none dark:text-white placeholder:text-gray-400"
                 placeholder="Tell the cultural story..."
@@ -262,6 +289,7 @@ export default function AddListing() {
               <input
                 type="text"
                 required
+                value={formData.tradition}
                 onChange={(e) => setFormData({ ...formData, tradition: e.target.value })}
                 className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-xl text-xs font-bold dark:text-white outline-none focus:border-orange-500"
                 placeholder="Tradition (e.g. Jamdani)"
@@ -269,6 +297,7 @@ export default function AddListing() {
               <input
                 type="text"
                 required
+                value={formData.country}
                 onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                 className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-xl text-xs font-bold dark:text-white outline-none focus:border-orange-500"
                 placeholder="Country (e.g. Bangladesh)"
@@ -330,17 +359,40 @@ export default function AddListing() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
-              <FiLink size={10} /> External Source
-            </label>
-            <div className="h-23 flex flex-col justify-end">
-              <input
-                type="url"
-                required
-                onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
-                className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold dark:text-white outline-none focus:border-orange-500"
-                placeholder="https://source-link.com"
-              />
+            <div className="flex items-center justify-between ml-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-1">
+                <FiLink size={10} /> Sources
+              </label>
+              <button
+                type="button"
+                onClick={addUrlField}
+                className="text-orange-500 hover:text-orange-600 transition-colors"
+              >
+                <FiPlus size={14} />
+              </button>
+            </div>
+            <div className="max-h-32 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+              {formData.externalUrls.map((url, index) => (
+                <div key={index} className="relative group">
+                  <input
+                    type="url"
+                    required
+                    value={url}
+                    onChange={(e) => handleUrlChange(index, e.target.value)}
+                    className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 pr-8 rounded-xl text-[10px] font-bold dark:text-white outline-none focus:border-orange-500"
+                    placeholder="https://..."
+                  />
+                  {formData.externalUrls.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeUrlField(index)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <FiX size={12} />
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
