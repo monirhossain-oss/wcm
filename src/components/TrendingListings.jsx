@@ -112,7 +112,7 @@ const TrendingListings = () => {
               return (
                 <div
                   key={item._id}
-                  className="bg-white dark:bg-white/5 rounded-lg overflow-hidden relative border border-gray-100 dark:border-white/10 transition-all hover:shadow-2xl group flex flex-col"
+                  className="bg-gray-50 dark:bg-white/5 rounded-lg overflow-hidden relative transition-all hover:shadow-sm group flex flex-col"
                 >
                   {item.status === 'approved' && item.isPromoted && (
                     <span className="absolute top-3 left-3 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full z-10 uppercase tracking-tighter shadow-xl">
@@ -132,7 +132,7 @@ const TrendingListings = () => {
                     />
                   </div>
 
-                  <div className="p-5 flex flex-col grow bg-white dark:bg-[#0a0a0a]">
+                  <div className="p-5 flex flex-col grow bg-gray-50 dark:bg-white/5">
                     <h3 className="text-lg line-clamp-2 font-black text-gray-900 dark:text-white tracking-tight truncate">
                       {item.title}
                     </h3>
