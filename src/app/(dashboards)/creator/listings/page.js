@@ -79,7 +79,8 @@ export default function MyListings() {
     setEditFormData({
       title: item.title,
       description: item.description || '',
-      externalUrls: item.externalUrls?.length > 0 ? item.externalUrls : [''], // 🔹 Updated to array
+      externalUrls: item.externalUrls?.length > 0 ? item.externalUrls : [''],
+      websiteLink: item.websiteLink || '',
       region: item.region,
       country: item.country,
       tradition: item.tradition,
@@ -361,13 +362,37 @@ export default function MyListings() {
                       {viewingItem.region || 'N/A'}
                     </p>
                   </div>
-                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 md:col-span-2">
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 ">
                     <p className="text-[8px] font-black text-gray-400 uppercase mb-1 tracking-widest flex items-center gap-1">
                       <FiShield size={10} /> Cultural Tradition
                     </p>
                     <p className="text-xs font-bold dark:text-white uppercase italic text-orange-500">
                       {viewingItem.tradition}
                     </p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 ">
+                    <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                      Website Reference
+                    </h4>
+                    <div className="grid grid-cols-1 gap-2">
+                      {viewingItem.websiteLink?.length > 0 ? (
+                        <a
+                          href={viewingItem.websiteLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between"
+                        >
+                          <span className="text-[10px] font-bold dark:text-gray-300 truncate pr-4">
+                            {viewingItem.websiteLink}
+                          </span>
+                          <FiExternalLink className="text-orange-500 group-hover:scale-110 transition-transform" />
+                        </a>
+                      ) : (
+                        <p className="text-[10px] text-gray-500 italic">
+                          No Social Links linked.
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -403,7 +428,7 @@ export default function MyListings() {
                 {/* 🔹 External Verification URLs */}
                 <div className="space-y-3 pb-4">
                   <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
-                    External Sources
+                    Social Links
                   </h4>
                   <div className="grid grid-cols-1 gap-2">
                     {viewingItem.externalUrls?.length > 0 ? (
@@ -423,7 +448,7 @@ export default function MyListings() {
                       ))
                     ) : (
                       <p className="text-[10px] text-gray-500 italic">
-                        No external sources linked.
+                        No Social Links linked.
                       </p>
                     )}
                   </div>
@@ -500,7 +525,7 @@ export default function MyListings() {
               {/* Right: Info */}
               <div className="lg:col-span-8 space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="md:col-span-2 space-y-1.5">
+                  <div className="space-y-1.5">
                     <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
                       Title
                     </label>
@@ -508,6 +533,20 @@ export default function MyListings() {
                       type="text"
                       value={editFormData.title}
                       onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                      className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+                      Website Reference
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.websiteLink}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, websiteLink: e.target.value })
+                      }
                       className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                     />
                   </div>
@@ -575,7 +614,7 @@ export default function MyListings() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between ml-1">
                     <label className="text-[10px] font-black uppercase text-gray-400 flex items-center gap-1">
-                      <FiLink size={10} /> External Sources
+                      <FiLink size={10} /> Social Links
                     </label>
                     <button
                       type="button"
@@ -639,9 +678,9 @@ export default function MyListings() {
                 <div className="pt-4">
                   <button
                     disabled={updateLoading}
-                    className="w-full h-16 bg-orange-600 hover:bg-orange-500 text-white rounded-2xl font-black text-[11px] tracking-[0.4em] uppercase transition-all shadow-lg flex items-center justify-center gap-3"
+                    className="w-full h-16 bg-orange-600 cursor-pointer hover:bg-orange-500 text-white rounded-2xl font-black text-[11px] tracking-[0.4em] uppercase transition-all shadow-lg flex items-center justify-center gap-3"
                   >
-                    {updateLoading ? <FiRefreshCw className="animate-spin" /> : 'Synchronize Node'}
+                    {updateLoading ? <FiRefreshCw className="animate-spin" /> : 'Update Listing'}
                   </button>
                 </div>
               </div>
