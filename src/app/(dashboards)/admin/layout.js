@@ -16,6 +16,7 @@ import {
 } from 'react-icons/fi';
 import Image from 'next/image';
 import { FaCreativeCommonsSampling, FaTag } from 'react-icons/fa';
+import { getImageUrl } from '@/lib/imageHelper';
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
@@ -69,7 +70,7 @@ export default function AdminLayout({ children }) {
   ];
 
   const profileImage = user?.profile?.profileImage
-    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${user.profile.profileImage}?t=${new Date().getTime()}`
+    ? getImageUrl(user.profile.profileImage, 'avatar')
     : '/default-avatar.png';
 
   const SidebarContent = () => (

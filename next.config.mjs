@@ -3,23 +3,31 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-                protocol: 'https',
-                hostname: 'images.unsplash.com',
-            },
-            {
-                protocol: 'https',
-                hostname: 'i.ibb.co.com', 
-            },
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      },
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co.com',
       },
       {
         protocol: 'http',
-        hostname: '**',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'wcm-server.onrender.com',
+        pathname: '/uploads/**',
       },
     ],
-    domains: ['wcm-server.onrender.com', 'localhost', 'res.cloudinary.com'],
   },
 };
 

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { FiGrid, FiList, FiPlus, FiUser, FiLogOut, FiArrowLeft, FiMenu, FiX } from 'react-icons/fi';
 import Image from 'next/image';
+import { getImageUrl } from '@/lib/imageHelper';
 
 export default function CreatorLayout({ children }) {
   const pathname = usePathname();
@@ -56,7 +57,7 @@ export default function CreatorLayout({ children }) {
   ];
 
   const profileImage = user?.profile?.profileImage
-    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${user.profile.profileImage}`
+    ? getImageUrl(user.profile.profileImage)
     : '/default-avatar.png';
 
   const SidebarContent = () => (
