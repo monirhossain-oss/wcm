@@ -21,6 +21,7 @@ import {
   FiAlertCircle,
   FiArrowLeft,
 } from 'react-icons/fi';
+import { getImageUrl } from '@/lib/imageHelper';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
@@ -104,8 +105,6 @@ export default function ProfilePage() {
     }
   };
 
-  const getFullUrl = (path) => (path ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${path}` : null);
-
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center animate-pulse font-black tracking-widest uppercase text-orange-500 bg-[#050505]">
@@ -144,7 +143,7 @@ export default function ProfilePage() {
                 <img
                   src={
                     previews.cover ||
-                    getFullUrl(user.profile?.coverImage) ||
+                    getImageUrl(user.profile?.coverImage) ||
                     'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'
                   }
                   className="w-full h-full object-cover"
@@ -173,11 +172,7 @@ export default function ProfilePage() {
                 <div className="relative">
                   <div className="h-32 w-32 rounded-full border-[6px] border-white dark:border-[#050505] bg-white overflow-hidden shadow-2xl">
                     <img
-                      src={
-                        previews.profile ||
-                        getFullUrl(user.profile?.profileImage) ||
-                        '/default-avatar.png'
-                      }
+                      src={previews.profile || getImageUrl(user.profile?.profileImage, 'avatar')}
                       className="w-full h-full object-cover"
                       alt="avatar"
                     />

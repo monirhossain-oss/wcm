@@ -1,8 +1,7 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  FiPlus,
   FiTrash2,
   FiEdit2,
   FiLoader,
@@ -12,6 +11,7 @@ import {
   FiTag,
   FiImage,
 } from 'react-icons/fi';
+import { getImageUrl } from '@/lib/imageHelper';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -21,7 +21,8 @@ const api = axios.create({
 export default function AdminTags() {
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState(false); // For Create
+  const [updatingId, setUpdatingId] = useState(null); // For Update
 
   // States
   const [formData, setFormData] = useState({ title: '', image: null });
@@ -74,7 +75,6 @@ export default function AdminTags() {
       setFormData({ title: '', image: null });
       setPreview(null);
     } catch (err) {
-      console.log('Error details:', err.response?.data);
       alert(err.response?.data?.message || 'Error adding tag');
     } finally {
       setSubmitting(false);
@@ -86,6 +86,7 @@ export default function AdminTags() {
     data.append('title', editData.title);
     if (editData.image) data.append('image', editData.image);
 
+    setUpdatingId(id);
     try {
       const res = await api.put(`/api/admin/tags/${id}`, data);
       setTags(tags.map((t) => (t._id === id ? res.data : t)));
@@ -93,6 +94,8 @@ export default function AdminTags() {
       setEditData({ title: '', image: null, preview: null });
     } catch (err) {
       alert('Update failed');
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -115,6 +118,7 @@ export default function AdminTags() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20">
+      {/* Create Form */}
       <div className="bg-white dark:bg-white/5 p-6 rounded-xl border border-gray-100 dark:border-white/10 shadow-sm">
         <h1 className="text-xl font-black uppercase italic tracking-tighter dark:text-white mb-6">
           System <span className="text-orange-500">Tags</span>
@@ -146,10 +150,11 @@ export default function AdminTags() {
               className="flex-1 bg-gray-50 dark:bg-white/20 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-orange-500 dark:text-white font-bold"
             />
             <button
+              type="submit"
               disabled={submitting}
-              className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-8 font-black uppercase text-[10px] tracking-widest transition-all disabled:opacity-50 h-12 shadow-lg shadow-orange-500/20"
+              className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-8 font-black uppercase text-[10px] tracking-widest transition-all disabled:opacity-50 h-12 shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2"
             >
-              {submitting ? 'Creating...' : 'Create Tag'}
+              {submitting ? <FiLoader className="animate-spin" size={14} /> : 'Create Tag'}
             </button>
           </div>
         </form>
@@ -177,8 +182,9 @@ export default function AdminTags() {
                       <img src={editData.preview} className="w-full h-full object-cover" />
                     ) : (
                       <img
-                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${tag.image}`}
+                        src={getImageUrl(tag.image)}
                         className="w-full h-full object-cover"
+                        alt={tag.title}
                       />
                     )}
                     {editingId === tag._id && (
@@ -206,15 +212,22 @@ export default function AdminTags() {
                   <div className="flex justify-end gap-2">
                     {editingId === tag._id ? (
                       <>
-                        <button
-                          onClick={() => handleUpdate(tag._id)}
-                          className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg"
-                        >
-                          <FiCheck size={18} />
-                        </button>
+                        {updatingId === tag._id ? (
+                          <div className="p-2">
+                            <FiLoader className="animate-spin text-orange-500" size={18} />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleUpdate(tag._id)}
+                            className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg"
+                          >
+                            <FiCheck size={18} />
+                          </button>
+                        )}
                         <button
                           onClick={() => setEditingId(null)}
-                          className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"
+                          disabled={updatingId === tag._id}
+                          className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg disabled:opacity-30"
                         >
                           <FiX size={18} />
                         </button>

@@ -19,6 +19,8 @@ import {
   FiLink,
   FiRepeat,
 } from 'react-icons/fi';
+// ✅ ১. getImageUrl ইমপোর্ট করুন
+import { getImageUrl } from '@/lib/imageHelper';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -107,7 +109,8 @@ export default function CreatorRequestsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 dark:bg-white/10 border-b border-gray-100 dark:border-white/10">
+              {/* ✅ ২. আপনার প্রেফারেন্স অনুযায়ী dark:bg-white/20 করা হয়েছে */}
+              <tr className="bg-gray-50/50 dark:bg-white/20 border-b border-gray-100 dark:border-white/10">
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
                   Applicant
                 </th>
@@ -138,13 +141,11 @@ export default function CreatorRequestsPage() {
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-4">
                         <div className="relative">
+                          {/* ✅ ৩. ইমেজ ফিক্স */}
                           <img
-                            src={
-                              request.profile?.profileImage
-                                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${request.profile.profileImage}`
-                                : '/default-avatar.png'
-                            }
-                            className="h-11 w-11 rounded-2xl object-cover ring-2 ring-gray-100 dark:ring-white/5"
+                            src={getImageUrl(request.profile?.profileImage, 'avatar')}
+                            className="h-11 w-11 rounded-2xl object-cover ring-2 ring-gray-100 dark:ring-white/5 shadow-md"
+                            alt="applicant"
                           />
                           <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 border-2 border-white dark:border-[#111] rounded-full"></div>
                         </div>
@@ -163,7 +164,7 @@ export default function CreatorRequestsPage() {
                         <div className="flex items-center gap-2 text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase">
                           <FiGlobe size={10} /> {request.profile?.country || 'Global'}
                         </div>
-                        <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 truncate max-w-37.5">
+                        <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 truncate max-w-[150px]">
                           <FiLink size={10} /> {request.profile?.websiteLink || 'No Portfolio'}
                         </div>
                       </div>
@@ -176,7 +177,7 @@ export default function CreatorRequestsPage() {
                       </span>
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <div className="flex justify-end gap-2  transition-opacity">
+                      <div className="flex justify-end gap-2">
                         <button
                           onClick={() => setSelectedUser(request)}
                           className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-black dark:hover:text-white rounded-xl transition-all"
@@ -219,20 +220,21 @@ export default function CreatorRequestsPage() {
 
       {/* 🔹 Modal: View Details */}
       {selectedUser && !rejectingUser && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-300"
             onClick={() => setSelectedUser(null)}
           />
           <div className="relative w-full max-w-2xl bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-gray-100 dark:border-white/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="h-40 w-full bg-gray-100 dark:bg-white/5 relative">
+              {/* ✅ ৪. কভার ইমেজ ফিক্স */}
               <img
                 src={
-                  selectedUser.profile?.coverImage
-                    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${selectedUser.profile.coverImage}`
-                    : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop'
+                  getImageUrl(selectedUser.profile?.coverImage) ||
+                  'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'
                 }
-                className="w-full h-full object-cover opacity-40"
+                className="w-full h-full object-cover opacity-60"
+                alt="cover"
               />
               <button
                 onClick={() => setSelectedUser(null)}
@@ -243,20 +245,18 @@ export default function CreatorRequestsPage() {
             </div>
             <div className="p-10 -mt-20 relative">
               <div className="flex items-end gap-6 mb-10">
+                {/* ✅ ৫. প্রোফাইল ইমেজ ফিক্স ইন মডেল */}
                 <img
-                  src={
-                    selectedUser.profile?.profileImage
-                      ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${selectedUser.profile.profileImage}`
-                      : '/default-avatar.png'
-                  }
-                  className="h-32 w-32 rounded-4xl border-8 border-white dark:border-[#0a0a0a] bg-white object-cover shadow-2xl"
+                  src={getImageUrl(selectedUser.profile?.profileImage, 'avatar')}
+                  className="h-32 w-32 rounded-[2.5rem] border-8 border-white dark:border-[#0a0a0a] bg-white object-cover shadow-2xl"
+                  alt="profile"
                 />
                 <div className="pb-2">
                   <h3 className="text-3xl font-black uppercase tracking-tighter dark:text-white leading-none mb-1">
                     {selectedUser.firstName} {selectedUser.lastName}
                   </h3>
                   <p className="text-orange-500 text-sm font-black uppercase tracking-widest mb-2">
-                    Verification Level: User Node
+                    @ {selectedUser.username}
                   </p>
                 </div>
               </div>
@@ -324,9 +324,9 @@ export default function CreatorRequestsPage() {
         </div>
       )}
 
-      {/* 🔹 Modal: Reject/Feedback */}
+      {/* 🔹 Modal: Reject/Feedback (Unchanged except minor styling) */}
       {rejectingUser && (
-        <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/90 backdrop-blur-md"
             onClick={() => setRejectingUser(null)}
@@ -361,7 +361,6 @@ export default function CreatorRequestsPage() {
                   ))}
                 </div>
               </div>
-
               <div>
                 <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">
                   Feedback Note
@@ -369,7 +368,7 @@ export default function CreatorRequestsPage() {
                 <textarea
                   value={rejectData.reason}
                   onChange={(e) => setRejectData({ ...rejectData, reason: e.target.value })}
-                  placeholder="Tell the user what to fix (e.g. Profile photo too dark, Website link broken...)"
+                  placeholder="Tell the user what to fix..."
                   className="w-full mt-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-4 text-[11px] font-bold outline-none focus:border-orange-500 dark:text-white resize-none h-32"
                 />
               </div>
@@ -385,13 +384,13 @@ export default function CreatorRequestsPage() {
               <button
                 onClick={handleRejectSubmit}
                 disabled={processingId === rejectingUser._id}
-                className="flex-[2] py-4 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"
+                className="flex-[2] py-4 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
               >
                 {processingId === rejectingUser._id ? (
                   'Dispatching...'
                 ) : (
                   <>
-                    <FiSend /> Finalize Decision
+                    <FiSend /> Finalize
                   </>
                 )}
               </button>
