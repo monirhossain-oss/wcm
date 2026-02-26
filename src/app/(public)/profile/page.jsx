@@ -65,12 +65,24 @@ export default function ProfilePage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        await api.delete('/api/users/delete-account');
+        setUser(null);
+        router.push('/auth/signup');
+      } catch (error) {
+        console.error('Delete Error:', error);
+        setMessage({ type: 'error', text: error.response?.data?.message || 'Delete failed' });
+      }
+    }
+  };
+
   const onSubmit = async (data) => {
     try {
       setMessage({ type: '', text: '' });
       const formData = new FormData();
 
-      // টেক্সট ডাটা অ্যাপেন্ড
       const fields = [
         'firstName',
         'lastName',
@@ -104,41 +116,31 @@ export default function ProfilePage() {
       setMessage({ type: 'error', text: error.response?.data?.message || 'Update failed' });
     }
   };
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth/login');
+    }
+  }, [user, loading, router]);
 
-  if (loading)
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center animate-pulse font-black tracking-widest uppercase text-orange-500 bg-[#050505]">
         Syncing Profile...
       </div>
     );
-
-  if (!user) {
-    if (typeof window !== 'undefined') router.push('/login');
-    return null;
   }
 
-  const isPending = user.creatorRequest?.status === 'pending';
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505] pt-24 pb-20 px-4 md:px-8">
       <div className="max-w-5xl mx-auto">
-        {/* Header Navigation */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-[10px] font-black hover:text-orange-500 transition-all active:scale-90 group"
-          >
-            <div className="p-2 bg-white dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/10 group-hover:border-orange-500 shadow-sm">
-              <FiArrowLeft />
-            </div>
-            BACK
-          </button>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* 🔹 Avatar Section */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden flex flex-col items-center">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden flex flex-col items-center">
               <div className="h-32 w-full bg-gray-100 dark:bg-white/5 relative">
                 <img
                   src={
@@ -211,7 +213,7 @@ export default function ProfilePage() {
 
             {/* Creator Request Status */}
             {user.creatorRequest?.status === 'rejected' && (
-              <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-3xl animate-in fade-in">
+              <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl animate-in fade-in">
                 <p className="text-[10px] font-black text-red-500 uppercase flex items-center gap-2">
                   <FiAlertCircle /> ACTION REQUIRED
                 </p>
@@ -224,7 +226,7 @@ export default function ProfilePage() {
 
           {/* 🔹 Details Section */}
           <div className="lg:col-span-8">
-            <div className="bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
               <div className="px-10 py-8 border-b border-gray-100 dark:border-white/10 flex items-center justify-between bg-white/50 dark:bg-white/5">
                 <div>
                   <h3 className="text-sm font-black uppercase tracking-[0.2em] dark:text-white">
@@ -282,6 +284,22 @@ export default function ProfilePage() {
                       <p className="text-xs font-medium leading-relaxed italic dark:text-gray-300">
                         {user.profile?.bio || 'No bio provided...'}
                       </p>
+                    </div>
+                    <div className="mt-10 md:col-span-2 p-6 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                      <div>
+                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">
+                          Danger Zone
+                        </h3>
+                        <p className="text-xs font-medium dark:text-gray-300 mt-1">
+                          Once you delete your account, there is no going back. Please be certain.
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleDelete}
+                        className="mt-4 px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg cursor-pointer transition-all"
+                      >
+                        Delete Account
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -358,7 +376,7 @@ export default function ProfilePage() {
                         disabled={isSubmitting}
                         className="w-full md:w-auto px-12 py-4 rounded-xl bg-orange-500 text-white font-black text-[10px] tracking-[0.2em] hover:bg-orange-600 transition-all shadow-xl shadow-orange-500/20 active:scale-95 disabled:bg-gray-400 uppercase"
                       >
-                        {isSubmitting ? 'SYNCHRONIZING...' : 'SAVE CHANGES'}
+                        {isSubmitting ? 'Saving...' : 'SAVE CHANGES'}
                       </button>
                     </div>
                   </form>

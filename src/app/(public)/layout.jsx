@@ -1,4 +1,5 @@
-import PublicNavbar from "@/components/PublicNavbar";
+import CookieConsent from '@/components/CookieConsent';
+import PublicNavbar from '@/components/PublicNavbar';
 
 export default function PublicLayout({ children }) {
   return (
@@ -6,6 +7,7 @@ export default function PublicLayout({ children }) {
       <PublicNavbar />
       <main className="min-h-screen">
         {children}
+        <CookieConsent />
       </main>
     </>
   );

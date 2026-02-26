@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FiSearch, FiUserX, FiUserCheck, FiCalendar, FiShield, FiUser } from 'react-icons/fi';
+import {
+  FiSearch,
+  FiUserX,
+  FiUserCheck,
+  FiCalendar,
+  FiShield,
+  FiUser,
+  FiFileText,
+  FiDownload,
+} from 'react-icons/fi';
 // ✅ ১. getImageUrl ইমপোর্ট করুন
 import { getImageUrl } from '@/lib/imageHelper';
 
@@ -25,6 +34,24 @@ export default function UsersPage() {
       console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const response = await api.get('/api/admin/export-users', {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Users_List.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Export failed', err);
     }
   };
 
@@ -78,6 +105,26 @@ export default function UsersPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+
+        <button onClick={handleDownload} className="group relative flex items-center gap-3 cursor-pointer">
+          <div className="p-2 bg-green-500/20 rounded-lg text-green-500 transition-all">
+            <FiFileText size={16} className="animate-pulse group-hover:animate-none" />
+          </div>
+
+          <div className="text-left">
+            <span className="block text-[11px] font-medium uppercase tracking-tighter text-green-500">
+              Export Users
+            </span>
+            <span className="block text-[9px] uppercase text-green-500">
+              Excel Format
+            </span>
+          </div>
+
+          <FiDownload
+            size={14}
+            className="ml-2 text-green-500 group-hover:text-white p-2 w-9.5 h-9.5 bg-green-600/10 group-hover:bg-green-600 border border-green-500/20 group-hover:border-green-500 rounded-xl transition-all duration-300"
+          />
+        </button>
       </div>
 
       {/* 🔹 Users Table Container */}
