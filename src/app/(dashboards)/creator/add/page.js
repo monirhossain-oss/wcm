@@ -27,7 +27,8 @@ export default function AddListing() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    externalUrls: [''], // 🔹 Changed to array for multiple links
+    externalUrls: [''],
+    websiteLink: '',
     region: '',
     country: '',
     tradition: '',
@@ -192,7 +193,7 @@ export default function AddListing() {
 
           {/* Right: Primary Details */}
           <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="md:col-span-2 space-y-2">
+            <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
                 Listing Title
               </label>
@@ -203,6 +204,20 @@ export default function AddListing() {
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                 placeholder="Descriptive name..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
+                Website Link
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.websiteLink}
+                onChange={(e) => setFormData({ ...formData, websiteLink: e.target.value })}
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                placeholder="https://example.com"
               />
             </div>
 
