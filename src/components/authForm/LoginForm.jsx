@@ -32,7 +32,7 @@ export default function LoginForm() {
       {/* 🔹 Dark Overlay */}
       <div className="absolute inset-0 bg-black/40"></div>
 
-      {/* 🔹 Logo (same position) */}
+      {/* 🔹 Logo */}
       <div
         className="absolute top-4 left-4 cursor-pointer z-20"
         onClick={() => router.push("/")}
@@ -48,10 +48,10 @@ export default function LoginForm() {
 
       {/* 🔹 Centered Login Form */}
       <div className="relative z-10 min-h-screen mt-20 md:mt-0 flex items-center justify-center px-4">
-        <div className="w-full max-w-md  backdrop-blur-xl rounded-2xl shadow-2xl p-8">
+        <div className="w-full max-w-md backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
 
           {/* Header */}
-          <div className="mb-6 text-center">
+          <div className="mb-6 text-center text-white">
             <h1 className="text-3xl font-extrabold mb-2">Welcome Back</h1>
             <p className="text-sm">
               Don't have an account?{" "}
@@ -65,33 +65,43 @@ export default function LoginForm() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-white">
 
             {/* Email */}
             <div>
-              <label className="block font-medium mb-1">Email</label>
+              <label className="block font-medium mb-1 text-white">
+                Email
+              </label>
               <input
                 type="email"
                 placeholder="Enter your email"
                 {...register("email", { required: "Email required" })}
-                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full bg-transparent border border-white/50 rounded-lg px-3 py-2
+                           text-white placeholder-white/70
+                           focus:ring-2 focus:ring-[var(--color-primary)]
+                           outline-none"
               />
               {errors.email && (
-                <p className="text-red-600 text-sm">{errors.email.message}</p>
+                <p className="text-red-400 text-sm">{errors.email.message}</p>
               )}
             </div>
 
             {/* Password */}
             <div>
-              <label className="block font-medium mb-1">Password</label>
+              <label className="block font-medium mb-1 text-white">
+                Password
+              </label>
               <input
                 type="password"
                 placeholder="Enter your password"
                 {...register("password", { required: "Password required" })}
-                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                className="w-full bg-transparent border border-white/50 rounded-lg px-3 py-2
+                           text-white placeholder-white/70
+                           focus:ring-2 focus:ring-[var(--color-primary)]
+                           outline-none"
               />
               {errors.password && (
-                <p className="text-red-600 text-sm">{errors.password.message}</p>
+                <p className="text-red-400 text-sm">{errors.password.message}</p>
               )}
             </div>
 
@@ -99,14 +109,15 @@ export default function LoginForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition"
+              className="w-full py-2 rounded-lg bg-[var(--color-primary)]
+                         text-white hover:opacity-90 transition"
             >
               {isSubmitting ? "Logging in..." : "Login"}
             </button>
           </form>
 
           {/* Footer */}
-          <p className="text-xs text-center text-gray-50 mt-4">
+          <p className="text-xs text-center text-white/80 mt-4">
             By joining, you agree to the{" "}
             <a href="/terms" className="underline">Terms</a> and{" "}
             <a href="/privacy" className="underline">Privacy Policy</a>.

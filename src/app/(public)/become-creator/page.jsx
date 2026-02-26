@@ -78,10 +78,10 @@ export default function UserProfileForm() {
                     {...register("display_name", { required: "Required" })}
                     placeholder="Your public display name"
                     className="w-full border border-gray-300 dark:border-gray-700
-        bg-white dark:bg-gray-900
-        text-gray-900 dark:text-gray-100
-        placeholder:text-gray-400 dark:placeholder:text-gray-500
-        rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-gray-900
+                  text-gray-900 dark:text-gray-100
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
 
@@ -93,10 +93,10 @@ export default function UserProfileForm() {
                     {...register("username", { required: "Required" })}
                     placeholder="Unique username"
                     className="w-full border border-gray-300 dark:border-gray-700
-        bg-white dark:bg-gray-900
-        text-gray-900 dark:text-gray-100
-        placeholder:text-gray-400 dark:placeholder:text-gray-500
-        rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-gray-900
+                  text-gray-900 dark:text-gray-100
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -111,10 +111,10 @@ export default function UserProfileForm() {
                   rows={4}
                   placeholder="Tell people about yourself and your work"
                   className="w-full border border-gray-300 dark:border-gray-700
-      bg-white dark:bg-gray-900
-      text-gray-900 dark:text-gray-100
-      placeholder:text-gray-400 dark:placeholder:text-gray-500
-      rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500"
+                bg-white dark:bg-gray-900
+                text-gray-900 dark:text-gray-100
+                placeholder:text-gray-400 dark:placeholder:text-gray-500
+                rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
@@ -128,10 +128,10 @@ export default function UserProfileForm() {
                     {...register("profile_image")}
                     placeholder="https://example.com/profile.jpg"
                     className="w-full border border-gray-300 dark:border-gray-700
-        bg-white dark:bg-gray-900
-        text-gray-900 dark:text-gray-100
-        placeholder:text-gray-400 dark:placeholder:text-gray-500
-        rounded-lg px-3 py-2"
+                  bg-white dark:bg-gray-900
+                  text-gray-900 dark:text-gray-100
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  rounded-lg px-3 py-2"
                   />
                 </div>
 
@@ -143,10 +143,10 @@ export default function UserProfileForm() {
                     {...register("cover_image")}
                     placeholder="https://example.com/cover.jpg"
                     className="w-full border border-gray-300 dark:border-gray-700
-        bg-white dark:bg-gray-900
-        text-gray-900 dark:text-gray-100
-        placeholder:text-gray-400 dark:placeholder:text-gray-500
-        rounded-lg px-3 py-2"
+                  bg-white dark:bg-gray-900
+                  text-gray-900 dark:text-gray-100
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  rounded-lg px-3 py-2"
                   />
                 </div>
               </div>
@@ -160,10 +160,10 @@ export default function UserProfileForm() {
                     {...register("country", { required: "Required" })}
                     placeholder="Country you are based in"
                     className="w-full border border-gray-300 dark:border-gray-700
-        bg-white dark:bg-gray-900
-        text-gray-900 dark:text-gray-100
-        placeholder:text-gray-400 dark:placeholder:text-gray-500
-        rounded-lg px-3 py-2"
+                  bg-white dark:bg-gray-900
+                  text-gray-900 dark:text-gray-100
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  rounded-lg px-3 py-2"
                   />
                 </div>
 
@@ -175,10 +175,10 @@ export default function UserProfileForm() {
                     {...register("city", { required: "Required" })}
                     placeholder="City you are based in"
                     className="w-full border border-gray-300 dark:border-gray-700
-        bg-white dark:bg-gray-900
-        text-gray-900 dark:text-gray-100
-        placeholder:text-gray-400 dark:placeholder:text-gray-500
-        rounded-lg px-3 py-2"
+                  bg-white dark:bg-gray-900
+                  text-gray-900 dark:text-gray-100
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  rounded-lg px-3 py-2"
                   />
                 </div>
               </div>
@@ -191,10 +191,10 @@ export default function UserProfileForm() {
                   {...register("language", { required: "Required" })}
                   placeholder="Language you are fluent in"
                   className="w-full border border-gray-300 dark:border-gray-700
-        bg-white dark:bg-gray-900
-        text-gray-900 dark:text-gray-100
-        placeholder:text-gray-400 dark:placeholder:text-gray-500
-        rounded-lg px-3 py-2"
+                  bg-white dark:bg-gray-900
+                  text-gray-900 dark:text-gray-100
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  rounded-lg px-3 py-2"
                 />
               </div>
               {/* website link  */}
@@ -206,10 +206,10 @@ export default function UserProfileForm() {
                   {...register("website_link", { required: "Required" })}
                   placeholder="https://your-website.com"
                   className="w-full border border-gray-300 dark:border-gray-700
-        bg-white dark:bg-gray-900
-        text-gray-900 dark:text-gray-100
-        placeholder:text-gray-400 dark:placeholder:text-gray-500
-        rounded-lg px-3 py-2"
+                  bg-white dark:bg-gray-900
+                  text-gray-900 dark:text-gray-100
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  rounded-lg px-3 py-2"
                 />
               </div>
               {/* Social link */}
@@ -221,10 +221,10 @@ export default function UserProfileForm() {
                   {...register("social_link", { required: "Required" })}
                   placeholder="https://your-social-link.com"
                   className="w-full border border-gray-300 dark:border-gray-700
-        bg-white dark:bg-gray-900
-        text-gray-900 dark:text-gray-100
-        placeholder:text-gray-400 dark:placeholder:text-gray-500
-        rounded-lg px-3 py-2"
+                  bg-white dark:bg-gray-900
+                  text-gray-900 dark:text-gray-100
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  rounded-lg px-3 py-2"
                 />
               </div>
 

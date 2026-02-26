@@ -18,13 +18,25 @@ const PublicNavbar = ({ isLoggedIn }) => {
         {/* Left */}
         <div className="flex items-center space-x-2">
           <Link href="/" className="cursor-pointer">
+
+            {/* Light mode logo */}
+            <Image
+              src="/wc,-web-logo.png"
+              alt="Logo"
+              width={100}
+              height={100}
+              className="block brightness-125 h-auto w-auto dark:hidden"
+            />
+
+            {/* Dark mode logo */}
             <Image
               src="/World_Culture_Marketplace_logo.png"
               alt="Logo"
               width={100}
               height={100}
-              className="brightness-125 h-auto w-auto"
+              className="hidden brightness-125 h-auto w-auto dark:block"
             />
+
           </Link>
         </div>
 
