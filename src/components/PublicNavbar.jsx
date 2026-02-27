@@ -37,12 +37,12 @@ const PublicNavbar = () => {
             />
             {/* Dark Mode Logo */}
             <Image
-                                             src="/wc,-web-white.png" 
-                                             alt="Logo Dark"
-                                             width={100}
-                                             height={100}
-                                             className="hidden dark:block brightness-125 h-auto w-auto"
-                                           />
+               src="/wc,-web-white.png" 
+                 alt="Logo Dark"
+                 width={100}
+                height={100}
+                className="hidden dark:block brightness-125 h-auto w-auto"
+                />
           </Link>
         </div>
 
