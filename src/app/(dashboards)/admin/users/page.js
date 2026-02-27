@@ -2,7 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FiSearch, FiUserX, FiUserCheck, FiCalendar, FiShield, FiUser } from 'react-icons/fi';
+import {
+  FiSearch,
+  FiUserX,
+  FiUserCheck,
+  FiCalendar,
+  FiShield,
+  FiUser,
+  FiFileText,
+  FiDownload,
+} from 'react-icons/fi';
+// ✅ ১. getImageUrl ইমপোর্ট করুন
+import { getImageUrl } from '@/lib/imageHelper';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -23,6 +34,24 @@ export default function UsersPage() {
       console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const response = await api.get('/api/admin/export-users', {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Users_List.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Export failed', err);
     }
   };
 
@@ -76,6 +105,26 @@ export default function UsersPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+
+        <button onClick={handleDownload} className="group relative flex items-center gap-3 cursor-pointer">
+          <div className="p-2 bg-green-500/20 rounded-lg text-green-500 transition-all">
+            <FiFileText size={16} className="animate-pulse group-hover:animate-none" />
+          </div>
+
+          <div className="text-left">
+            <span className="block text-[11px] font-medium uppercase tracking-tighter text-green-500">
+              Export Users
+            </span>
+            <span className="block text-[9px] uppercase text-green-500">
+              Excel Format
+            </span>
+          </div>
+
+          <FiDownload
+            size={14}
+            className="ml-2 text-green-500 group-hover:text-white p-2 w-9.5 h-9.5 bg-green-600/10 group-hover:bg-green-600 border border-green-500/20 group-hover:border-green-500 rounded-xl transition-all duration-300"
+          />
+        </button>
       </div>
 
       {/* 🔹 Users Table Container */}
@@ -83,6 +132,7 @@ export default function UsersPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
+              {/* ✅ ২. আপনার প্রেফারেন্স অনুযায়ী bg-white/20 আপডেট করা হয়েছে */}
               <tr className="bg-gray-50/50 dark:bg-white/20 border-b border-gray-100 dark:border-white/10">
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">
                   Identity
@@ -116,20 +166,22 @@ export default function UsersPage() {
                   >
                     <td className="px-8 py-4">
                       <div className="flex items-center gap-4">
-                        {/* 🔹 Image or Placeholder Logic */}
                         <div className="h-9 w-9 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm flex items-center justify-center">
-                          {user.profile?.profileImage ? (
-                            <img
-                              src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${user.profile.profileImage}`}
-                              alt="avatar"
-                              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[11px] font-black uppercase">
-                              {user.firstName?.[0]}
-                              {user.lastName?.[0]}
-                            </div>
-                          )}
+                          {/* ✅ ৩. ইমেজ লজিক আপডেট: getImageUrl ব্যবহার করা হয়েছে */}
+                          <img
+                            src={getImageUrl(user.profile?.profileImage, 'avatar')}
+                            alt="avatar"
+                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                            // যদি ইমেজ লোড হতে ফেইল করে তবে ইউজার লেটার দেখাবে
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                          <div className="hidden w-full h-full items-center justify-center bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[11px] font-black uppercase">
+                            {user.firstName?.[0]}
+                            {user.lastName?.[0]}
+                          </div>
                         </div>
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-tight text-[#1f1f1f] dark:text-white">
@@ -149,13 +201,7 @@ export default function UsersPage() {
                           <FiUser className="text-gray-400" size={12} />
                         )}
                         <span
-                          className={`text-[9px] font-black uppercase tracking-widest ${
-                            user.role === 'admin'
-                              ? 'text-red-500'
-                              : user.role === 'creator'
-                                ? 'text-orange-500'
-                                : 'text-blue-500'
-                          }`}
+                          className={`text-[9px] font-black uppercase tracking-widest ${user.role === 'admin' ? 'text-red-500' : user.role === 'creator' ? 'text-orange-500' : 'text-blue-500'}`}
                         >
                           {user.role}
                         </span>
@@ -173,11 +219,7 @@ export default function UsersPage() {
                     </td>
                     <td className="px-8 py-4">
                       <div
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[8px] font-black uppercase tracking-widest border ${
-                          user.status === 'active'
-                            ? 'bg-green-500/5 text-green-500 border-green-500/20'
-                            : 'bg-red-500/5 text-red-500 border-red-500/20'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[8px] font-black uppercase tracking-widest border ${user.status === 'active' ? 'bg-green-500/5 text-green-500 border-green-500/20' : 'bg-red-500/5 text-red-500 border-red-500/20'}`}
                       >
                         <span
                           className={`w-1 h-1 rounded-full ${user.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}
@@ -188,11 +230,7 @@ export default function UsersPage() {
                     <td className="px-8 py-4 text-right">
                       <button
                         onClick={() => handleToggleStatus(user._id)}
-                        className={`p-2 rounded-lg border transition-all ${
-                          user.status === 'active'
-                            ? 'text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 border-transparent'
-                            : 'text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-500/10 border-transparent'
-                        }`}
+                        className={`p-2 rounded-lg border transition-all ${user.status === 'active' ? 'text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 border-transparent' : 'text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-500/10 border-transparent'}`}
                         title={user.status === 'active' ? 'Block Access' : 'Restore Access'}
                       >
                         {user.status === 'active' ? (

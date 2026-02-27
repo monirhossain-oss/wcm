@@ -23,6 +23,7 @@ import {
   FiGlobe,
   FiShield,
 } from 'react-icons/fi';
+import { getImageUrl } from '@/lib/imageHelper';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -210,9 +211,9 @@ export default function MyListings() {
                   <td className="px-6 py-4">
                     <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-100 dark:border-white/10">
                       <img
-                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
+                        src={getImageUrl(item.image)}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        alt=""
+                        alt={item.title}
                       />
                     </div>
                   </td>
@@ -241,7 +242,7 @@ export default function MyListings() {
                       </span>
                       {item.status === 'rejected' && item.rejectionReason && (
                         <span
-                          className="text-[7px] font-bold text-red-400 uppercase italic max-w-[80px] truncate"
+                          className="text-[7px] font-bold text-red-400 uppercase italic max-w-20 truncate"
                           title={item.rejectionReason}
                         >
                           Reason Attached
@@ -303,11 +304,11 @@ export default function MyListings() {
               {/* Media Section */}
               <div className="relative h-72 shrink-0">
                 <img
-                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${viewingItem.image}`}
+                  src={getImageUrl(viewingItem.image)}
                   className="w-full h-full object-cover"
                   alt={viewingItem.title}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                 <button
                   onClick={() => setViewingItem(null)}
                   className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-xl hover:bg-red-500 transition-all z-20"
@@ -388,9 +389,7 @@ export default function MyListings() {
                           <FiExternalLink className="text-orange-500 group-hover:scale-110 transition-transform" />
                         </a>
                       ) : (
-                        <p className="text-[10px] text-gray-500 italic">
-                          No Social Links linked.
-                        </p>
+                        <p className="text-[10px] text-gray-500 italic">No Social Links linked.</p>
                       )}
                     </div>
                   </div>
@@ -447,9 +446,7 @@ export default function MyListings() {
                         </a>
                       ))
                     ) : (
-                      <p className="text-[10px] text-gray-500 italic">
-                        No Social Links linked.
-                      </p>
+                      <p className="text-[10px] text-gray-500 italic">No Social Links linked.</p>
                     )}
                   </div>
                 </div>
@@ -504,11 +501,10 @@ export default function MyListings() {
                 <div className="relative h-80 bg-gray-50 dark:bg-white/5 border border-dashed border-gray-300 dark:border-white/10 rounded-2xl overflow-hidden group">
                   <img
                     src={
-                      editImage
-                        ? URL.createObjectURL(editImage)
-                        : `${process.env.NEXT_PUBLIC_API_BASE_URL}${editingItem.image}`
+                      editImage ? URL.createObjectURL(editImage) : getImageUrl(editingItem.image)
                     }
                     className="w-full h-full object-cover"
+                    alt="Preview"
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white pointer-events-none">
                     <FiUploadCloud size={24} className="mb-2 text-orange-500" />
