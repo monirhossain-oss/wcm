@@ -30,7 +30,7 @@ const featuredCultures = [
 
 export default function FeaturedCultures() {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-8 lg:px-8">
+    <section className="max-w-7xl mx-auto px-6 py-12">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>

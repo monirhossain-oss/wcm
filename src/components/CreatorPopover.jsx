@@ -11,6 +11,8 @@ const getImageUrl = (path, type = 'post') => {
       : 'https://placehold.co/600x200/27272a/white?text=No+Cover';
   }
   if (path.startsWith('http')) return path;
+
+  // আপনার NEXT_PUBLIC_API_BASE_URL এখানে ব্যবহার করা হয়েছে
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${baseUrl}${cleanPath}`;
@@ -18,25 +20,30 @@ const getImageUrl = (path, type = 'post') => {
 
 const CreatorPopover = ({ creator, item, API_BASE_URL, creatorLocation }) => {
   const [listingCount, setListingCount] = useState(0);
+  const [fullCreatorData, setFullCreatorData] = useState(null); // ব্যাকএন্ড থেকে আসা ডাটা রাখার জন্য
+
   const creatorName = creator?.username || 'Anonymous';
-  const avatarImage = creator?.profile?.profileImage;
-  const coverImage = creator?.profile?.coverImage;
+  // প্রোফাইল ডাটা যদি ব্যাকএন্ড থেকে আসে তবে সেটা ব্যবহার করা হবে
+  const avatarImage = fullCreatorData?.profile?.profileImage || creator?.profile?.profileImage;
+  const coverImage = fullCreatorData?.profile?.coverImage || creator?.profile?.coverImage;
 
   useEffect(() => {
-    const fetchCount = async () => {
+    const fetchCreatorData = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/listings/count/${creator._id}`);
-        setListingCount(res.data.count || 0);
+        // আমরা আপনার বানানো getPublicProfile এন্ডপয়েন্টটি কল করছি
+        const res = await axios.get(`${API_BASE_URL}/api/users/profile/${creator._id}`);
+        setListingCount(res.data.listingsCount || 0);
+        setFullCreatorData(res.data.user);
       } catch (err) {
+        console.error('Popover fetch error:', err);
         setListingCount(0);
       }
     };
-    if (creator?._id) fetchCount();
+    if (creator?._id) fetchCreatorData();
   }, [creator?._id, API_BASE_URL]);
 
   return (
-    // z-[999] ব্যবহার করা হয়েছে যাতে এটি অন্য সব কার্ডের উপরে থাকে
-    <div className="absolute bottom-full left-0 md:left-3 mb-7 w-50 md:w-72 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-md shadow-[0_20px_60px_rgba(0,0,0,0.4)] z-999 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200 pointer-events-auto">
+    <div className="absolute bottom-full left-0 md:left-3 mb-7 w-50 md:w-72 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-md shadow-[0_20px_60px_rgba(0,0,0,0.4)] z-[999] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200 pointer-events-auto">
       <div className="h-20 w-full bg-zinc-200 dark:bg-zinc-800 relative">
         <img
           src={getImageUrl(coverImage, 'cover')}
@@ -66,7 +73,7 @@ const CreatorPopover = ({ creator, item, API_BASE_URL, creatorLocation }) => {
             @{creatorName}
           </h4>
           <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
-            {creatorLocation}
+            {creatorLocation || fullCreatorData?.profile?.location || 'Global'}
           </p>
         </div>
 
