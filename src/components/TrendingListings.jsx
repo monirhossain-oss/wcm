@@ -106,7 +106,7 @@ const TrendingListings = () => {
                 key={item._id}
                 className="!z-auto hover:!z-[110] active:!z-[110] focus-within:!z-[110]"
               >
-                <ListingCard item={item} API_BASE_URL={API_BASE_URL} />
+                <ListingCard item={item} />
               </SwiperSlide>
             ))}
           </Swiper>

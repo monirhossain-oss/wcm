@@ -17,7 +17,8 @@ const getImageUrl = (path, type = 'post') => {
   return `${baseUrl}${cleanPath}`;
 };
 
-const ListingCard = ({ item: initialItem, API_BASE_URL }) => {
+const ListingCard = ({ item: initialItem }) => {
+   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
   const { user } = useAuth();
   const [item, setItem] = useState(initialItem);
   const [showCreator, setShowCreator] = useState(false);

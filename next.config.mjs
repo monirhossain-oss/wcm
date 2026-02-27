@@ -2,20 +2,11 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.ibb.co.com',
-      },
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'i.ibb.co.com' },
+      { protocol: 'https', hostname: 'cdn-icons-png.flaticon.com' },
+      { protocol: 'https', hostname: 'placehold.co' },
       {
         protocol: 'http',
         hostname: 'localhost',
@@ -27,8 +18,13 @@ const nextConfig = {
         hostname: 'wcm-server.onrender.com',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: '**.ibb.co.com',
+      },
     ],
   },
+  trailingSlash: false,
 };
 
 export default nextConfig;
