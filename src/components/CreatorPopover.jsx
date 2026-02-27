@@ -12,7 +12,6 @@ const getImageUrl = (path, type = 'post') => {
   }
   if (path.startsWith('http')) return path;
 
-  // আপনার NEXT_PUBLIC_API_BASE_URL এখানে ব্যবহার করা হয়েছে
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${baseUrl}${cleanPath}`;
@@ -20,17 +19,15 @@ const getImageUrl = (path, type = 'post') => {
 
 const CreatorPopover = ({ creator, item, API_BASE_URL, creatorLocation }) => {
   const [listingCount, setListingCount] = useState(0);
-  const [fullCreatorData, setFullCreatorData] = useState(null); // ব্যাকএন্ড থেকে আসা ডাটা রাখার জন্য
+  const [fullCreatorData, setFullCreatorData] = useState(null); 
 
   const creatorName = creator?.username || 'Anonymous';
-  // প্রোফাইল ডাটা যদি ব্যাকএন্ড থেকে আসে তবে সেটা ব্যবহার করা হবে
   const avatarImage = fullCreatorData?.profile?.profileImage || creator?.profile?.profileImage;
   const coverImage = fullCreatorData?.profile?.coverImage || creator?.profile?.coverImage;
 
   useEffect(() => {
     const fetchCreatorData = async () => {
       try {
-        // আমরা আপনার বানানো getPublicProfile এন্ডপয়েন্টটি কল করছি
         const res = await axios.get(`${API_BASE_URL}/api/users/profile/${creator._id}`);
         setListingCount(res.data.listingsCount || 0);
         setFullCreatorData(res.data.user);
