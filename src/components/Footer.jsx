@@ -21,18 +21,18 @@ const Footer = () => {
                                 World Culture Marketplace
                             </span>
                         </Link>
-                        <p className="text-gray-500 dark:text-gray-400 text-[15px] leading-relaxed max-w-xs">
+                        <p className="text-gray-500 dark:text-gray-400 text-[12px] leading-relaxed max-w-xs">
                             Connecting the world through cultural craftsmanship. Discover authentic creations from artisans across every continent.
                         </p>
                     </div>
 
                     {/* Column 2: Discover */}
                     <div>
-                        <h3 className="text-[15px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">Discover</h3>
+                        <h4 className="text-[1-px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">Discover</h4>
                         <ul className="space-y-4">
                             {['Discover','Cultures', 'Categories','Regions', 'Creators'].map((item) => (
                                 <li key={item}>
-                                    <Link href={`/${item.toLowerCase().replace(/ /g, '-')}`} className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[15px]">
+                                    <Link href={`/${item.toLowerCase().replace(/ /g, '-')}`} className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
                                         {item}
                                     </Link>
                                 </li>
@@ -42,11 +42,11 @@ const Footer = () => {
 
                     {/* Column 3: Company */}
                     <div>
-                        <h3 className="text-[15px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">Company</h3>
+                        <h4 className="text-[12px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">Company</h4>
                         <ul className="space-y-4">
                             {['About WCM', 'How It Works', 'Cultural Insights', 'Contact'].map((item) => (
                                 <li key={item}>
-                                    <Link href={`/${item.toLowerCase().replace(/ /g, '-')}`} className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[15px]">
+                                    <Link href={`/${item.toLowerCase().replace(/ /g, '-')}`} className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
                                         {item}
                                     </Link>
                                 </li>
@@ -56,11 +56,11 @@ const Footer = () => {
 
                     {/* Column 4: Support */}
                     <div>
-                        <h3 className="text-[15px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">Support</h3>
+                        <h4 className="text-[12px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">Support</h4>
                         <ul className="space-y-4">
                             {['FAQ', 'Terms & Conditions', 'Privacy Policy', 'Cookie Policy'].map((item) => (
                                 <li key={item}>
-                                    <Link href={`/${item.toLowerCase().replace(/ /g, '-')}`} className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[15px]">
+                                    <Link href={`/${item.toLowerCase().replace(/ /g, '-')}`} className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
                                         {item}
                                     </Link>
                                 </li>
