@@ -75,10 +75,10 @@ export default function RegisterForm() {
           <div className="absolute bottom-6 right-6 text-[#e5d5bc]/30 text-xl tracking-[0.5em]">◈◈◈</div>
         </div>
 
-        {/* ডান পাশ: রেজিস্ট্রেশন ফর্ম (গ্লাস মরফিজম) */}
+        
         <div className="relative p-8 md:p-12 flex flex-col justify-center bg-[#fdfaf6]/70 backdrop-blur-xl overflow-y-auto">
           
-          {/* টপ লোগো */}
+          {/* logo*/}
           <div className="mb-6 flex justify-center md:justify-start">
              <Image src="/wc,-web-logo.png" alt="Logo" width={100} height={40} className="h-auto cursor-pointer" onClick={() => router.push('/')} />
           </div>
