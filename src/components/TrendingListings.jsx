@@ -40,7 +40,7 @@ const TrendingListings = () => {
   };
 
   return (
-    <div className="w-full py-12 overflow-hidden bg-white dark:bg-zinc-950">
+    <div className="w-full overflow-hidden bg-white dark:bg-zinc-950">
       <div className="max-w-7xl mx-auto px-6 py-12 relative group">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
@@ -65,7 +65,6 @@ const TrendingListings = () => {
           </div>
         </div>
 
-        {/* Custom Navigation Buttons - ডেক্সটপে হোভার করলে আসবে */}
         <button className="swiper-prev-btn absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-full items-center justify-center border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-500 hover:text-white -ml-2 md:flex hidden">
           <FaChevronLeft size={14} />
         </button>
@@ -73,7 +72,6 @@ const TrendingListings = () => {
           <FaChevronRight size={14} />
         </button>
 
-        {/* Swiper Slider Section */}
         {loading ? (
           <div className="flex gap-5">
             {[...Array(5)].map((_, i) => (
