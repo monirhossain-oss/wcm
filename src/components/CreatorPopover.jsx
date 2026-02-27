@@ -11,7 +11,7 @@ const getImageUrl = (path, type = 'post') => {
       : 'https://placehold.co/600x200/27272a/white?text=No+Cover';
   }
   if (path.startsWith('http')) return path;
-  const baseUrl = 'http://localhost:5000';
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${baseUrl}${cleanPath}`;
 };
