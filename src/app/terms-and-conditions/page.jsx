@@ -50,7 +50,7 @@ const TermsAndConditionsPage = () => {
                     </p>
                 </div>
 
-                {/* 5. Ownership & Handover */}
+                {/* 5.Ownership & Handover */}
                 <div>
                     <h2 className="text-xl font-bold mb-4 text-[#F57C00]">5. CONTENT OWNERSHIP & DATA RIGHTS</h2>
                     <p>
