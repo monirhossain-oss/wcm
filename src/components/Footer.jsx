@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { FaGlobe } from 'react-icons/fa'; // লোগো আইকন হিসেবে ব্যবহারের জন্য
 
@@ -12,24 +13,32 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
                     
                     {/* Column 1: Logo & About */}
-                    <div className="space-y-6">
-                        <Link href="/" className="flex items-center space-x-2">
-                            <span className="text-[#F57C00] text-2xl">
-                                <FaGlobe />
-                            </span>
-                            <span className="text-xl font-bold tracking-tight text-[#1a1a1a] dark:text-white">
-                                World Culture Marketplace
-                            </span>
-                        </Link>
-                        <p className="text-gray-500 dark:text-gray-400 text-[12px] leading-relaxed max-w-xs">
-                            Connecting the world through cultural craftsmanship. Discover authentic creations from artisans across every continent.
-                        </p>
-                    </div>
+                    {/* Left: Logo */}
+        <div className="flex items-center space-x-2">
+          <Link href="/" className="cursor-pointer">
+            {/* Light Mode Logo */}
+            <Image
+              src="/wc,-web-logo.png"
+              alt="Logo Light"
+              width={100}
+              height={100}
+              className="dark:hidden brightness-125 h-auto w-auto"
+            />
+            {/* Dark Mode Logo */}
+            <Image
+               src="/wc,-web-white.png" 
+                 alt="Logo Dark"
+                 width={100}
+                height={100}
+                className="hidden dark:block brightness-125 h-auto w-auto"
+                />
+          </Link>
+        </div>
 
                     {/* Column 2: Discover */}
                     <div>
                         <h4 className="text-[1-px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">Discover</h4>
-                        <ul className="space-y-4">
+                        <ul className="3">
                             {['Discover','Cultures', 'Categories','Regions', 'Creators'].map((item) => (
                                 <li key={item}>
                                     <Link href={`/${item.toLowerCase().replace(/ /g, '-')}`} className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
@@ -43,7 +52,7 @@ const Footer = () => {
                     {/* Column 3: Company */}
                     <div>
                         <h4 className="text-[12px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">Company</h4>
-                        <ul className="space-y-4">
+                        <ul className="3">
                             {['About WCM', 'How It Works', 'Cultural Insights', 'Contact'].map((item) => (
                                 <li key={item}>
                                     <Link href={`/${item.toLowerCase().replace(/ /g, '-')}`} className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
@@ -57,7 +66,7 @@ const Footer = () => {
                     {/* Column 4: Support */}
                     <div>
                         <h4 className="text-[12px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">Support</h4>
-                        <ul className="space-y-4">
+                        <ul className="3">
                             {['FAQ', 'Terms & Conditions', 'Privacy Policy', 'Cookie Policy'].map((item) => (
                                 <li key={item}>
                                     <Link href={`/${item.toLowerCase().replace(/ /g, '-')}`} className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
