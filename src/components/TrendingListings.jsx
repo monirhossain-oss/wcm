@@ -6,8 +6,8 @@ import ListingCard from './ListingCard';
 
 // Swiper Components and Styles
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, FreeMode, Navigation } from 'swiper/modules';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // আইকন ইমপোর্ট
+import { FreeMode, Navigation } from 'swiper/modules';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 import 'swiper/css';
 import 'swiper/css/free-mode';
@@ -41,11 +41,11 @@ const TrendingListings = () => {
 
   return (
     <div className="w-full py-12 overflow-hidden bg-white dark:bg-zinc-950">
-      <div className="max-w-[1600px] mx-auto px-4 relative group">
+      <div className="max-w-7xl mx-auto px-6 py-12 relative group">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-gray-900 dark:text-white italic">
-            Trending <span className="text-orange-500">Listings</span>
+          <h2 className="text-2xl font-bold text-[#1F1F1F] dark:text-[#ededed]">
+            Featured cultures
           </h2>
 
           <div className="flex space-x-1 bg-gray-100 dark:bg-white/10 p-1 rounded-full w-fit">
@@ -86,7 +86,7 @@ const TrendingListings = () => {
         ) : (
           <Swiper
             slidesPerView={1.4}
-            spaceBetween={14}
+            spaceBetween={20}
             freeMode={true}
             loop={listings.length > 5}
             watchSlidesProgress={true}

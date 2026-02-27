@@ -68,13 +68,13 @@ const ListingCard = ({ item: initialItem, API_BASE_URL }) => {
 
   return (
     <div
-      className={`group relative flex flex-col bg-white dark:bg-zinc-900 rounded-md transition-all duration-300 border border-transparent sm:p-0 p-0.5 shadow-sm 
+      className={`group relative flex flex-col bg-white dark:bg-zinc-900 rounded-xl transition-all duration-300 border border-transparent sm:p-0 p-0.5 shadow-sm 
       ${showCreator ? 'z-110' : 'z-auto'} hover:z-110`}
     >
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-white/5 rounded-t-md">
         <Link
-          href={`/listing/${item._id}`}
+          href={`/listings/${item._id}`}
           className="w-full h-full flex items-center justify-center"
         >
           <img
@@ -97,9 +97,9 @@ const ListingCard = ({ item: initialItem, API_BASE_URL }) => {
       <div className="pt-2 pb-2 px-2 sm:px-3">
         <div className="flex flex-col gap-1">
           {/* Title and Stats Row */}
-          <div className="flex justify-between items-start gap-1">
+          <div className="flex justify-between items-start gap-3">
             <h3 className="text-[12px] sm:text-[14px] font-bold text-gray-900 dark:text-white truncate hover:text-orange-500 transition-colors leading-tight flex-1">
-              <Link href={`/listing/${item._id}`}>{item.title}</Link>
+              <Link href={`/listings/${item._id}`}>{item.title}</Link>
             </h3>
 
             <div className="flex items-center gap-2 shrink-0 pt-0.5">
