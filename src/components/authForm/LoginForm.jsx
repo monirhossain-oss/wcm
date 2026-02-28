@@ -91,7 +91,7 @@ export default function LoginForm() {
             {/* Password Input */}
             <div className="relative">
               <input
-                // ২. টাইপটি ডাইনামিক করতে হবে (password অথবা text)
+                
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
                 {...register('password', { required: 'Password required' })}

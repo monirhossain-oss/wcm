@@ -50,10 +50,10 @@ export default function RegisterForm() {
   return (
     <div className="min-h-screen w-full bg-[#f3eee7] flex items-center justify-center p-4 md:p-10 font-serif">
       
-      {/* মেইন কন্টেইনার - ২ কলাম লেআউট */}
+      
       <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-0 rounded-[40px] overflow-hidden shadow-2xl bg-white/50 backdrop-blur-md border border-white/30">
         
-        {/* বাম পাশ: কালচারাল আর্ট সেকশন (লগইন পেজের মতো) */}
+      
         <div className="relative hidden md:flex flex-col items-center justify-between bg-[#1a2b4b] p-12 text-center text-white overflow-hidden">
           <div className="absolute top-6 left-6 text-[#e5d5bc]/30 text-xl tracking-[0.5em]">◈◈◈</div>
           <div className="absolute top-6 right-6 text-[#e5d5bc]/30 text-xl tracking-[0.5em]">◈◈◈</div>
@@ -61,7 +61,7 @@ export default function RegisterForm() {
           <div className="relative z-10 w-full mt-10">
              <div className="relative w-full aspect-square mb-8">
                 <Image 
-                  src="/cultural.jpg" 
+                  src="/cultural1.jpg" 
                   alt="Cultural Art"
                   fill
                   className="object-contain"
