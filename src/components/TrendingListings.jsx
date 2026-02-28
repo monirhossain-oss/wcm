@@ -1,10 +1,9 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import ListingCard from './ListingCard';
 
-// Swiper Components and Styles
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode, Navigation } from 'swiper/modules';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
@@ -17,37 +16,69 @@ const TrendingListings = () => {
   const { user } = useAuth();
   const [listings, setListings] = useState([]);
   const [filter, setFilter] = useState('All');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+  const isFetching = useRef(false);
 
+  // ডাটা ফেচিং ফাংশন
+  const fetchListings = useCallback(
+    async (pageNum, isNewFilter = false) => {
+      if (isFetching.current) return;
+      if (!hasMore && !isNewFilter) return;
+
+      isFetching.current = true;
+      if (pageNum === 1) setLoading(true);
+
+      try {
+        const res = await axios.get(
+          `${API_BASE_URL}/api/listings/public?filter=${filter}&page=${pageNum}&limit=10`,
+          { withCredentials: true }
+        );
+
+        // ব্যাকএন্ড অবজেক্ট { listings: [...] } পাঠালে সেটা নেবে, নাহলে সরাসরি অ্যারে
+        const fetchedData = res.data.listings || (Array.isArray(res.data) ? res.data : []);
+
+        if (fetchedData.length < 10) {
+          setHasMore(false);
+        } else {
+          setHasMore(true);
+        }
+
+        setListings((prev) => (isNewFilter ? fetchedData : [...prev, ...fetchedData]));
+        setPage(pageNum);
+      } catch (err) {
+        console.error('Error fetching listings:', err);
+      } finally {
+        setLoading(false);
+        isFetching.current = false;
+      }
+    },
+    [filter, API_BASE_URL, hasMore]
+  );
+
+  // মাউন্ট হওয়ার সময় এবং ফিল্টার চেঞ্জ হলে কল হবে
   useEffect(() => {
-    fetchListings();
-  }, [filter, user]);
+    setHasMore(true); // নতুন ফিল্টারের জন্য রিসেট
+    fetchListings(1, true);
+  }, [filter]); // এখানে 'user' ডিপেন্ডেন্সি বাদ দিয়েছি যাতে গেস্ট ইউজারদের জন্যও অটো লোড হয়
 
-  const fetchListings = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/listings/public?filter=${filter}&limit=20`, {
-        withCredentials: true,
-      });
-      setListings(res.data);
-    } catch (err) {
-      console.error('Error:', err);
-    } finally {
-      setLoading(false);
+  const handleReachEnd = () => {
+    if (hasMore && !loading && !isFetching.current) {
+      fetchListings(page + 1);
     }
   };
 
   return (
     <div className="w-full overflow-hidden bg-white dark:bg-zinc-950">
-      <div className="max-w-7xl mx-auto px-6 py-12 relative group">
+      <div className="max-w-7xl mx-auto px-6 relative group">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
           <h2 className="text-2xl font-bold text-[#1F1F1F] dark:text-[#ededed]">
             Featured cultures
           </h2>
-
           <div className="flex space-x-1 bg-gray-100 dark:bg-white/10 p-1 rounded-full w-fit">
             {['All', 'Today', 'This week'].map((f) => (
               <button
@@ -65,49 +96,57 @@ const TrendingListings = () => {
           </div>
         </div>
 
-        <button className="swiper-prev-btn absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-full items-center justify-center border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-500 hover:text-white -ml-2 md:flex hidden">
+        {/* Navigation Buttons */}
+        <button className="swiper-prev-btn absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-full flex items-center justify-center border border-gray-200 dark:border-white/10 opacity-0 group-hover:opacity-100 transition-all -ml-2 hover:bg-orange-500 hover:text-white md:flex hidden">
           <FaChevronLeft size={14} />
         </button>
-        <button className="swiper-next-btn absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-full items-center justify-center border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-500 hover:text-white -mr-2 md:flex hidden">
+        <button className="swiper-next-btn absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-full flex items-center justify-center border border-gray-200 dark:border-white/10 opacity-0 group-hover:opacity-100 transition-all -mr-2 hover:bg-orange-500 hover:text-white md:flex hidden">
           <FaChevronRight size={14} />
         </button>
 
-        {loading ? (
+        {loading && page === 1 ? (
           <div className="flex gap-5">
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
-                className="flex-1 min-w-[250px] h-72 bg-gray-200 dark:bg-white/5 animate-pulse rounded-sm"
+                className="flex-1 min-w-[250px] h-72 bg-gray-200 dark:bg-white/5 animate-pulse rounded-md"
               />
             ))}
           </div>
-        ) : (
+        ) : listings.length > 0 ? (
           <Swiper
             slidesPerView={1.4}
             spaceBetween={20}
             freeMode={true}
-            loop={listings.length > 5}
-            watchSlidesProgress={true}
+            loop={false}
+            onReachEnd={handleReachEnd}
             navigation={{
               nextEl: '.swiper-next-btn',
               prevEl: '.swiper-prev-btn',
             }}
             breakpoints={{
-              640: { slidesPerView: 3.2, spaceBetween: 16 },
-              1024: { slidesPerView: 5, spaceBetween: 20 },
+              640: { slidesPerView: 3.2 },
+              1024: { slidesPerView: 5 },
             }}
             modules={[FreeMode, Navigation]}
             className="mySwiper !overflow-visible"
           >
             {listings.map((item) => (
-              <SwiperSlide
-                key={item._id}
-                className="!z-auto hover:!z-[110] active:!z-[110] focus-within:!z-[110]"
-              >
+              <SwiperSlide key={item._id}>
                 <ListingCard item={item} />
               </SwiperSlide>
             ))}
+
+            {hasMore && (
+              <SwiperSlide>
+                <div className="flex items-center justify-center h-full min-h-[250px] w-full">
+                  <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              </SwiperSlide>
+            )}
           </Swiper>
+        ) : (
+          <div className="py-20 text-center text-gray-400">No listings found.</div>
         )}
       </div>
     </div>

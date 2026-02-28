@@ -14,7 +14,7 @@ export default function HeroSection() {
   const [currentImage, setCurrentImage] = useState(0);
   const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
-  
+
   // Role checking based on your context logic
   const isCreator = user?.role === 'creator';
   const isAdmin = user?.role === 'admin';
@@ -94,16 +94,24 @@ export default function HeroSection() {
           {[
             { icon: <FaUtensils />, label: 'Category', options: ['Food', 'Art', 'Music'] },
             { icon: <FaGlobe />, label: 'Region', options: ['Asia', 'Europe', 'Africa'] },
-            { icon: <FaTheaterMasks />, label: 'Cultural', options: ['Traditional', 'Modern', 'Fusion'] },
+            {
+              icon: <FaTheaterMasks />,
+              label: 'Cultural',
+              options: ['Traditional', 'Modern', 'Fusion'],
+            },
           ].map((filter, i) => (
             <div key={i} className="relative w-full md:w-1/3">
               <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 z-10">
                 {filter.icon}
               </span>
               <select className="w-full bg-white/20 backdrop-blur-xl px-12 py-4 rounded-full text-white appearance-none border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#F57C00] transition-all cursor-pointer font-medium">
-                <option value="" className="bg-gray-900">{filter.label}</option>
-                {filter.options.map(opt => (
-                  <option key={opt} value={opt.toLowerCase()} className="bg-gray-900">{opt}</option>
+                <option value="" className="bg-gray-900">
+                  {filter.label}
+                </option>
+                {filter.options.map((opt) => (
+                  <option key={opt} value={opt.toLowerCase()} className="bg-gray-900">
+                    {opt}
+                  </option>
                 ))}
               </select>
               <FaChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-300 z-10" />
