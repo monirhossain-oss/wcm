@@ -45,7 +45,7 @@ const PublicNavbar = () => {
                 />
           </Link>
         </div>
-    
+
         {/* Center: Menu or Search */}
         <div className="flex-1 flex justify-center">
           {showSearch ? (
