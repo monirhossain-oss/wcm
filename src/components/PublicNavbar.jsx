@@ -13,7 +13,14 @@ const PublicNavbar = () => {
 
   const { user, logoutUser } = useAuth();
 
-  const menuItems = ['Discover', 'Cultures', 'Categories', 'Regions', 'Creators'];
+  // মেনু আইটেমগুলোকে অবজেক্ট আকারে রাখা হয়েছে রাউটিং সহজ করার জন্য
+  const menuItems = [
+    { name: 'Discover', href: '/discover' },
+    { name: 'Cultures', href: '/cultures' },
+    { name: 'Categories', href: '/categories' },
+    { name: 'Regions', href: '/regions' },
+    { name: 'Creators', href: '/creators' },
+  ];
 
   const getDashboardLink = () => {
     if (user?.role === 'admin') return '/admin';
@@ -27,7 +34,6 @@ const PublicNavbar = () => {
         {/* Left: Logo */}
         <div className="flex items-center space-x-2">
           <Link href="/" className="cursor-pointer">
-            {/* Light Mode Logo */}
             <Image
               src="/wc,-web-logo.png"
               alt="Logo Light"
@@ -35,14 +41,13 @@ const PublicNavbar = () => {
               height={100}
               className="dark:hidden brightness-125 h-auto w-auto"
             />
-            {/* Dark Mode Logo */}
             <Image
-               src="/wc,-web-white.png" 
-                 alt="Logo Dark"
-                 width={100}
-                height={100}
-                className="hidden dark:block brightness-125 h-auto w-auto"
-                />
+              src="/wc,-web-white.png"
+              alt="Logo Dark"
+              width={100}
+              height={100}
+              className="hidden dark:block brightness-125 h-auto w-auto"
+            />
           </Link>
         </div>
 
@@ -66,17 +71,18 @@ const PublicNavbar = () => {
             <div className="hidden md:flex space-x-6">
               {menuItems.map((item) => (
                 <Link
-                  key={item}
-                  href={`/${item.toLowerCase()}`}
+                  key={item.name}
+                  href={item.href}
                   className="text-sm font-medium hover:text-[#F57C00] transition-colors"
                 >
-                  {item}
+                  {item.name}
                 </Link>
               ))}
             </div>
           )}
         </div>
 
+        {/* Right: User Actions */}
         <div className="flex items-center space-x-3">
           {showSearch ? (
             <FiX className="h-9 w-9 p-2 cursor-pointer" onClick={() => setShowSearch(false)} />
@@ -159,12 +165,12 @@ const PublicNavbar = () => {
         <div className="flex flex-col space-y-4 p-6">
           {menuItems.map((item) => (
             <Link
-              key={item}
-              href={`/${item.toLowerCase()}`}
+              key={item.name}
+              href={item.href}
               className="text-lg font-medium"
               onClick={() => setIsMobileDrawerOpen(false)}
             >
-              {item}
+              {item.name}
             </Link>
           ))}
 
