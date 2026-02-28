@@ -15,7 +15,6 @@ export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
 
-  // Role checking based on your context logic
   const isCreator = user?.role === 'creator';
   const isAdmin = user?.role === 'admin';
 
@@ -34,26 +33,29 @@ export default function HeroSection() {
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden min-h-[750px] flex items-center transition-colors duration-500">
+    <section className="relative overflow-hidden min-h-[750px] flex items-center transition-all duration-500">
+      
       {/* Background Slider */}
-      {images.map((img, index) => (
-        <div
-          key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out -z-10 ${
-            index === currentImage ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{
-            backgroundImage: `url(${img})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-linear-to-b from-transparent via-black/30 to-black/80 dark:from-transparent dark:via-black/50 dark:to-black/95 transition-all duration-500" />
-        </div>
-      ))}
+      <div className="absolute inset-0 w-full h-full">
+        {images.map((img, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              index === currentImage ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{
+              backgroundImage: `url(${img})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            {/* Gradient Overlay - Fixed Syntax */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black/80 transition-all duration-500" />
+          </div>
+        ))}
+      </div>
 
-      <div className="max-w-7xl mx-auto px-6 pt-32 pb-12 flex flex-col items-center text-center w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-12 flex flex-col items-center text-center w-full">
         {/* Heading */}
         <h1 className="text-5xl md:text-7xl font-bold text-white drop-shadow-2xl leading-tight">
           Discover <br /> culture <span className="text-[#F57C00]">worldwide</span>
@@ -89,7 +91,7 @@ export default function HeroSection() {
           )}
         </div>
 
-        {/* Filters - Updated with bg-white/20 per your instruction */}
+        {/* Filters */}
         <div className="max-w-4xl w-full mx-auto mt-20 py-4 flex flex-col md:flex-row gap-4">
           {[
             { icon: <FaUtensils />, label: 'Category', options: ['Food', 'Art', 'Music'] },
@@ -105,11 +107,11 @@ export default function HeroSection() {
                 {filter.icon}
               </span>
               <select className="w-full bg-white/20 backdrop-blur-xl px-12 py-4 rounded-full text-white appearance-none border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#F57C00] transition-all cursor-pointer font-medium">
-                <option value="" className="bg-gray-900">
+                <option value="" className="bg-gray-800">
                   {filter.label}
                 </option>
                 {filter.options.map((opt) => (
-                  <option key={opt} value={opt.toLowerCase()} className="bg-gray-900">
+                  <option key={opt} value={opt.toLowerCase()} className="bg-gray-800 text-white">
                     {opt}
                   </option>
                 ))}
