@@ -151,3 +151,19 @@ h6 {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* স্লাইডারের স্লাইড হোভার বা একটিভ হলে সবার উপরে থাকবে */
+.swiper-slide {
+  transition: z-index 0.3s;
+}
+
+.swiper-slide:hover, 
+.swiper-slide:active, 
+.swiper-slide-active {
+  z-index: 999 !important;
+}
+
+/* পপওভার যেন স্লাইডারের কন্টেইনারে আটকে না যায় */
+.swiper {
+  overflow: visible !important;
+}
