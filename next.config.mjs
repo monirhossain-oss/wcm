@@ -7,6 +7,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'i.ibb.co.com' },
       { protocol: 'https', hostname: 'cdn-icons-png.flaticon.com' },
       { protocol: 'https', hostname: 'placehold.co' },
+      { protocol: 'https', hostname: 'i.postimg.cc' }, // Postimage এর জন্য যোগ করা হলো
       {
         protocol: 'http',
         hostname: 'localhost',

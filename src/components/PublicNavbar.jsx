@@ -13,13 +13,13 @@ const PublicNavbar = () => {
 
   const { user, logoutUser } = useAuth();
 
-  // মেনু আইটেমগুলোকে অবজেক্ট আকারে রাখা হয়েছে রাউটিং সহজ করার জন্য
   const menuItems = [
     { name: 'Discover', href: '/discover' },
     { name: 'Cultures', href: '/cultures' },
     { name: 'Categories', href: '/categories' },
     { name: 'Regions', href: '/regions' },
     { name: 'Creators', href: '/creators' },
+    { name: 'Blogs', href: '/blogs' },
   ];
 
   const getDashboardLink = () => {
