@@ -50,9 +50,22 @@ export default function CreatorsPage() {
           border-radius: 20px;
           padding: 28px;
           cursor: pointer;
-          transition: transform 0.25s ease, border-color 0.25s ease;
+          transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
           overflow: hidden;
         }
+
+        /* Dark Mode support using class or media query */
+        @media (prefers-color-scheme: dark) {
+          .creator-card {
+            background: #1f1f1f; /* ডার্ক মোডে গ্রে ব্যাকগ্রাউন্ড */
+            border-color: #333;
+          }
+          .creator-name { color: #f3f3f3 !important; }
+          .creator-desc { color: #a0a0a0 !important; }
+          .tag { border-color: #333 !important; color: #ccc !important; }
+          .rule-line { background: #333 !important; }
+        }
+
         .creator-card::before {
           content: '';
           position: absolute;
@@ -68,7 +81,7 @@ export default function CreatorsPage() {
           transform: translateY(-3px);
           border-color: #D4C8B8;
         }
-        .creator-card:hover .creator-name { color: #E07B39; }
+        .creator-card:hover .creator-name { color: #E07B39 !important; }
 
         .avatar-ring {
           width: 64px; height: 64px;
@@ -114,7 +127,9 @@ export default function CreatorsPage() {
           font-size: 14px; font-weight: 500; color: #1C2B4A;
           outline: none;
           transition: border-color 0.2s, box-shadow 0.2s;
-          box-shadow: none;
+        }
+        @media (prefers-color-scheme: dark) {
+          .search-input { background: #2a2a2a; border-color: #444; color: #fff; }
         }
         .search-input:focus {
           border-color: #E07B39;
@@ -140,9 +155,8 @@ export default function CreatorsPage() {
 
       {/* ===== HERO HEADER ===== */}
       <div style={{ background: '#1C2B4A', padding: '52px 48px 48px', position: 'relative', overflow: 'hidden' }}>
-        {/* Corner diamonds */}
         <div style={{ position: 'absolute', top: 24, left: 32, display: 'flex', gap: 10 }}>
-          {[0,1,2].map(i => <Diamond key={i} size={12} className="" style={{ color: '#4A6090', opacity: 0.6 }} />)}
+          {[0,1,2].map(i => <Diamond key={i} size={12} style={{ color: '#4A6090', opacity: 0.6 }} />)}
         </div>
         <div style={{ position: 'absolute', top: 24, right: 32, display: 'flex', gap: 10 }}>
           {[0,1,2].map(i => <Diamond key={i} size={12} />)}
@@ -158,17 +172,16 @@ export default function CreatorsPage() {
                 Creators Directory
               </h1>
               <p className="dm" style={{ color: '#8FA3C8', fontSize: 15, marginTop: 12, fontWeight: 500 }}>
-                Meet the artisans preserving and sharing cultural traditions worldwide.
+                Meet the creators preserving and sharing cultural traditions worldwide.
               </p>
             </div>
 
-            <div className="count-badge dm">
+            {/* <div className="count-badge dm">
               <span style={{ fontSize: 20, fontWeight: 900 }}>{creators.length}</span>
-              <span style={{ opacity: 0.7 }}>Artisans</span>
-            </div>
+              <span style={{ opacity: 0.7 }}>Creators</span>
+            </div> */}
           </div>
 
-          {/* Search */}
           <div style={{ marginTop: 36 }} className="search-wrap">
             <FiSearch className="search-icon" />
             <input
@@ -203,7 +216,6 @@ export default function CreatorsPage() {
                 onMouseLeave={() => setHoveredId(null)}
               >
                 <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
-                  {/* Avatar */}
                   <div
                     className="avatar-ring dm"
                     style={{ '--hue': creator.hue, background: creator.hue }}
@@ -211,7 +223,6 @@ export default function CreatorsPage() {
                     {creator.initials}
                   </div>
 
-                  {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <h3
                       className="creator-name pf"
@@ -220,7 +231,7 @@ export default function CreatorsPage() {
                       {creator.name}
                     </h3>
                     <p
-                      className="dm"
+                      className="creator-desc dm"
                       style={{ fontSize: 13, color: '#7A6A5A', lineHeight: 1.6, margin: '8px 0 14px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
                     >
                       {creator.description}
@@ -232,10 +243,9 @@ export default function CreatorsPage() {
                   </div>
                 </div>
 
-                {/* Bottom arrow hint */}
                 <div style={{
                   marginTop: 20, paddingTop: 16,
-                  borderTop: '1px solid #F0EAE0',
+                  borderTop: '1px solid rgba(240, 234, 224, 0.5)',
                   display: 'flex', justifyContent: 'flex-end'
                 }}>
                   <span className="dm" style={{ fontSize: 11, fontWeight: 700, color: hoveredId === creator.id ? '#E07B39' : '#C0B0A0', letterSpacing: '0.08em', textTransform: 'uppercase', transition: 'color 0.2s' }}>
@@ -249,7 +259,7 @@ export default function CreatorsPage() {
           <div style={{
             textAlign: 'center', padding: '80px 40px',
             border: '2px dashed #DDD5C8', borderRadius: 24,
-            background: '#FAF8F4'
+            background: 'transparent'
           }}>
             <p className="pf" style={{ fontSize: 32, color: '#C0B0A0', margin: 0 }}>No creators found</p>
             <p className="dm" style={{ fontSize: 14, color: '#9C8A78', marginTop: 8 }}>Try a different name, culture, or region.</p>
