@@ -6,7 +6,7 @@ import { dummyProducts } from '@/data';
 
 const CategoriesPage = () => {
   const [activeCategory, setActiveCategory] = useState('All');
-  const categories = ['All', 'Textiles', 'Ceramics', 'Accessories', 'Home Decor', 'Art & Sculpture', 'Jewelry', 'Fashion'];
+  const categories = ['All', 'Textiles', 'Ceramics', 'Accessories', 'Home Decor', 'Art & Sculpture', 'Jewelry'];
 
   const filteredProducts = activeCategory === 'All' 
     ? dummyProducts 
@@ -58,5 +58,4 @@ const CategoriesPage = () => {
     </div>
   );
 };
-
 export default CategoriesPage;
