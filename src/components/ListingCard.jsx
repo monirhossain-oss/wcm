@@ -69,11 +69,10 @@ const ListingCard = ({ item: initialItem }) => {
 
   return (
     <div
-      className={`group relative flex flex-col bg-white dark:bg-zinc-900 rounded-xl transition-all duration-300 border border-transparent sm:p-0 p-0.5 shadow-sm 
-      ${showCreator ? 'z-110' : 'z-auto'} hover:z-110`}
+      className={`group relative flex flex-col bg-transparent dark:bg-transparent rounded-xl transition-all duration-300 ${showCreator ? 'z-110' : 'z-auto'} hover:z-110`}
     >
       {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-white/5 rounded-t-md">
+      <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-white/5 rounded-xl">
         <Link
           href={`/listings/${item._id}`}
           className="w-full h-full flex items-center justify-center"
@@ -95,18 +94,18 @@ const ListingCard = ({ item: initialItem }) => {
       </div>
 
       {/* Info Section */}
-      <div className="pt-2 pb-2 px-2 sm:px-3">
+      <div className="pt-4">
         <div className="flex flex-col gap-1">
           {/* Title and Stats Row */}
           <div className="flex justify-between items-start gap-3">
-            <h3 className="text-[12px] sm:text-[14px] font-bold text-gray-900 dark:text-white truncate hover:text-orange-500 transition-colors leading-tight flex-1">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate hover:text-orange-500 transition-colors leading-tight flex-1">
               <Link href={`/listings/${item._id}`}>{item.title}</Link>
             </h3>
 
             <div className="flex items-center gap-2 shrink-0 pt-0.5">
               <button
                 onClick={handleToggleFavorite}
-                className={`flex items-center gap-0.5 text-[9px] sm:text-[10px] transition-all duration-200 hover:scale-110 cursor-pointer ${
+                className={`flex items-center gap-0.5 text-[10px] sm:text-[12px] transition-all duration-200 hover:scale-110 cursor-pointer ${
                   isLiked ? 'text-red-500 font-bold' : 'text-gray-400 hover:text-red-400'
                 }`}
               >
@@ -114,7 +113,7 @@ const ListingCard = ({ item: initialItem }) => {
                 <span>{item.favoritesCount || 0}</span>
               </button>
 
-              <div className="flex items-center gap-0.5 text-gray-400 text-[9px] sm:text-[10px]">
+              <div className="flex items-center gap-0.5 text-gray-400 text-[10px] sm:text-[12px]">
                 <FaEye size={10} className="text-blue-400" />
                 <span>{item.views || 0}</span>
               </div>
@@ -127,13 +126,12 @@ const ListingCard = ({ item: initialItem }) => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={(e) => {
-              // মোবাইলে ক্লিক করলে টগল হবে
               if (window.innerWidth < 768) {
                 setShowCreator(!showCreator);
               }
             }}
           >
-            <button className="text-[11px] sm:text-[12px] font-bold text-gray-700 dark:text-gray-300 hover:text-orange-500 transition-all">
+            <button className="text-[12px] sm:text-[12px] font-bold text-gray-700 dark:text-gray-300 hover:text-orange-500 transition-all">
               @{creatorName}
             </button>
 
@@ -150,7 +148,7 @@ const ListingCard = ({ item: initialItem }) => {
           </div>
 
           {/* Location & Tradition Row */}
-          <div className="flex items-center justify-between gap-1 mt-0.5 text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 font-medium border-t border-gray-100 dark:border-white/5 pt-1">
+          <div className="flex items-center justify-between gap-1 mt-0.5 text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 font-medium border-t border-gray-50 dark:border-white/2 pt-1.5">
             <span className="flex items-center gap-1 truncate">
               <FaMapMarkerAlt size={8} className="text-orange-500 shrink-0" />
               <span className="truncate">{creatorLocation}</span>
