@@ -71,7 +71,7 @@ const ListingDetails = () => {
         {/* Main Details Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-24">
           
-          {/* Left: Image Section */}
+    
           {/* Left: Image Section */}
           <div className="rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-[#111] relative aspect-square">
             <Image
