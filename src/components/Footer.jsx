@@ -11,7 +11,7 @@ const Footer = () => {
     <footer className="bg-white dark:bg-[#0a0a0a] border-t border-gray-100 dark:border-gray-800 transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-6 py-16 md:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-          {/* Column 1: Logo & About */}
+          
           {/* Left: Logo */}
           <div className="flex items-center space-x-2">
             <Link href="/" className="cursor-pointer">
@@ -59,11 +59,11 @@ const Footer = () => {
     Company
   </h4>
   
-  {/* Flex column ব্যবহার করে লিঙ্কগুলো সাজানো হয়েছে */}
+  
   <ul className="flex flex-col ">
     <li>
       <Link href="/about" className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
-        About WCM
+        About 
       </Link>
     </li>
     <li>
