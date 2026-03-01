@@ -1,122 +1,176 @@
-"use client";
-import React, { useState } from "react";
-import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-
-const trendingItems = [
-    { title: "Handwoven Moroccan Rug", subtitle: "Traditional Berber design", image: "/rug.jpg", author: "Fatima K.", likes: 234, promoted: true },
-    { title: "Tea Ceremony Set", subtitle: "Authentic Japanese craftsmanship", image: "/tea-set.jpg", author: "Kenji T.", likes: 189, promoted: false },
-    { title: "Tribal Wooden Mask", subtitle: "West African tradition", image: "/mask.jpg", author: "Kofi A.", likes: 156, promoted: false },
-    { title: "Embroidered Huipil", subtitle: "Oaxacan handcraft", image: "/huipil.jpg", author: "Maria G.", likes: 312, promoted: true },
-    { title: "Native Beaded Necklace", subtitle: "Native American craftsmanship", image: "/necklace.jpg", author: "Alex R.", likes: 98, promoted: false },
-    { title: "Hand-painted Vase", subtitle: "Mediterranean style", image: "/vase.jpg", author: "Sophia L.", likes: 145, promoted: false },
-    { title: "Silk Kimono", subtitle: "Japanese traditional clothing", image: "/kimono.jpg", author: "Hiroshi T.", likes: 203, promoted: true },
-    { title: "African Drum", subtitle: "West African percussion instrument", image: "/drum.jpg", author: "Kwame N.", likes: 178, promoted: false },
-    { title: "Persian Carpet", subtitle: "Authentic Persian design", image: "/persian-carpet.jpg", author: "Leila M.", likes: 276, promoted: true },
-    { title: "Handmade Pottery", subtitle: "Rustic craftsmanship", image: "/pottery.jpg", author: "Emma K.", likes: 132, promoted: false },
-    { title: "Traditional Basket", subtitle: "African handcraft", image: "/basket.jpg", author: "Samuel A.", likes: 88, promoted: false },
-    { title: "Colorful Shawl", subtitle: "Mexican handwoven textile", image: "/shawl.jpg", author: "Isabel G.", likes: 199, promoted: true },
-];
+'use client';
+import React, { useState, useEffect } from 'react';
+import { FaHeart } from 'react-icons/fa';
+import axios from 'axios';
+import { useAuth } from '@/context/AuthContext';
 
 const TrendingListings = () => {
-    const [filter, setFilter] = useState("All");
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 4;
+  const { user } = useAuth();
+  const [listings, setListings] = useState([]);
+  const [filter, setFilter] = useState('All');
+  const [loading, setLoading] = useState(true);
 
-    // Filtering
-    const filteredItems = trendingItems.filter((item) => {
-        if (filter === "All") return true;
-        if (filter === "Today") return true;
-        if (filter === "This week") return true;
-    });
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
-    // Pagination 
-    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
+  useEffect(() => {
+    fetchListings();
+  }, [filter, user]);
 
-    return (
-        <div className="max-w-7xl mx-auto px-4 py-6 relative">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                        Trending listings
-                    </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Discover what's popular right now
-                    </p>
-                </div>
+  const fetchListings = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/listings/public?filter=${filter}`, {
+        withCredentials: true,
+      });
+      setListings(res.data);
+    } catch (err) {
+      console.error('Error fetching listings:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                {/* Filters */}
-                <div className="flex space-x-2">
-                    {["All", "Today", "This week"].map((f) => (
-                        <button
-                            key={f}
-                            onClick={() => { setFilter(f); setCurrentPage(1); }}
-                            className={`px-3 py-1 text-sm font-medium rounded ${filter === f
-                                ? "bg-[#F57C00] text-white"
-                                : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
-                                }`}
-                        >
-                            {f}
-                        </button>
-                    ))}
-                </div>
-            </div>
+  const handleToggleFavorite = async (listingId) => {
+    if (!user) {
+      alert('Please login to favorite listings');
+      return;
+    }
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-                {currentItems.map((item, index) => (
-                    <div
-                        key={index}
-                        className="bg-white dark:bg-[#0a0a0a] shadow rounded-lg overflow-hidden relative"
-                    >
-                        {item.promoted && (
-                            <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
-                                Promoted
-                            </span>
-                        )}
-                        <img
-                            src={item.image}
-                            alt={item.title}
-                            className="w-full h-48 object-cover"
-                        />
-                        <div className="p-4">
-                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                                {item.title}
-                            </h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {item.subtitle}
-                            </p>
-                            <div className="flex items-center justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
-                                <span>{item.author}</span>
-                                <span className="flex items-center space-x-1">
-                                    <FaHeart className="text-red-500" /> <span>{item.likes}</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/api/listings/favorite/${listingId}`,
+        {},
+        { withCredentials: true }
+      );
 
-                <div className="absolute inset-y-0 left-0 flex items-center">
-                    <button
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                    >
-                        <FaChevronLeft />
-                    </button>
-                </div>
-                <div className="absolute inset-y-0 right-0 flex items-center">
-                    <button
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                        className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                    >
-                        <FaChevronRight />
-                    </button>
-                </div>
-            </div>
+      const { isFavorited, favoritesCount } = res.data;
+
+      setListings((prev) =>
+        prev.map((item) => {
+          if (item._id === listingId) {
+            return {
+              ...item,
+              isFavorited: isFavorited,
+              favoritesCount: favoritesCount,
+            };
+          }
+          return item;
+        })
+      );
+    } catch (err) {
+      console.error('Favorite toggle failed', err);
+    }
+  };
+
+  const SkeletonCard = () => (
+    <div className="bg-gray-200 dark:bg-gray-800 rounded-lg h-72 animate-pulse">
+      <div className="h-48 bg-gray-300 dark:bg-gray-700 rounded-t-lg" />
+      <div className="p-4 space-y-3">
+        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-3/4" />
+        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2" />
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6 relative">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-black uppercase tracking-tighter text-gray-900 dark:text-white">
+            Trending listings
+          </h2>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            Discover what's popular right now
+          </p>
         </div>
-    );
+
+        <div className="flex space-x-2">
+          {['All', 'Today', 'This week'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-full transition-all ${
+                filter === f
+                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                  : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+          {loading ? (
+            [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
+          ) : listings.length > 0 ? (
+            listings.map((item) => {
+              const isLiked = item.isFavorited;
+
+              return (
+                <div
+                  key={item._id}
+                  className="bg-gray-50 dark:bg-white/5 rounded-lg overflow-hidden relative transition-all hover:shadow-sm group flex flex-col"
+                >
+                  {item.status === 'approved' && item.isPromoted && (
+                    <span className="absolute top-3 left-3 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full z-10 uppercase tracking-tighter shadow-xl">
+                      Promoted
+                    </span>
+                  )}
+
+                  <div className="relative w-full overflow-hidden bg-gray-50 dark:bg-white/5">
+                    <img
+                      src={`${API_BASE_URL}${item.image}`}
+                      alt={item.title}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://placehold.co/600x400/0a0a0a/white?text=No+Image';
+                      }}
+                      className="w-full h-auto min-h-40 max-h-60 object-contain"
+                    />
+                  </div>
+
+                  <div className="p-5 flex flex-col grow bg-gray-50 dark:bg-white/5">
+                    <h3 className="text-lg line-clamp-2 font-black text-gray-900 dark:text-white tracking-tight truncate">
+                      {item.title}
+                    </h3>
+                    <p className="text-[9px] text-orange-500 mt-3 font-black tracking-[0.15em] italic">
+                      {item.tradition}
+                    </p>
+
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-[10px] font-black text-gray-400 tracking-widest">
+                        @{item.creatorId?.username || 'user'}
+                      </span>
+                      <button
+                        onClick={() => handleToggleFavorite(item._id)}
+                        className="flex items-center gap-1.5 transition-all active:scale-75 group/fav"
+                      >
+                        <FaHeart
+                          className={`text-sm transition-colors ${isLiked ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'text-gray-300 dark:text-white/10 group-hover/fav:text-red-400'}`}
+                        />
+                        <span
+                          className={`text-[10px] font-black ${isLiked ? 'text-red-500' : 'text-gray-400'}`}
+                        >
+                          {item.favoritesCount || 0}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="col-span-full py-20 text-center text-gray-500 text-xs font-black uppercase tracking-[0.3em]">
+              No listings found for "{filter}".
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default TrendingListings;
