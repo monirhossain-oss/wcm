@@ -19,6 +19,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { getImageUrl } from '@/lib/imageHelper';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -219,9 +220,9 @@ export default function CreatorDashboard() {
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-100 dark:border-white/10 shadow-sm">
                       <img
-                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${item.image}`}
+                        src={getImageUrl(item.image)}
                         className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                        alt=""
+                        alt={item.title}
                       />
                     </div>
                     <div className="max-w-30">

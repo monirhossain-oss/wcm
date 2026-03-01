@@ -34,16 +34,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [usersRes, requestsRes, listingsRes] = await Promise.all([
-          api.get('/api/admin/users'),
-          api.get('/api/admin/creator-requests'),
-          api.get('/api/admin/listings'),
-        ]);
+        const { data } = await api.get('/api/admin/stats');
+        const requestsRes = await api.get('/api/admin/creator-requests');
 
         setStats({
-          users: usersRes.data.length,
+          users: data.totalUsers,
+          listings: data.totalListings,
           requests: requestsRes.data.slice(0, 5),
-          listings: listingsRes.data.length,
         });
       } catch (err) {
         console.error('Dashboard Stats Error:', err);
@@ -66,21 +63,21 @@ export default function AdminDashboard() {
       label: 'Total Users',
       value: stats.users,
       icon: FiUsers,
-      color: 'bg-red-800', 
+      color: 'bg-red-800',
       trend: '+12%',
     },
     {
       label: 'Total Listings',
       value: stats.listings,
       icon: FiBox,
-      color: 'bg-orange-500', 
+      color: 'bg-orange-500',
       trend: '+5%',
     },
     {
       label: 'Active Creator Requests',
       value: stats.requests.length,
       icon: FiClock,
-      color: 'bg-orange-600', 
+      color: 'bg-orange-600',
       trend: 'Pending',
     },
     {

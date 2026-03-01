@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { FiGrid, FiList, FiPlus, FiUser, FiLogOut, FiArrowLeft, FiMenu, FiX } from 'react-icons/fi';
 import Image from 'next/image';
+import { getImageUrl } from '@/lib/imageHelper';
 
 export default function CreatorLayout({ children }) {
   const pathname = usePathname();
@@ -56,21 +57,32 @@ export default function CreatorLayout({ children }) {
   ];
 
   const profileImage = user?.profile?.profileImage
-    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${user.profile.profileImage}`
+    ? getImageUrl(user.profile.profileImage)
     : '/default-avatar.png';
 
   const SidebarContent = () => (
     <>
       <div className="p-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 font-black text-lg tracking-tighter">
-          <Image
-            src="/wc,-web-logo.png"
-            alt="Logo"
-            width={100}
-            height={100}
-            className="brightness-125 h-auto w-auto"
-          />
-        </Link>
+       
+         <Link href="/" className="cursor-pointer">
+            {/* Light Mode Logo */}
+            <Image
+              src="/wc,-web-logo.png"
+              alt="Logo Light"
+              width={100}
+              height={100}
+              className="dark:hidden brightness-125 h-auto w-auto"
+            />
+            {/* Dark Mode Logo */}
+            <Image
+               src="/wc,-web-white.png" 
+                 alt="Logo Dark"
+                 width={100}
+                height={100}
+                className="hidden dark:block brightness-125 h-auto w-auto"
+                />
+          </Link>
+        
         {/* Mobile Close Button */}
         <button
           onClick={() => setIsSidebarOpen(false)}

@@ -9,7 +9,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterForm() {
   const router = useRouter();
-  const { registerUser } = useAuth(); 
+  const { registerUser } = useAuth();
   const [serverError, setServerError] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
@@ -48,137 +48,149 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
-      <Image
-        src="/Backgroun_image.jpg"
-        alt="Register Background"
-        fill
-        priority
-        className="object-cover scale-110 "
-      />
-      <div className="absolute inset-0 bg-black/40"></div>
+    <div className="min-h-screen w-full bg-[#f3eee7] flex items-center justify-center p-4 md:p-10 font-serif">
+      
+      
+      <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-0 rounded-[40px] overflow-hidden shadow-2xl bg-white/50 backdrop-blur-md border border-white/30">
+        
+      
+        <div className="relative hidden md:flex flex-col items-center justify-between bg-[#1a2b4b] p-12 text-center text-white overflow-hidden">
+          <div className="absolute top-6 left-6 text-[#e5d5bc]/30 text-xl tracking-[0.5em]">◈◈◈</div>
+          <div className="absolute top-6 right-6 text-[#e5d5bc]/30 text-xl tracking-[0.5em]">◈◈◈</div>
+          
+          <div className="relative z-10 w-full mt-10">
+             <div className="relative w-full aspect-square mb-8">
+                <Image 
+                  src="/cultural1.jpg" 
+                  alt="Cultural Art"
+                  fill
+                  className="object-contain"
+                />
+             </div>
+             <h2 className="text-3xl font-bold mb-2 text-[#e5d5bc]">Join the Marketplace.</h2>
+             <h2 className="text-3xl font-bold text-[#e5d5bc]">Share Your Culture.</h2>
+          </div>
 
-      <div className="absolute top-4 left-4 cursor-pointer z-20" onClick={() => router.push('/')}>
-        <Image src="/wc,-web-logo.png" alt="Logo Light" width={100} height={100} className="dark:hidden brightness-125 h-auto w-auto" />
-        <Image src="/wc,-web-logo.png" alt="Logo Dark" width={100} height={100} className="hidden dark:block brightness-125 h-auto w-auto" />
-      </div>
+          <div className="absolute bottom-6 left-6 text-[#e5d5bc]/30 text-xl tracking-[0.5em]">◈◈◈</div>
+          <div className="absolute bottom-6 right-6 text-[#e5d5bc]/30 text-xl tracking-[0.5em]">◈◈◈</div>
+        </div>
 
-      <div className="relative mt-24 z-10 min-h-screen flex items-center justify-center px-4">
-        <div className="w-full max-w-md backdrop-blur-xl bg-white/90 dark:bg-black/60 rounded-2xl shadow-2xl p-8">
-          <div className="mb-6 text-center">
-            <h1 className="text-3xl font-extrabold mb-2 text-foreground">Create Account</h1>
-            <p className="text-sm text-text">
-              Already have an account?{' '}
-              <a href="/auth/login" className="underline text-amber-500 font-medium hover:opacity-80 transition-opacity">Login</a>
-            </p>
+        
+        <div className="relative p-8 md:p-12 flex flex-col justify-center bg-[#fdfaf6]/70 backdrop-blur-xl overflow-y-auto">
+          
+          {/* logo*/}
+          <div className="mb-6 flex justify-center md:justify-start">
+             <Image src="/wc,-web-logo.png" alt="Logo" width={100} height={40} className="h-auto cursor-pointer" onClick={() => router.push('/')} />
+          </div>
+
+          <div className="text-center md:text-left mb-6">
+            <h1 className="text-4xl font-bold text-[#1a2b4b] mb-2">Create Account</h1>
+            <p className="text-[#6b5b4b]">Start your journey in global culture</p>
           </div>
 
           {serverError && (
-            <div className="alert-error text-center mb-4 py-2 rounded text-sm bg-red-100 text-red-600 border border-red-200">{serverError}</div>
+            <div className="mb-4 p-3 bg-red-100 text-red-600 border border-red-200 rounded-xl text-sm text-center">
+              {serverError}
+            </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 backdrop-blur-md bg-white/10 dark:bg-black/30 p-6 rounded-2xl border border-white/20 shadow-2xl">
-            
-            {/* Name Section */}
-            <div className="flex gap-3">
-              <div className="flex-1 space-y-1">
-                <label className="text-xs font-semibold text-foreground/90 ml-1">First Name</label>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Name Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
                 <input
-                  placeholder="John"
-                  {...register('first_name', { required: 'Required' })}
-                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground"
+                  placeholder="First Name"
+                  {...register('first_name', { required: 'First name required' })}
+                  className="w-full bg-white border border-[#e5d5bc] rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-[#c5a367] transition shadow-sm text-gray-700 text-sm"
                 />
-                {errors.first_name && <p className="text-error text-[10px] mt-1 ml-1">{errors.first_name.message}</p>}
+                {errors.first_name && <p className="text-red-400 text-[10px] ml-4">{errors.first_name.message}</p>}
               </div>
-              <div className="flex-1 space-y-1">
-                <label className="text-xs font-semibold text-foreground/90 ml-1">Last Name</label>
+              <div className="space-y-1">
                 <input
-                  placeholder="Doe"
-                  {...register('last_name', { required: 'Required' })}
-                  className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground"
+                  placeholder="Last Name"
+                  {...register('last_name', { required: 'Last name required' })}
+                  className="w-full bg-white border border-[#e5d5bc] rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-[#c5a367] transition shadow-sm text-gray-700 text-sm"
                 />
-                {errors.last_name && <p className="text-error text-[10px] mt-1 ml-1">{errors.last_name.message}</p>}
+                {errors.last_name && <p className="text-red-400 text-[10px] ml-4">{errors.last_name.message}</p>}
               </div>
             </div>
 
-            {/* Username Section */}
+            {/* Username Input */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-foreground/90 ml-1">Username</label>
               <input
-                placeholder="johndoe123"
+                placeholder="Username"
                 {...register('username', { required: 'Username required' })}
-                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground"
+                className="w-full bg-white border border-[#e5d5bc] rounded-full px-6 py-3 outline-none focus:ring-2 focus:ring-[#c5a367] transition shadow-sm text-gray-700 text-sm"
               />
-              {errors.username && <p className="text-error text-[10px] mt-1 ml-1">{errors.username.message}</p>}
+              {errors.username && <p className="text-red-400 text-[10px] ml-4">{errors.username.message}</p>}
             </div>
 
-            {/* Email Section */}
+            {/* Email Input */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-foreground/90 ml-1">Email Address</label>
               <input
                 type="email"
-                placeholder="email@example.com"
+                placeholder="Email Address"
                 {...register('email', { required: 'Email required' })}
-                className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground"
+                className="w-full bg-white border border-[#e5d5bc] rounded-full px-6 py-3 outline-none focus:ring-2 focus:ring-[#c5a367] transition shadow-sm text-gray-700 text-sm"
               />
-              {errors.email && <p className="text-error text-[10px] mt-1 ml-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-red-400 text-[10px] ml-4">{errors.email.message}</p>}
             </div>
 
-            {/* Password Section */}
-            <div className="flex gap-3">
-              <div className="flex-1 space-y-1">
-                <label className="text-xs font-semibold text-foreground/90 ml-1">Password</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••"
-                    {...register('password', {
-                      required: 'Required',
-                      minLength: { value: 6, message: 'Min 6 chars' },
-                    })}
-                    className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground pr-9"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
+            {/* Password Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password"
+                  {...register('password', { 
+                    required: 'Required',
+                    minLength: { value: 6, message: 'Min 6 chars' }
+                  })}
+                  className="w-full bg-white border border-[#e5d5bc] rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-[#c5a367] transition shadow-sm text-gray-700 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-3 text-[#c5a367]"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                {errors.password && <p className="text-red-400 text-[10px] ml-4">{errors.password.message}</p>}
               </div>
 
-              <div className="flex-1 space-y-1">
-                <label className="text-xs font-semibold text-foreground/90 ml-1">Confirm</label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="••••••"
-                    {...register('password_confirmation', { required: 'Required' })}
-                    className="w-full border border-ui rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none bg-background/50 text-foreground pr-9"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors"
-                  >
-                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Confirm"
+                  {...register('password_confirmation', { required: 'Required' })}
+                  className="w-full bg-white border border-[#e5d5bc] rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-[#c5a367] transition shadow-sm text-gray-700 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-3 text-[#c5a367]"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                {errors.password_confirmation && <p className="text-red-400 text-[10px] ml-4">{errors.password_confirmation.message}</p>}
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full py-2.5 mt-2 rounded-lg btn-primary transition font-bold shadow-lg ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90 active:scale-[0.98]'}`}
+              className={`w-full py-4 mt-2 rounded-full bg-[#F57C00] text-white font-bold text-lg shadow-lg hover:brightness-110 transition transform active:scale-95 ${isSubmitting ? 'opacity-70' : ''}`}
             >
               {isSubmitting ? 'Creating Account...' : 'Register'}
             </button>
           </form>
 
-          <p className="text-[10px] text-center text-text/70 mt-4">
-            By joining, you agree to the <a href="/terms" className="underline hover:text-primary">Terms</a> and <a href="/privacy" className="underline hover:text-primary">Privacy Policy</a>.
+          <p className="text-center mt-6 text-sm text-[#8a7b6a]">
+            Already have an account? <a href="/auth/login" className="text-[#F57C00] font-bold hover:underline ml-1">Log In</a>
+          </p>
+          
+          <p className="text-[10px] text-center text-[#8a7b6a] mt-6">
+            By joining, you agree to the <a href="/terms-conditions" className="underline hover:text-[#F57C00]">Terms</a> and <a href="/privacy-policy" className="underline hover:text-[#F57C00]">Privacy Policy</a>.
           </p>
         </div>
       </div>
