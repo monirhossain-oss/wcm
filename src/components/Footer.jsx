@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaGlobe } from 'react-icons/fa'; // লোগো আইকন হিসেবে ব্যবহারের জন্য
+import { FaGlobe } from 'react-icons/fa'; 
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -54,23 +54,37 @@ const Footer = () => {
           </div>
 
           {/* Column 3: Company */}
-          <div>
-            <h4 className="text-[12px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">
-              Company
-            </h4>
-            <ul className="3">
-              {['About WCM', 'How It Works', 'Cultural Insights', 'Contact'].map((item) => (
-                <li key={item}>
-                  <Link
-                    href={`/${item.toLowerCase().replace(/ /g, '-')}`}
-                    className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]"
-                  >
-                    {item}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+         <div>
+  <h4 className="text-[12px] font-bold text-[#1a1a1a] dark:text-white mb-6 uppercase tracking-wider">
+    Company
+  </h4>
+  
+  {/* Flex column ব্যবহার করে লিঙ্কগুলো সাজানো হয়েছে */}
+  <ul className="flex flex-col ">
+    <li>
+      <Link href="/about" className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
+        About WCM
+      </Link>
+    </li>
+    <li>
+      <Link href="/howItWorks" className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
+        How It Works
+      </Link>
+    </li>
+    <li>
+      <Link href="/cultural-insights" className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
+        Cultural Insights
+      </Link>
+    </li>
+    <li>
+      <Link href="/contact" className="text-gray-500 dark:text-gray-400 hover:text-[#F57C00] transition-colors text-[12px]">
+        Contact
+      </Link>
+    </li>
+
+    
+  </ul>
+</div>
 
           {/* Column 4: Support */}
           <div>
