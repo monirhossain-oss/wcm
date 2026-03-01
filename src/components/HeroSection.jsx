@@ -4,7 +4,8 @@ import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import { FaUtensils, FaChevronDown, FaGlobe, FaTheaterMasks } from 'react-icons/fa';
 
-export default function HeroSection() {
+// এখানে প্রপসগুলো রিসিভ করতে হবে (filters এবং onFilterChange)
+export default function HeroSection({ filters, onFilterChange }) {
   const images = [
     'https://i.ibb.co.com/6RXQcNcM/15-4-11zon-min-2048x1365-1-1170x550.webp',
     'https://i.ibb.co.com/ycFMBh0N/photo-1589463349208-95817c91f971.avif',
@@ -34,7 +35,6 @@ export default function HeroSection() {
 
   return (
     <section className="relative overflow-hidden min-h-[750px] flex items-center transition-all duration-500">
-      
       {/* Background Slider */}
       <div className="absolute inset-0 w-full h-full">
         {images.map((img, index) => (
@@ -49,25 +49,21 @@ export default function HeroSection() {
               backgroundPosition: 'center',
             }}
           >
-            {/* Gradient Overlay - Fixed Syntax */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black/80 transition-all duration-500" />
           </div>
         ))}
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-12 flex flex-col items-center text-center w-full">
-        {/* Heading */}
         <h1 className="text-5xl md:text-7xl font-bold text-white drop-shadow-2xl leading-tight">
           Discover <br /> culture <span className="text-[#F57C00]">worldwide</span>
         </h1>
 
-        {/* Subheading */}
         <p className="mt-6 max-w-2xl text-lg md:text-xl text-gray-100 font-medium drop-shadow-md">
           Explore authentic products, stories, and experiences from creators around the world —
           crafted with culture, passion, and purpose.
         </p>
 
-        {/* CTA Buttons */}
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <Link href="/products">
             <button className="px-8 py-3 cursor-pointer rounded-lg bg-[#F57C00] text-white font-bold hover:scale-105 transition-all shadow-xl active:scale-95">
@@ -91,12 +87,22 @@ export default function HeroSection() {
           )}
         </div>
 
-        {/* Filters */}
         <div className="max-w-4xl w-full mx-auto mt-20 py-4 flex flex-col md:flex-row gap-4">
           {[
-            { icon: <FaUtensils />, label: 'Category', options: ['Food', 'Art', 'Music'] },
-            { icon: <FaGlobe />, label: 'Region', options: ['Asia', 'Europe', 'Africa'] },
             {
+              id: 'category',
+              icon: <FaUtensils />,
+              label: 'Category',
+              options: ['Food', 'Art', 'Music'],
+            },
+            {
+              id: 'region',
+              icon: <FaGlobe />,
+              label: 'Region',
+              options: ['Asia', 'Europe', 'Africa'],
+            },
+            {
+              id: 'tradition',
               icon: <FaTheaterMasks />,
               label: 'Cultural',
               options: ['Traditional', 'Modern', 'Fusion'],
@@ -106,12 +112,16 @@ export default function HeroSection() {
               <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 z-10">
                 {filter.icon}
               </span>
-              <select className="w-full bg-white/20 backdrop-blur-xl px-12 py-4 rounded-full text-white appearance-none border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#F57C00] transition-all cursor-pointer font-medium">
+              <select
+                value={filters[filter.id] || ''}
+                onChange={(e) => onFilterChange(filter.id, e.target.value)}
+                className="w-full bg-white/20 backdrop-blur-xl px-12 py-4 rounded-full text-white appearance-none border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#F57C00] transition-all cursor-pointer font-medium"
+              >
                 <option value="" className="bg-gray-800">
-                  {filter.label}
+                  All {filter.label}
                 </option>
                 {filter.options.map((opt) => (
-                  <option key={opt} value={opt.toLowerCase()} className="bg-gray-800 text-white">
+                  <option key={opt} value={opt} className="bg-gray-800 text-white">
                     {opt}
                   </option>
                 ))}
