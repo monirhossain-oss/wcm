@@ -27,6 +27,7 @@ import {
 import Image from 'next/image';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
+import ListingCard from '@/components/ListingCard';
 
 const ListingDetails = () => {
   const params = useParams();
@@ -35,6 +36,7 @@ const ListingDetails = () => {
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [relatedListings, setRelatedListings] = useState([]);
   const [clickLoading, setClickLoading] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favCount, setFavCount] = useState(0);
@@ -57,17 +59,35 @@ const ListingDetails = () => {
         const res = await axios.get(`${API_BASE_URL}/api/listings/${id}`, {
           withCredentials: true,
         });
-        setProduct(res.data);
-        setFavCount(res.data.favorites?.length || 0);
-        if (user && res.data.favorites) {
-          setIsFavorited(res.data.favorites.includes(user._id));
+        const currentProduct = res.data;
+        setProduct(currentProduct);
+
+        if (user && currentProduct.favorites) {
+          setIsFavorited(currentProduct.favorites.includes(user._id));
+        }
+
+        if (currentProduct.creatorId?._id) {
+          try {
+            const relatedRes = await axios.get(
+              `${API_BASE_URL}/api/listings/public?creatorId=${currentProduct.creatorId._id}&limit=10`,
+              { withCredentials: true }
+            );
+
+            const allListingsFromCreator = relatedRes.data.listings || [];
+            const filtered = allListingsFromCreator.filter((item) => item._id !== id).slice(0, 4);
+            setRelatedListings(filtered);
+          } catch (relatedErr) {
+            console.error('Related Listings Error:', relatedErr);
+            setRelatedListings([]);
+          }
         }
       } catch (err) {
-        console.error('Fetch Error:', err);
+        console.error('Main Fetch Error:', err);
       } finally {
         setLoading(false);
       }
     };
+
     if (id) fetchListing();
   }, [id, API_BASE_URL, user]);
 
@@ -265,6 +285,34 @@ const ListingDetails = () => {
             </button>
           </div>
         </div>
+
+        {/* 🔥 "More from this creator" Section */}
+        {relatedListings.length > 0 && (
+          <div className="pt-16 border-t border-zinc-100 dark:border-white/5">
+            <div className="flex justify-between items-end mb-8">
+              <div>
+                <p className="text-[#F57C00] text-[10px] font-black uppercase tracking-[0.3em] mb-2">
+                  Heritage Collection
+                </p>
+                <h2 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
+                  More from @{product.creatorId?.username}
+                </h2>
+              </div>
+              <Link
+                href={`/profile/${product.creatorId?._id}`}
+                className="text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-orange-500 transition-colors border-b border-transparent hover:border-orange-500 pb-1"
+              >
+                View All
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {relatedListings.map((item) => (
+                <ListingCard item={item} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
