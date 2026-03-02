@@ -109,7 +109,7 @@ export default function FeaturedCultures() {
             <SwiperSlide key={tag._id}>
               <div
                 onClick={() => (window.location.href = `/listings?tag=${tag._id}`)}
-                className="relative h-64 w-full rounded-xl overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500"
+                className="relative h-64 w-full rounded-sm overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500"
               >
                 {/* Background Image */}
                 <Image
