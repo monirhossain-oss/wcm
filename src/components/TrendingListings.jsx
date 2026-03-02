@@ -79,7 +79,7 @@ const TrendingListings = ({ activeFilters }) => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
           <div>
             <h2 className="text-2xl font-bold text-[#1F1F1F] dark:text-[#ededed]">
-              Featured cultures
+              All Listings
             </h2>
             <p className="text-sm mt-1 text-zinc-400">
               Handpicked traditions for you
