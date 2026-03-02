@@ -11,7 +11,7 @@ export default function PublicLayout({ children }) {
         <CookieConsent />
       </main>
       <div className='mt-10'>
-        {/* <Footer/> */}
+        <Footer/>
       </div>
     </>
   );

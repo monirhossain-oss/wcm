@@ -11,7 +11,11 @@
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
     "axios": "^1.13.5",
+<<<<<<< HEAD
     "canvas-confetti": "^1.9.4",
+=======
+    "framer-motion": "^12.34.3",
+>>>>>>> cec959987ac43da3be50e9a6603fad64bea08b7e
     "lucide-react": "^0.575.0",
     "next": "16.1.6",
     "react": "19.2.3",

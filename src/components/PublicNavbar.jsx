@@ -154,9 +154,8 @@ const PublicNavbar = () => {
 
       {/* Mobile Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-2/3 bg-white dark:bg-[#0a0a0a] shadow-2xl transform transition-transform duration-300 md:hidden z-100 ${
-          isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed top-0 right-0 h-full w-2/3 bg-white dark:bg-[#0a0a0a] shadow-2xl transform transition-transform duration-300 md:hidden z-100 ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-800">
           <span className="font-bold text-[#F57C00]">Menu</span>
