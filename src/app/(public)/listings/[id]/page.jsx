@@ -308,7 +308,7 @@ const ListingDetails = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6">
               {relatedListings.map((item) => (
-                <ListingCard item={item} />
+                <ListingCard key={item._id} item={item} />
               ))}
             </div>
           </div>

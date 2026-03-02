@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { FiGrid, FiList, FiPlus, FiUser, FiLogOut, FiArrowLeft, FiMenu, FiX } from 'react-icons/fi';
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/imageHelper';
+import { DollarSign } from 'lucide-react';
 
 export default function CreatorLayout({ children }) {
   const pathname = usePathname();
@@ -52,6 +53,7 @@ export default function CreatorLayout({ children }) {
 
   const navItems = [
     { name: 'Overview', path: '/creator', icon: FiGrid },
+    { name: 'Promotions', path: '/creator/promotions', icon: DollarSign },
     { name: 'My Listings', path: '/creator/listings', icon: FiList },
     { name: 'Add Listings', path: '/creator/add', icon: FiPlus },
   ];
