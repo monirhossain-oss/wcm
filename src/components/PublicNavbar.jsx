@@ -101,39 +101,40 @@ const PublicNavbar = () => {
                 </Link>
               )}
 
-              <div
-                className="flex items-center space-x-2 cursor-pointer p-1 rounded-full border border-gray-200 dark:border-gray-800"
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-              >
-                <div className="bg-[#F57C00] p-1.5 rounded-full text-white">
-                  <FiUser className="h-4 w-4" />
+              <div>
+                <div
+                  className="flex items-center space-x-2 cursor-pointer p-1 pr-3 rounded-full border border-gray-200 dark:border-gray-800"
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                >
+                  <div className="bg-[#F57C00] p-1.5 rounded-full text-white">
+                    <FiUser className="h-4 w-4" />
+                  </div>
+                  <span className="hidden lg:block text-xs font-semibold capitalize">
+                    {user.username}
+                  </span>
                 </div>
-                <span className="hidden lg:block text-xs font-semibold capitalize">
-                  {user.username}
-                </span>
+                {isProfileOpen && (
+                  <div className="absolute top-12 right-0 w-48 bg-white dark:bg-[#1a1a1a] shadow-xl border border-gray-100 dark:border-gray-800 rounded-xl py-2 z-60">
+                    <Link
+                      href={getDashboardLink()}
+                      className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      {user?.role === 'admin'
+                        ? 'Admin Dashboard'
+                        : user?.role === 'creator'
+                          ? 'Creator Dashboard'
+                          : 'Profile'}
+                    </Link>
+                    <button
+                      onClick={logoutUser}
+                      className="w-full text-left flex items-center space-x-2 px-4 py-2 text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      <FiLogOut /> <span>Logout</span>
+                    </button>
+                  </div>
+                )}
               </div>
-
-              {isProfileOpen && (
-                <div className="absolute top-12 right-0 w-48 bg-white dark:bg-[#1a1a1a] shadow-xl border border-gray-100 dark:border-gray-800 rounded-xl py-2 z-60">
-                  <Link
-                    href={getDashboardLink()}
-                    className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
-                    onClick={() => setIsProfileOpen(false)}
-                  >
-                    {user?.role === 'admin'
-                      ? 'Admin Dashboard'
-                      : user?.role === 'creator'
-                        ? 'Creator Dashboard'
-                        : 'Profile'}
-                  </Link>
-                  <button
-                    onClick={logoutUser}
-                    className="w-full text-left flex items-center space-x-2 px-4 py-2 text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    <FiLogOut /> <span>Logout</span>
-                  </button>
-                </div>
-              )}
             </div>
           ) : (
             <Link
@@ -153,9 +154,8 @@ const PublicNavbar = () => {
 
       {/* Mobile Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-2/3 bg-white dark:bg-[#0a0a0a] shadow-2xl transform transition-transform duration-300 md:hidden z-100 ${
-          isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed top-0 right-0 h-full w-2/3 bg-white dark:bg-[#0a0a0a] shadow-2xl transform transition-transform duration-300 md:hidden z-100 ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-800">
           <span className="font-bold text-[#F57C00]">Menu</span>

@@ -10,7 +10,9 @@ export default function PublicLayout({ children }) {
         {children}
         <CookieConsent />
       </main>
-      
+      <div className='mt-10'>
+        <Footer/>
+      </div>
     </>
   );
 }

@@ -4,7 +4,6 @@ import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import { FaUtensils, FaChevronDown, FaGlobe, FaTheaterMasks } from 'react-icons/fa';
 
-// এখানে প্রপসগুলো রিসিভ করতে হবে (filters এবং onFilterChange)
 export default function HeroSection({ filters, onFilterChange }) {
   const images = [
     'https://i.ibb.co.com/6RXQcNcM/15-4-11zon-min-2048x1365-1-1170x550.webp',
@@ -34,7 +33,7 @@ export default function HeroSection({ filters, onFilterChange }) {
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden min-h-[750px] flex items-center transition-all duration-500">
+    <section className="relative overflow-hidden min-h-187.5 flex items-center transition-all duration-500">
       {/* Background Slider */}
       <div className="absolute inset-0 w-full h-full">
         {images.map((img, index) => (
@@ -49,7 +48,7 @@ export default function HeroSection({ filters, onFilterChange }) {
               backgroundPosition: 'center',
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black/80 transition-all duration-500" />
+            <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/50 to-black/80 transition-all duration-500" />
           </div>
         ))}
       </div>
