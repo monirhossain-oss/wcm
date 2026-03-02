@@ -100,7 +100,7 @@ export default function FeaturedCultures() {
           }}
           breakpoints={{
             640: { slidesPerView: 2.5, spaceBetween: 20 },
-            1024: { slidesPerView: 5, spaceBetween: 24 },
+            1024: { slidesPerView: 4, spaceBetween: 24 },
           }}
           modules={[FreeMode, Navigation]}
           className="mySwiper !overflow-visible"
@@ -109,7 +109,7 @@ export default function FeaturedCultures() {
             <SwiperSlide key={tag._id}>
               <div
                 onClick={() => (window.location.href = `/listings?tag=${tag._id}`)}
-                className="relative h-64 w-full rounded-sm overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500"
+                className="relative h-56 md:h-72 w-full rounded-sm overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500"
               >
                 {/* Background Image */}
                 <Image
