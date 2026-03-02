@@ -24,7 +24,7 @@ const getSocialIcon = (url) => {
   if (url.includes('youtube.com')) return <FaYoutube className="hover:text-[#FF0000]" />;
   if (url.includes('twitter.com') || url.includes('x.com'))
     return <FaTwitter className="hover:text-[#1DA1F2]" />;
-  return <FaLink className="hover:text-orange-500" />; // অন্য সব লিঙ্কের জন্য
+  return <FaLink className="hover:text-orange-500" />;
 };
 
 const getImageUrl = (path, type = 'post') => {
