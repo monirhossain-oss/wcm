@@ -8,9 +8,9 @@ const AboutContent = () => {
                 
                 {/* বাম পাশের টেক্সট সেকশন */}
                 <div className="space-y-6">
-                    <h1 className="text-6xl md:text-7xl font-light text-gray-900 leading-tight">
-                        Discover <br />
-                        <span className="italic font-serif text-rose-900">Culture</span> <br />
+                    <h1 className="text-3xl md:text-4xl font-light  leading-tight">
+                        Discover 
+                        <span className=" font-serif text-rose-900"> Culture</span> <br />
                         Worldwide
                     </h1>
                     <p className="text-xl text-gray-600 max-w-md leading-relaxed">
@@ -27,7 +27,7 @@ const AboutContent = () => {
                             ))}
                         </div>
                         <p className="text-sm text-gray-500 font-medium">
-                            Joined by <span className="text-black font-bold">12,000+</span> independent creators
+                            Joined by <span className="text-amber-500 font-bold">12,000+</span> independent creators
                         </p>
                     </div>
                 </div>
