@@ -17,14 +17,13 @@ import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import CreatorPopover from './CreatorPopover';
 
-// ইউআরএল দেখে আইকন রিটার্ন করার ফাংশন
 const getSocialIcon = (url) => {
   if (url.includes('facebook.com')) return <FaFacebook className="hover:text-[#1877F2]" />;
   if (url.includes('instagram.com')) return <FaInstagram className="hover:text-[#E4405F]" />;
   if (url.includes('youtube.com')) return <FaYoutube className="hover:text-[#FF0000]" />;
   if (url.includes('twitter.com') || url.includes('x.com'))
     return <FaTwitter className="hover:text-[#1DA1F2]" />;
-  return <FaLink className="hover:text-orange-500" />; // অন্য সব লিঙ্কের জন্য
+  return <FaLink className="hover:text-orange-500" />; 
 };
 
 const getImageUrl = (path, type = 'post') => {
@@ -50,7 +49,6 @@ const ListingCard = ({ item: initialItem }) => {
   const creatorLocation = item.country || creator?.profile?.country || 'Global';
   const tradition = item.tradition || 'Heritage';
 
-  // --- আগের হ্যান্ডেলার ফাংশনগুলো এখানে থাকবে ---
   const handleToggleFavorite = async (e) => {
     e.preventDefault();
     if (!user) {
@@ -76,7 +74,7 @@ const ListingCard = ({ item: initialItem }) => {
   };
 
   return (
-    <div
+    <div key={item._id}
       className={`group relative flex flex-col bg-transparent rounded-xl transition-all duration-300 ${showCreator ? 'z-110' : 'z-auto'} hover:z-110`}
     >
       {/* Image Container (Design Same) */}
