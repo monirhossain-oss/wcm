@@ -1,150 +1,270 @@
 'use client';
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { FiArrowLeft, FiExternalLink, FiUser } from 'react-icons/fi';
-import { dummyProducts } from '@/data'; // আপনার ডাটা ফাইল থেকে ইম্পোর্ট করা
+import {
+  FiArrowLeft,
+  FiExternalLink,
+  FiUser,
+  FiMapPin,
+  FiGlobe,
+  FiLink,
+  FiTag,
+  FiLayers,
+} from 'react-icons/fi';
+import {
+  FaSpinner,
+  FaFacebook,
+  FaInstagram,
+  FaYoutube,
+  FaTwitter,
+  FaLinkedin,
+  FaGithub,
+  FaHeart,
+  FaRegHeart,
+  FaEye,
+} from 'react-icons/fa';
 import Image from 'next/image';
+import axios from 'axios';
+import { useAuth } from '@/context/AuthContext';
 
 const ListingDetails = () => {
   const params = useParams();
   const { id } = params;
+  const { user } = useAuth();
 
-  // URL-এর আইডি অনুযায়ী ডাটা খুঁজে বের করা হচ্ছে
-  const product = dummyProducts.find((p) => p._id === id);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [clickLoading, setClickLoading] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favCount, setFavCount] = useState(0);
 
-  // যদি ডাটা খুঁজে না পাওয়া যায়
-  if (!product) {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+
+  const getSocialIcon = (url) => {
+    if (url.includes('facebook.com')) return <FaFacebook className="text-[#1877F2]" />;
+    if (url.includes('instagram.com')) return <FaInstagram className="text-[#E4405F]" />;
+    if (url.includes('youtube.com')) return <FaYoutube className="text-[#FF0000]" />;
+    if (url.includes('twitter.com') || url.includes('x.com'))
+      return <FaTwitter className="text-[#1DA1F2]" />;
+    if (url.includes('linkedin.com')) return <FaLinkedin className="text-[#0A66C2]" />;
+    return <FiLink className="text-orange-500" />;
+  };
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/listings/${id}`, {
+          withCredentials: true,
+        });
+        setProduct(res.data);
+        setFavCount(res.data.favorites?.length || 0);
+        if (user && res.data.favorites) {
+          setIsFavorited(res.data.favorites.includes(user._id));
+        }
+      } catch (err) {
+        console.error('Fetch Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchListing();
+  }, [id, API_BASE_URL, user]);
+
+  const handleToggleFavorite = async () => {
+    if (!user) return alert('Please login to add to favorites!');
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/api/listings/favorite/${id}`,
+        {},
+        { withCredentials: true }
+      );
+      setIsFavorited(res.data.isFavorited);
+      setFavCount(res.data.favoritesCount);
+    } catch (err) {
+      console.error('Favorite Toggle Error:', err);
+    }
+  };
+
+  const handleVisitSite = async () => {
+    if (!product?.websiteLink) return;
+    setClickLoading(true);
+    try {
+      await axios.post(`${API_BASE_URL}/api/listings/${id}/click`);
+      window.open(product.websiteLink, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      window.open(product.websiteLink, '_blank', 'noopener,noreferrer');
+    } finally {
+      setClickLoading(false);
+    }
+  };
+
+  if (loading)
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center dark:text-white">
-        <h2 className="text-2xl font-bold mb-4">Product Not Found! (ID: {id})</h2>
-        <Link href="/categories" className="px-6 py-2 bg-[#F57C00] text-white rounded-lg font-bold">
-          Back to Categories
-        </Link>
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0a0a0a]">
+        <FaSpinner className="animate-spin text-[#F57C00] text-4xl" />
       </div>
     );
-  }
-
-  // Cultural Insights এর জন্য ডামি ডাটা
-  const insights = [
-    {
-      category: "Traditions",
-      region: "East Asia",
-      title: "The Art of Japanese Kintsugi: Beauty in Imperfection",
-      desc: "Discover how the ancient practice of repairing broken pottery with gold reflects a profound philosophy about embracing flaws and finding beauty in imperfection.",
-      date: "Feb 15, 2026"
-    },
-    {
-      category: "Textiles",
-      region: "West Africa",
-      title: "Weaving Stories: Kente Cloth and Ashanti Heritage",
-      desc: "Each pattern in Kente cloth carries deep meaning — from proverbs to historical events. Explore the symbolic language woven into every thread.",
-      date: "Feb 8, 2026"
-    },
-    {
-      category: "Ceramics",
-      region: "Latin America",
-      title: "From Earth to Art: Oaxacan Black Clay Pottery",
-      desc: "The Zapotec tradition of Barro Negro pottery dates back over 2,000 years. Learn about the artisans keeping this extraordinary craft alive.",
-      date: "Jan 28, 2026"
-    },
-    {
-      category: "Textiles",
-      region: "South Asia",
-      title: "Natural Dyes: India's Block Printing Renaissance",
-      desc: "As sustainability gains momentum, Rajasthani block printing with natural dyes is experiencing a global revival. Meet the artisans leading the charge.",
-      date: "Jan 15, 2026"
-    }
-  ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] pt-24 pb-12 px-4 md:px-8 transition-colors duration-300">
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] pt-5 pb-12 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
-        
-        {/* Back Link */}
-        <Link href="/categories" className="flex items-center gap-2 text-gray-400 hover:text-[#F57C00] mb-8 transition-all group">
-          <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-medium">Back to discovery</span>
-        </Link>
+        <div className="flex justify-between items-center mb-8">
+          <Link
+            href="/categories"
+            className="flex items-center gap-2 text-zinc-400 hover:text-orange-500 transition-all group w-fit"
+          >
+            <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
+            <span className="text-xs font-black uppercase tracking-widest">Back to discovery</span>
+          </Link>
 
-        {/* Main Details Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-24">
-          
-    
-          {/* Left: Image Section */}
-          <div className="rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-[#111] relative aspect-square">
+          <button
+            onClick={handleToggleFavorite}
+            className={`flex items-center gap-2 px-6 py-2 rounded-full transition-all font-black uppercase tracking-widest text-[10px] shadow-sm border ${
+              isFavorited
+                ? 'bg-red-50 border-red-100 text-red-500'
+                : 'bg-zinc-50 dark:bg-white/5 border-zinc-100 dark:border-white/10 text-zinc-400'
+            }`}
+          >
+            {isFavorited ? <FaHeart className="text-sm" /> : <FaRegHeart className="text-sm" />}
+            {isFavorited ? 'Saved' : 'Save Treasure'}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          {/* Left: Image Container (Sticky removed, Rounded reduced) */}
+          <div className="rounded-2xl overflow-hidden shadow-xl border border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-zinc-900 aspect-square relative">
             <Image
-              src={product?.imageUrl} 
+              src={
+                product.image.startsWith('http')
+                  ? product.image
+                  : `${API_BASE_URL}/${product.image}`
+              }
               alt={product.title}
-              fill 
-              unoptimized 
-              priority 
-              className="object-cover "
+              fill
+              unoptimized
+              className="object-cover"
             />
+            {product.isPromoted && (
+              <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/80 backdrop-blur-md px-3 py-1 rounded-full shadow-lg">
+                <span className="text-[9px] font-black text-[#F57C00] uppercase tracking-widest">
+                  Featured
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Right: Info Section */}
+          {/* Right: Content Section */}
           <div className="flex flex-col">
-            
-            {/* Primary Tags */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {product.tags?.map((tag, index) => (
-                <span 
-                  key={index} 
-                  className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase ${
-                    tag === 'Featured' 
-                    ? 'bg-orange-100 text-orange-600' 
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-300'
-                  }`}
-                >
-                  {tag}
-                </span>
-              ))}
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <span className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 rounded-full text-[10px] font-black uppercase tracking-widest">
+                <FiMapPin /> {product.country}
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 rounded-full text-[10px] font-black uppercase tracking-widest">
+                <FiGlobe /> {product.tradition}
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded-full text-[10px] font-black uppercase tracking-widest">
+                <FiLayers /> {product.category?.title}
+              </span>
             </div>
 
-            {/* Title */}
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white mb-6 uppercase tracking-tighter leading-tight">
               {product.title}
             </h1>
 
-            {/* Description */}
-            <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-10">
+            <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed mb-8 font-medium">
               {product.description}
             </p>
 
-            {/* Creator Card */}
-            <div className="bg-gray-50 dark:bg-[#0d0d0d] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 mb-8 flex items-center gap-4">
-              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center text-[#F57C00]">
-                <FiUser size={24} />
+            {/* Cultural Tags */}
+            {product.culturalTags?.length > 0 && (
+              <div className="mb-8">
+                <p className="text-[10px] text-zinc-400 uppercase font-black tracking-[0.2em] mb-4">
+                  Cultural Insights
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.culturalTags.map((tag) => (
+                    <span
+                      key={tag._id}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-full text-[11px] font-bold text-zinc-700 dark:text-zinc-300"
+                    >
+                      <FiTag className="text-orange-500" /> {tag.title}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div>
-                <p className="text-[8px] text-gray-400 uppercase font-bold mb-0.5">Creator</p>
-                <h4 className="font-bold text-gray-900 dark:text-white">{product.creatorName}</h4>
+            )}
+
+            {/* Social Links Box */}
+            {product.externalUrls?.length > 0 && (
+              <div className="mb-8 p-5 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-xl">
+                <p className="text-[10px] text-zinc-400 uppercase font-black tracking-[0.2em] mb-4">
+                  External Links
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  {product.externalUrls.map((url, idx) => (
+                    <a
+                      key={idx}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-2xl transition-all hover:-translate-y-1"
+                    >
+                      {getSocialIcon(url)}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Stats & Creator Card (Rounded-xl) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+              <div className="md:col-span-2 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 p-5 rounded-xl flex items-center gap-4">
+                <div className="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center text-white text-xl font-black">
+                  {product.creatorId?.username?.charAt(0).toUpperCase()}
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-[9px] text-zinc-400 uppercase font-black tracking-widest">
+                    Curated By
+                  </p>
+                  <Link
+                    href={`/profile/${product.creatorId?._id}`}
+                    className="font-bold text-zinc-900 dark:text-white hover:text-orange-500 truncate block uppercase tracking-tighter"
+                  >
+                    @{product.creatorId?.username}
+                  </Link>
+                </div>
+              </div>
+
+              <div className="bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 p-5 rounded-xl flex flex-col justify-center items-center">
+                <div className="flex items-center gap-2">
+                  <FaEye className="text-blue-500" />
+                  <span className="text-lg font-black text-zinc-900 dark:text-white">
+                    {product.views || 0}
+                  </span>
+                </div>
+                <p className="text-[9px] text-zinc-400 uppercase font-black tracking-widest mt-1">
+                  Total Views
+                </p>
               </div>
             </div>
 
-            {/* Secondary Tags */}
-            <div className="flex flex-wrap gap-3 mb-10">
-              {product.secondaryTags?.map((tag, index) => (
-                <span 
-                  key={index} 
-                  className="px-2 py-1.5 border border-gray-200 dark:border-gray-800 rounded-full text-sm text-gray-600 dark:text-gray-400 font-medium"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            {/* Action Button */}
-            <button className="w-full py-3 bg-[#F57C00] hover:bg-[#E65100] text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-500/20 active:scale-95">
-              Visit Creator Site <FiExternalLink />
+            {/* CTA Button (Sharped Rounded) */}
+            <button
+              onClick={handleVisitSite}
+              disabled={clickLoading}
+              className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-full font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 transition-all hover:bg-orange-500 dark:hover:bg-orange-500 dark:hover:text-white active:scale-[0.99] disabled:opacity-70"
+            >
+              {clickLoading ? (
+                <FaSpinner className="animate-spin" />
+              ) : (
+                <>
+                  Visit Experience <FiExternalLink />
+                </>
+              )}
             </button>
           </div>
         </div>
-
-        {/* --- Section End --- */}
-
       </div>
     </div>
   );

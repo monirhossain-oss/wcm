@@ -40,7 +40,7 @@ const CreatorPopover = ({ creator, item, API_BASE_URL, creatorLocation }) => {
   }, [creator?._id, API_BASE_URL]);
 
   return (
-    <div className="absolute bottom-full left-0 md:left-3 mb-7 w-50 md:w-72 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-md shadow-[0_20px_60px_rgba(0,0,0,0.4)] z-[999] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200 pointer-events-auto">
+    <div className="absolute bottom-full left-0 md:left-3 mb-5 w-50 md:w-72 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.4)] z-999 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200 pointer-events-auto">
       <div className="h-20 w-full bg-zinc-200 dark:bg-zinc-800 relative">
         <img
           src={getImageUrl(coverImage, 'cover')}
@@ -84,7 +84,7 @@ const CreatorPopover = ({ creator, item, API_BASE_URL, creatorLocation }) => {
         <div className="flex flex-col w-full gap-2 mt-1">
           <Link
             href={`/profile/${creator?._id}`}
-            className="w-full py-2 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase rounded-sm transition-all text-center tracking-widest"
+            className="w-full py-2 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase rounded-full transition-all text-center tracking-widest"
           >
             View Profile
           </Link>
@@ -93,7 +93,7 @@ const CreatorPopover = ({ creator, item, API_BASE_URL, creatorLocation }) => {
               href={item.websiteLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-1.5 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white text-[9px] font-black uppercase rounded-sm text-center flex items-center justify-center gap-2"
+              className="w-full py-1.5 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white text-[9px] font-black uppercase rounded-full text-center flex items-center justify-center gap-2"
             >
               Website <FaExternalLinkAlt size={8} />
             </a>
