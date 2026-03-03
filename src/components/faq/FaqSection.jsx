@@ -4,7 +4,7 @@ import { ChevronDown, Globe, Users, Rocket, Zap, Wallet, Lock, ShieldQuestion } 
 
 const FaqSection = () => {
     const [activeCategory, setActiveCategory] = useState('General');
-    const [openIndex, setOpenIndex] = useState(0); // প্রথম প্রশ্নটি ডিফল্টভাবে খোলা থাকবে
+    const [openIndex, setOpenIndex] = useState(null);
 
     const categories = [
         { id: 'General', icon: <Globe size={16} />, label: 'General' },
@@ -16,20 +16,34 @@ const FaqSection = () => {
         { id: 'Technical', icon: <ShieldQuestion size={16} />, label: 'Technical & Support' },
     ];
 
-    const faqs = [
-        {
-            question: "What is WCM?",
-            answer: "WCM (World Culture Museum) is a digital platform dedicated to preserving and promoting global heritage by connecting master creators directly with cultural explorers."
-        },
-        {
-            question: "How do I create an account?",
-            answer: "You can create an account by clicking the 'Sign Up' button in the top right corner. Choose between a Creator or Explorer account to get started."
-        },
-        {
-            question: "Is WCM available globally?",
-            answer: "Yes, WCM is designed for a global audience, allowing creators from any region to share their traditions with people everywhere."
-        }
-    ];
+    const faqData = {
+        General: [
+            { question: "What is WCM?", answer: "WCM is a digital platform dedicated to preserving and promoting global heritage." },
+            { question: "Is WCM available globally?", answer: "Yes, WCM is designed for a global audience, connecting creators worldwide." }
+        ],
+        Explorers: [
+            { question: "How can I discover new cultures?", answer: "You can browse by region, technique, or heritage through our curated works section." },
+            { question: "Can I contact creators directly?", answer: "Yes, you can visit the creator's site to support them and learn their stories." }
+        ],
+        Creators: [
+            { question: "How do I create an account?", answer: "Creators can sign up and set up their premium presentation layout to showcase craftsmanship." },
+            { question: "Do I maintain ownership of my brand?", answer: "Yes, you maintain 100% control over your brand, pricing, and inventory." }
+        ],
+        Boost: [
+            { question: "What is Smart Visibility?", answer: "It includes transparent boost options and PPC placement to reach targeted collectors." }
+        ],
+        Payments: [
+            { question: "Are there hidden fees?", answer: "No, we ensure fair representation with no hidden fees or aggressive algorithms." }
+        ],
+        Privacy: [
+            { question: "Is my data secure?", answer: "We follow strict privacy and GDPR protocols to protect our community." }
+        ],
+        Technical: [
+            { question: "Where is the support center?", answer: "Our support center is available for any technical assistance you may need." }
+        ]
+    };
+
+    const currentFaqs = faqData[activeCategory] || [];
 
     return (
         <section className="bg-white dark:bg-[#0a0a0a] py-24 px-6">
@@ -43,21 +57,20 @@ const FaqSection = () => {
                     <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
                         Frequently Asked Questions
                     </h2>
-                    <p className="text-gray-500 dark:text-gray-400 text-lg">
-                        Everything you need to know about discovering and sharing culture on <br className="hidden md:block" />
-                        the World Culture Museum.
-                    </p>
                 </div>
 
-                {/* Category Pills */}
+                {/* Category Filtering Buttons */}
                 <div className="flex flex-wrap justify-center gap-3 mb-16">
                     {categories.map((cat) => (
                         <button
                             key={cat.id}
-                            onClick={() => setActiveCategory(cat.id)}
+                            onClick={() => {
+                                setActiveCategory(cat.id);
+                                setOpenIndex(null);
+                            }}
                             className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 border ${
                                 activeCategory === cat.id
-                                    ? 'bg-[#7A1F1F] border-[#7A1F1F] text-white shadow-lg'
+                                    ? 'bg-[#F57C00] border-[#F57C00] text-white shadow-lg' 
                                     : 'bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400 hover:border-gray-300'
                             }`}
                         >
@@ -67,13 +80,13 @@ const FaqSection = () => {
                     ))}
                 </div>
 
-                {/* FAQ List */}
+                {/* Dynamic FAQ List */}
                 <div className="space-y-4">
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 border-b border-gray-100 dark:border-zinc-800 pb-4 w-fit pr-20">
                         {activeCategory}
                     </h3>
                     
-                    {faqs.map((faq, index) => (
+                    {currentFaqs.map((faq, index) => (
                         <div 
                             key={index} 
                             className="border-b border-gray-100 dark:border-zinc-800 last:border-0"
