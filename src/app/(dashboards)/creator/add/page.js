@@ -153,10 +153,10 @@ export default function AddListing() {
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block ml-1">
               Media
             </label>
-            <div className="relative md:h-86 w-full max-md:aspect-video bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center overflow-hidden shadow-sm group">
+            <div className="relative md:h-86 w-full max-md:aspect-video bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-lg flex flex-col items-center justify-center overflow-hidden shadow-sm group">
               {image ? (
                 <div className="absolute inset-0 w-full h-full p-2">
-                  <div className="relative w-full h-full rounded-xl overflow-hidden">
+                  <div className="relative w-full h-full rounded-lg overflow-hidden">
                     <img
                       src={URL.createObjectURL(image)}
                       alt="preview"
@@ -202,7 +202,7 @@ export default function AddListing() {
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                 placeholder="Descriptive name..."
               />
             </div>
@@ -216,7 +216,7 @@ export default function AddListing() {
                 required
                 value={formData.websiteLink}
                 onChange={(e) => setFormData({ ...formData, websiteLink: e.target.value })}
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                 placeholder="https://example.com"
               />
             </div>
@@ -227,7 +227,7 @@ export default function AddListing() {
               </label>
               <div
                 onClick={() => setShowCatDrop(!showCatDrop)}
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold dark:text-white flex justify-between items-center cursor-pointer hover:border-orange-500/50"
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold dark:text-white flex justify-between items-center cursor-pointer hover:border-orange-500/50"
               >
                 {formData.category
                   ? metaData.categories.find((c) => c._id === formData.category)?.title
@@ -237,7 +237,7 @@ export default function AddListing() {
                 />
               </div>
               {showCatDrop && (
-                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
                   <div className="p-2 border-b dark:border-white/10 flex items-center gap-2 bg-gray-50 dark:bg-white/5">
                     <FiSearch className="text-gray-400" size={12} />
                     <input
@@ -274,7 +274,7 @@ export default function AddListing() {
                 required
                 value={formData.region}
                 onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
                 placeholder="e.g. South Asia"
               />
             </div>
@@ -287,7 +287,7 @@ export default function AddListing() {
                 required
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-xs font-bold outline-none focus:border-orange-500 h-39 resize-none dark:text-white placeholder:text-gray-400"
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 h-39 resize-none dark:text-white placeholder:text-gray-400"
                 placeholder="Tell the cultural story..."
               />
             </div>
@@ -295,7 +295,7 @@ export default function AddListing() {
         </div>
 
         {/* Bottom Section: Tradition, Tags, and URL */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-2xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-lg">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
               Tradition & Country
@@ -306,7 +306,7 @@ export default function AddListing() {
                 required
                 value={formData.tradition}
                 onChange={(e) => setFormData({ ...formData, tradition: e.target.value })}
-                className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-xl text-xs font-bold dark:text-white outline-none focus:border-orange-500"
+                className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500"
                 placeholder="Tradition (e.g. Jamdani)"
               />
               <input
@@ -314,7 +314,7 @@ export default function AddListing() {
                 required
                 value={formData.country}
                 onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-xl text-xs font-bold dark:text-white outline-none focus:border-orange-500"
+                className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500"
                 placeholder="Country (e.g. Bangladesh)"
               />
             </div>
@@ -326,7 +326,7 @@ export default function AddListing() {
             </label>
             <div
               onClick={() => setShowTagDrop(!showTagDrop)}
-              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-xl text-[10px] font-bold dark:text-white flex flex-wrap gap-1 min-h-23 cursor-pointer align-top"
+              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-[10px] font-bold dark:text-white flex flex-wrap gap-1 min-h-23 cursor-pointer align-top"
             >
               {formData.culturalTags.length === 0 && (
                 <span className="text-gray-400">Add up to 5 tags...</span>
@@ -334,7 +334,7 @@ export default function AddListing() {
               {formData.culturalTags.map((tId) => (
                 <span
                   key={tId}
-                  className="bg-orange-500 text-white px-2 py-1 h-fit rounded-md flex items-center gap-1 animate-in zoom-in-95"
+                  className="bg-orange-500 text-white px-2 py-1 h-fit rounded-lg flex items-center gap-1 animate-in zoom-in-95"
                 >
                   {metaData.tags.find((t) => t._id === tId)?.title}
                   <FiX
@@ -348,7 +348,7 @@ export default function AddListing() {
               ))}
             </div>
             {showTagDrop && (
-              <div className="absolute bottom-full mb-2 z-50 w-full bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-2">
+              <div className="absolute bottom-full mb-2 z-50 w-full bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in slide-in-from-bottom-2">
                 <div className="p-2 border-b dark:border-white/10 flex items-center gap-2 bg-gray-50 dark:bg-white/5">
                   <FiSearch className="text-gray-400" size={12} />
                   <input
@@ -394,7 +394,7 @@ export default function AddListing() {
                     required
                     value={url}
                     onChange={(e) => handleUrlChange(index, e.target.value)}
-                    className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 pr-8 rounded-xl text-[10px] font-bold dark:text-white outline-none focus:border-orange-500"
+                    className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 pr-8 rounded-lg text-[10px] font-bold dark:text-white outline-none focus:border-orange-500"
                     placeholder="https://..."
                   />
                   {formData.externalUrls.length > 1 && (
@@ -414,7 +414,7 @@ export default function AddListing() {
 
         <button
           disabled={loading}
-          className="w-full h-16 bg-orange-600 hover:bg-orange-500 text-white rounded-2xl font-black text-[11px] tracking-[0.3em] uppercase transition-all flex items-center justify-center gap-3 shadow-lg shadow-orange-500/20 active:scale-[0.98]"
+          className="w-full h-16 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-black text-[11px] tracking-[0.3em] uppercase transition-all flex items-center justify-center gap-3 shadow-lg shadow-orange-500/20 active:scale-[0.98]"
         >
           {loading ? (
             <FiLoader className="animate-spin" />
