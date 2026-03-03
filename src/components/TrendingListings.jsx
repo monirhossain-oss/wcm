@@ -74,7 +74,7 @@ const TrendingListings = ({ activeFilters }) => {
 
   return (
     <div className="w-full overflow-hidden bg-white dark:bg-zinc-950">
-      <div className="max-w-7xl mx-auto px-6 relative group">
+      <div className="max-w-7xl mx-auto px-6 relative tlgroup">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
           <div>
@@ -104,10 +104,10 @@ const TrendingListings = ({ activeFilters }) => {
         </div>
 
         {/* Navigation Buttons */}
-        <button className="swiper-prev-btn absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-full items-center justify-center border border-gray-200 dark:border-white/10 opacity-0 group-hover:opacity-100 transition-all -ml-2 hover:bg-orange-500 hover:text-white md:flex hidden shadow-xl">
+        <button className="swiper-prev-btn absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-full items-center justify-center border border-gray-200 dark:border-white/10 opacity-0 tlgroup-hover:opacity-100 transition-all -ml-2 hover:bg-orange-500 hover:text-white md:flex hidden shadow-xl">
           <FaChevronLeft size={14} />
         </button>
-        <button className="swiper-next-btn absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-full items-center justify-center border border-gray-200 dark:border-white/10 opacity-0 group-hover:opacity-100 transition-all -mr-2 hover:bg-orange-500 hover:text-white md:flex hidden shadow-xl">
+        <button className="swiper-next-btn absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-full items-center justify-center border border-gray-200 dark:border-white/10 opacity-0 tlgroup-hover:opacity-100 transition-all -mr-2 hover:bg-orange-500 hover:text-white md:flex hidden shadow-xl">
           <FaChevronRight size={14} />
         </button>
 
@@ -140,8 +140,8 @@ const TrendingListings = ({ activeFilters }) => {
             {!hasMore && (
               <SwiperSlide>
                 <Link href="/products">
-                  <div className="h-full min-h-78 md:min-h-95 bg-gray-100 dark:bg-white/5 border-2 border-dashed border-gray-300 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center group/btn cursor-pointer hover:bg-orange-50/50 dark:hover:bg-orange-500/5 transition-all">
-                    <div className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center mb-3 group-hover/btn:scale-110 transition-transform">
+                  <div className="h-full min-h-78 md:min-h-95 bg-gray-100 dark:bg-white/5 border-2 border-dashed border-gray-300 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center tlgroup/btn cursor-pointer hover:bg-orange-50/50 dark:hover:bg-orange-500/5 transition-all">
+                    <div className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center mb-3 tlgroup-hover/btn:scale-110 transition-transform">
                       <FaArrowRight size={20} />
                     </div>
                     <span className="font-bold text-gray-700 dark:text-gray-200">
