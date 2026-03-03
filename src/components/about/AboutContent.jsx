@@ -10,7 +10,7 @@ const AboutContent = () => {
                 <div className="space-y-6">
                     <h1 className="text-3xl md:text-4xl font-light  leading-tight">
                         Discover 
-                        <span className=" font-serif text-rose-900"> Culture</span> <br />
+                        <span className=" font-serif text-[#F57C00] dark:text-[#F57C00]"> Culture</span> <br />
                         Worldwide
                     </h1>
                     <p className="text-xl text-gray-600 max-w-md leading-relaxed">
