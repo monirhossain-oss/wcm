@@ -135,7 +135,7 @@ export default function AddListing() {
     );
 
   return (
-    <div className="max-w-6xl mx-auto py-4 animate-in fade-in duration-700 pb-20">
+    <div className="max-w-6xl mx-auto py-4 pb-20">
       {/* Header */}
       <div className="mb-8 border-b border-gray-100 dark:border-white/10 pb-6">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">

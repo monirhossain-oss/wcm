@@ -205,7 +205,7 @@ export default function CreatorDashboard() {
           </div>
         </div>
 
-        {/* 🔹 Asset Health */}
+        {/* 🔹 Inventory Status */}
         <div className="lg:col-span-4 flex flex-col gap-4">
           <div className="bg-white/3 border border-white/10 rounded-lg p-6 flex-1">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-6">
@@ -234,7 +234,7 @@ export default function CreatorDashboard() {
             </div>
           </div>
           <Link
-            href="/creator/listings/create"
+            href="/creator/add"
             className="bg-orange-600 hover:bg-orange-500 p-4 rounded-lg flex items-center justify-between group transition-all"
           >
             <span className="text-xs font-black text-white uppercase tracking-widest">
@@ -335,7 +335,7 @@ const MetricCard = ({ label, value, icon: Icon, color, trend }) => (
     <div className="relative z-10">
       <p className="text-[10px] font-black uppercase opacity-40 tracking-widest">{label}</p>
       <h3 className="text-2xl font-black mt-1 text-white italic tracking-tighter">{value || 0}</h3>
-      <p className="text-[9px] mt-2 font-bold uppercase text-zinc-500">{trend}</p>
+      <p className="text-[9px] mt-2 font-bold uppercase text-zinc-300">{trend}</p>
     </div>
     <Icon
       className="absolute -right-4 -bottom-4 text-white/3 group-hover:scale-110 transition-transform duration-500"

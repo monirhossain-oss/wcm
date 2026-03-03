@@ -92,7 +92,7 @@ export default function HeroSection({ filters, onFilterChange }) {
               id: 'category',
               icon: <FaUtensils />,
               label: 'Category',
-              options: ['Food', 'Art', 'Music'],
+              options: ['Art & Sculpture', 'Fashion', 'Music'],
             },
             {
               id: 'region',
@@ -104,7 +104,7 @@ export default function HeroSection({ filters, onFilterChange }) {
               id: 'tradition',
               icon: <FaTheaterMasks />,
               label: 'Cultural',
-              options: ['Traditional', 'Modern', 'Fusion'],
+              options: ['jamdami', 'Modern', 'Fusion'],
             },
           ].map((filter, i) => (
             <div key={i} className="relative w-full md:w-1/3">
