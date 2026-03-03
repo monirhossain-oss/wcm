@@ -26,7 +26,7 @@ const AboutPrincpals = () => {
     ];
 
     return (
-        <section className="bg-white dark:bg-[#0a0a0a] py-20 px-4">
+        <section className="bg-white dark:bg-[#0a0a0a] py-8 px-4">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">

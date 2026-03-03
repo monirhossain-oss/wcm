@@ -5,6 +5,8 @@ import AboutExplore from "@/components/about/AboutExplore";
 import AboutPresting from "@/components/about/AboutPresting";
 import AboutCulture from "@/components/about/AboutCulture";
 import AboutHeader from "@/components/about/AboutHeader";
+import AboutVisibility from "@/components/about/AboutVisibility";
+import AboutPrincpals from "@/components/about/AboutPrincpals";
 
 export default function Page() {
     return (
@@ -14,7 +16,9 @@ export default function Page() {
             <AboutShape />
             <AboutExplore />
             <AboutPresting />
+            <AboutPrincpals />
             <AboutCulture />
+            <AboutVisibility />
         </main>
     );
 }

@@ -23,7 +23,7 @@ const AboutCulture = () => {
     ];
 
     return (
-        <section className="bg-[#fafafa] dark:bg-[#0d0d0d] py-24 px-6">
+        <section className="bg-[#fafafa] dark:bg-[#0d0d0d] py-8 px-6">
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
                 {/* Featured Creator Card */}
