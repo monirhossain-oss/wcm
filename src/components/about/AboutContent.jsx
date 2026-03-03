@@ -6,7 +6,7 @@ const AboutContent = () => {
         <section className="max-w-7xl mx-auto px-4 py-20 md:py-32">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 
-                {/* বাম পাশের টেক্সট সেকশন */}
+                
                 <div className="space-y-6">
                     <h1 className="text-3xl md:text-4xl font-light  leading-tight">
                         Discover 
@@ -17,7 +17,7 @@ const AboutContent = () => {
                         A global platform connecting cultural creators with explorers who value authenticity and heritage.
                     </p>
                     
-                    {/* সোশ্যাল প্রুফ সেকশন */}
+                    
                     <div className="flex items-center gap-4 pt-8">
                         <div className="flex -space-x-3">
                             {[1, 2, 3, 4].map((i) => (
