@@ -1,21 +1,20 @@
-import AboutContent from '@/components/about/AboutContent';
-import AboutCulture from '@/components/about/AboutCulture';
-import AboutExplore from '@/components/about/AboutExplore';
-import AboutPresting from '@/components/about/AboutPresting';
-import AboutShape from '@/components/about/AboutShape';
 
-import React from 'react';
+import AboutContent from "@/components/about/AboutContent";
+import AboutShape from "@/components/about/AboutShape";
+import AboutExplore from "@/components/about/AboutExplore";
+import AboutPresting from "@/components/about/AboutPresting";
+import AboutCulture from "@/components/about/AboutCulture";
+import AboutHeader from "@/components/about/AboutHeader";
 
-const page = () => {
+export default function Page() {
     return (
-        <div>
-            <AboutContent/>
-            <AboutShape/>
-            <AboutExplore/>
-            <AboutCulture/>
-            <AboutPresting/>
-        </div>
+        <main className="bg-white dark:bg-[#0a0a0a]">
+            <AboutHeader />
+            <AboutContent />
+            <AboutShape />
+            <AboutExplore />
+            <AboutPresting />
+            <AboutCulture />
+        </main>
     );
-};
-
-export default page;
+}
