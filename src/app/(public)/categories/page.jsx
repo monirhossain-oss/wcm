@@ -107,7 +107,7 @@ const CategoriesPage = () => {
           </div>
         ) : listings.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10">
               {listings.map((item) => (
                 <div key={item._id}>
                   <ListingCard item={item} />
