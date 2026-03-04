@@ -19,6 +19,7 @@ const PublicNavbar = () => {
     { name: 'Categories', href: '/categories' },
     { name: 'Regions', href: '/regions' },
     { name: 'Creators', href: '/creators' },
+    { name: 'About Us', href: '/aboutUs' },
     { name: 'Blogs', href: '/blogs' },
   ];
 
@@ -30,7 +31,7 @@ const PublicNavbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] border-b border-[#F2F2F2] dark:border-[#1F1F1F] z-50">
-      <div className="flex items-center justify-between px-6 py-1">
+      <div className="flex items-center justify-between px-6 py-2">
         {/* Left: Logo */}
         <div className="flex items-center space-x-2">
           <Link href="/" className="cursor-pointer">

@@ -33,7 +33,7 @@ export default function HeroSection({ filters, onFilterChange }) {
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden min-h-187.5 flex items-center transition-all duration-500">
+    <section className="relative overflow-hidden flex items-center transition-all duration-500">
       {/* Background Slider */}
       <div className="absolute inset-0 w-full h-full">
         {images.map((img, index) => (
