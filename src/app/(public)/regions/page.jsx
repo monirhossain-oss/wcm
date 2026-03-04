@@ -92,3 +92,4 @@ const RegionCard = ({ region }) => (
 );
 
 export default RegionPage;
+
