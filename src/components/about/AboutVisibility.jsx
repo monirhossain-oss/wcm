@@ -5,7 +5,7 @@ import React from 'react';
 
 const AboutVisibility = () => {
     return (
-        <section className="bg-white dark:bg-[#0a0a0a] py-24 px-6 flex flex-col items-center text-center">
+        <section className="bg-white dark:bg-[#0a0a0a] py-8 px-6 flex flex-col items-center text-center">
             {/* অরেঞ্জ হার্ট আইকন */}
             <div className="mb-8">
                 <Heart className="w-12 h-12 text-[#F57C00] stroke-[1.5px]" />
