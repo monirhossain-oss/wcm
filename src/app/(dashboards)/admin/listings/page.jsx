@@ -8,16 +8,16 @@ import {
   FiGlobe,
   FiTag,
   FiFileText,
-  FiMapPin,
   FiExternalLink,
   FiActivity,
   FiClock,
   FiShield,
   FiLayers,
-  FiAlertCircle,
   FiSend,
   FiLink,
   FiAward,
+  FiChevronLeft,
+  FiChevronRight,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 
@@ -34,6 +34,10 @@ export default function AdminListings() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setrejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+
+  // --- Pagination State ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   useEffect(() => {
     fetchListings();
@@ -86,6 +90,17 @@ export default function AdminListings() {
   const filteredListings =
     filter === 'all' ? listings : listings.filter((l) => l.status === filter);
 
+  // --- Pagination Logic ---
+  const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredListings.slice(indexOfFirstItem, indexOfLastItem);
+
+  // ফিল্টার চেঞ্জ হলে প্রথম পেজে ফেরত যাওয়া
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
+
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -94,7 +109,7 @@ export default function AdminListings() {
     );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-20 font-sans">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
@@ -146,7 +161,7 @@ export default function AdminListings() {
         ))}
       </div>
 
-      {/* Filter & Table */}
+      {/* Filter & Table Wrapper */}
       <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm">
         <div className="p-6 border-b border-gray-50 dark:border-white/10 flex flex-col md:flex-row justify-between gap-4">
           <h2 className="text-xl font-black uppercase italic dark:text-white">
@@ -164,6 +179,7 @@ export default function AdminListings() {
             ))}
           </div>
         </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -176,7 +192,7 @@ export default function AdminListings() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-white/5">
-              {filteredListings.map((item) => (
+              {currentItems.map((item) => (
                 <tr
                   key={item._id}
                   className="group hover:bg-gray-50/30 dark:hover:bg-white/10 transition-all"
@@ -212,7 +228,7 @@ export default function AdminListings() {
                   <td className="px-8 py-4 text-right">
                     <button
                       onClick={() => setViewItem(item)}
-                      className="p-2 bg-gray-100 dark:bg-white/5 rounded-lg hover:bg-orange-500 hover:text-white transition-all"
+                      className="p-2 bg-gray-100 dark:bg-white/5 rounded-lg hover:bg-orange-500 hover:text-white transition-all text-gray-500"
                     >
                       <FiEye size={14} />
                     </button>
@@ -222,16 +238,55 @@ export default function AdminListings() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Section */}
+        <div className="p-6 border-t border-gray-50 dark:border-white/10 flex items-center justify-between bg-gray-50/30 dark:bg-white/20">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            Protocol Range: {indexOfFirstItem + 1} —{' '}
+            {Math.min(indexOfLastItem, filteredListings.length)} of {filteredListings.length}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className="p-2 bg-gray-100 dark:bg-white/10 rounded-lg border dark:border-white/10 disabled:opacity-20 transition-all"
+            >
+              <FiChevronLeft className="dark:text-white" />
+            </button>
+            <div className="flex gap-1">
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${
+                    currentPage === i + 1
+                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                      : 'bg-gray-100 dark:bg-white/10 text-gray-400 border dark:border-white/10 hover:border-orange-500'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="p-2 bg-gray-100 dark:bg-white/10 rounded-lg border dark:border-white/10 disabled:opacity-20 transition-all"
+            >
+              <FiChevronRight className="dark:text-white" />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Inspection Modal */}
       {viewItem && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/90 backdrop-blur-md"
             onClick={() => setViewItem(null)}
           />
-          <div className="relative w-full max-w-6xl bg-white dark:bg-[#0a0a0a] rounded-3xl border dark:border-white/10 overflow-hidden flex flex-col lg:flex-row max-h-[90vh]">
+          <div className="relative w-full max-w-6xl bg-white dark:bg-[#0a0a0a] rounded-3xl border dark:border-white/10 overflow-hidden flex flex-col lg:flex-row max-h-[90vh] animate-in slide-in-from-bottom-5">
             {/* Image Side */}
             <div className="lg:w-1/2 relative h-64 lg:h-auto bg-gray-900">
               <img
@@ -239,7 +294,7 @@ export default function AdminListings() {
                 className="w-full h-full object-cover"
                 alt=""
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent" />
               <div className="absolute bottom-8 left-8 right-8">
                 <p className="text-orange-500 text-[10px] font-black uppercase tracking-widest mb-2">
                   {viewItem.categoryName}
@@ -251,7 +306,7 @@ export default function AdminListings() {
             </div>
 
             {/* Content Side */}
-            <div className="lg:w-1/2 p-8 lg:p-12 overflow-y-auto bg-white dark:bg-[#0a0a0a]">
+            <div className="lg:w-1/2 p-8 lg:p-12 overflow-y-auto scrollbar-hide bg-white dark:bg-[#0a0a0a]">
               <div className="flex justify-between mb-8">
                 <div className="flex items-center gap-3">
                   <div className="p-3 bg-orange-500/10 rounded-xl text-orange-500">
@@ -266,7 +321,7 @@ export default function AdminListings() {
                 </div>
                 <button
                   onClick={() => setViewItem(null)}
-                  className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
+                  className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all text-gray-400"
                 >
                   <FiX size={24} />
                 </button>
@@ -299,7 +354,6 @@ export default function AdminListings() {
                   </div>
                 </div>
 
-                {/* ✅ Flipped 'name' to 'title' for Cultural Tags */}
                 <div className="space-y-2">
                   <h4 className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-2">
                     <FiTag className="text-orange-500" /> Protocol Tags
@@ -333,7 +387,7 @@ export default function AdminListings() {
                       <a
                         href={viewItem.websiteLink}
                         target="_blank"
-                        className="flex items-center justify-between p-3 bg-black dark:bg-white text-white dark:text-black rounded-xl text-[9px] font-black uppercase tracking-widest"
+                        className="flex items-center justify-between p-3 bg-black dark:bg-white text-white dark:text-black rounded-xl text-[9px] font-black uppercase tracking-widest transition-opacity hover:opacity-80"
                       >
                         <FiLink /> Website
                       </a>
@@ -387,12 +441,12 @@ export default function AdminListings() {
 
       {/* Rejection Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-110 flex items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-200">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-md"
             onClick={() => setShowRejectModal(false)}
           />
-          <div className="relative w-full max-w-md bg-white dark:bg-[#0f0f0f] rounded-3xl border dark:border-white/10 p-8">
+          <div className="relative w-full max-w-md bg-white dark:bg-[#0f0f0f] rounded-3xl border dark:border-white/10 p-8 shadow-2xl">
             <h3 className="text-lg font-black uppercase italic dark:text-white mb-4">
               Rejection <span className="text-red-500">Note</span>
             </h3>
@@ -400,21 +454,21 @@ export default function AdminListings() {
               value={rejectionReason}
               onChange={(e) => setrejectionReason(e.target.value)}
               placeholder="Reason for non-compliance..."
-              className="w-full h-32 bg-gray-50 dark:bg-white/5 border dark:border-white/10 rounded-2xl p-4 text-xs font-bold dark:text-white outline-none focus:border-red-500 transition-all mb-6"
+              className="w-full h-32 bg-gray-50 dark:bg-white/5 border dark:border-white/10 rounded-2xl p-4 text-xs font-bold dark:text-white outline-none focus:border-red-500 transition-all mb-6 resize-none"
             />
             <div className="flex gap-3">
               <button
                 onClick={() => setShowRejectModal(false)}
-                className="flex-1 h-12 rounded-xl text-[10px] font-black uppercase dark:text-gray-400 bg-gray-100 dark:bg-white/5"
+                className="flex-1 h-12 rounded-xl text-[10px] font-black uppercase dark:text-gray-400 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleStatusUpdate(viewItem._id, 'rejected', rejectionReason)}
                 disabled={!rejectionReason.trim() || actionLoading}
-                className="flex-1 h-12 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 h-12 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-red-700 transition-colors"
               >
-                <FiSend /> Submit
+                <FiSend /> {actionLoading ? 'Processing...' : 'Submit'}
               </button>
             </div>
           </div>
