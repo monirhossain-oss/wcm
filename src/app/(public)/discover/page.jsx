@@ -39,7 +39,6 @@ const DiscoverPage = () => {
   const categories = Object.keys(categoryContent);
   const sortOptions = ['Recommended', 'Curated', 'Most Appreciated', 'Most Recent'];
 
-  // ২. ৮টি ডামি কার্ডের ডাটা
   const dummyListings = [
     { _id: '1', title: 'Handmade Pottery', price: 45, category: 'Crafts', images: ['https://i.postimg.cc/3x9yPRpV/Pottery-craft-ceramics.jpg'] },
     { _id: '2', title: 'Traditional Scarf', price: 25, category: 'Clothing', images: ['https://i.postimg.cc/sD41hXnH/Chris-Fallon.jpg'] },
