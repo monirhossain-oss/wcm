@@ -6,7 +6,7 @@ const AboutContent = () => {
         <section className="max-w-7xl mx-auto px-6 md:px-10 ">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-24 items-center">
 
-                {/* বাম পাশের টেক্সট সেকশন */}
+               
                 <div className="space-y-8">
                     <h1 className="text-3xl sm:text-4xl md:text-5xl 
                                    font-light leading-tight 
@@ -22,7 +22,6 @@ const AboutContent = () => {
                         A global platform connecting cultural creators with explorers who value authenticity and heritage.
                     </p>
 
-                    {/* সোশ্যাল প্রুফ সেকশন */}
                     <div className="flex items-center gap-5 pt-6">
                         <div className="flex -space-x-3">
                             {[1, 2, 3, 4].map((i) => (
@@ -47,10 +46,8 @@ const AboutContent = () => {
                     </div>
                 </div>
 
-                {/* ডান পাশের স্টাইলিশ ইমেজ গ্রিড */}
                 <div className="grid grid-cols-2 gap-5 md:gap-6 h-[520px] sm:h-[560px] md:h-[620px]">
 
-                    {/* বড় লম্বা ইমেজ */}
                     <div className="space-y-5">
                         <div className="relative h-[70%] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition duration-500">
                             <Image
@@ -71,7 +68,6 @@ const AboutContent = () => {
                         </div>
                     </div>
 
-                    {/* ডান পাশের দুই ইমেজ */}
                     <div className="space-y-5 pt-10 md:pt-12">
                         <div className="relative h-[30%] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition duration-500">
                             <Image
