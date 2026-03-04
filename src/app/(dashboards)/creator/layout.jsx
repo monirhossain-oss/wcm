@@ -51,10 +51,10 @@ export default function CreatorLayout({ children }) {
   if (!user || user.role !== 'creator') return null;
 
   const navItems = [
-    { name: 'Dashboard', path: '/creator', icon: FiGrid },
+    { name: 'Overview', path: '/creator', icon: FiGrid },
     { name: 'Ad Promotions', path: '/creator/promotions', icon: DollarSign },
-    { name: 'My Inventory', path: '/creator/listings', icon: FiList },
-    { name: 'New Listing', path: '/creator/add', icon: FiPlus },
+    { name: 'My Listings', path: '/creator/listings', icon: FiList },
+    { name: 'Add Listing', path: '/creator/add', icon: FiPlus },
   ];
 
   const profileImage = user?.profile?.profileImage
@@ -106,7 +106,7 @@ export default function CreatorLayout({ children }) {
             href="/"
             className="flex items-center gap-4 px-4 py-3 rounded-sm text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-orange-500 transition-all"
           >
-            <FiArrowLeft size={14} /> Exit to Gateway
+            <FiArrowLeft size={14} /> Go to Marketplace
           </Link>
         </div>
       </div>
@@ -183,7 +183,7 @@ export default function CreatorLayout({ children }) {
 
       {/* 🔹 Mobile Sidebar */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
+        <div className="fixed inset-0 z-100 lg:hidden">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
           <aside className="absolute left-0 top-0 h-full w-72 bg-white dark:bg-[#0c0c0c] flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 border-r border-white/10">
              <div className="flex justify-end p-4">

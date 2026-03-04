@@ -63,12 +63,12 @@ export default function AdminLayout({ children }) {
   if (!user || user.role !== 'admin') return null;
 
   const menuItems = [
-    { name: 'Dashboard', path: '/admin', icon: FiGrid },
-    { name: 'User Directory', path: '/admin/users', icon: FiUsers },
+    { name: 'Overview', path: '/admin', icon: FiGrid },
+    { name: 'User Management', path: '/admin/users', icon: FiUsers },
     { name: 'Creator Requests', path: '/admin/requests', icon: FiCheckCircle },
     { name: 'Global Listings', path: '/admin/listings', icon: FiLayout },
-    { name: 'Tag System', path: '/admin/tags', icon: FaTag },
-    { name: 'Categories', path: '/admin/categories', icon: FaCreativeCommonsSampling },
+    { name: 'All Tags', path: '/admin/tags', icon: FaTag },
+    { name: 'All Categories', path: '/admin/categories', icon: FaCreativeCommonsSampling },
   ];
 
   const profileImage = user?.profile?.profileImage
@@ -116,10 +116,10 @@ export default function AdminLayout({ children }) {
             System
           </p>
           <Link
-            href="/profile"
+            href="/"
             className="flex items-center gap-4 px-4 py-3 rounded-sm text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-orange-500 transition-all"
           >
-            <FiArrowLeft size={14} /> Exit to Web
+            <FiArrowLeft size={14} /> Go to Marketplace
           </Link>
         </div>
       </div>
@@ -201,7 +201,7 @@ export default function AdminLayout({ children }) {
 
       {/* 🔹 Mobile Sidebar */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
+        <div className="fixed inset-0 z-100 lg:hidden">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
           <aside className="absolute left-0 top-0 h-full w-72 bg-white dark:bg-[#0c0c0c] flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 border-r border-white/10">
              <div className="flex justify-end p-4">
