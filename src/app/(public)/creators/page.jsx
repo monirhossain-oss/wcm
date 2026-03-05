@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FiSearch } from 'react-icons/fi';
 
 const creators = [
   { id: 1, name: 'Amadou Diallo', description: 'Wood sculptor from Senegal preserving West African carving traditions.', culture: 'Mandinka', region: 'West Africa', initials: 'AD', hue: '#C0392B' },
@@ -14,21 +13,14 @@ const creators = [
   { id: 8, name: 'Yuki Tanaka', description: 'Ceramic artist based in Kyoto, trained in the Raku tradition for over 15 years.', culture: 'Japanese', region: 'East Asia', initials: 'YT', hue: '#2C7873' },
 ];
 
-const Diamond = ({ size = 10, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 10 10" fill="none" className={className}>
+const Diamond = ({ size = 10, className = '', style = {} }) => (
+  <svg width={size} height={size} viewBox="0 0 10 10" fill="none" className={className} style={style}>
     <rect x="5" y="0.5" width="6.5" height="6.5" rx="0.5" transform="rotate(45 5 0.5)" stroke="currentColor" strokeWidth="1" fill="none" />
   </svg>
 );
 
 export default function CreatorsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
   const [hoveredId, setHoveredId] = useState(null);
-
-  const filtered = creators.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.culture.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.region.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div
@@ -54,10 +46,9 @@ export default function CreatorsPage() {
           overflow: hidden;
         }
 
-        /* Dark Mode support using class or media query */
         @media (prefers-color-scheme: dark) {
           .creator-card {
-            background: #1f1f1f; /* ডার্ক মোডে গ্রে ব্যাকগ্রাউন্ড */
+            background: #1f1f1f;
             border-color: #333;
           }
           .creator-name { color: #f3f3f3 !important; }
@@ -113,40 +104,6 @@ export default function CreatorsPage() {
           border: 1px solid #E8E0D5;
         }
 
-        .search-wrap {
-          position: relative;
-          max-width: 420px;
-        }
-        .search-input {
-          width: 100%;
-          padding: 14px 20px 14px 48px;
-          border-radius: 100px;
-          border: 2px solid #E8E0D5;
-          background: #fff;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 14px; font-weight: 500; color: #1C2B4A;
-          outline: none;
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        @media (prefers-color-scheme: dark) {
-          .search-input { background: #2a2a2a; border-color: #444; color: #fff; }
-        }
-        .search-input:focus {
-          border-color: #E07B39;
-          box-shadow: 0 0 0 4px rgba(224,123,57,0.12);
-        }
-        .search-icon {
-          position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
-          color: #9C8A78; font-size: 18px; pointer-events: none;
-        }
-
-        .count-badge {
-          display: inline-flex; align-items: center; gap: 6px;
-          background: #1C2B4A; color: #fff;
-          padding: 6px 16px; border-radius: 100px;
-          font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
-        }
-
         .section-rule {
           display: flex; align-items: center; gap: 12px; margin-bottom: 36px;
         }
@@ -154,44 +111,24 @@ export default function CreatorsPage() {
       `}</style>
 
       {/* ===== HERO HEADER ===== */}
-      <div style={{ background: '#1C2B4A', padding: '52px 48px 48px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: '#1C2B4A', padding: '80px 48px 60px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 24, left: 32, display: 'flex', gap: 10 }}>
           {[0,1,2].map(i => <Diamond key={i} size={12} style={{ color: '#4A6090', opacity: 0.6 }} />)}
         </div>
         <div style={{ position: 'absolute', top: 24, right: 32, display: 'flex', gap: 10 }}>
-          {[0,1,2].map(i => <Diamond key={i} size={12} />)}
+          {[0,1,2].map(i => <Diamond key={i} size={12} style={{ color: '#E07B39' }} />)}
         </div>
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
-            <div>
-              <p className="dm" style={{ color: '#E07B39', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>
-                ◆ &nbsp;World Culture Marketplace
-              </p>
-              <h1 className="pf" style={{ color: '#fff', fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 900, lineHeight: 1.1, margin: 0 }}>
-                Creators Directory
-              </h1>
-              <p className="dm" style={{ color: '#8FA3C8', fontSize: 15, marginTop: 12, fontWeight: 500 }}>
-                Meet the creators preserving and sharing cultural traditions worldwide.
-              </p>
-            </div>
-
-            {/* <div className="count-badge dm">
-              <span style={{ fontSize: 20, fontWeight: 900 }}>{creators.length}</span>
-              <span style={{ opacity: 0.7 }}>Creators</span>
-            </div> */}
-          </div>
-
-          <div style={{ marginTop: 36 }} className="search-wrap">
-            <FiSearch className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search by name, culture, or region..."
-              className="search-input"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <p className="dm" style={{ color: '#E07B39', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>
+            ◆ &nbsp;World Culture Marketplace
+          </p>
+          <h1 className="pf" style={{ color: '#fff', fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 900, lineHeight: 1.1, margin: 0 }}>
+            Creators Directory
+          </h1>
+          <p className="dm" style={{ color: '#8FA3C8', fontSize: 16, marginTop: 14, fontWeight: 500, maxWidth: '600px' }}>
+            Meet the master artisans and creators dedicated to preserving global heritage and traditional craftsmanship.
+          </p>
         </div>
       </div>
 
@@ -200,71 +137,60 @@ export default function CreatorsPage() {
         <div className="section-rule">
           <div className="rule-line" />
           <span className="dm" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9C8A78' }}>
-            {filtered.length} results
+            Featured Artisans
           </span>
           <div className="rule-line" />
         </div>
 
-        {filtered.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
-            {filtered.map((creator) => (
-              <div
-                key={creator.id}
-                className="creator-card"
-                style={{ '--hue': creator.hue }}
-                onMouseEnter={() => setHoveredId(creator.id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
-                  <div
-                    className="avatar-ring dm"
-                    style={{ '--hue': creator.hue, background: creator.hue }}
-                  >
-                    {creator.initials}
-                  </div>
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3
-                      className="creator-name pf"
-                      style={{ fontSize: 20, fontWeight: 800, color: '#1C2B4A', margin: 0, lineHeight: 1.2, transition: 'color 0.2s' }}
-                    >
-                      {creator.name}
-                    </h3>
-                    <p
-                      className="creator-desc dm"
-                      style={{ fontSize: 13, color: '#7A6A5A', lineHeight: 1.6, margin: '8px 0 14px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
-                    >
-                      {creator.description}
-                    </p>
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <span className="tag">◆ {creator.culture}</span>
-                      <span className="tag">{creator.region}</span>
-                    </div>
-                  </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
+          {creators.map((creator) => (
+            <div
+              key={creator.id}
+              className="creator-card"
+              style={{ '--hue': creator.hue }}
+              onMouseEnter={() => setHoveredId(creator.id)}
+              onMouseLeave={() => setHoveredId(null)}
+            >
+              <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
+                <div
+                  className="avatar-ring dm"
+                  style={{ '--hue': creator.hue, background: creator.hue }}
+                >
+                  {creator.initials}
                 </div>
 
-                <div style={{
-                  marginTop: 20, paddingTop: 16,
-                  borderTop: '1px solid rgba(240, 234, 224, 0.5)',
-                  display: 'flex', justifyContent: 'flex-end'
-                }}>
-                  <span className="dm" style={{ fontSize: 11, fontWeight: 700, color: hoveredId === creator.id ? '#E07B39' : '#C0B0A0', letterSpacing: '0.08em', textTransform: 'uppercase', transition: 'color 0.2s' }}>
-                    View Profile →
-                  </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3
+                    className="creator-name pf"
+                    style={{ fontSize: 20, fontWeight: 800, color: '#1C2B4A', margin: 0, lineHeight: 1.2, transition: 'color 0.2s' }}
+                  >
+                    {creator.name}
+                  </h3>
+                  <p
+                    className="creator-desc dm"
+                    style={{ fontSize: 13, color: '#7A6A5A', lineHeight: 1.6, margin: '8px 0 14px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                  >
+                    {creator.description}
+                  </p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <span className="tag">◆ {creator.culture}</span>
+                    <span className="tag">{creator.region}</span>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{
-            textAlign: 'center', padding: '80px 40px',
-            border: '2px dashed #DDD5C8', borderRadius: 24,
-            background: 'transparent'
-          }}>
-            <p className="pf" style={{ fontSize: 32, color: '#C0B0A0', margin: 0 }}>No creators found</p>
-            <p className="dm" style={{ fontSize: 14, color: '#9C8A78', marginTop: 8 }}>Try a different name, culture, or region.</p>
-          </div>
-        )}
+
+              <div style={{
+                marginTop: 20, paddingTop: 16,
+                borderTop: '1px solid rgba(240, 234, 224, 0.5)',
+                display: 'flex', justifyContent: 'flex-end'
+              }}>
+                <span className="dm" style={{ fontSize: 11, fontWeight: 700, color: hoveredId === creator.id ? '#E07B39' : '#C0B0A0', letterSpacing: '0.08em', textTransform: 'uppercase', transition: 'color 0.2s' }}>
+                  View Profile →
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
