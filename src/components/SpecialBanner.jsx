@@ -5,8 +5,8 @@ import Image from 'next/image';
 
 const SpecialBanner = () => {
     return (
-        <section className="max-w-7xl mx-auto px-6 py-12">
-            <div className="relative overflow-hidden rounded-2xl bg-[#F3EFE0] dark:bg-[#1a1a1a] flex flex-col md:flex-row items-center transition-colors duration-500 min-h-[450px]">
+        <section className="max-w-7xl mx-auto px-6 py-8">
+            <div className="relative overflow-hidden  bg-[#F3EFE0] dark:bg-[#1a1a1a] flex flex-col md:flex-row items-center transition-colors duration-500 min-h-[450px]">
                 
                 {/* Left Content Area */}
                 <div className="w-full md:w-3/5 p-8 md:p-16 text-center md:text-left z-10">
@@ -20,7 +20,7 @@ const SpecialBanner = () => {
                     </p>
                     
                     <div className="mt-10">
-                        <Link href="/products">
+                        <Link href="/discover">
                         <button className="px-8 py-3 cursor-pointer rounded-lg bg-[#F57C00] text-white font-bold hover:scale-105 transition-all shadow-xl">
                             Shop Our Favourites
                         </button>

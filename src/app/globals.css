@@ -157,8 +157,8 @@ h6 {
   transition: z-index 0.3s;
 }
 
-.swiper-slide:hover, 
-.swiper-slide:active, 
+.swiper-slide:hover,
+.swiper-slide:active,
 .swiper-slide-active {
   z-index: 999 !important;
 }
@@ -166,4 +166,20 @@ h6 {
 /* পপওভার যেন স্লাইডারের কন্টেইনারে আটকে না যায় */
 .swiper {
   overflow: visible !important;
+}
+
+@keyframes creatorFade {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+.animate-creatorFade {
+  animation: creatorFade 0.18s ease-out forwards;
 }
