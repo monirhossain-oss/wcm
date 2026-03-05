@@ -18,7 +18,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen overflow-hidden bg-white dark:bg-zinc-950">
+    <main className="min-h-screen mx-w-7xl mx-auto overflow-hidden bg-white dark:bg-zinc-950">
       <HeroSection onFilterChange={handleFilterChange} filters={filters} />
 
       <FeaturesSection filters={filters} onFilterChange={handleFilterChange} />
