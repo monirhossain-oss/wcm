@@ -158,10 +158,10 @@ export default function CreatorDashboard() {
       </div>
 
       {/* 🔹 Campaign Operations Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <CampaignBox title="Boost Operations" icon={FiZap} color="text-purple-500" data={promotedListings.filter((l) => l.promotion?.boost?.isActive)} />
         <CampaignBox title="PPC Flow Logic" icon={FiActivity} color="text-orange-500" data={promotedListings.filter((l) => l.promotion?.ppc?.isActive)} isPpc />
-      </div>
+      </div> */}
 
       {/* 🔹 Transaction Ledger */}
       <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg overflow-hidden shadow-sm">
@@ -236,33 +236,33 @@ const StatusRow = ({ label, count, color }) => (
   </div>
 );
 
-const CampaignBox = ({ title, icon: Icon, color, data, isPpc }) => (
-  <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg p-8 shadow-sm">
-    <div className="flex justify-between items-center mb-8">
-      <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-400">{title}</h4>
-      <Icon className={color} size={22} />
-    </div>
-    <div className="space-y-4">
-      {data.length > 0 ? (
-        data.map((item, i) => (
-          <Link key={i} href={`/listings/${item._id}`} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/2 border border-gray-100 dark:border-white/5 rounded-md hover:border-orange-500/30 transition-all group">
-            <div className="flex items-center gap-4">
-              <img src={getImageUrl(item.image)} className="w-10 h-10 rounded object-cover border border-gray-200 dark:border-white/10 grayscale-[0.5] group-hover:grayscale-0 transition-all" alt="" />
-              <div>
-                <p className="text-[11px] font-black dark:text-white uppercase truncate max-w-[140px] tracking-tight">{item.title}</p>
-                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
-                  {isPpc ? `Credits: €${item.promotion.ppc.ppcBalance}` : `Exp: ${new Date(item.promotion.boost.expiresAt).toLocaleDateString()}`}
-                </p>
-              </div>
-            </div>
-            <FiChevronRight className="text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
-          </Link>
-        ))
-      ) : (
-        <div className="py-10 text-center border border-dashed border-gray-200 dark:border-white/10 rounded-md">
-          <p className="text-[9px] uppercase font-black tracking-widest text-gray-400 italic">No Active Transmissions</p>
-        </div>
-      )}
-    </div>
-  </div>
-);
+// const CampaignBox = ({ title, icon: Icon, color, data, isPpc }) => (
+//   <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg p-8 shadow-sm">
+//     <div className="flex justify-between items-center mb-8">
+//       <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-400">{title}</h4>
+//       <Icon className={color} size={22} />
+//     </div>
+//     <div className="space-y-4">
+//       {data.length > 0 ? (
+//         data.map((item, i) => (
+//           <Link key={i} href={`/listings/${item._id}`} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/2 border border-gray-100 dark:border-white/5 rounded-md hover:border-orange-500/30 transition-all group">
+//             <div className="flex items-center gap-4">
+//               <img src={getImageUrl(item.image)} className="w-10 h-10 rounded object-cover border border-gray-200 dark:border-white/10 grayscale-[0.5] group-hover:grayscale-0 transition-all" alt="" />
+//               <div>
+//                 <p className="text-[11px] font-black dark:text-white uppercase truncate max-w-35 tracking-tight">{item.title}</p>
+//                 <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
+//                   {isPpc ? `Credits: €${item.promotion.ppc.ppcBalance}` : `Exp: ${new Date(item.promotion.boost.expiresAt).toLocaleDateString()}`}
+//                 </p>
+//               </div>
+//             </div>
+//             <FiChevronRight className="text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
+//           </Link>
+//         ))
+//       ) : (
+//         <div className="py-10 text-center border border-dashed border-gray-200 dark:border-white/10 rounded-md">
+//           <p className="text-[9px] uppercase font-black tracking-widest text-gray-400 italic">No Active Transmissions</p>
+//         </div>
+//       )}
+//     </div>
+//   </div>
+// );

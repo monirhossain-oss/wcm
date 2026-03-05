@@ -1,11 +1,10 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
   FiArrowLeft,
   FiExternalLink,
-  FiUser,
   FiMapPin,
   FiGlobe,
   FiLink,
@@ -19,7 +18,6 @@ import {
   FaYoutube,
   FaTwitter,
   FaLinkedin,
-  FaGithub,
   FaHeart,
   FaRegHeart,
   FaEye,
@@ -34,12 +32,17 @@ const ListingDetails = () => {
   const { id } = params;
   const { user } = useAuth();
 
+  // States
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [relatedListings, setRelatedListings] = useState([]);
   const [clickLoading, setClickLoading] = useState(false);
+  const [externalClickLoading, setExternalClickLoading] = useState(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favCount, setFavCount] = useState(0);
+
+  // 🛡️ Locking Ref: ডাবল ক্লিক বা রি-রেন্ডার জনিত ডাবল এপিআই কল রোধ করবে
+  const isProcessing = useRef(false);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -61,9 +64,14 @@ const ListingDetails = () => {
         });
         const currentProduct = res.data;
         setProduct(currentProduct);
+        setFavCount(currentProduct.favorites?.length || 0);
 
         if (user && currentProduct.favorites) {
-          setIsFavorited(currentProduct.favorites.includes(user._id));
+          setIsFavorited(
+            currentProduct.favorites.some(
+              (favId) => (typeof favId === 'string' ? favId : favId._id) === user._id
+            )
+          );
         }
 
         if (currentProduct.creatorId?._id) {
@@ -72,13 +80,12 @@ const ListingDetails = () => {
               `${API_BASE_URL}/api/listings/public?creatorId=${currentProduct.creatorId._id}&limit=10`,
               { withCredentials: true }
             );
-
-            const allListingsFromCreator = relatedRes.data.listings || [];
-            const filtered = allListingsFromCreator.filter((item) => item._id !== id).slice(0, 4);
+            const filtered = (relatedRes.data.listings || [])
+              .filter((item) => item._id !== id)
+              .slice(0, 4);
             setRelatedListings(filtered);
-          } catch (relatedErr) {
-            console.error('Related Listings Error:', relatedErr);
-            setRelatedListings([]);
+          } catch (err) {
+            console.error('Related Listings Error:', err);
           }
         }
       } catch (err) {
@@ -93,7 +100,10 @@ const ListingDetails = () => {
 
   const handleToggleFavorite = async () => {
     if (!user) return alert('Please login to add to favorites!');
+    if (isProcessing.current) return;
+
     try {
+      isProcessing.current = true;
       const res = await axios.post(
         `${API_BASE_URL}/api/listings/favorite/${id}`,
         {},
@@ -103,19 +113,51 @@ const ListingDetails = () => {
       setFavCount(res.data.favoritesCount);
     } catch (err) {
       console.error('Favorite Toggle Error:', err);
+    } finally {
+      isProcessing.current = false;
     }
   };
 
-  const handleVisitSite = async () => {
-    if (!product?.websiteLink) return;
-    setClickLoading(true);
+  // 🚀 PPC Click Handler for Social Icons
+  const handleExternalClick = async (url, index) => {
+    if (isProcessing.current || externalClickLoading !== null) return;
+
+    isProcessing.current = true;
+    setExternalClickLoading(index);
+
     try {
-      await axios.post(`${API_BASE_URL}/api/listings/${id}/click`);
+      await axios.post(`${API_BASE_URL}/api/listings/${id}/click`, {}, { withCredentials: true });
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      console.error('Tracking Failed:', err);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } finally {
+      setExternalClickLoading(null);
+      // ছোট ডিলে যাতে স্টেট আপডেটের পর লক খুলে
+      setTimeout(() => {
+        isProcessing.current = false;
+      }, 500);
+    }
+  };
+
+  // 🚀 PPC Click Handler for Main Button
+  const handleVisitSite = async () => {
+    if (!product?.websiteLink || isProcessing.current || clickLoading) return;
+
+    isProcessing.current = true;
+    setClickLoading(true);
+
+    try {
+      await axios.post(`${API_BASE_URL}/api/listings/${id}/click`, {}, { withCredentials: true });
       window.open(product.websiteLink, '_blank', 'noopener,noreferrer');
     } catch (err) {
+      console.error('Click Tracking Failed', err);
       window.open(product.websiteLink, '_blank', 'noopener,noreferrer');
     } finally {
       setClickLoading(false);
+      setTimeout(() => {
+        isProcessing.current = false;
+      }, 500);
     }
   };
 
@@ -126,9 +168,12 @@ const ListingDetails = () => {
       </div>
     );
 
+  if (!product) return <div className="text-center py-20">Listing not found.</div>;
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a] pt-5 pb-12 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
+        {/* Top Navigation */}
         <div className="flex justify-between items-center mb-8">
           <Link
             href="/categories"
@@ -152,11 +197,11 @@ const ListingDetails = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-          {/* Left: Image Container (Sticky removed, Rounded reduced) */}
+          {/* Image Section */}
           <div className="rounded-2xl overflow-hidden shadow-xl border border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-zinc-900 aspect-square relative">
             <Image
               src={
-                product.image.startsWith('http')
+                product.image?.startsWith('http')
                   ? product.image
                   : `${API_BASE_URL}/${product.image}`
               }
@@ -174,7 +219,7 @@ const ListingDetails = () => {
             )}
           </div>
 
-          {/* Right: Content Section */}
+          {/* Details Section */}
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center gap-2 mb-6">
               <span className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 rounded-full text-[10px] font-black uppercase tracking-widest">
@@ -215,7 +260,7 @@ const ListingDetails = () => {
               </div>
             )}
 
-            {/* Social Links Box */}
+            {/* Social Links / External URLs */}
             {product.externalUrls?.length > 0 && (
               <div className="mb-8 p-5 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-xl">
                 <p className="text-[10px] text-zinc-400 uppercase font-black tracking-[0.2em] mb-4">
@@ -223,25 +268,28 @@ const ListingDetails = () => {
                 </p>
                 <div className="flex flex-wrap gap-4">
                   {product.externalUrls.map((url, idx) => (
-                    <a
+                    <button
                       key={idx}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-2xl transition-all hover:-translate-y-1"
+                      onClick={() => handleExternalClick(url, idx)}
+                      disabled={externalClickLoading !== null}
+                      className="text-2xl transition-all hover:-translate-y-1 cursor-pointer bg-transparent border-none p-0 outline-none"
                     >
-                      {getSocialIcon(url)}
-                    </a>
+                      {externalClickLoading === idx ? (
+                        <FaSpinner className="animate-spin text-sm" />
+                      ) : (
+                        getSocialIcon(url)
+                      )}
+                    </button>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Stats & Creator Card (Rounded-xl) */}
+            {/* Stats & Creator Card */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
               <div className="md:col-span-2 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 p-5 rounded-xl flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center text-white text-xl font-black">
-                  {product.creatorId?.username?.charAt(0).toUpperCase()}
+                <div className="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center text-white text-xl font-black uppercase">
+                  {product.creatorId?.username?.charAt(0)}
                 </div>
                 <div className="overflow-hidden">
                   <p className="text-[9px] text-zinc-400 uppercase font-black tracking-widest">
@@ -269,7 +317,7 @@ const ListingDetails = () => {
               </div>
             </div>
 
-            {/* CTA Button (Sharped Rounded) */}
+            {/* Main Visit Button */}
             <button
               onClick={handleVisitSite}
               disabled={clickLoading}
@@ -279,16 +327,16 @@ const ListingDetails = () => {
                 <FaSpinner className="animate-spin" />
               ) : (
                 <>
-                  Visit Experience <FiExternalLink />
+                  {'Visit Experience'} <FiExternalLink />
                 </>
               )}
             </button>
           </div>
         </div>
 
-        {/* 🔥 "More from this creator" Section */}
+        {/* More from Creator Section */}
         {relatedListings.length > 0 && (
-          <div className="pt-16 border-t border-zinc-100 dark:border-white/5">
+          <div className="pt-16 border-t border-zinc-100 dark:border-white/5 mt-12">
             <div className="flex justify-between items-end mb-8">
               <div>
                 <p className="text-[#F57C00] text-[10px] font-black uppercase tracking-[0.3em] mb-2">
@@ -305,8 +353,7 @@ const ListingDetails = () => {
                 View All
               </Link>
             </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {relatedListings.map((item) => (
                 <ListingCard key={item._id} item={item} />
               ))}

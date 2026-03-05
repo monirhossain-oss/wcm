@@ -1,17 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import {
-  FiTarget,
-  FiZap,
-  FiEye,
-  FiTrendingUp,
-  FiClock,
-  FiMousePointer,
-  FiArrowLeft,
-  FiActivity,
-  FiShield,
-} from 'react-icons/fi';
+import { FiZap, FiClock, FiMousePointer, FiArrowLeft, FiActivity } from 'react-icons/fi';
 import axios from 'axios';
 
 const api = axios.create({
@@ -38,7 +28,7 @@ export default function PromotionInsightsPage() {
         setLoading(false);
       }
     };
-    fetchStats();
+    if (id) fetchStats();
   }, [id]);
 
   if (loading) {
@@ -49,24 +39,13 @@ export default function PromotionInsightsPage() {
     );
   }
 
-  if (!data) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center dark:bg-[#050505] bg-gray-50">
-        <p className="text-gray-400 uppercase tracking-widest text-[10px] font-black">
-          Protocol Failure: No Data
-        </p>
-        <button
-          onClick={() => router.back()}
-          className="mt-4 text-orange-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:underline"
-        >
-          <FiArrowLeft /> Return to Command
-        </button>
-      </div>
-    );
-  }
+  if (!data) return null;
+
+  // ক্যালকুলেশনগুলো ভেরিয়েবলে নিয়ে আসা যাতে ভুল না হয়
+  const { ppc, boost } = data;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans animate-in fade-in duration-700">
+    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans px-4 pt-10 animate-in fade-in duration-700">
       {/* Navigation & Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-gray-100 dark:border-white/5 pb-8">
         <div className="flex items-center gap-4">
@@ -79,17 +58,17 @@ export default function PromotionInsightsPage() {
           <div>
             <h1 className="text-2xl font-black uppercase tracking-tighter dark:text-white flex items-center gap-3">
               <FiActivity className="text-orange-500" /> Performance{' '}
-              <span className="text-orange-500">Page</span>
+              <span className="text-orange-500">Node</span>
             </h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
-              Target ID: {id.slice(0, 8)}... | {data.title}
+              Target: {data.title}
             </p>
           </div>
         </div>
 
         <div className="flex gap-4">
           <HeaderStat label="Rank Level" value={data.level} color="text-orange-500" />
-          <HeaderStat label="Net Views" value={data.views} color="dark:text-white text-black" />
+          <HeaderStat label="Total Views" value={data.views} color="dark:text-white text-black" />
         </div>
       </div>
 
@@ -102,47 +81,47 @@ export default function PromotionInsightsPage() {
                 <FiMousePointer className="text-blue-500" /> PPC Campaign Logic
               </h2>
               <span
-                className={`text-[9px] font-black uppercase tracking-widest italic ${data.ppc.isActive ? 'text-green-500' : 'text-red-500'}`}
+                className={`text-[9px] font-black uppercase tracking-widest italic ${ppc.isActive ? 'text-green-500' : 'text-red-500'}`}
               >
-                {data.ppc.isActive ? '● Executing' : '○ Standby'}
+                {ppc.isActive ? '● Executing' : '○ Standby'}
               </span>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-              <DataBox label="Remaining" value={data.ppc.clicksRemaining} unit="Clicks" />
-              <DataBox label="Executed" value={data.ppc.clicksUsed} unit="Clicks" />
-              <DataBox label="Unit Cost" value={`€${data.ppc.costPerClick}`} unit="CPC" />
-              <DataBox label="Credit" value={`€${data.ppc.balance}`} unit="EUR" />
+              <DataBox label="Available" value={ppc.clicksRemaining} unit="Clicks" />
+              <DataBox label="Executed" value={ppc.clicksUsed} unit="Clicks" />
+              <DataBox label="Credit" value={`€${ppc.balance}`} unit="EUR" />
+              <DataBox label="Unit Cost" value={`€${ppc.costPerClick}`} unit="CPC" />
             </div>
           </div>
 
           <div className="space-y-3">
             <div className="flex justify-between text-[9px] font-black text-gray-400 uppercase tracking-widest">
-              <span>Resource Depletion</span>
-              <span className="text-blue-500">{data.ppc.consumptionRate}%</span>
+              <span>Budget Depletion</span>
+              <span className="text-blue-500">{ppc.consumptionRate}% Used</span>
             </div>
-            <div className="w-full bg-gray-100 dark:bg-white/5 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-gray-100 dark:bg-white/10 rounded-full h-1.5 overflow-hidden">
               <div
                 className="bg-blue-500 h-full transition-all duration-1000"
-                style={{ width: `${data.ppc.consumptionRate}%` }}
+                style={{ width: `${ppc.consumptionRate}%` }}
               />
             </div>
           </div>
         </div>
 
-        {/* Boost Protocol Card */}
+        {/* Boost Card */}
         <div className="bg-white dark:bg-[#0c0c0c] rounded-md p-6 border border-gray-100 dark:border-white/5 shadow-sm flex flex-col justify-between">
           <div>
             <h2 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 dark:text-white mb-8">
               <FiZap className="text-yellow-500" /> Viral Protocol
             </h2>
 
-            <div className="text-center py-8 bg-gray-50 dark:bg-white/5 rounded">
+            <div className="text-center py-6 bg-gray-50 dark:bg-white/5 rounded">
               <div className="text-5xl font-black tracking-tighter text-yellow-500">
-                {data.boost.daysRemaining}
+                {boost.daysRemaining}
               </div>
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-2">
-                Days Until Expiry
+                Days Remaining
               </p>
             </div>
           </div>
@@ -151,17 +130,14 @@ export default function PromotionInsightsPage() {
             <div className="flex items-center gap-3 px-3 py-3 bg-gray-50 dark:bg-white/5 rounded border border-gray-100 dark:border-white/5">
               <FiClock className="text-yellow-500" size={16} />
               <div>
-                <p className="text-[8px] font-black text-gray-400 uppercase">Expiry Command</p>
+                <p className="text-[8px] font-black text-gray-400 uppercase">Status</p>
                 <p className="text-[10px] font-bold dark:text-white">
-                  {data.boost.expiresAt
-                    ? new Date(data.boost.expiresAt).toLocaleDateString()
-                    : 'N/A'}
+                  {boost.isActive
+                    ? `Expires: ${new Date(boost.expiresAt).toLocaleDateString()}`
+                    : 'Not Active'}
                 </p>
               </div>
             </div>
-            {/* <button className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded transition-all active:scale-95 shadow-lg shadow-orange-500/10">
-              Extend Protocol
-            </button> */}
           </div>
         </div>
       </div>
@@ -169,8 +145,9 @@ export default function PromotionInsightsPage() {
   );
 }
 
+// Helpers
 const HeaderStat = ({ label, value, color }) => (
-  <div className="bg-white dark:bg-[#0c0c0c] px-5 py-3 rounded border border-gray-100 dark:border-white/5 text-center min-w-25">
+  <div className="bg-white dark:bg-[#0c0c0c] px-5 py-3 rounded border border-gray-100 dark:border-white/5 text-center min-w-[100px]">
     <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{label}</p>
     <p className={`text-xl font-black tracking-tighter ${color}`}>{value}</p>
   </div>
