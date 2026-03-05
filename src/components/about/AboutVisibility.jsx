@@ -24,7 +24,7 @@ const AboutVisibility = () => {
             </p>
 
             {/* এক্সপ্লোর বাটন */}
-            <Link href="/products">
+            <Link href="/discover">
             <button className="px-8 py-3 cursor-pointer rounded-lg bg-[#F57C00] text-white font-bold hover:scale-105 transition-all shadow-xl active:scale-95">
               Explore Products
             </button>

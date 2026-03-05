@@ -91,7 +91,7 @@ const DiscoverPage = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-10">
-        {/* ৩. ক্যাটাগরি পিলস */}
+        
         <div className="flex items-center gap-2 mb-12 overflow-x-auto pb-2 no-scrollbar">
           {categories.map((cat) => (
             <button
@@ -106,7 +106,7 @@ const DiscoverPage = () => {
           ))}
         </div>
 
-        {/* ৪. ডাইনামিক কন্টেন্ট সেকশন (Title & Desc) */}
+     
         <div className="text-center mb-16 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <h1 className="text-2xl md:text-4xl font-black text-zinc-900 dark:text-white tracking-tighter">
             {categoryContent[activeCategory].title}
@@ -114,12 +114,10 @@ const DiscoverPage = () => {
           <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
             {categoryContent[activeCategory].desc}
           </p>
-          <button className="inline-flex items-center gap-2 bg-[#F57C00] text-white px-8 py-3 rounded-full font-bold text-sm hover:bg-[#F57C00] transition-all shadow-lg">
-            <Plus size={18} /> Follow {activeCategory}
-          </button>
+        
         </div>
 
-        {/* ৫. ৮টি কার্ডের গ্রিড */}
+       
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {filteredListings.map((item) => (
             <ListingCard key={item._id} item={item} />
