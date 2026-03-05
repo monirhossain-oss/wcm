@@ -1,197 +1,126 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-
-const creators = [
-  { id: 1, name: 'Amadou Diallo', description: 'Wood sculptor from Senegal preserving West African carving traditions.', culture: 'Mandinka', region: 'West Africa', initials: 'AD', hue: '#C0392B' },
-  { id: 2, name: 'Carlos Quispe', description: 'Fiber artist from Cusco, Peru working with highland alpaca herding communities.', culture: 'Quechua', region: 'South America', initials: 'CQ', hue: '#1A6B4A' },
-  { id: 3, name: 'Elif Yılmaz', description: 'Glass mosaic artist from Istanbul, Turkey, inspired by Ottoman and Byzantine artistry.', culture: 'Ottoman', region: 'Middle East', initials: 'EY', hue: '#7B3FA0' },
-  { id: 4, name: 'Hassan El Fassi', description: 'Leather artisan from Fez, Morocco, carrying forward centuries-old tanning and embossing techniques.', culture: 'Moroccan', region: 'North Africa', initials: 'HE', hue: '#B8860B' },
-  { id: 5, name: 'Kwame Asante', description: 'Master weaver from Kumasi, Ghana with 20+ years preserving Ashanti textile traditions.', culture: 'Ashanti', region: 'West Africa', initials: 'KA', hue: '#2E5A9C' },
-  { id: 6, name: 'María López', description: 'Third-generation Barro Negro artisan from Oaxaca, Mexico.', culture: 'Zapotec', region: 'Latin America', initials: 'ML', hue: '#8B4513' },
-  { id: 7, name: 'Priya Sharma', description: 'Textile designer from Jaipur, India dedicated to preserving block printing traditions.', culture: 'Rajasthani', region: 'South Asia', initials: 'PS', hue: '#C0392B' },
-  { id: 8, name: 'Yuki Tanaka', description: 'Ceramic artist based in Kyoto, trained in the Raku tradition for over 15 years.', culture: 'Japanese', region: 'East Asia', initials: 'YT', hue: '#2C7873' },
-];
-
-const Diamond = ({ size = 10, className = '', style = {} }) => (
-  <svg width={size} height={size} viewBox="0 0 10 10" fill="none" className={className} style={style}>
-    <rect x="5" y="0.5" width="6.5" height="6.5" rx="0.5" transform="rotate(45 5 0.5)" stroke="currentColor" strokeWidth="1" fill="none" />
-  </svg>
-);
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function CreatorsPage() {
-  const [hoveredId, setHoveredId] = useState(null);
+  const [creators, setCreators] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const loadingRef = useRef(false);
+
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+
+  const LIMIT = 8;
+
+  const fetchCreators = async () => {
+    if (loadingRef.current || !hasMore) return;
+
+    loadingRef.current = true;
+
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/api/users/famous-creators?limit=${LIMIT}&offset=${offset}`
+      );
+
+      const newCreators = res.data.data;
+
+      // 🔥 DUPLICATE FILTER
+      setCreators((prev) => {
+        const existingIds = new Set(prev.map((c) => c._id));
+        const filtered = newCreators.filter(
+          (c) => !existingIds.has(c._id)
+        );
+        return [...prev, ...filtered];
+      });
+
+      if (!res.data.pagination.hasMore) {
+        setHasMore(false);
+      }
+
+      setOffset((prev) => prev + LIMIT);
+    } catch (error) {
+      console.error(error);
+    }
+
+    loadingRef.current = false;
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchCreators();
+  }, []);
+
+  // Scroll listener (ONLY ONCE)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 200
+      ) {
+        fetchCreators();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []); // 🔥 empty dependency
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'transparent',
-        fontFamily: "'DM Sans', system-ui, sans-serif",
-      }}
-    >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap');
-        .pf { font-family: 'Playfair Display', Georgia, serif; }
-        .dm { font-family: 'DM Sans', system-ui, sans-serif; }
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <h1 className="text-3xl font-bold mb-10 text-center">
+        All Creators
+      </h1>
 
-        .creator-card {
-          position: relative;
-          background: #fff;
-          border: 1.5px solid #E8E0D5;
-          border-radius: 20px;
-          padding: 28px;
-          cursor: pointer;
-          transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
-          overflow: hidden;
-        }
-
-        @media (prefers-color-scheme: dark) {
-          .creator-card {
-            background: #1f1f1f;
-            border-color: #333;
-          }
-          .creator-name { color: #f3f3f3 !important; }
-          .creator-desc { color: #a0a0a0 !important; }
-          .tag { border-color: #333 !important; color: #ccc !important; }
-          .rule-line { background: #333 !important; }
-        }
-
-        .creator-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0;
-          width: 100%; height: 4px;
-          background: linear-gradient(90deg, var(--hue), #E07B39);
-          transform: scaleX(0);
-          transform-origin: left;
-          transition: transform 0.3s ease;
-        }
-        .creator-card:hover::before { transform: scaleX(1); }
-        .creator-card:hover {
-          transform: translateY(-3px);
-          border-color: #D4C8B8;
-        }
-        .creator-card:hover .creator-name { color: #E07B39 !important; }
-
-        .avatar-ring {
-          width: 64px; height: 64px;
-          border-radius: 50%;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 22px; font-weight: 800; color: #fff;
-          flex-shrink: 0;
-          position: relative;
-        }
-        .avatar-ring::after {
-          content: '';
-          position: absolute;
-          inset: -3px;
-          border-radius: 50%;
-          border: 2px dashed;
-          border-color: var(--hue);
-          opacity: 0.4;
-          animation: spin 12s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .tag {
-          display: inline-flex; align-items: center;
-          padding: 3px 12px;
-          border-radius: 100px;
-          font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-          background: transparent;
-          color: #5A4A3A;
-          border: 1px solid #E8E0D5;
-        }
-
-        .section-rule {
-          display: flex; align-items: center; gap: 12px; margin-bottom: 36px;
-        }
-        .rule-line { flex: 1; height: 1px; background: #DDD5C8; }
-      `}</style>
-
-      {/* ===== HERO HEADER ===== */}
-      <div style={{ background: '#1C2B4A', padding: '80px 48px 60px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 24, left: 32, display: 'flex', gap: 10 }}>
-          {[0,1,2].map(i => <Diamond key={i} size={12} style={{ color: '#4A6090', opacity: 0.6 }} />)}
-        </div>
-        <div style={{ position: 'absolute', top: 24, right: 32, display: 'flex', gap: 10 }}>
-          {[0,1,2].map(i => <Diamond key={i} size={12} style={{ color: '#E07B39' }} />)}
-        </div>
-
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto' }}>
-          <p className="dm" style={{ color: '#E07B39', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>
-            ◆ &nbsp;World Culture Marketplace
-          </p>
-          <h1 className="pf" style={{ color: '#fff', fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 900, lineHeight: 1.1, margin: 0 }}>
-            Creators Directory
-          </h1>
-          <p className="dm" style={{ color: '#8FA3C8', fontSize: 16, marginTop: 14, fontWeight: 500, maxWidth: '600px' }}>
-            Meet the master artisans and creators dedicated to preserving global heritage and traditional craftsmanship.
-          </p>
-        </div>
-      </div>
-
-      {/* ===== GRID ===== */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '48px 32px' }}>
-        <div className="section-rule">
-          <div className="rule-line" />
-          <span className="dm" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9C8A78' }}>
-            Featured Artisans
-          </span>
-          <div className="rule-line" />
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
-          {creators.map((creator) => (
-            <div
-              key={creator.id}
-              className="creator-card"
-              style={{ '--hue': creator.hue }}
-              onMouseEnter={() => setHoveredId(creator.id)}
-              onMouseLeave={() => setHoveredId(null)}
-            >
-              <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
-                <div
-                  className="avatar-ring dm"
-                  style={{ '--hue': creator.hue, background: creator.hue }}
-                >
-                  {creator.initials}
-                </div>
-
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h3
-                    className="creator-name pf"
-                    style={{ fontSize: 20, fontWeight: 800, color: '#1C2B4A', margin: 0, lineHeight: 1.2, transition: 'color 0.2s' }}
-                  >
-                    {creator.name}
-                  </h3>
-                  <p
-                    className="creator-desc dm"
-                    style={{ fontSize: 13, color: '#7A6A5A', lineHeight: 1.6, margin: '8px 0 14px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
-                  >
-                    {creator.description}
-                  </p>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <span className="tag">◆ {creator.culture}</span>
-                    <span className="tag">{creator.region}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{
-                marginTop: 20, paddingTop: 16,
-                borderTop: '1px solid rgba(240, 234, 224, 0.5)',
-                display: 'flex', justifyContent: 'flex-end'
-              }}>
-                <span className="dm" style={{ fontSize: 11, fontWeight: 700, color: hoveredId === creator.id ? '#E07B39' : '#C0B0A0', letterSpacing: '0.08em', textTransform: 'uppercase', transition: 'color 0.2s' }}>
-                  View Profile →
-                </span>
-              </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {creators.map((creator) => (
+          <div
+            key={creator._id}
+            className="bg-white dark:bg-zinc-800 rounded-2xl shadow hover:shadow-lg transition p-6 text-center"
+          >
+            <div className="relative w-24 h-24 mx-auto mb-4">
+              <Image
+                src={
+                  creator.profile?.profileImage ||
+                  "/default-avatar.png"
+                }
+                alt={creator.username}
+                fill
+                className="rounded-full object-cover"
+              />
             </div>
-          ))}
-        </div>
+
+            <h3 className="font-semibold text-lg">
+              {creator.firstName} {creator.lastName}
+            </h3>
+
+            <p className="text-sm text-gray-500">
+              {creator.profile?.city || "Unknown"},{" "}
+              {creator.profile?.country || "World"}
+            </p>
+
+            <p className="text-xs text-gray-400 mt-2">
+              {creator.totalListings} Listings
+            </p>
+
+            <Link
+              href={`/profile/${creator._id}`}
+              className="mt-4 py-1 px-4 inline-block text-sm bg-orange-400 text-white rounded-2xl hover:bg-orange-700 transition"
+            >
+              View Profile
+            </Link>
+          </div>
+        ))}
       </div>
+
+      {!hasMore && (
+        <p className="text-center mt-8 text-gray-400">
+          You have seen all creators
+        </p>
+      )}
     </div>
   );
 }

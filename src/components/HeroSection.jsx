@@ -1,59 +1,26 @@
-'use client';
-import { useAuth } from '@/context/AuthContext';
-import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
-import { FaUtensils, FaChevronDown, FaGlobe, FaTheaterMasks } from 'react-icons/fa';
+// HeroSection.jsx
+import dynamic from 'next/dynamic';
 
-export default function HeroSection({ filters, onFilterChange }) {
-  const images = [
-    'https://i.ibb.co.com/6RXQcNcM/15-4-11zon-min-2048x1365-1-1170x550.webp',
-    'https://i.ibb.co.com/ycFMBh0N/photo-1589463349208-95817c91f971.avif',
-    'https://i.ibb.co.com/JRMkRJqG/abstract-silhouettes-front-view-geometric-260nw-2496928155.webp',
-  ];
+// Client-only components
+const HeroSlider = dynamic(() => import('./HeroSlider'), { ssr: false });
+const HeroActions = dynamic(() => import('./HeroActions'), { ssr: false });
+const HeroFilters = dynamic(() => import('./HeroFilters'), { ssr: false });
 
-  const [currentImage, setCurrentImage] = useState(0);
-  const [mounted, setMounted] = useState(false);
-  const { user } = useAuth();
-
-  const isCreator = user?.role === 'creator';
-  const isAdmin = user?.role === 'admin';
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    const timer = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % images.length);
-    }, 8000);
-    return () => clearInterval(timer);
-  }, [mounted, images.length]);
-
-  if (!mounted) return null;
+export default function HeroSection({ filters = {} }) {
+  // Server component থেকে শুধুমাত্র initial filters পাঠানো যাবে
+  const handleFilterChange = (id, value) => {
+    console.log('Filter changed:', id, value);
+    // চাইলে এখানে API call করে filtered products fetch করতে পারেন
+  };
 
   return (
-    <section className="relative overflow-hidden min-h-187.5 flex items-center transition-all duration-500">
-      {/* Background Slider */}
-      <div className="absolute inset-0 w-full h-full">
-        {images.map((img, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              index === currentImage ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{
-              backgroundImage: `url(${img})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
-            <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/50 to-black/80 transition-all duration-500" />
-          </div>
-        ))}
-      </div>
+    <section className="relative overflow-hidden flex items-center transition-all duration-500">
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-12 flex flex-col items-center text-center w-full">
+      {/* Client Slider */}
+      <HeroSlider />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-4 flex flex-col items-center text-center w-full">
+
         <h1 className="text-5xl md:text-7xl font-bold text-white drop-shadow-2xl leading-tight">
           Discover <br /> culture <span className="text-[#F57C00]">worldwide</span>
         </h1>
@@ -63,72 +30,8 @@ export default function HeroSection({ filters, onFilterChange }) {
           crafted with culture, passion, and purpose.
         </p>
 
-        <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <Link href="/products">
-            <button className="px-8 py-3 cursor-pointer rounded-lg bg-[#F57C00] text-white font-bold hover:scale-105 transition-all shadow-xl active:scale-95">
-              Explore Products
-            </button>
-          </Link>
-
-          {isCreator || isAdmin ? (
-            <button
-              disabled
-              className="px-8 py-3 rounded-lg bg-gray-400/50 text-white cursor-not-allowed backdrop-blur-sm"
-            >
-              {isAdmin ? 'Admin Access Active' : 'Creator Mode Active'}
-            </button>
-          ) : (
-            <Link href={user ? `/become-creator` : `/auth/login`}>
-              <button className="px-8 py-3 border border-white/30 text-white bg-white/10 backdrop-blur-md rounded-lg cursor-pointer hover:bg-white/20 transition-all">
-                Become a Creator
-              </button>
-            </Link>
-          )}
-        </div>
-
-        <div className="max-w-4xl w-full mx-auto mt-20 py-4 flex flex-col md:flex-row gap-4">
-          {[
-            {
-              id: 'category',
-              icon: <FaUtensils />,
-              label: 'Category',
-              options: ['Art & Sculpture', 'Fashion', 'Music'],
-            },
-            {
-              id: 'region',
-              icon: <FaGlobe />,
-              label: 'Region',
-              options: ['Asia', 'Europe', 'Africa'],
-            },
-            {
-              id: 'tradition',
-              icon: <FaTheaterMasks />,
-              label: 'Cultural',
-              options: ['jamdami', 'Modern', 'Fusion'],
-            },
-          ].map((filter, i) => (
-            <div key={i} className="relative w-full md:w-1/3">
-              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 z-10">
-                {filter.icon}
-              </span>
-              <select
-                value={filters[filter.id] || ''}
-                onChange={(e) => onFilterChange(filter.id, e.target.value)}
-                className="w-full bg-white/20 backdrop-blur-xl px-12 py-4 rounded-full text-white appearance-none border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#F57C00] transition-all cursor-pointer font-medium"
-              >
-                <option value="" className="bg-gray-800">
-                  All {filter.label}
-                </option>
-                {filter.options.map((opt) => (
-                  <option key={opt} value={opt} className="bg-gray-800 text-white">
-                    {opt}
-                  </option>
-                ))}
-              </select>
-              <FaChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-300 z-10" />
-            </div>
-          ))}
-        </div>
+        {/* Client Auth Buttons */}
+        <HeroActions />
       </div>
     </section>
   );
