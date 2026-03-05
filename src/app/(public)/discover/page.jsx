@@ -1,130 +1,253 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import axios from 'axios';
 import ListingCard from '@/components/ListingCard';
-import { Search, Filter, ChevronDown, Check, Plus } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Loader2, MapPin, Zap } from 'lucide-react';
+
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  withCredentials: true,
+});
 
 const DiscoverPage = () => {
+  const [listings, setListings] = useState([]);
+  const [categories, setCategories] = useState(['All']);
+  const [regions, setRegions] = useState(['All Regions']); // ডায়নামিক রিজিয়ন
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeSort, setActiveSort] = useState('Recommended');
-  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [sortBy, setSortBy] = useState('Popularity');
+  const [selectedRegion, setSelectedRegion] = useState('All Regions');
 
-  const categoryContent = {
-    All: { 
-      title: "Discover Culture", 
-      desc: "Immerse yourself in a global gallery of heritage. From the intricate threads of ancient weaving to the bold strokes of contemporary tribal art, explore handpicked treasures that define the lived experiences of humanity." 
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+
+  const limit = 12;
+  const observer = useRef();
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const fetchMeta = async () => {
+      try {
+        const res = await api.get('/api/listings/meta-data');
+        const catTitles = res.data.categories.map((c) => c.title);
+        setCategories(['All', ...catTitles]);
+
+        if (res.data.regions) {
+          setRegions(['All Regions', ...res.data.regions]);
+        }
+      } catch (err) {
+        console.error('Meta fetch error:', err);
+      }
+    };
+    fetchMeta();
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const fetchListings = useCallback(
+    async (isInitial = false) => {
+      if (isInitial) setLoading(true);
+      else setLoadingMore(true);
+
+      try {
+        let url = `/api/listings/public?limit=${limit}&offset=${isInitial ? 0 : offset}`;
+        if (activeCategory !== 'All') url += `&category=${activeCategory}`;
+        if (debouncedSearch) url += `&search=${debouncedSearch}`;
+        if (sortBy === 'Newest') url += `&filter=Today`;
+        if (selectedRegion !== 'All Regions') url += `&region=${selectedRegion}`;
+
+        const res = await api.get(url);
+        const { listings: newListings, hasMore: more } = res.data;
+
+        setListings((prev) => (isInitial ? newListings : [...prev, ...newListings]));
+        setHasMore(more);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     },
-    Crafts: { 
-      title: "Master Crafts", 
-      desc: "Celebrate the soul of craftsmanship. Our collection features master artisans who preserve age-old techniques, creating unique pottery, wood carvings, and hand-woven artifacts that stand as a testament to cultural resilience." 
+    [activeCategory, debouncedSearch, sortBy, selectedRegion, offset]
+  );
+
+  useEffect(() => {
+    setOffset(0);
+    setHasMore(true);
+    fetchListings(true);
+  }, [activeCategory, debouncedSearch, sortBy, selectedRegion]);
+
+  useEffect(() => {
+    if (offset > 0) fetchListings(false);
+  }, [offset]);
+
+  const lastElementRef = useCallback(
+    (node) => {
+      if (loading || loadingMore) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setOffset((prev) => prev + limit);
+        }
+      });
+      if (node) observer.current.observe(node);
     },
-    Clothing: { 
-      title: "Heritage Wear", 
-      desc: "Wear the story of a nation. Discover traditional silhouettes and ethnic textiles that blend historical patterns with modern elegance, ensuring that the art of indigenous fashion continues to inspire future generations." 
-    },
-    Art: { 
-      title: "Cultural Art", 
-      desc: "Beyond aesthetics, these are the visual voices of our ancestors. Explore a curated selection of ritual masks, oil paintings, and sculptures that capture the spiritual and social essence of diverse communities worldwide." 
-    },
-    'Home Decor': { 
-      title: "Artisan Living", 
-      desc: "Transform your space into a sanctuary of stories. From hand-painted ceramic vases to ethically sourced tapestries, each piece brings the warmth and authenticity of global heritage directly into your modern home." 
-    },
-    Accessories: { 
-      title: "Ethnic Accents", 
-      desc: "Discover small treasures with big histories. Our jewelry and accessory collection highlights the intricate beadwork and metal-smithing traditions that have been passed down through centuries of artisan families." 
+    [loading, loadingMore, hasMore]
+  );
+
+  const slide = (direction) => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - 200 : scrollLeft + 200;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
     }
   };
 
-  const categories = Object.keys(categoryContent);
-  const sortOptions = ['Recommended', 'Curated', 'Most Appreciated', 'Most Recent'];
-
-  const dummyListings = [
-    { _id: '1', title: 'Handmade Pottery', price: 45, category: 'Crafts', images: ['https://i.postimg.cc/3x9yPRpV/Pottery-craft-ceramics.jpg'] },
-    { _id: '2', title: 'Traditional Scarf', price: 25, category: 'Clothing', images: ['https://i.postimg.cc/sD41hXnH/Chris-Fallon.jpg'] },
-    { _id: '3', title: 'Wooden Totem', price: 120, category: 'Art', images: ['https://i.postimg.cc/Y0wq4KYF/essay-scruton-fakery-42-22804006.webp'] },
-    { _id: '4', title: 'Ceramic Vase', price: 60, category: 'Home Decor', images: ['https://i.postimg.cc/QxhdhDXX/138016039-15563697440551n.jpg'] },
-    { _id: '5', title: 'Oil Painting', price: 250, category: 'Art', images: ['https://i.postimg.cc/2ymrkdNw/kch-280226-ce-bagatan-p1.jpg'] },
-    { _id: '6', title: 'Beaded Jewelry', price: 35, category: 'Accessories', images: ['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908'] },
-    { _id: '7', title: 'Cultural Mask', price: 85, category: 'Art', images: ['https://images.unsplash.com/photo-1503177119275-0aa32b3a9368'] },
-    { _id: '8', title: 'Woven Basket', price: 30, category: 'Crafts', images: ['https://images.unsplash.com/photo-1596436889106-be35e843f974'] },
-  ];
-
-  const filteredListings = dummyListings.filter((item) => {
-    const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const SkeletonCard = () => (
+    <div className="space-y-4 animate-pulse">
+      <div className="aspect-5/4 bg-zinc-100 dark:bg-white/5" />
+      <div className="h-4 bg-zinc-100 dark:bg-white/5 w-3/4" />
+      <div className="h-3 bg-zinc-100 dark:bg-white/5 w-1/2" />
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] transition-colors">
-      
-      {/* Sticky Search & Sort Bar */}
-      <div className="sticky top-0 z-30 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="relative max-w-2xl mx-auto">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search items..." 
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] transition-colors pb-20">
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
+      {/* Sticky Header Section */}
+      <div className="sticky top-20 z-40 bg-white/95 dark:bg-[#0a0a0a] border-b border-zinc-100 dark:border-white/5">
+        <div className="max-w-7xl mx-auto px-6 py-4 space-y-4">
+          {/* Search Row */}
+          <div className="relative max-w-3xl mx-auto w-full">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search culture, art, nodes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-2.5 bg-gray-100 dark:bg-zinc-900 border-none rounded-full text-sm outline-none"
+              className="w-full pl-12 pr-4 py-3 bg-zinc-100 dark:bg-white/5 border-none rounded-full text-sm outline-none focus:ring-1 focus:ring-orange-500/50 transition-all dark:text-white"
             />
           </div>
-          <div className="relative">
-            <button onClick={() => setIsSortOpen(!isSortOpen)} className="flex items-center gap-2 text-sm font-bold">
-              <span className="text-gray-400 font-normal">Sort:</span> {activeSort}
-              <ChevronDown size={14} />
-            </button>
-            {isSortOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border rounded-xl shadow-xl z-50 py-2">
-                {sortOptions.map((opt) => (
-                  <button key={opt} onClick={() => { setActiveSort(opt); setIsSortOpen(false); }} className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm flex justify-between">
-                    {opt} {activeSort === opt && <Check size={14} />}
+
+          {/* Filters & Category Slider Row */}
+          <div className="flex items-center gap-4">
+            {/* Left: Sort Select */}
+            <div className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 px-3 py-2 rounded-xl border border-transparent hover:border-orange-500/30 transition-all shrink-0">
+              <Zap size={14} className="text-orange-500" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer dark:text-zinc-300 dark:bg-[#1a1a1a]"
+              >
+                <option value="Popularity" className="dark:bg-[#1a1a1a]">
+                  Popularity
+                </option>
+                <option value="Newest" className="dark:bg-[#1a1a1a]">
+                  Newest
+                </option>
+              </select>
+            </div>
+
+            {/* Middle: Categories with Slide Icons */}
+            <div className="relative flex-1 flex items-center overflow-hidden">
+              <button
+                onClick={() => slide('left')}
+                className="p-1 hover:text-orange-500 transition-colors shrink-0"
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <div
+                ref={scrollRef}
+                className="flex items-center gap-2 overflow-x-auto no-scrollbar px-2 scroll-smooth"
+              >
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                      activeCategory === cat
+                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                        : 'text-zinc-500 hover:text-orange-500 bg-zinc-50 dark:bg-white/2'
+                    }`}
+                  >
+                    {cat}
                   </button>
                 ))}
               </div>
-            )}
+
+              <button
+                onClick={() => slide('right')}
+                className="p-1 hover:text-orange-500 transition-colors shrink-0"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+
+            {/* Right: Region Select */}
+            <div className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 px-3 py-2 rounded-xl border border-transparent hover:border-orange-500/30 transition-all shrink-0">
+              <MapPin size={14} className="text-blue-500" />
+              <select
+                value={selectedRegion}
+                onChange={(e) => setSelectedRegion(e.target.value)}
+                className="bg-transparent text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer dark:text-zinc-300 dark:bg-[#1a1a1a]"
+              >
+                {regions.map((r) => (
+                  <option key={r} value={r} className="dark:bg-[#1a1a1a]">
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        {/* ৩. ক্যাটাগরি পিলস */}
-        <div className="flex items-center gap-2 mb-12 overflow-x-auto pb-2 no-scrollbar">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-6 py-2 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all ${
-                activeCategory === cat ? 'bg-[#F57C00] text-white shadow-lg' : 'bg-gray-100 dark:bg-zinc-900 text-gray-500 hover:bg-gray-200'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+      {/* Grid Content */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {loading && listings.length === 0 ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {[...Array(8)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+            {listings.map((item, index) => (
+              <div key={item._id} ref={index === listings.length - 1 ? lastElementRef : null}>
+                <ListingCard item={item} />
+              </div>
+            ))}
 
-        {/* ৪. ডাইনামিক কন্টেন্ট সেকশন (Title & Desc) */}
-        <div className="text-center mb-16 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h1 className="text-2xl md:text-4xl font-black text-zinc-900 dark:text-white tracking-tighter">
-            {categoryContent[activeCategory].title}
-          </h1>
-          <p className="text-gray-400 text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
-            {categoryContent[activeCategory].desc}
-          </p>
-          <button className="inline-flex items-center gap-2 bg-[#F57C00] text-white px-8 py-3 rounded-full font-bold text-sm hover:bg-[#F57C00] transition-all shadow-lg">
-            <Plus size={18} /> Follow {activeCategory}
-          </button>
-        </div>
+            {loadingMore && [...Array(4)].map((_, i) => <SkeletonCard key={`more-${i}`} />)}
+          </div>
+        )}
 
-        {/* ৫. ৮টি কার্ডের গ্রিড */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {filteredListings.map((item) => (
-            <ListingCard key={item._id} item={item} />
-          ))}
-        </div>
+        {!hasMore && listings.length > 0 && (
+          <div className="mt-24 text-center border-t border-zinc-100 dark:border-white/5 pt-10">
+            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em]">
+              Protocol Complete: All nodes retrieved
+            </p>
+          </div>
+        )}
+
+        {!loading && listings.length === 0 && (
+          <div className="text-center py-40 bg-zinc-50 dark:bg-white/2 rounded-[40px] border border-dashed border-zinc-200 dark:border-white/10">
+            <p className="text-zinc-400 font-black uppercase tracking-widest text-xs">
+              No matching cultural nodes found in this sector.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
