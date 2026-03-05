@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import ListingCard from '@/components/ListingCard';
 import { Search } from 'lucide-react';
 
@@ -48,15 +48,15 @@ const DiscoverPage = () => {
       
       {/* Search Bar */}
       <div className="sticky top-0 z-30 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
-          <div className="relative flex-1">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="relative max-w-2xl mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
-              placeholder="Search..." 
+              placeholder="Search items..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-2 bg-gray-100 dark:bg-zinc-900 border-none rounded-full text-sm outline-none"
+              className="w-full pl-12 pr-4 py-2.5 bg-gray-100 dark:bg-zinc-900 border-none rounded-full text-sm outline-none"
             />
           </div>
         </div>
@@ -108,7 +108,7 @@ const DiscoverPage = () => {
           <h1 className="text-2xl md:text-4xl font-black text-zinc-900 dark:text-white tracking-tighter">
             {categoryContent[activeCategory].title}
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-400 text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
             {categoryContent[activeCategory].desc}
           </p>
         </div>
