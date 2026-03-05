@@ -9,12 +9,12 @@ const DiscoverPage = () => {
   const [sortBy, setSortBy] = useState('Popularity'); // Default Sort
 
   const categoryContent = {
-    All: { title: "Discover Culture", desc: "Immerse yourself in a global gallery of heritage." },
-    Crafts: { title: "Master Crafts", desc: "Celebrate the soul of craftsmanship." },
-    Clothing: { title: "Heritage Wear", desc: "Wear the story of a nation." },
-    Art: { title: "Cultural Art", desc: "Beyond aesthetics, these are visual voices." },
-    'Home Decor': { title: "Artisan Living", desc: "Transform your space into a sanctuary." },
-    Accessories: { title: "Ethnic Accents", desc: "Small treasures with big histories." }
+    All: { title: "Discover Culture", desc: "Immerse yourself in a global gallery of heritage. From the intricate threads of ancient weaving to the bold strokes of contemporary tribal art, explore handpicked treasures that define the lived experiences of humanity." },
+    Crafts: { title: "Master Crafts", desc: "Celebrate the soul of craftsmanship. Our collection features master artisans who preserve age-old techniques, creating unique pottery, wood carvings, and hand-woven artifacts that stand as a testament to cultural resilience." },
+    Clothing: { title: "Heritage Wear", desc: "Wear the story of a nation. Discover traditional silhouettes and ethnic textiles that blend historical patterns with modern elegance, ensuring that the art of indigenous fashion continues to inspire future generations." },
+    Art: { title: "Cultural Art", desc: "Beyond aesthetics, these are the visual voices of our ancestors. Explore a curated selection of ritual masks, oil paintings, and sculptures that capture the spiritual and social essence of diverse communities worldwide." },
+    'Home Decor': { title: "Artisan Living", desc: "Transform your space into a sanctuary of stories. From hand-painted ceramic vases to ethically sourced tapestries, each piece brings the warmth and authenticity of global heritage directly into your modern home." },
+    Accessories: { title: "Ethnic Accents", desc: "Discover small treasures with big histories. Our jewelry and accessory collection highlights the intricate beadwork and metal-smithing traditions that have been passed down through centuries of artisan families." }
   };
 
   const categories = Object.keys(categoryContent);
@@ -28,7 +28,7 @@ const DiscoverPage = () => {
     { _id: '6', title: 'Beaded Jewelry', price: 35, category: 'Accessories', images: ['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908'], date: '2024-01-10' },
   ];
 
-  // ফিল্টারিং এবং সর্টিং লজিক
+ 
   const processedListings = dummyListings
     .filter((item) => {
       const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
@@ -37,9 +37,9 @@ const DiscoverPage = () => {
     })
     .sort((a, b) => {
       if (sortBy === 'Popularity') {
-        return b.price - a.price; // Popularity হিসেবে দামিগুলো আগে দেখাচ্ছি
+        return b.price - a.price; 
       } else {
-        return b._id.localeCompare(a._id); // Newest হিসেবে লেটেস্ট আইডি আগে দেখাচ্ছি
+        return b._id.localeCompare(a._id); 
       }
     });
 
