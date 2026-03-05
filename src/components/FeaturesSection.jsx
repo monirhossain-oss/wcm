@@ -33,6 +33,7 @@ export default function FeaturedCultures() {
       );
 
       const newTags = res.data.tags || [];
+      // console.log('Fetched tags:', newTags);
 
       if (newTags.length < 10) {
         setHasMore(false);
@@ -55,7 +56,7 @@ export default function FeaturedCultures() {
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-12 relative group">
+    <section className="max-w-7xl mx-auto px-6 pb-4 relative group">
       {/* Header */}
       <div className="flex justify-between items-end mb-8">
         <div>
