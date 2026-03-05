@@ -101,8 +101,8 @@ const RegionCreatorsPage = ({ params }) => {
 
                 <div className="mt-8 flex gap-3">
                   <Link href={`/become-creator?creator=${c.name.toLowerCase().replace(/\s+/g, '-')}`} className="flex-1">
-                    <button className="w-full py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-black text-xs uppercase hover:bg-[#F57C00] dark:hover:bg-[#F57C00] dark:hover:text-white transition-all shadow-lg flex items-center justify-center gap-2">
-                      View Portfolio <ExternalLink size={14} />
+                    <button className="w-full py-4 bg-[#F57C00] dark:bg-white text-white dark:text-black rounded-2xl font-black text-xs uppercase hover:bg-[#F57C00] dark:hover:bg-[#F57C00] dark:hover:text-white transition-all shadow-lg flex items-center justify-center gap-2">
+                      View Profile <ExternalLink size={14} />
                     </button>
                   </Link>
                 </div>
