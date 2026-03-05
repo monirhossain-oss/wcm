@@ -1,6 +1,7 @@
 import { Inter, Poppins, Roboto, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { ListingsProvider } from '@/context/ListingsContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -37,7 +38,9 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} ${poppins.variable} ${roboto.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <ListingsProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ListingsProvider>
       </body>
     </html>
   );
