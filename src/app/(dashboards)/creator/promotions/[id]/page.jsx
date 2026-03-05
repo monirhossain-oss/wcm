@@ -159,9 +159,9 @@ export default function PromotionInsightsPage() {
                 </p>
               </div>
             </div>
-            <button className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded transition-all active:scale-95 shadow-lg shadow-orange-500/10">
+            {/* <button className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded transition-all active:scale-95 shadow-lg shadow-orange-500/10">
               Extend Protocol
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
