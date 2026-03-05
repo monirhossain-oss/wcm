@@ -7,6 +7,7 @@ import axios from 'axios';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import CreatorPopover from './CreatorPopover';
+import { Star } from 'lucide-react';
 
 // Image URL Helper
 const getImageUrl = (path) => {
@@ -102,10 +103,9 @@ const ListingCard = ({ item: initialItem }) => {
 
         {/* Featured Badge */}
         {item.isPromoted && (
-          <div className="absolute top-3 left-3 z-20">
-            <span className="bg-orange-600 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-md shadow-md">
-              FEATURED
-            </span>
+          <div className="absolute top-[4px] left-[3px] z-20 text-[10px] leading-[15px] font-bold text-white  bg-orange-600/40 px-2 py-0.5 rounded-md flex items-center gap-1">
+            <Star size={14} />
+            <span>FEATURED</span>
           </div>
         )}
       </div>
@@ -141,7 +141,7 @@ const ListingCard = ({ item: initialItem }) => {
             <div className="font-bold text-[12px] text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded whitespace-nowrap">
               {tradition}
             </div>
-            <div className="flex items-center text-[12px] gap-1 font-medium whitespace-nowrap">
+            <div className="hidden md:flex items-center text-[12px] gap-1 font-medium whitespace-nowrap">
               <HiOutlineLocationMarker className="text-sm" />
               {region}
             </div>
