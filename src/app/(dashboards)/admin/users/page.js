@@ -35,6 +35,7 @@ export default function UsersPage() {
       setLoading(true);
       const res = await api.get('/api/admin/users');
       setUsers(res.data);
+      console.log(res.data)
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
