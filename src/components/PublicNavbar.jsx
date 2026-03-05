@@ -30,8 +30,8 @@ const PublicNavbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] border-b border-[#F2F2F2] dark:border-[#1F1F1F] z-50">
-      <div className="flex items-center justify-between px-6 py-2">
+    <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] dark:border-[#1F1F1F] border-b z-50">
+      <div className="flex items-center justify-between px-6 h-20">
         {/* Left: Logo */}
         <div className="flex items-center space-x-2">
           <Link href="/" className="cursor-pointer">
