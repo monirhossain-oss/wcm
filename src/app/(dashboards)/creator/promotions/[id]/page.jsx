@@ -60,7 +60,7 @@ export default function PromotionInsightsPage() {
           </button>
           <div>
             <h1 className="text-3xl font-black uppercase tracking-tighter text-gray-900 dark:text-white flex items-center gap-3">
-              Performance <span className="text-orange-600 italic">Insights</span>
+              All <span className="text-orange-600 italic">Insights</span>
             </h1>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mt-1">
               Listing: <span className="text-orange-500">{data.title}</span> • ID: {id.slice(-8)}
