@@ -1,7 +1,15 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { FiZap, FiClock, FiMousePointer, FiArrowLeft, FiActivity } from 'react-icons/fi';
+import {
+  FiZap,
+  FiClock,
+  FiMousePointer,
+  FiArrowLeft,
+  FiActivity,
+  FiTrendingUp,
+  FiEye,
+} from 'react-icons/fi';
 import axios from 'axios';
 
 const api = axios.create({
@@ -19,9 +27,7 @@ export default function PromotionInsightsPage() {
     const fetchStats = async () => {
       try {
         const response = await api.get(`/api/creator/promotion-insights/${id}`);
-        if (response.data.success) {
-          setData(response.data.data);
-        }
+        if (response.data.success) setData(response.data.data);
       } catch (err) {
         console.error('Failed to load insights', err);
       } finally {
@@ -31,110 +37,143 @@ export default function PromotionInsightsPage() {
     if (id) fetchStats();
   }, [id]);
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center dark:bg-[#050505] bg-gray-50">
-        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center dark:bg-[#050505]">
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
-  }
 
   if (!data) return null;
-
-  // ক্যালকুলেশনগুলো ভেরিয়েবলে নিয়ে আসা যাতে ভুল না হয়
   const { ppc, boost } = data;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans px-4 pt-10 animate-in fade-in duration-700">
-      {/* Navigation & Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-gray-100 dark:border-white/5 pb-8">
-        <div className="flex items-center gap-4">
+    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans animate-in fade-in duration-500">
+      {/* Top Navigation */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-10">
+        <div className="flex items-center gap-5">
           <button
             onClick={() => router.back()}
-            className="p-2 bg-gray-100 dark:bg-white/10 hover:bg-orange-500 hover:text-white rounded transition-all"
+            className="p-3 bg-white/5 hover:bg-orange-500 hover:text-white rounded-lg transition-all border border-white/5"
           >
-            <FiArrowLeft size={18} />
+            <FiArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl font-black uppercase tracking-tighter dark:text-white flex items-center gap-3">
-              <FiActivity className="text-orange-500" /> Performance{' '}
-              <span className="text-orange-500">Node</span>
+            <h1 className="text-3xl font-black uppercase tracking-tighter text-white flex items-center gap-3">
+              Performance <span className="text-orange-500">Terminal</span>
             </h1>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
-              Target: {data.title}
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.4em] mt-1 italic">
+              Node ID: {id.slice(-8)} / {data.title}
             </p>
           </div>
         </div>
 
-        <div className="flex gap-4">
-          <HeaderStat label="Rank Level" value={data.level} color="text-orange-500" />
-          <HeaderStat label="Total Views" value={data.views} color="dark:text-white text-black" />
+        <div className="flex gap-3">
+          <QuickStat
+            icon={FiTrendingUp}
+            label="Current Rank"
+            value={`Lvl ${data.level}`}
+            color="text-orange-500"
+          />
+          <QuickStat icon={FiEye} label="Organic Reach" value={data.views} color="text-blue-400" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* PPC Logic Card */}
-        <div className="md:col-span-2 bg-white dark:bg-[#0c0c0c] rounded-md p-6 border border-gray-100 dark:border-white/5 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 dark:text-white">
-                <FiMousePointer className="text-blue-500" /> PPC Campaign Logic
-              </h2>
-              <span
-                className={`text-[9px] font-black uppercase tracking-widest italic ${ppc.isActive ? 'text-green-500' : 'text-red-500'}`}
-              >
-                {ppc.isActive ? '● Executing' : '○ Standby'}
-              </span>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* PPC ENGINE CARD */}
+        <div className="lg:col-span-2 bg-[#0c0c0c] rounded-lg p-8 border border-white/5 shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+            <FiMousePointer size={120} />
+          </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-              <DataBox label="Available" value={ppc.clicksRemaining} unit="Clicks" />
-              <DataBox label="Executed" value={ppc.clicksUsed} unit="Clicks" />
-              <DataBox label="Credit" value={`€${ppc.balance}`} unit="EUR" />
-              <DataBox label="Unit Cost" value={`€${ppc.costPerClick}`} unit="CPC" />
+          <div className="flex justify-between items-center mb-10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <FiActivity className="text-blue-500" size={20} />
+              </div>
+              <h2 className="text-sm font-black uppercase tracking-widest text-white">
+                Click Injection Logic
+              </h2>
+            </div>
+            <div
+              className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2 ${ppc.isActive ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}
+            >
+              <div
+                className={`h-1.5 w-1.5 rounded-full ${ppc.isActive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}
+              />
+              {ppc.isActive ? 'Active Protocol' : 'Standby'}
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex justify-between text-[9px] font-black text-gray-400 uppercase tracking-widest">
-              <span>Budget Depletion</span>
-              <span className="text-blue-500">{ppc.consumptionRate}% Used</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <MetricBox label="Remaining" value={ppc.clicksRemaining} sub="Clicks" />
+            <MetricBox label="Executed" value={ppc.clicksUsed} sub="Total" />
+            <MetricBox label="Balance" value={`€${ppc.balance}`} sub="EUR" />
+            <MetricBox label="CPC Rate" value={`€${ppc.costPerClick}`} sub="Per Click" />
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex justify-between items-end">
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                Resource Depletion
+              </p>
+              <p className="text-sm font-black text-blue-500 italic">{ppc.consumptionRate}%</p>
             </div>
-            <div className="w-full bg-gray-100 dark:bg-white/10 rounded-full h-1.5 overflow-hidden">
+            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
               <div
-                className="bg-blue-500 h-full transition-all duration-1000"
+                className="h-full bg-linear-to-r from-blue-600 to-blue-400 transition-all duration-1000 shadow-[0_0_15px_rgba(59,130,246,0.5)]"
                 style={{ width: `${ppc.consumptionRate}%` }}
               />
             </div>
           </div>
         </div>
 
-        {/* Boost Card */}
-        <div className="bg-white dark:bg-[#0c0c0c] rounded-md p-6 border border-gray-100 dark:border-white/5 shadow-sm flex flex-col justify-between">
-          <div>
-            <h2 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 dark:text-white mb-8">
-              <FiZap className="text-yellow-500" /> Viral Protocol
-            </h2>
+        {/* BOOST STATUS CARD */}
+        <div
+          className={`rounded-lg p-8 border transition-all flex flex-col justify-between overflow-hidden relative ${boost.isExpiringSoon ? 'bg-orange-500/5 border-orange-500/20' : 'bg-[#0c0c0c] border-white/5'}`}
+        >
+          {boost.isExpiringSoon && (
+            <div className="absolute top-0 left-0 w-full py-1 bg-orange-500 text-[8px] font-black text-center text-black uppercase tracking-[0.3em]">
+              Critical: Expiring in less than 24h
+            </div>
+          )}
 
-            <div className="text-center py-6 bg-gray-50 dark:bg-white/5 rounded">
-              <div className="text-5xl font-black tracking-tighter text-yellow-500">
-                {boost.daysRemaining}
+          <div>
+            <div className="flex items-center gap-3 mb-10">
+              <div className="p-2 bg-orange-500/10 rounded-lg">
+                <FiZap className="text-orange-500" size={20} />
               </div>
-              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-2">
-                Days Remaining
+              <h2 className="text-sm font-black uppercase tracking-widest text-white">
+                Viral Boost
+              </h2>
+            </div>
+
+            <div className="text-center py-10">
+              <div
+                className={`text-7xl font-black tracking-tighter mb-2 ${boost.isExpiringSoon ? 'text-orange-500' : 'text-white'}`}
+              >
+                {boost.isExpiringSoon ? boost.hoursRemaining : boost.daysRemaining}
+              </div>
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em]">
+                {boost.isExpiringSoon ? 'Hours Remaining' : 'Days Remaining'}
               </p>
             </div>
           </div>
 
-          <div className="mt-8 space-y-4">
-            <div className="flex items-center gap-3 px-3 py-3 bg-gray-50 dark:bg-white/5 rounded border border-gray-100 dark:border-white/5">
-              <FiClock className="text-yellow-500" size={16} />
+          <div className="space-y-4 mt-10">
+            <div className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/5">
+              <FiClock
+                className={boost.isExpiringSoon ? 'text-orange-500' : 'text-gray-500'}
+                size={20}
+              />
               <div>
-                <p className="text-[8px] font-black text-gray-400 uppercase">Status</p>
-                <p className="text-[10px] font-bold dark:text-white">
+                <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">
+                  Expiry Command
+                </p>
+                <p className="text-[11px] font-bold text-white">
                   {boost.isActive
-                    ? `Expires: ${new Date(boost.expiresAt).toLocaleDateString()}`
-                    : 'Not Active'}
+                    ? new Date(boost.expiresAt).toLocaleString()
+                    : 'Protocol Terminated'}
                 </p>
               </div>
             </div>
@@ -145,18 +184,21 @@ export default function PromotionInsightsPage() {
   );
 }
 
-// Helpers
-const HeaderStat = ({ label, value, color }) => (
-  <div className="bg-white dark:bg-[#0c0c0c] px-5 py-3 rounded border border-gray-100 dark:border-white/5 text-center min-w-[100px]">
-    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{label}</p>
-    <p className={`text-xl font-black tracking-tighter ${color}`}>{value}</p>
+// Visual Components
+const QuickStat = ({ icon: Icon, label, value, color }) => (
+  <div className="bg-[#0c0c0c] border border-white/5 px-6 py-3 rounded-lg flex items-center gap-4">
+    <Icon size={18} className={color} />
+    <div>
+      <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">{label}</p>
+      <p className={`text-lg font-black tracking-tighter ${color}`}>{value}</p>
+    </div>
   </div>
 );
 
-const DataBox = ({ label, value, unit }) => (
-  <div className="bg-gray-50 dark:bg-white/5 p-4 rounded border border-gray-100 dark:border-white/5">
-    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{label}</p>
-    <div className="text-lg font-black dark:text-white tracking-tight">{value}</div>
-    <p className="text-[7px] text-gray-500 uppercase font-bold italic">{unit}</p>
+const MetricBox = ({ label, value, sub }) => (
+  <div className="bg-white/2 border border-white/5 p-5 rounded-lg group-hover:border-white/10 transition-colors">
+    <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest mb-2">{label}</p>
+    <div className="text-2xl font-black text-white tracking-tighter">{value}</div>
+    <p className="text-[7px] text-gray-500 uppercase font-bold italic mt-1">{sub}</p>
   </div>
 );

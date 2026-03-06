@@ -12,10 +12,13 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiBarChart2,
+  FiDollarSign,
+  FiClock,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
+import toast, { Toaster } from 'react-hot-toast';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -30,16 +33,18 @@ export default function PromotionsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedListing, setSelectedListing] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
-  const [statusMsg, setStatusMsg] = useState(null);
   const [currency, setCurrency] = useState('eur');
   const [promoType, setPromoType] = useState('boost');
 
-  // --- Pagination State ---
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // প্রতি পেজে ৫টি আইটেম
+  const itemsPerPage = 5;
 
-  // Promotion States
-  const [boostDays, setBoostDays] = useState(30);
+  // Boost States (Updated: Manual input)
+  const [boostDays, setBoostDays] = useState(7);
+  const [boostBudget, setBoostBudget] = useState(20);
+
+  // PPC States
   const [ppcAmount, setPpcAmount] = useState(10);
   const [targetClicks, setTargetClicks] = useState(50);
 
@@ -47,17 +52,18 @@ export default function PromotionsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const BOOST_PER_DAY = 1.63;
-  const currentBoostCost = (boostDays * BOOST_PER_DAY).toFixed(2);
-  const displayCost = promoType === 'boost' ? currentBoostCost : ppcAmount;
-
+  // Calculations
+  const displayCost = promoType === 'boost' ? boostBudget : ppcAmount;
   const estimatedCPC = (ppcAmount / targetClicks).toFixed(2);
+  const dailyBoostIntensity = (boostBudget / boostDays).toFixed(2);
 
   useEffect(() => {
     initData();
     if (searchParams.get('success') === 'true') {
       triggerConfetti();
-      showStatus('success', 'Promotion activated successfully.');
+      toast.success('Promotion Protocol Activated!', {
+        style: { background: '#111', color: '#fff', border: '1px solid #222' },
+      });
       router.replace(pathname);
     }
   }, [searchParams]);
@@ -71,26 +77,25 @@ export default function PromotionsPage() {
       setListings(listRes.data.filter((l) => l.status === 'approved'));
       setStats(statsRes.data);
     } catch (err) {
-      console.error(err);
+      toast.error('Network synchronization failed');
     } finally {
       setLoading(false);
     }
   };
 
-  // --- Pagination Logic ---
-  const totalPages = Math.ceil(listings.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = listings.slice(indexOfFirstItem, indexOfLastItem);
-
-  const showStatus = (type, text) => {
-    setStatusMsg({ type, text });
-    setTimeout(() => setStatusMsg(null), 5000);
-  };
-
   const handlePromotion = async () => {
     const finalAmountEUR = Number(displayCost);
+
+    // Validation
+    if (promoType === 'boost' && (boostBudget < 5 || boostDays < 1)) {
+      return toast.error('Minimum investment €5 for 1 day');
+    }
+    if (promoType === 'ppc' && (ppcAmount < 5 || targetClicks < 1)) {
+      return toast.error('Minimum investment €5 for PPC');
+    }
+
     setPaymentLoading(true);
+    const toastId = toast.loading('Initializing Transaction...');
 
     const payload = {
       listingId: selectedListing._id,
@@ -103,20 +108,24 @@ export default function PromotionsPage() {
     };
 
     try {
+      // Wallet check
       if (currency === 'eur' && stats?.walletBalance >= finalAmountEUR) {
         const res = await api.post('/api/payments/pay-with-wallet', payload);
         if (res.data.success) {
           triggerConfetti();
-          showStatus('success', `Promotion active!`);
+          toast.success('Transaction Verified. Growth Active.', { id: toastId });
           setSelectedListing(null);
           initData();
         }
       } else {
         const res = await api.post('/api/payments/create-checkout-session', payload);
-        if (res.data.url) window.location.href = res.data.url;
+        if (res.data.url) {
+          toast.dismiss(toastId);
+          window.location.href = res.data.url;
+        }
       }
     } catch (err) {
-      showStatus('error', err.response?.data?.message || 'Transaction Failed');
+      toast.error(err.response?.data?.message || 'Authorization Refused', { id: toastId });
     } finally {
       setPaymentLoading(false);
     }
@@ -131,156 +140,132 @@ export default function PromotionsPage() {
     });
   };
 
+  const currentItems = listings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(listings.length / itemsPerPage);
+
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center dark:bg-[#050505]">
-        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans animate-in fade-in duration-700">
-      {statusMsg && (
-        <div
-          className={`fixed top-10 left-1/2 -translate-x-1/2 z-100 px-6 py-3 rounded-md border backdrop-blur-md shadow-2xl animate-in zoom-in ${
-            statusMsg.type === 'success'
-              ? 'bg-green-500/10 border-green-500/30 text-green-500'
-              : 'bg-red-500/10 border-red-500/30 text-red-500'
-          }`}
-        >
-          <span className="text-[10px] font-black uppercase tracking-widest">{statusMsg.text}</span>
-        </div>
-      )}
+    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans">
+      <Toaster position="top-center" reverseOrder={false} />
 
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-100 dark:border-white/5 pb-8">
-        <div>
-          <h1 className="text-2xl font-black uppercase tracking-tighter dark:text-white flex items-center gap-3">
-            <FiTrendingUp className="text-orange-500" /> Growth{' '}
-            <span className="text-orange-500">Accelerator</span>
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-10">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
+            <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em]">
+              Visibility Engine
+            </span>
+          </div>
+          <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
+            Growth <span className="text-orange-600/80 italic">Accelerator</span>
           </h1>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
-            Scale your node visibility across the network
-          </p>
+        </div>
+
+        <div className="flex gap-4">
+          <QuickStat label="Vault" value={`€${stats?.walletBalance || '0'}`} icon={FiShield} />
+          <QuickStat label="Active" value={stats?.activePromotions || '0'} icon={FiTrendingUp} />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatsCard
-          label="Vault Balance"
-          value={`€${stats?.walletBalance || '0.00'}`}
-          color="text-black dark:text-white"
-        />
-        <StatsCard
-          label="Active Campaigns"
-          value={stats?.activePromotions || 0}
-          color="text-blue-500"
-        />
-        <StatsCard
-          label="PPC Credits"
-          value={`€${stats?.totalPpcBalance || '0.00'}`}
-          color="text-orange-500"
-        />
-      </div>
+      {/* Assets Table */}
+      <div className="bg-[#0c0c0c] border border-white/5 rounded-lg shadow-2xl overflow-hidden">
+        <div className="p-6 border-b border-white/5 flex justify-between items-center">
+          <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
+            Validated Assets
+          </h2>
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 bg-green-500 rounded-full" />
+            <span className="text-[9px] font-bold text-gray-500 uppercase">Live Network</span>
+          </div>
+        </div>
 
-      <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg overflow-hidden shadow-sm">
         <div className="overflow-x-auto scrollbar-hide">
-          <table className="w-full text-left">
+          <table className="w-full">
             <thead>
-              <tr className="bg-gray-50/50 dark:bg-white/20 border-b border-gray-100 dark:border-white/5">
-                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  Asset
+              <tr className="bg-white/2 text-left">
+                <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest">
+                  Node Identification
                 </th>
-                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  Status
-                </th>
-                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
+                <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest">
                   Campaign Logic
                 </th>
-                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-right">
-                  Action
+                <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest text-right">
+                  Operation
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50 dark:divide-white/5 text-sm">
+            <tbody className="divide-y divide-white/5">
               {currentItems.map((item) => (
-                <tr
-                  key={item._id}
-                  className="hover:bg-gray-50/50 dark:hover:bg-white/20 transition-all group"
-                >
-                  <td className="px-6 py-4">
+                <tr key={item._id} className="hover:bg-white/3 transition-colors group">
+                  <td className="px-6 py-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-md overflow-hidden border border-gray-100 dark:border-white/10 shrink-0">
+                      <div className="w-14 h-14 rounded-lg overflow-hidden border border-white/10 group-hover:border-orange-500/30 transition-all">
                         <img
                           src={getImageUrl(item.image)}
-                          className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all"
-                          alt=""
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                         />
                       </div>
                       <div>
-                        <span className="text-xs font-black uppercase dark:text-white block truncate max-w-37.5">
+                        <p className="text-xs font-black uppercase text-white tracking-tight">
                           {item.title}
-                        </span>
-                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
-                          Rank: {item.promotion?.level || 0}
-                        </span>
+                        </p>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase mt-1">
+                          Level: {item.promotion?.level || 0}
+                        </p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    {item.isPromoted ? (
-                      <span className="flex items-center gap-1.5 text-green-500 text-[9px] font-black uppercase italic tracking-widest">
-                        <FiCheckCircle size={10} /> Active
-                      </span>
-                    ) : (
-                      <span className="text-gray-400 text-[9px] font-black uppercase tracking-widest opacity-40 italic">
-                        Deactive
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2 whitespace-nowrap">
+                  <td className="px-6 py-5">
+                    <div className="flex gap-2">
                       {item.promotion?.boost?.isActive && (
-                        <div className="bg-purple-500/10 border border-purple-500/20 px-2.5 py-1.5 rounded-sm">
-                          <p className="text-purple-500 text-[8px] font-black uppercase flex items-center gap-1">
-                            <FiZap size={10} /> Boost
-                          </p>
-                          <p className="text-[7px] text-gray-500 dark:text-gray-400 font-bold uppercase mt-0.5 italic">
-                            EXP: {new Date(item.promotion.boost.expiresAt).toLocaleDateString()}
-                          </p>
+                        <div className="px-2 py-1 bg-purple-500/10 border border-purple-500/20 rounded text-purple-500">
+                          <p className="text-[8px] font-black uppercase">Viral Boost</p>
                         </div>
                       )}
-                      {item.promotion?.ppc?.isActive && item.promotion?.ppc?.ppcBalance > 0 && (
-                        <div className="bg-orange-500/10 border border-orange-500/20 px-2.5 py-1.5 rounded-sm">
-                          <p className="text-orange-500 text-[8px] font-black uppercase flex items-center gap-1">
-                            <FiActivity size={10} /> PPC Logic
-                          </p>
-                          <p className="text-[7px] text-gray-500 dark:text-gray-400 font-bold uppercase mt-0.5 italic">
-                            BAL: €{item.promotion.ppc.ppcBalance}
-                          </p>
+                      {item.promotion?.ppc?.isActive && (
+                        <div className="px-2 py-1 bg-orange-500/10 border border-orange-500/20 rounded text-orange-500">
+                          <p className="text-[8px] font-black uppercase">PPC Protocol</p>
                         </div>
                       )}
                       {!item.isPromoted && (
-                        <span className="text-[8px] text-gray-400 font-bold uppercase italic opacity-60 tracking-widest">
-                          Awaiting Command
+                        <span className="text-[9px] font-bold text-gray-600 uppercase italic">
+                          Standby
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex justify-end gap-2">
-                      {/* View / Analytics Button */}
+                  <td className="px-6 py-5">
+                    {item.isPromoted ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-[8px] font-black uppercase">
+                        <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse" /> Active
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-bold text-gray-700 uppercase tracking-widest">
+                        Idle
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-5 text-right">
+                    <div className="flex justify-end gap-3">
                       <button
                         onClick={() => router.push(`/creator/promotions/${item._id}`)}
-                        className="p-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-600 dark:text-gray-300 rounded-md transition-all active:scale-95 cursor-pointer"
-                        title="View Insights"
+                        className="p-2.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all border border-white/5"
                       >
-                        <FiBarChart2 size={14} />
+                        <FiBarChart2 size={16} />
                       </button>
-
-                      {/* Promote Button */}
                       <button
                         onClick={() => setSelectedListing(item)}
-                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 cursor-pointer"
+                        className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all hover:shadow-[0_0_20px_rgba(234,88,12,0.3)] active:scale-95"
                       >
                         Promote
                       </button>
@@ -292,161 +277,177 @@ export default function PromotionsPage() {
           </table>
         </div>
 
-        {/* --- Pagination Controls --- */}
-        <div className="p-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/5">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-            Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, listings.length)} of{' '}
-            {listings.length} nodes
-          </p>
+        {/* Pagination */}
+        <div className="px-6 py-4 bg-white/1 border-t border-white/5 flex items-center justify-between">
+          <span className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.2em]">
+            Sequence {currentPage} / {totalPages}
+          </span>
           <div className="flex gap-2">
             <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="p-2 border border-gray-100 dark:border-white/10 rounded-md hover:bg-white dark:hover:bg-white/10 disabled:opacity-20 transition-all text-gray-400"
+              onClick={() => setCurrentPage((p) => p - 1)}
+              className="p-2 border border-white/10 rounded-md hover:bg-white/5 disabled:opacity-20 transition-all"
             >
-              <FiChevronLeft size={16} />
+              <FiChevronLeft className="text-gray-400" />
             </button>
             <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="p-2 border border-gray-100 dark:border-white/10 rounded-md hover:bg-white dark:hover:bg-white/10 disabled:opacity-20 transition-all text-gray-400"
+              onClick={() => setCurrentPage((p) => p + 1)}
+              className="p-2 border border-white/10 rounded-md hover:bg-white/5 disabled:opacity-20 transition-all"
             >
-              <FiChevronRight size={16} />
+              <FiChevronRight className="text-gray-400" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Selected Listing Modal (Promote Modal) */}
+      {/* Promotion Config Modal */}
       {selectedListing && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 backdrop-blur-md bg-black/80 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#0c0c0c] w-full max-w-xl rounded-lg border border-gray-100 dark:border-white/5 overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/20">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+            onClick={() => setSelectedListing(null)}
+          />
+
+          <div className="relative bg-[#0c0c0c] w-full max-w-xl rounded-lg border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in zoom-in duration-300">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/2">
               <div>
-                <h3 className="text-sm font-black dark:text-white uppercase tracking-widest flex items-center gap-2">
-                  <FiShield className="text-orange-500" /> Protocol Configuration
+                <h3 className="text-sm font-black text-white uppercase tracking-widest">
+                  Protocol Setup
                 </h3>
-                <p className="text-[9px] text-gray-400 font-bold uppercase mt-1 tracking-widest italic">
+                <p className="text-[9px] text-gray-500 font-bold uppercase mt-1 italic tracking-widest">
                   {selectedListing.title}
                 </p>
               </div>
               <button
                 onClick={() => setSelectedListing(null)}
-                className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-md transition-colors text-gray-400"
+                className="p-2 hover:bg-white/10 rounded-full text-gray-400 transition-colors"
               >
-                <FiX size={18} />
+                <FiX size={20} />
               </button>
             </div>
 
             <div className="p-8 space-y-8">
+              {/* Type Switcher */}
               <div className="grid grid-cols-2 gap-4">
-                <OptionButton
+                <ModalTab
                   active={promoType === 'boost'}
                   onClick={() => setPromoType('boost')}
                   icon={FiZap}
                   label="Fixed Boost"
-                  desc="Focus on visibility duration."
                   color="purple"
                 />
-                <OptionButton
+                <ModalTab
                   active={promoType === 'ppc'}
                   onClick={() => setPromoType('ppc')}
                   icon={FiActivity}
-                  label="PPC Credits"
-                  desc="Bid for engagement rank."
+                  label="Pay Per Click"
                   color="orange"
                 />
               </div>
 
-              {promoType === 'boost' ? (
-                <div className="space-y-4">
-                  <div className="flex justify-between text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                    <span>Duration: {boostDays} Days</span>
-                    <span className="text-purple-500">
-                      Intensity: €{(displayCost / boostDays).toFixed(2)} / Day
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="7"
-                    max="90"
-                    value={boostDays}
-                    onChange={(e) => setBoostDays(e.target.value)}
-                    className="w-full accent-purple-500 h-1 bg-gray-100 dark:bg-white/10 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <p className="text-[8px] text-gray-500 italic uppercase font-bold text-center tracking-widest">
-                    Pro Tip: Fewer days with higher budget increases Rank Level.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-6">
+              {/* Dynamic Form */}
+              <div className="space-y-6">
+                {promoType === 'boost' ? (
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                        Investment Amount (€)
-                      </p>
+                    <InputGroup label="Duration (Days)" icon={FiClock}>
                       <input
                         type="number"
+                        min="1"
+                        value={boostDays}
+                        onChange={(e) => setBoostDays(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white font-black text-sm focus:border-purple-500 focus:outline-none"
+                      />
+                    </InputGroup>
+                    <InputGroup label="Total Budget (€)" icon={FiDollarSign}>
+                      <input
+                        type="number"
+                        min="5"
+                        value={boostBudget}
+                        onChange={(e) => setBoostBudget(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white font-black text-sm focus:border-purple-500 focus:outline-none"
+                      />
+                    </InputGroup>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputGroup label="Budget Amount (€)" icon={FiDollarSign}>
+                      <input
+                        type="number"
+                        min="5"
                         value={ppcAmount}
                         onChange={(e) => setPpcAmount(e.target.value)}
-                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-md p-3 dark:text-white font-black focus:outline-none focus:border-orange-500"
-                        placeholder="Min 5"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white font-black text-sm focus:border-orange-500 focus:outline-none"
                       />
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                        Target Clicks
-                      </p>
+                    </InputGroup>
+                    <InputGroup label="Target Clicks" icon={FiMousePointer}>
                       <input
                         type="number"
+                        min="10"
                         value={targetClicks}
                         onChange={(e) => setTargetClicks(e.target.value)}
-                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-md p-3 dark:text-white font-black focus:outline-none focus:border-orange-500"
-                        placeholder="Min 10"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white font-black text-sm focus:border-orange-500 focus:outline-none"
                       />
-                    </div>
+                    </InputGroup>
                   </div>
-                  <div className="p-3 bg-orange-500/5 border border-orange-500/10 rounded-sm flex items-center justify-between">
-                    <span className="text-[9px] font-black text-orange-500 uppercase flex items-center gap-2">
-                      <FiMousePointer size={12} /> Bid Intensity
-                    </span>
-                    <span className="text-xs font-black dark:text-white">
-                      €{estimatedCPC}{' '}
-                      <span className="text-[8px] text-gray-400 uppercase italic">/ click</span>
-                    </span>
-                  </div>
-                </div>
-              )}
+                )}
 
-              <div className="p-5 bg-gray-50 dark:bg-white/5 rounded-md flex justify-between items-center border border-gray-100 dark:border-white/5">
+                {/* Info Display */}
+                <div
+                  className={`p-4 rounded-lg border flex justify-between items-center ${promoType === 'boost' ? 'bg-purple-500/5 border-purple-500/20' : 'bg-orange-500/5 border-orange-500/20'}`}
+                >
+                  <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+                    {promoType === 'boost' ? (
+                      <>
+                        <FiTrendingUp className="text-purple-500" /> Daily Intensity
+                      </>
+                    ) : (
+                      <>
+                        <FiMousePointer className="text-orange-500" /> Bid Intensity
+                      </>
+                    )}
+                  </span>
+                  <span className="text-lg font-black text-white italic">
+                    €{promoType === 'boost' ? dailyBoostIntensity : estimatedCPC}{' '}
+                    <span className="text-[8px] text-gray-500 uppercase">
+                      / {promoType === 'boost' ? 'Day' : 'Click'}
+                    </span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Currency Selector */}
+              <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/5">
                 <div className="flex gap-2">
                   {['eur', 'usd'].map((c) => (
                     <button
                       key={c}
                       onClick={() => setCurrency(c)}
-                      className={`px-4 py-1.5 rounded-sm text-[9px] font-black uppercase transition-all ${currency === c ? 'bg-black dark:bg-white text-white dark:text-black' : 'text-gray-400 border border-gray-200 dark:border-white/5'}`}
+                      className={`px-4 py-1.5 rounded text-[10px] font-black uppercase transition-all ${currency === c ? 'bg-white text-black' : 'text-gray-500 hover:text-white'}`}
                     >
                       {c}
                     </button>
                   ))}
                 </div>
                 <div className="text-right">
-                  <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest">
-                    Total Investment
+                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+                    Est. Investment
                   </p>
-                  <p className="text-2xl font-black dark:text-white italic tracking-tighter">
+                  <p className="text-2xl font-black text-white tracking-tighter">
                     {currency === 'eur' ? '€' : '$'}
                     {currency === 'eur' ? displayCost : (displayCost / FX_RATE).toFixed(2)}
                   </p>
                 </div>
               </div>
 
+              {/* Action Button */}
               <button
-                disabled={paymentLoading || (promoType === 'ppc' && ppcAmount < 5)}
+                disabled={paymentLoading}
                 onClick={handlePromotion}
-                className="w-full py-5 bg-orange-500 hover:bg-orange-600 disabled:opacity-30 text-white rounded-md font-black uppercase text-[10px] tracking-[0.4em] transition-all shadow-lg shadow-orange-500/10 active:scale-95"
+                className="w-full py-5 bg-orange-600 hover:bg-orange-500 disabled:opacity-20 text-white rounded-lg font-black uppercase text-[11px] tracking-[0.3em] transition-all hover:shadow-[0_0_30px_rgba(234,88,12,0.2)]"
               >
-                {paymentLoading ? 'Authenticating...' : 'Confirm Activation'}
+                {paymentLoading ? 'Authenticating...' : 'Engage Protocol'}
               </button>
             </div>
           </div>
@@ -456,27 +457,43 @@ export default function PromotionsPage() {
   );
 }
 
-const StatsCard = ({ label, value, color }) => (
-  <div className="bg-white dark:bg-[#0c0c0c] p-6 rounded-lg border border-gray-100 dark:border-white/5 shadow-sm">
-    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">{label}</p>
-    <h2 className={`text-3xl font-black tracking-tighter ${color}`}>{value}</h2>
+// Helper Components
+const QuickStat = ({ label, value, icon: Icon }) => (
+  <div className="px-5 py-3 bg-white/5 border border-white/5 rounded-lg flex items-center gap-4">
+    <div className="p-2 bg-white/5 rounded-lg">
+      <Icon className="text-orange-500" size={16} />
+    </div>
+    <div>
+      <p className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em]">{label}</p>
+      <p className="text-lg font-black text-white tracking-tighter">{value}</p>
+    </div>
   </div>
 );
 
-const OptionButton = ({ active, onClick, icon: Icon, label, desc, color }) => (
+const ModalTab = ({ active, onClick, icon: Icon, label, color }) => (
   <button
     onClick={onClick}
-    className={`p-5 rounded-md border transition-all text-left group cursor-pointer ${active ? (color === 'purple' ? 'border-purple-500 bg-purple-500/5' : 'border-orange-500 bg-orange-500/5') : 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/2 hover:border-gray-300 dark:hover:border-white/20'}`}
+    className={`p-4 rounded-lg border transition-all text-left flex flex-col gap-3 ${active ? (color === 'purple' ? 'border-purple-500/50 bg-purple-500/10' : 'border-orange-500/50 bg-orange-500/10') : 'border-white/5 bg-white/2 hover:bg-white/5'}`}
   >
     <Icon
-      className={`mb-3 ${active ? (color === 'purple' ? 'text-purple-500' : 'text-orange-500') : 'text-gray-400 group-hover:text-gray-200'}`}
+      className={
+        active ? (color === 'purple' ? 'text-purple-500' : 'text-orange-500') : 'text-gray-600'
+      }
       size={20}
     />
-    <p
-      className={`text-[10px] font-black uppercase tracking-widest ${active ? 'dark:text-white' : 'text-gray-400'}`}
+    <span
+      className={`text-[10px] font-black uppercase tracking-widest ${active ? 'text-white' : 'text-gray-500'}`}
     >
       {label}
-    </p>
-    <p className="text-[9px] text-gray-400 font-bold mt-1 leading-relaxed italic">{desc}</p>
+    </span>
   </button>
+);
+
+const InputGroup = ({ label, icon: Icon, children }) => (
+  <div className="space-y-2">
+    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
+      <Icon size={12} /> {label}
+    </label>
+    {children}
+  </div>
 );

@@ -7,9 +7,10 @@ import {
   FiExternalLink,
   FiMapPin,
   FiGlobe,
-  FiLink,
   FiTag,
   FiLayers,
+  FiShield,
+  FiLink, // ✅ এখানে FiLink যোগ করা হয়েছে
 } from 'react-icons/fi';
 import {
   FaSpinner,
@@ -32,7 +33,6 @@ const ListingDetails = () => {
   const { id } = params;
   const { user } = useAuth();
 
-  // States
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [relatedListings, setRelatedListings] = useState([]);
@@ -41,20 +41,8 @@ const ListingDetails = () => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [favCount, setFavCount] = useState(0);
 
-  // 🛡️ Locking Ref: ডাবল ক্লিক বা রি-রেন্ডার জনিত ডাবল এপিআই কল রোধ করবে
   const isProcessing = useRef(false);
-
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-
-  const getSocialIcon = (url) => {
-    if (url.includes('facebook.com')) return <FaFacebook className="text-[#1877F2]" />;
-    if (url.includes('instagram.com')) return <FaInstagram className="text-[#E4405F]" />;
-    if (url.includes('youtube.com')) return <FaYoutube className="text-[#FF0000]" />;
-    if (url.includes('twitter.com') || url.includes('x.com'))
-      return <FaTwitter className="text-[#1DA1F2]" />;
-    if (url.includes('linkedin.com')) return <FaLinkedin className="text-[#0A66C2]" />;
-    return <FiLink className="text-orange-500" />;
-  };
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -75,33 +63,26 @@ const ListingDetails = () => {
         }
 
         if (currentProduct.creatorId?._id) {
-          try {
-            const relatedRes = await axios.get(
-              `${API_BASE_URL}/api/listings/public?creatorId=${currentProduct.creatorId._id}&limit=10`,
-              { withCredentials: true }
-            );
-            const filtered = (relatedRes.data.listings || [])
-              .filter((item) => item._id !== id)
-              .slice(0, 4);
-            setRelatedListings(filtered);
-          } catch (err) {
-            console.error('Related Listings Error:', err);
-          }
+          const relatedRes = await axios.get(
+            `${API_BASE_URL}/api/listings/public?creatorId=${currentProduct.creatorId._id}&limit=5`,
+            { withCredentials: true }
+          );
+          setRelatedListings(
+            (relatedRes.data.listings || []).filter((item) => item._id !== id).slice(0, 4)
+          );
         }
       } catch (err) {
-        console.error('Main Fetch Error:', err);
+        console.error('Fetch Error:', err);
       } finally {
         setLoading(false);
       }
     };
-
     if (id) fetchListing();
   }, [id, API_BASE_URL, user]);
 
   const handleToggleFavorite = async () => {
-    if (!user) return alert('Please login to add to favorites!');
+    if (!user) return alert('Please login!');
     if (isProcessing.current) return;
-
     try {
       isProcessing.current = true;
       const res = await axios.post(
@@ -111,50 +92,25 @@ const ListingDetails = () => {
       );
       setIsFavorited(res.data.isFavorited);
       setFavCount(res.data.favoritesCount);
-    } catch (err) {
-      console.error('Favorite Toggle Error:', err);
     } finally {
       isProcessing.current = false;
     }
   };
 
-  // 🚀 PPC Click Handler for Social Icons
-  const handleExternalClick = async (url, index) => {
-    if (isProcessing.current || externalClickLoading !== null) return;
-
+  const handleVisitSite = async (url, isExternal = false, index = null) => {
+    if (!url || isProcessing.current) return;
     isProcessing.current = true;
-    setExternalClickLoading(index);
+    if (isExternal) setExternalClickLoading(index);
+    else setClickLoading(true);
 
     try {
       await axios.post(`${API_BASE_URL}/api/listings/${id}/click`, {}, { withCredentials: true });
       window.open(url, '_blank', 'noopener,noreferrer');
     } catch (err) {
-      console.error('Tracking Failed:', err);
       window.open(url, '_blank', 'noopener,noreferrer');
-    } finally {
-      setExternalClickLoading(null);
-      // ছোট ডিলে যাতে স্টেট আপডেটের পর লক খুলে
-      setTimeout(() => {
-        isProcessing.current = false;
-      }, 500);
-    }
-  };
-
-  // 🚀 PPC Click Handler for Main Button
-  const handleVisitSite = async () => {
-    if (!product?.websiteLink || isProcessing.current || clickLoading) return;
-
-    isProcessing.current = true;
-    setClickLoading(true);
-
-    try {
-      await axios.post(`${API_BASE_URL}/api/listings/${id}/click`, {}, { withCredentials: true });
-      window.open(product.websiteLink, '_blank', 'noopener,noreferrer');
-    } catch (err) {
-      console.error('Click Tracking Failed', err);
-      window.open(product.websiteLink, '_blank', 'noopener,noreferrer');
     } finally {
       setClickLoading(false);
+      setExternalClickLoading(null);
       setTimeout(() => {
         isProcessing.current = false;
       }, 500);
@@ -163,116 +119,116 @@ const ListingDetails = () => {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0a0a0a]">
-        <FaSpinner className="animate-spin text-[#F57C00] text-4xl" />
+      <div className="min-h-screen flex items-center justify-center dark:bg-[#050505]">
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
 
-  if (!product) return <div className="text-center py-20">Listing not found.</div>;
+  if (!product)
+    return (
+      <div className="text-center py-20 uppercase font-black tracking-widest opacity-30">
+        Asset not found.
+      </div>
+    );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] pt-5 pb-12 px-4 md:px-8">
+    <div className="min-h-screen bg-white dark:bg-[#050505] pt-10 pb-20 px-4 md:px-8 font-sans">
       <div className="max-w-7xl mx-auto">
-        {/* Top Navigation */}
-        <div className="flex justify-between items-center mb-8">
+        {/* Navigation */}
+        <div className="flex justify-between items-center mb-12">
           <Link
             href="/categories"
-            className="flex items-center gap-2 text-zinc-400 hover:text-orange-500 transition-all group w-fit"
+            className="flex items-center gap-3 text-zinc-500 hover:text-orange-500 transition-all group"
           >
             <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-black uppercase tracking-widest">Back to discovery</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Back to Hub</span>
           </Link>
 
           <button
             onClick={handleToggleFavorite}
-            className={`flex items-center gap-2 px-6 py-2 rounded-full transition-all font-black uppercase tracking-widest text-[10px] shadow-sm border ${
-              isFavorited
-                ? 'bg-red-50 border-red-100 text-red-500'
-                : 'bg-zinc-50 dark:bg-white/5 border-zinc-100 dark:border-white/10 text-zinc-400'
-            }`}
+            className={`px-5 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center gap-2 ${isFavorited ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-white dark:bg-white/5 border-zinc-100 dark:border-white/10 text-zinc-400'}`}
           >
-            {isFavorited ? <FaHeart className="text-sm" /> : <FaRegHeart className="text-sm" />}
-            {isFavorited ? 'Saved' : 'Save Treasure'}
+            {isFavorited ? <FaHeart /> : <FaRegHeart />}{' '}
+            {isFavorited ? 'Saved to Vault' : 'Save Asset'}
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-          {/* Image Section */}
-          <div className="rounded-2xl overflow-hidden shadow-xl border border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-zinc-900 aspect-square relative">
-            <Image
-              src={
-                product.image?.startsWith('http')
-                  ? product.image
-                  : `${API_BASE_URL}/${product.image}`
-              }
-              alt={product.title}
-              fill
-              unoptimized
-              className="object-cover"
-            />
-            {product.isPromoted && (
-              <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/80 backdrop-blur-md px-3 py-1 rounded-full shadow-lg">
-                <span className="text-[9px] font-black text-[#F57C00] uppercase tracking-widest">
-                  Featured
-                </span>
-              </div>
-            )}
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          {/* Visual Section (Left) */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="relative aspect-square bg-zinc-100 dark:bg-white/5 rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 group shadow-2xl">
+              <Image
+                src={
+                  product.image?.startsWith('http')
+                    ? product.image
+                    : `${API_BASE_URL}/${product.image}`
+                }
+                alt={product.title}
+                fill
+                unoptimized
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
 
-          {/* Details Section */}
-          <div className="flex flex-col">
-            <div className="flex flex-wrap items-center gap-2 mb-6">
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 rounded-full text-[10px] font-black uppercase tracking-widest">
-                <FiMapPin /> {product.country}
-              </span>
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 rounded-full text-[10px] font-black uppercase tracking-widest">
-                <FiGlobe /> {product.tradition}
-              </span>
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded-full text-[10px] font-black uppercase tracking-widest">
-                <FiLayers /> {product.category?.title}
-              </span>
+              {product.isPromoted && (
+                <div className="absolute top-4 left-4 bg-orange-600 px-3 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest shadow-lg">
+                  Top Ranked
+                </div>
+              )}
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white mb-6 uppercase tracking-tighter leading-tight">
+            <div className="grid grid-cols-2 gap-4">
+              <StatBox icon={FiShield} label="Protocol" value={product.tradition} />
+              <StatBox icon={FaEye} label="Network Views" value={product.views || 0} />
+            </div>
+          </div>
+
+          {/* Info Section (Right) */}
+          <div className="lg:col-span-7">
+            <div className="flex flex-wrap gap-2 mb-6">
+              <Tag label={product.country} icon={FiMapPin} color="orange" />
+              <Tag label={product.category?.title} icon={FiLayers} color="zinc" />
+            </div>
+
+            <h1 className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white mb-6 uppercase tracking-tighter leading-[0.9]">
               {product.title}
             </h1>
 
-            <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed mb-8 font-medium">
+            <p className="text-zinc-600 dark:text-gray-400 leading-relaxed text-base md:text-lg font-medium mb-10 max-w-2xl">
               {product.description}
             </p>
 
             {/* Cultural Tags */}
             {product.culturalTags?.length > 0 && (
-              <div className="mb-8">
-                <p className="text-[10px] text-zinc-400 uppercase font-black tracking-[0.2em] mb-4">
-                  Cultural Insights
+              <div className="mb-10">
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4">
+                  Metadata Tags
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {product.culturalTags.map((tag) => (
+                  {product.culturalTags.map((tag, idx) => (
                     <span
-                      key={tag._id}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-full text-[11px] font-bold text-zinc-700 dark:text-zinc-300"
+                      key={tag._id || `tag-${idx}`}
+                      className="px-3 py-1.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-md text-[10px] font-black uppercase text-zinc-500 dark:text-zinc-400 flex items-center gap-2"
                     >
-                      <FiTag className="text-orange-500" /> {tag.title}
+                      <FiTag className="text-orange-500" /> {tag.title || tag}
                     </span>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Social Links / External URLs */}
+            {/* External Matrix */}
             {product.externalUrls?.length > 0 && (
-              <div className="mb-8 p-5 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-xl">
-                <p className="text-[10px] text-zinc-400 uppercase font-black tracking-[0.2em] mb-4">
-                  External Links
+              <div className="mb-10 p-6 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-xl">
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-5">
+                  Access Matrix
                 </p>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex gap-6">
                   {product.externalUrls.map((url, idx) => (
                     <button
-                      key={idx}
-                      onClick={() => handleExternalClick(url, idx)}
+                      key={`ext-${idx}`}
+                      onClick={() => handleVisitSite(url, true, idx)}
                       disabled={externalClickLoading !== null}
-                      className="text-2xl transition-all hover:-translate-y-1 cursor-pointer bg-transparent border-none p-0 outline-none"
+                      className="text-2xl opacity-60 hover:opacity-100 hover:-translate-y-1 transition-all"
                     >
                       {externalClickLoading === idx ? (
                         <FaSpinner className="animate-spin text-sm" />
@@ -285,75 +241,44 @@ const ListingDetails = () => {
               </div>
             )}
 
-            {/* Stats & Creator Card */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-              <div className="md:col-span-2 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 p-5 rounded-xl flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center text-white text-xl font-black uppercase">
-                  {product.creatorId?.username?.charAt(0)}
-                </div>
-                <div className="overflow-hidden">
-                  <p className="text-[9px] text-zinc-400 uppercase font-black tracking-widest">
-                    Curated By
-                  </p>
-                  <Link
-                    href={`/profile/${product.creatorId?._id}`}
-                    className="font-bold text-zinc-900 dark:text-white hover:text-orange-500 truncate block uppercase tracking-tighter"
-                  >
-                    @{product.creatorId?.username}
-                  </Link>
-                </div>
-              </div>
-
-              <div className="bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 p-5 rounded-xl flex flex-col justify-center items-center">
-                <div className="flex items-center gap-2">
-                  <FaEye className="text-blue-500" />
-                  <span className="text-lg font-black text-zinc-900 dark:text-white">
-                    {product.views || 0}
-                  </span>
-                </div>
-                <p className="text-[9px] text-zinc-400 uppercase font-black tracking-widest mt-1">
-                  Total Views
-                </p>
-              </div>
-            </div>
-
-            {/* Main Visit Button */}
+            {/* Main Action */}
             <button
-              onClick={handleVisitSite}
-              disabled={clickLoading}
-              className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-full font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 transition-all hover:bg-orange-500 dark:hover:bg-orange-500 dark:hover:text-white active:scale-[0.99] disabled:opacity-70"
+              onClick={() => handleVisitSite(product.websiteLink)}
+              disabled={clickLoading || !product.websiteLink}
+              className="group w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl font-black uppercase tracking-[0.4em] text-[11px] flex items-center justify-center gap-3 transition-all hover:bg-orange-600 dark:hover:bg-orange-600 dark:hover:text-white active:scale-95 disabled:opacity-30"
             >
               {clickLoading ? (
                 <FaSpinner className="animate-spin" />
               ) : (
                 <>
-                  {'Visit Experience'} <FiExternalLink />
+                  Access Experience{' '}
+                  <FiExternalLink className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </button>
           </div>
         </div>
 
-        {/* More from Creator Section */}
+        {/* Related Assets */}
         {relatedListings.length > 0 && (
-          <div className="pt-16 border-t border-zinc-100 dark:border-white/5 mt-12">
-            <div className="flex justify-between items-end mb-8">
+          <div className="mt-24 pt-16 border-t border-white/5">
+            <div className="flex justify-between items-end mb-10">
               <div>
-                <p className="text-[#F57C00] text-[10px] font-black uppercase tracking-[0.3em] mb-2">
-                  Heritage Collection
+                <p className="text-orange-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2">
+                  Network Suggestion
                 </p>
-                <h2 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
+                <h2 className="text-3xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
                   More from @{product.creatorId?.username}
                 </h2>
               </div>
               <Link
                 href={`/profile/${product.creatorId?._id}`}
-                className="text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-orange-500 transition-colors border-b border-transparent hover:border-orange-500 pb-1"
+                className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white transition-colors border-b border-white/10 pb-1"
               >
-                View All
+                View Full Profile
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedListings.map((item) => (
                 <ListingCard key={item._id} item={item} />
               ))}
@@ -363,6 +288,35 @@ const ListingDetails = () => {
       </div>
     </div>
   );
+};
+
+// Sub-components
+const Tag = ({ label, icon: Icon, color }) => (
+  <span
+    className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${color === 'orange' ? 'bg-orange-500/10 text-orange-500' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500'}`}
+  >
+    <Icon size={12} /> {label}
+  </span>
+);
+
+const StatBox = ({ icon: Icon, label, value }) => (
+  <div className="bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 p-4 rounded-xl">
+    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-1">{label}</p>
+    <div className="flex items-center gap-2 font-black dark:text-white uppercase tracking-tighter text-sm">
+      <Icon className="text-orange-500" size={14} /> {value}
+    </div>
+  </div>
+);
+
+// Icon Helper
+const getSocialIcon = (url) => {
+  if (url.includes('facebook')) return <FaFacebook className="text-[#1877F2]" />;
+  if (url.includes('instagram')) return <FaInstagram className="text-[#E4405F]" />;
+  if (url.includes('youtube')) return <FaYoutube className="text-[#FF0000]" />;
+  if (url.includes('twitter') || url.includes('x.com'))
+    return <FaTwitter className="text-[#1DA1F2]" />;
+  if (url.includes('linkedin')) return <FaLinkedin className="text-[#0A66C2]" />;
+  return <FiLink className="text-orange-500" />; // ✅ এখন কাজ করবে!
 };
 
 export default ListingDetails;
