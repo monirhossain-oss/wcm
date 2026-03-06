@@ -60,10 +60,10 @@ export default function PromotionInsightsPage() {
           </button>
           <div>
             <h1 className="text-3xl font-black uppercase tracking-tighter text-white flex items-center gap-3">
-              Performance <span className="text-orange-500">Terminal</span>
+              All Promotions
             </h1>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.4em] mt-1 italic">
-              Node ID: {id.slice(-8)} / {data.title}
+              Promotion ID: {id.slice(-8)} / {data.title}
             </p>
           </div>
         </div>
@@ -71,11 +71,11 @@ export default function PromotionInsightsPage() {
         <div className="flex gap-3">
           <QuickStat
             icon={FiTrendingUp}
-            label="Current Rank"
+            label="Visibility Level"
             value={`Lvl ${data.level}`}
             color="text-orange-500"
           />
-          <QuickStat icon={FiEye} label="Organic Reach" value={data.views} color="text-blue-400" />
+          <QuickStat icon={FiEye} label="Natural Views" value={data.views} color="text-blue-400" />
         </div>
       </div>
 
@@ -92,7 +92,7 @@ export default function PromotionInsightsPage() {
                 <FiActivity className="text-blue-500" size={20} />
               </div>
               <h2 className="text-sm font-black uppercase tracking-widest text-white">
-                Click Injection Logic
+                Click Ad Results
               </h2>
             </div>
             <div
@@ -101,21 +101,21 @@ export default function PromotionInsightsPage() {
               <div
                 className={`h-1.5 w-1.5 rounded-full ${ppc.isActive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}
               />
-              {ppc.isActive ? 'Active Protocol' : 'Standby'}
+              {ppc.isActive ? 'Ad is Running' : 'Paused / Finished'}
             </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            <MetricBox label="Remaining" value={ppc.clicksRemaining} sub="Clicks" />
-            <MetricBox label="Executed" value={ppc.clicksUsed} sub="Total" />
-            <MetricBox label="Balance" value={`€${ppc.balance}`} sub="EUR" />
-            <MetricBox label="CPC Rate" value={`€${ppc.costPerClick}`} sub="Per Click" />
+            <MetricBox label="Clicks Left" value={ppc.clicksRemaining} sub="still available" />
+            <MetricBox label="Total Clicks" value={ppc.clicksUsed} sub="delivered so far" />
+            <MetricBox label="My Balance" value={`€${ppc.balance}`} sub="account eur" />
+            <MetricBox label="Cost Per Click" value={`€${ppc.costPerClick}`} sub="Per Click" />
           </div>
 
           <div className="space-y-4">
             <div className="flex justify-between items-end">
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                Resource Depletion
+                Budget Used
               </p>
               <p className="text-sm font-black text-blue-500 italic">{ppc.consumptionRate}%</p>
             </div>
@@ -134,7 +134,7 @@ export default function PromotionInsightsPage() {
         >
           {boost.isExpiringSoon && (
             <div className="absolute top-0 left-0 w-full py-1 bg-orange-500 text-[8px] font-black text-center text-black uppercase tracking-[0.3em]">
-              Critical: Expiring in less than 24h
+              Warning: Ending Soon! in less than 24h
             </div>
           )}
 
@@ -144,7 +144,7 @@ export default function PromotionInsightsPage() {
                 <FiZap className="text-orange-500" size={20} />
               </div>
               <h2 className="text-sm font-black uppercase tracking-widest text-white">
-                Viral Boost
+                Featured Boost
               </h2>
             </div>
 
@@ -168,12 +168,10 @@ export default function PromotionInsightsPage() {
               />
               <div>
                 <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">
-                  Expiry Command
+                  Ends On
                 </p>
                 <p className="text-[11px] font-bold text-white">
-                  {boost.isActive
-                    ? new Date(boost.expiresAt).toLocaleString()
-                    : 'Protocol Terminated'}
+                  {boost.isActive ? new Date(boost.expiresAt).toLocaleString() : 'Boost Expired'}
                 </p>
               </div>
             </div>

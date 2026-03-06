@@ -160,17 +160,17 @@ export default function PromotionsPage() {
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
             <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em]">
-              Visibility Engine
+              Promote Your Post
             </span>
           </div>
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
-            Growth <span className="text-orange-600/80 italic">Accelerator</span>
+            Boost <span className="text-orange-600/80 italic">Your Reach</span>
           </h1>
         </div>
 
         <div className="flex gap-4">
-          <QuickStat label="Vault" value={`€${stats?.walletBalance || '0'}`} icon={FiShield} />
-          <QuickStat label="Active" value={stats?.activePromotions || '0'} icon={FiTrendingUp} />
+          <QuickStat label="Wallet" value={`€${stats?.walletBalance || '0'}`} icon={FiShield} />
+          <QuickStat label="Running" value={stats?.activePromotions || '0'} icon={FiTrendingUp} />
         </div>
       </div>
 
@@ -178,7 +178,7 @@ export default function PromotionsPage() {
       <div className="bg-[#0c0c0c] border border-white/5 rounded-lg shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-white/5 flex justify-between items-center">
           <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
-            Validated Assets
+            My Listings
           </h2>
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 bg-green-500 rounded-full" />
@@ -191,16 +191,16 @@ export default function PromotionsPage() {
             <thead>
               <tr className="bg-white/2 text-left">
                 <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest">
-                  Node Identification
+                  Item Details
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest">
-                  Campaign Logic
+                  Promotion Type
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest">
                   Status
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest text-right">
-                  Operation
+                  Action
                 </th>
               </tr>
             </thead>
@@ -251,7 +251,7 @@ export default function PromotionsPage() {
                       </span>
                     ) : (
                       <span className="text-[9px] font-bold text-gray-700 uppercase tracking-widest">
-                        Idle
+                        Inactive
                       </span>
                     )}
                   </td>
@@ -314,7 +314,7 @@ export default function PromotionsPage() {
             <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/2">
               <div>
                 <h3 className="text-sm font-black text-white uppercase tracking-widest">
-                  Protocol Setup
+                  Choose Promotion
                 </h3>
                 <p className="text-[9px] text-gray-500 font-bold uppercase mt-1 italic tracking-widest">
                   {selectedListing.title}
@@ -335,7 +335,7 @@ export default function PromotionsPage() {
                   active={promoType === 'boost'}
                   onClick={() => setPromoType('boost')}
                   icon={FiZap}
-                  label="Fixed Boost"
+                  label="Duration Boost"
                   color="purple"
                 />
                 <ModalTab
@@ -447,7 +447,7 @@ export default function PromotionsPage() {
                 onClick={handlePromotion}
                 className="w-full py-5 bg-orange-600 hover:bg-orange-500 disabled:opacity-20 text-white rounded-lg font-black uppercase text-[11px] tracking-[0.3em] transition-all hover:shadow-[0_0_30px_rgba(234,88,12,0.2)]"
               >
-                {paymentLoading ? 'Authenticating...' : 'Engage Protocol'}
+                {paymentLoading ? 'Authenticating...' : 'Start Promotion'}
               </button>
             </div>
           </div>
