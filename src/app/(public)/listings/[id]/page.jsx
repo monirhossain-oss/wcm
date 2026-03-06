@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import {
   FiArrowLeft,
   FiExternalLink,
@@ -10,7 +10,7 @@ import {
   FiTag,
   FiLayers,
   FiShield,
-  FiLink, // ✅ এখানে FiLink যোগ করা হয়েছে
+  FiLink, 
 } from 'react-icons/fi';
 import {
   FaSpinner,
@@ -32,6 +32,7 @@ const ListingDetails = () => {
   const params = useParams();
   const { id } = params;
   const { user } = useAuth();
+  const router = useRouter();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -132,31 +133,33 @@ const ListingDetails = () => {
     );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#050505] pt-10 pb-20 px-4 md:px-8 font-sans">
+    <div className="min-h-screen bg-white dark:bg-[#050505] pt-5 pb-10 px-4 md:px-8 font-sans">
       <div className="max-w-7xl mx-auto">
         {/* Navigation */}
-        <div className="flex justify-between items-center mb-12">
-          <Link
-            href="/categories"
-            className="flex items-center gap-3 text-zinc-500 hover:text-orange-500 transition-all group"
+        <div className="flex justify-between items-center mb-5">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-3 text-zinc-500 hover:text-orange-500 transition-all group outline-none"
           >
             <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Back to Hub</span>
-          </Link>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">
+              Back to Previous
+            </span>
+          </button>
 
           <button
             onClick={handleToggleFavorite}
             className={`px-5 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center gap-2 ${isFavorited ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-white dark:bg-white/5 border-zinc-100 dark:border-white/10 text-zinc-400'}`}
           >
             {isFavorited ? <FaHeart /> : <FaRegHeart />}{' '}
-            {isFavorited ? 'Saved to Vault' : 'Save Asset'}
+            {isFavorited ? 'Saved' : 'Save to Favorites'}
           </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Visual Section (Left) */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="relative aspect-square bg-zinc-100 dark:bg-white/5 rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 group shadow-2xl">
+            <div className="relative aspect-square bg-zinc-100 dark:bg-white/5 rounded-lg overflow-hidden border border-zinc-200 dark:border-white/10 group shadow-2xl">
               <Image
                 src={
                   product.image?.startsWith('http')
@@ -177,8 +180,8 @@ const ListingDetails = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <StatBox icon={FiShield} label="Protocol" value={product.tradition} />
-              <StatBox icon={FaEye} label="Network Views" value={product.views || 0} />
+              <StatBox icon={FiShield} label="Tradition" value={product.tradition} />
+              <StatBox icon={FaEye} label="Total Views" value={product.views || 0} />
             </div>
           </div>
 
@@ -201,7 +204,7 @@ const ListingDetails = () => {
             {product.culturalTags?.length > 0 && (
               <div className="mb-10">
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4">
-                  Metadata Tags
+                  Key Features
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {product.culturalTags.map((tag, idx) => (
@@ -218,9 +221,9 @@ const ListingDetails = () => {
 
             {/* External Matrix */}
             {product.externalUrls?.length > 0 && (
-              <div className="mb-10 p-6 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-xl">
+              <div className="mb-10 p-6 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-lg">
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-5">
-                  Access Matrix
+                  Social Links
                 </p>
                 <div className="flex gap-6">
                   {product.externalUrls.map((url, idx) => (
@@ -245,7 +248,7 @@ const ListingDetails = () => {
             <button
               onClick={() => handleVisitSite(product.websiteLink)}
               disabled={clickLoading || !product.websiteLink}
-              className="group w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl font-black uppercase tracking-[0.4em] text-[11px] flex items-center justify-center gap-3 transition-all hover:bg-orange-600 dark:hover:bg-orange-600 dark:hover:text-white active:scale-95 disabled:opacity-30"
+              className="group w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-lg font-black uppercase tracking-[0.4em] text-[11px] flex items-center justify-center gap-3 transition-all hover:bg-orange-600 dark:hover:bg-orange-600 dark:hover:text-white active:scale-95 disabled:opacity-30"
             >
               {clickLoading ? (
                 <FaSpinner className="animate-spin" />
@@ -261,11 +264,11 @@ const ListingDetails = () => {
 
         {/* Related Assets */}
         {relatedListings.length > 0 && (
-          <div className="mt-24 pt-16 border-t border-white/5">
+          <div className="mt-10 pt-10 border-t border-white/5">
             <div className="flex justify-between items-end mb-10">
               <div>
                 <p className="text-orange-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2">
-                  Network Suggestion
+                  You might also like
                 </p>
                 <h2 className="text-3xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
                   More from @{product.creatorId?.username}
@@ -275,7 +278,7 @@ const ListingDetails = () => {
                 href={`/profile/${product.creatorId?._id}`}
                 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white transition-colors border-b border-white/10 pb-1"
               >
-                View Full Profile
+                More from this creator
               </Link>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
@@ -300,7 +303,7 @@ const Tag = ({ label, icon: Icon, color }) => (
 );
 
 const StatBox = ({ icon: Icon, label, value }) => (
-  <div className="bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 p-4 rounded-xl">
+  <div className="bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 p-4 rounded-lg">
     <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-1">{label}</p>
     <div className="flex items-center gap-2 font-black dark:text-white uppercase tracking-tighter text-sm">
       <Icon className="text-orange-500" size={14} /> {value}
