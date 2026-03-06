@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { FiSearch, FiMenu, FiX, FiUser, FiLogOut } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 
@@ -12,6 +13,7 @@ const PublicNavbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const { user, logoutUser } = useAuth();
+  const pathname = usePathname();
 
   const menuItems = [
     { name: 'Discover', href: '/discover' },
@@ -32,7 +34,8 @@ const PublicNavbar = () => {
   return (
     <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] dark:border-[#1F1F1F] border-b z-50">
       <div className="flex items-center justify-between px-6 h-20">
-        {/* Left: Logo */}
+
+        {/* Logo */}
         <div className="flex items-center space-x-2">
           <Link href="/" className="cursor-pointer">
             <Image
@@ -52,10 +55,13 @@ const PublicNavbar = () => {
           </Link>
         </div>
 
-        {/* Center: Menu or Search */}
+        {/* Center Menu */}
         <div className="flex-1 flex justify-center">
           {showSearch ? (
-            <form className="relative w-full max-w-[70%]" onSubmit={(e) => e.preventDefault()}>
+            <form
+              className="relative w-full max-w-[70%]"
+              onSubmit={(e) => e.preventDefault()}
+            >
               <input
                 type="text"
                 placeholder="Search cultures, products, creators…"
@@ -70,29 +76,45 @@ const PublicNavbar = () => {
             </form>
           ) : (
             <div className="hidden md:flex space-x-6">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-sm font-medium hover:text-[#F57C00] transition-colors"
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {menuItems.map((item) => {
+                const isActive = pathname === item.href;
+
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`text-sm font-medium transition-all duration-200 pb-1 border-b-2
+                      ${isActive
+                        ? 'text-[#F57C00] border-[#F57C00]'
+                        : 'border-transparent hover:text-[#F57C00]'
+                      }`}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
 
-        {/* Right: User Actions */}
+        {/* Right Side */}
         <div className="flex items-center space-x-3">
+
           {showSearch ? (
-            <FiX className="h-9 w-9 p-2 cursor-pointer" onClick={() => setShowSearch(false)} />
+            <FiX
+              className="h-9 w-9 p-2 cursor-pointer"
+              onClick={() => setShowSearch(false)}
+            />
           ) : (
-            <FiSearch className="h-9 w-9 p-2 cursor-pointer" onClick={() => setShowSearch(true)} />
+            <FiSearch
+              className="h-9 w-9 p-2 cursor-pointer"
+              onClick={() => setShowSearch(true)}
+            />
           )}
 
           {user ? (
             <div className="relative flex items-center space-x-2">
+
               {user.role === 'user' && (
                 <Link
                   href="/become-creator"
@@ -110,12 +132,15 @@ const PublicNavbar = () => {
                   <div className="bg-[#F57C00] p-1.5 rounded-full text-white">
                     <FiUser className="h-4 w-4" />
                   </div>
+
                   <span className="hidden lg:block text-xs font-semibold capitalize">
                     {user.username}
                   </span>
                 </div>
+
                 {isProfileOpen && (
                   <div className="absolute top-12 right-0 w-48 bg-white dark:bg-[#1a1a1a] shadow-xl border border-gray-100 dark:border-gray-800 rounded-xl py-2 z-60">
+
                     <Link
                       href={getDashboardLink()}
                       className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -127,12 +152,15 @@ const PublicNavbar = () => {
                           ? 'Creator Dashboard'
                           : 'Profile'}
                     </Link>
+
                     <button
                       onClick={logoutUser}
                       className="w-full text-left flex items-center space-x-2 px-4 py-2 text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
-                      <FiLogOut /> <span>Logout</span>
+                      <FiLogOut />
+                      <span>Logout</span>
                     </button>
+
                   </div>
                 )}
               </div>
@@ -150,6 +178,7 @@ const PublicNavbar = () => {
             className="md:hidden h-9 w-9 p-2 cursor-pointer"
             onClick={() => setIsMobileDrawerOpen(true)}
           />
+
         </div>
       </div>
 
@@ -158,35 +187,47 @@ const PublicNavbar = () => {
         className={`fixed top-0 right-0 h-full w-2/3 bg-white dark:bg-[#0a0a0a] shadow-2xl transform transition-transform duration-300 md:hidden z-100 ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
+
         <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-800">
           <span className="font-bold text-[#F57C00]">Menu</span>
-          <FiX className="text-2xl cursor-pointer" onClick={() => setIsMobileDrawerOpen(false)} />
+          <FiX
+            className="text-2xl cursor-pointer"
+            onClick={() => setIsMobileDrawerOpen(false)}
+          />
         </div>
 
         <div className="flex flex-col space-y-4 p-6">
-          {menuItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="text-lg font-medium"
-              onClick={() => setIsMobileDrawerOpen(false)}
-            >
-              {item.name}
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href;
+
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setIsMobileDrawerOpen(false)}
+                className={`text-lg font-medium ${isActive ? 'text-[#F57C00]' : ''
+                  }`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
 
           <hr className="border-gray-100 dark:border-gray-800" />
 
           {user ? (
             <>
-              <Link href={getDashboardLink()} onClick={() => setIsMobileDrawerOpen(false)}>
-                {user?.role === 'admin'
-                  ? 'Admin Dashboard'
-                  : user?.role === 'creator'
-                    ? 'Creator Dashboard'
-                    : 'Profile'}
+              <Link
+                href={getDashboardLink()}
+                onClick={() => setIsMobileDrawerOpen(false)}
+              >
+                Dashboard
               </Link>
-              <button onClick={logoutUser} className="text-left text-red-500">
+
+              <button
+                onClick={logoutUser}
+                className="text-left text-red-500"
+              >
                 Logout
               </button>
             </>
@@ -202,9 +243,11 @@ const PublicNavbar = () => {
         </div>
       </div>
 
-      {/* Overlay for closing dropdown when clicking outside */}
       {isProfileOpen && (
-        <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsProfileOpen(false)}
+        ></div>
       )}
     </nav>
   );
