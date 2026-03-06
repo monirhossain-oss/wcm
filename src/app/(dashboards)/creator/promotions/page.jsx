@@ -370,7 +370,7 @@ export default function PromotionsPage() {
               <div
                 className={`space-y-4 transition-opacity ${(promoType === 'boost' && isBoostActive(selectedListing)) || (promoType === 'ppc' && isPpcActive(selectedListing)) ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
               >
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   {promoType === 'boost' ? (
                     <>
                       <InputGroup label="Duration (Days)" icon={FiClock}>
@@ -379,7 +379,13 @@ export default function PromotionsPage() {
                           min="1"
                           value={boostDays}
                           onChange={(e) => setBoostDays(e.target.value)}
-                          className="input-style !p-3 text-xs" // প্যাডিং এবং টেক্সট সাইজ ছোট
+                          className="w-full pl-4 py-3 text-xs font-black tracking-tight rounded-xl outline-0 transition-all 
+                     bg-gray-50 dark:bg-[#ffffff10] 
+                     text-gray-900 dark:text-[#bbb] 
+                     border border-black/10 dark:border-white/5 
+                     focus:border-orange-500/50 dark:focus:border-orange-500/50 
+                     focus:bg-white dark:focus:bg-[#ffffff15]"
+                          placeholder="0"
                         />
                       </InputGroup>
                       <InputGroup label="Budget (€)" icon={FiDollarSign}>
@@ -388,19 +394,31 @@ export default function PromotionsPage() {
                           min="5"
                           value={boostBudget}
                           onChange={(e) => setBoostBudget(e.target.value)}
-                          className="input-style !p-3 text-xs"
+                          className="w-full pl-4 py-3 text-xs font-black tracking-tight rounded-xl outline-0 transition-all 
+                     bg-gray-50 dark:bg-[#ffffff10] 
+                     text-gray-900 dark:text-[#bbb] 
+                     border border-black/10 dark:border-white/5 
+                     focus:border-orange-500/50 dark:focus:border-orange-500/50 
+                     focus:bg-white dark:focus:bg-[#ffffff15]"
+                          placeholder="5.00"
                         />
                       </InputGroup>
                     </>
                   ) : (
-                    <div>
+                    <>
                       <InputGroup label="Budget (€)" icon={FiDollarSign}>
                         <input
                           type="number"
                           min="5"
                           value={ppcAmount}
                           onChange={(e) => setPpcAmount(e.target.value)}
-                          className="input-style !p-3 text-xs"
+                          className="w-full pl-4 py-3 text-xs font-black tracking-tight rounded-xl outline-0 transition-all 
+                     bg-gray-50 dark:bg-[#ffffff10] 
+                     text-gray-900 dark:text-[#bbb] 
+                     border border-black/10 dark:border-white/5 
+                     focus:border-orange-500/50 dark:focus:border-orange-500/50 
+                     focus:bg-white dark:focus:bg-[#ffffff15]"
+                          placeholder="5.00"
                         />
                       </InputGroup>
                       <InputGroup label="Clicks" icon={FiMousePointer}>
@@ -409,10 +427,16 @@ export default function PromotionsPage() {
                           min="10"
                           value={targetClicks}
                           onChange={(e) => setTargetClicks(e.target.value)}
-                          className="input-style !p-3 text-xs"
+                          className="w-full pl-4 py-3 text-xs font-black tracking-tight rounded-xl outline-0 transition-all 
+                     bg-gray-50 dark:bg-[#ffffff10] 
+                     text-gray-900 dark:text-[#bbb] 
+                     border border-black/10 dark:border-white/5 
+                     focus:border-orange-500/50 dark:focus:border-orange-500/50 
+                     focus:bg-white dark:focus:bg-[#ffffff15]"
+                          placeholder="10"
                         />
                       </InputGroup>
-                    </div>
+                    </>
                   )}
                 </div>
 
@@ -473,34 +497,6 @@ export default function PromotionsPage() {
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .input-style {
-          width: 100%;
-          background: rgba(0, 0, 0, 0.03);
-          border: 1px solid rgba(0, 0, 0, 0.1);
-          border-radius: 12px;
-          padding: 16px;
-          color: #111;
-          font-weight: 900;
-          font-size: 14px;
-          transition: all 0.2s;
-        }
-        .input-style:focus {
-          outline: none;
-          border-color: #ea580c;
-          background: #fff;
-        }
-        :global(.dark) .input-style {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #fff;
-        }
-        :global(.dark) .input-style:focus {
-          border-color: #ea580c;
-          background: rgba(255, 255, 255, 0.08);
-        }
-      `}</style>
     </div>
   );
 }
@@ -563,9 +559,10 @@ const ModalTab = ({ active, disabled, onClick, icon: Icon, label, subLabel, colo
 );
 
 const InputGroup = ({ label, icon: Icon, children }) => (
-  <div className="space-y-3">
-    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-      <Icon size={12} className="text-orange-500" /> {label}
+  <div className="space-y-2.5">
+    {' '}
+    <label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-2 ml-1">
+      <Icon size={12} className="text-orange-500/80 dark:text-orange-400" /> {label}
     </label>
     {children}
   </div>
