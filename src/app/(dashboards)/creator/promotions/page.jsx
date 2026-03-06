@@ -13,6 +13,8 @@ import {
   FiBarChart2,
   FiDollarSign,
   FiClock,
+  FiInfo,
+  FiExternalLink,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
@@ -33,11 +35,9 @@ export default function PromotionsPage() {
   const [currency, setCurrency] = useState('eur');
   const [promoType, setPromoType] = useState('boost');
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Manual Input States
   const [boostDays, setBoostDays] = useState(7);
   const [boostBudget, setBoostBudget] = useState(20);
   const [ppcAmount, setPpcAmount] = useState(10);
@@ -47,7 +47,6 @@ export default function PromotionsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Calculations for UI feedback
   const displayCost = promoType === 'boost' ? Number(boostBudget) : Number(ppcAmount);
   const estimatedCPC = targetClicks > 0 ? (ppcAmount / targetClicks).toFixed(2) : 0;
   const dailyBoostIntensity = boostDays > 0 ? (boostBudget / boostDays).toFixed(2) : 0;
@@ -57,7 +56,7 @@ export default function PromotionsPage() {
     if (searchParams.get('success') === 'true') {
       triggerConfetti();
       toast.success('Promotion Protocol Activated!', {
-        style: { background: '#111', color: '#fff', border: '1px solid #222' },
+        style: { background: '#111', color: '#fff' },
       });
       router.replace(pathname);
     }
@@ -79,21 +78,20 @@ export default function PromotionsPage() {
   };
 
   const handlePromotion = async () => {
-    // Validation
     if (promoType === 'boost' && (boostBudget < 5 || boostDays < 1)) {
-      return toast.error('Minimum investment €5 for 1 day');
+      return toast.error('Minimum investment €5 for at least 1 day');
     }
     if (promoType === 'ppc' && (ppcAmount < 5 || targetClicks < 1)) {
-      return toast.error('Minimum investment €5 for PPC');
+      return toast.error('Minimum investment €5 for PPC Protocol');
     }
 
     setPaymentLoading(true);
-    const toastId = toast.loading('Initializing Transaction...');
+    const toastId = toast.loading('Syncing with Payment Gateway...');
 
     const payload = {
       listingId: selectedListing._id,
       packageType: promoType,
-      amount: displayCost, // সরাসরি অ্যামাউন্ট পাঠানো হচ্ছে, ব্যাকএন্ড কারেন্সি অনুযায়ী হ্যান্ডেল করবে
+      amount: displayCost,
       currency: currency.toLowerCase(),
       days: promoType === 'boost' ? Number(boostDays) : 0,
       totalClicks: promoType === 'ppc' ? Number(targetClicks) : 0,
@@ -101,27 +99,13 @@ export default function PromotionsPage() {
     };
 
     try {
-      // Wallet Payment Logic (Only if Currency is EUR and balance is enough)
-      // Note: Backend should handle conversion if wallet is in EUR but user pays in USD
-      if (currency === 'eur' && stats?.walletBalance >= displayCost) {
-        const res = await api.post('/api/payments/pay-with-wallet', payload);
-        if (res.data.success) {
-          triggerConfetti();
-          toast.success('Transaction Verified. Growth Active.', { id: toastId });
-          setSelectedListing(null);
-          initData();
-          return;
-        }
-      }
-
-      // Stripe Checkout
       const res = await api.post('/api/payments/create-checkout-session', payload);
       if (res.data.url) {
         toast.dismiss(toastId);
         window.location.href = res.data.url;
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Authorization Refused', { id: toastId });
+      toast.error(err.response?.data?.message || 'Transaction Declined', { id: toastId });
     } finally {
       setPaymentLoading(false);
     }
@@ -136,135 +120,152 @@ export default function PromotionsPage() {
     });
   };
 
+  const isBoostActive = (l) =>
+    l.promotion?.boost?.isActive && new Date(l.promotion.boost.expiresAt) > new Date();
+  const isPpcActive = (l) => l.promotion?.ppc?.isActive && l.promotion.ppc.ppcBalance > 0;
+
   const currentItems = listings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(listings.length / itemsPerPage);
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#050505]">
         <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans">
-      <Toaster position="top-center" reverseOrder={false} />
+    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans transition-colors duration-300">
+      <Toaster position="top-center" />
 
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-black/5 dark:border-white/5 pb-10">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
             <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em]">
-              Promote Your Post
+              Accelerator Hub
             </span>
           </div>
-          <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
-            Boost <span className="text-orange-600/80 italic">Your Reach</span>
+          <h1 className="text-4xl font-black uppercase tracking-tighter text-gray-900 dark:text-white">
+            Boost <span className="text-orange-600 italic">Visibility</span>
           </h1>
+          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+            Manage your listing ranking and reach protocols.
+          </p>
         </div>
 
         <div className="flex gap-4">
-          <QuickStat label="Wallet" value={`€${stats?.walletBalance || '0'}`} icon={FiShield} />
-          <QuickStat label="Running" value={stats?.activePromotions || '0'} icon={FiTrendingUp} />
+          <QuickStat
+            label="Available Balance"
+            value={`€${stats?.walletBalance || '0'}`}
+            icon={FiShield}
+          />
+          <QuickStat
+            label="Active Campaigns"
+            value={stats?.activePromotions || '0'}
+            icon={FiTrendingUp}
+          />
         </div>
       </div>
 
       {/* Assets Table */}
-      <div className="bg-[#0c0c0c] border border-white/5 rounded-lg shadow-2xl overflow-hidden">
-        <div className="p-6 border-b border-white/5 flex justify-between items-center">
-          <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
-            My Listings
+      <div className="bg-white dark:bg-[#0c0c0c] border border-black/10 dark:border-white/5 rounded-xl shadow-sm overflow-hidden transition-all">
+        <div className="p-6 border-b border-black/5 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/20">
+          <h2 className="text-[11px] font-black text-gray-700 dark:text-white uppercase tracking-widest">
+            Listing Inventory
           </h2>
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 bg-green-500 rounded-full" />
-            <span className="text-[9px] font-bold text-gray-500 uppercase">Live Network</span>
-          </div>
+          <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase">
+            Status: Optimal
+          </span>
         </div>
 
         <div className="overflow-x-auto scrollbar-hide">
           <table className="w-full">
             <thead>
-              <tr className="bg-white/20 text-left">
+              <tr className="bg-gray-100/50 dark:bg-white/5 text-left">
                 <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest">
-                  Item Details
+                  Item Info
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest">
-                  Promotion Type
+                  Growth Engine
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest">
-                  Status
+                  Impact
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest text-right">
-                  Action
+                  Operations
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-black/5 dark:divide-white/5">
               {currentItems.map((item) => (
-                <tr key={item._id} className="hover:bg-white/5 transition-colors group">
+                <tr
+                  key={item._id}
+                  className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
+                >
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-lg overflow-hidden border border-white/10 group-hover:border-orange-500/30 transition-all">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-black/5 dark:border-white/10 group-hover:border-orange-500/30 transition-all shadow-sm">
                         <img
                           src={getImageUrl(item.image)}
-                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                          className="w-full h-full object-cover"
                           alt={item.title}
                         />
                       </div>
                       <div>
-                        <p className="text-xs font-black uppercase text-white tracking-tight">
+                        <p className="text-xs font-black uppercase text-gray-900 dark:text-white tracking-tight">
                           {item.title}
                         </p>
-                        <p className="text-[9px] text-gray-500 font-bold uppercase mt-1">
-                          Level: {item.promotion?.level || 0}
+                        <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">
+                          {item.region}, {item.country}
                         </p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex gap-2">
-                      {item.promotion?.boost?.isActive && (
-                        <div className="px-2 py-1 bg-purple-500/10 border border-purple-500/20 rounded text-purple-500">
-                          <p className="text-[8px] font-black uppercase">Viral Boost</p>
-                        </div>
-                      )}
-                      {item.promotion?.ppc?.isActive && (
-                        <div className="px-2 py-1 bg-orange-500/10 border border-orange-500/20 rounded text-orange-500">
-                          <p className="text-[8px] font-black uppercase">PPC Protocol</p>
-                        </div>
-                      )}
-                      {!item.isPromoted && (
-                        <span className="text-[9px] font-bold text-gray-600 uppercase italic">
-                          Standby
+                      {isBoostActive(item) && <Badge label="Viral Boost" color="purple" />}
+                      {isPpcActive(item) && <Badge label="PPC Active" color="orange" />}
+                      {!isBoostActive(item) && !isPpcActive(item) && (
+                        <span className="text-[9px] font-bold text-gray-400 uppercase italic tracking-widest">
+                          Organic Mode
                         </span>
                       )}
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    {item.isPromoted ? (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-[8px] font-black uppercase">
-                        <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse" /> Active
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-gray-700 dark:text-white italic">
+                        LVL {item.promotion?.level || 0}
                       </span>
-                    ) : (
-                      <span className="text-[9px] font-bold text-gray-700 uppercase tracking-widest">
-                        Inactive
-                      </span>
-                    )}
+                      <div className="flex-1 h-1 w-16 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-orange-500"
+                          style={{ width: `${Math.min((item.promotion?.level || 0) / 10, 100)}%` }}
+                        />
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-5 text-right">
-                    <div className="flex justify-end gap-3">
+                    <div className="flex justify-end gap-2">
                       <button
+                        title="View Detailed Analytics"
                         onClick={() => router.push(`/creator/promotions/${item._id}`)}
-                        className="p-2.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all border border-white/5"
+                        className="p-2.5 bg-gray-100 dark:bg-white/5 hover:bg-orange-500 hover:text-white dark:hover:text-orange-500 rounded-lg transition-all border border-black/5 dark:border-white/5"
                       >
-                        <FiBarChart2 size={16} />
+                        <FiExternalLink size={16} />
                       </button>
                       <button
                         onClick={() => setSelectedListing(item)}
-                        className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all hover:shadow-[0_0_20px_rgba(234,88,12,0.3)] active:scale-95"
+                        disabled={isBoostActive(item) && isPpcActive(item)}
+                        className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                          isBoostActive(item) && isPpcActive(item)
+                            ? 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                            : 'bg-orange-600 hover:bg-orange-500 text-white shadow-lg active:scale-95'
+                        }`}
                       >
-                        Promote
+                        {isBoostActive(item) && isPpcActive(item) ? 'Optimized' : 'Promote'}
                       </button>
                     </div>
                   </td>
@@ -275,24 +276,24 @@ export default function PromotionsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 bg-white/20 border-t border-white/5 flex items-center justify-between">
-          <span className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.2em]">
+        <div className="px-6 py-4 bg-gray-50 dark:bg-white/20 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
             Sequence {currentPage} / {totalPages}
           </span>
           <div className="flex gap-2">
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
-              className="p-2 border border-white/10 rounded-md hover:bg-white/5 disabled:opacity-20 transition-all"
+              className="p-2 border border-black/10 dark:border-white/10 rounded-md hover:bg-gray-200 dark:hover:bg-white/5 disabled:opacity-20 transition-all"
             >
-              <FiChevronLeft className="text-gray-400" />
+              <FiChevronLeft />
             </button>
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
-              className="p-2 border border-white/10 rounded-md hover:bg-white/5 disabled:opacity-20 transition-all"
+              className="p-2 border border-black/10 dark:border-white/10 rounded-md hover:bg-gray-200 dark:hover:bg-white/5 disabled:opacity-20 transition-all"
             >
-              <FiChevronRight className="text-gray-400" />
+              <FiChevronRight />
             </button>
           </div>
         </div>
@@ -300,197 +301,271 @@ export default function PromotionsPage() {
 
       {/* Promotion Config Modal */}
       {selectedListing && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 dark:bg-black/95 backdrop-blur-sm"
             onClick={() => setSelectedListing(null)}
           />
-
-          <div className="relative bg-[#0c0c0c] w-full max-w-xl rounded-lg border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in zoom-in duration-300">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/20">
-              <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-widest">
-                  Choose Promotion
-                </h3>
-                <p className="text-[9px] text-gray-500 font-bold uppercase mt-1 italic tracking-widest">
-                  {selectedListing.title}
-                </p>
+          {/* max-w-lg করে সাইজ ছোট করা হয়েছে */}
+          <div className="relative bg-white dark:bg-[#0c0c0c] w-full max-w-lg rounded-2xl border border-black/10 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+            {/* Header: প্যাডিং কিছুটা কমানো হয়েছে */}
+            <div className="p-5 border-b border-black/5 dark:border-white/5 flex justify-between items-center bg-gray-50 dark:bg-white/20">
+              <div className="flex items-center gap-3">
+                <div className="p-1.5 bg-orange-500 rounded-lg">
+                  <FiZap className="text-white" size={16} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">
+                    Protocol Settings
+                  </h3>
+                  <p className="text-[8px] text-orange-500 font-bold uppercase tracking-widest line-clamp-1">
+                    {selectedListing.title}
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setSelectedListing(null)}
-                className="p-2 hover:bg-white/10 rounded-full text-gray-400 transition-colors"
+                className="p-1.5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full text-gray-400 transition-colors"
               >
-                <FiX size={20} />
+                <FiX size={18} />
               </button>
             </div>
 
-            <div className="p-8 space-y-8">
-              {/* Type Switcher */}
-              <div className="grid grid-cols-2 gap-4">
+            {/* Body Section: p-8 থেকে কমিয়ে p-6 করা হয়েছে */}
+            <div className="p-6 space-y-6">
+              {/* Type Switcher: ছোট গ্যাপ */}
+              <div className="grid grid-cols-2 gap-3">
                 <ModalTab
                   active={promoType === 'boost'}
+                  disabled={isBoostActive(selectedListing)}
                   onClick={() => setPromoType('boost')}
                   icon={FiZap}
-                  label="Duration Boost"
+                  label="Viral Boost"
+                  subLabel={isBoostActive(selectedListing) ? 'Active' : 'Timeline'}
                   color="purple"
                 />
                 <ModalTab
                   active={promoType === 'ppc'}
+                  disabled={isPpcActive(selectedListing)}
                   onClick={() => setPromoType('ppc')}
                   icon={FiActivity}
-                  label="Pay Per Click"
+                  label="PPC Protocol"
+                  subLabel={isPpcActive(selectedListing) ? 'Active' : 'Performance'}
                   color="orange"
                 />
               </div>
 
-              {/* Dynamic Form */}
-              <div className="space-y-6">
-                {promoType === 'boost' ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    <InputGroup label="Duration (Days)" icon={FiClock}>
-                      <input
-                        type="number"
-                        min="1"
-                        value={boostDays}
-                        onChange={(e) => setBoostDays(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white font-black text-sm focus:border-purple-500 focus:outline-none"
-                      />
-                    </InputGroup>
-                    <InputGroup label="Total Budget" icon={FiDollarSign}>
-                      <input
-                        type="number"
-                        min="5"
-                        value={boostBudget}
-                        onChange={(e) => setBoostBudget(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white font-black text-sm focus:border-purple-500 focus:outline-none"
-                      />
-                    </InputGroup>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4">
-                    <InputGroup label="Budget Amount" icon={FiDollarSign}>
-                      <input
-                        type="number"
-                        min="5"
-                        value={ppcAmount}
-                        onChange={(e) => setPpcAmount(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white font-black text-sm focus:border-orange-500 focus:outline-none"
-                      />
-                    </InputGroup>
-                    <InputGroup label="Target Clicks" icon={FiMousePointer}>
-                      <input
-                        type="number"
-                        min="10"
-                        value={targetClicks}
-                        onChange={(e) => setTargetClicks(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white font-black text-sm focus:border-orange-500 focus:outline-none"
-                      />
-                    </InputGroup>
-                  </div>
-                )}
+              {/* Warning Section */}
+              {((promoType === 'boost' && isBoostActive(selectedListing)) ||
+                (promoType === 'ppc' && isPpcActive(selectedListing))) && (
+                <div className="p-3 bg-red-500/5 border border-red-500/20 rounded-xl flex items-start gap-2">
+                  <FiInfo className="text-red-500 mt-0.5" size={14} />
+                  <p className="text-[9px] text-red-600 dark:text-red-200 font-bold uppercase tracking-tighter">
+                    Protocol active. Please wait for completion.
+                  </p>
+                </div>
+              )}
 
-                {/* Info Display */}
+              {/* Input & Info Section */}
+              <div
+                className={`space-y-4 transition-opacity ${(promoType === 'boost' && isBoostActive(selectedListing)) || (promoType === 'ppc' && isPpcActive(selectedListing)) ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}
+              >
+                <div className="grid grid-cols-2 gap-3">
+                  {promoType === 'boost' ? (
+                    <>
+                      <InputGroup label="Duration (Days)" icon={FiClock}>
+                        <input
+                          type="number"
+                          min="1"
+                          value={boostDays}
+                          onChange={(e) => setBoostDays(e.target.value)}
+                          className="input-style !p-3 text-xs" // প্যাডিং এবং টেক্সট সাইজ ছোট
+                        />
+                      </InputGroup>
+                      <InputGroup label="Budget (€)" icon={FiDollarSign}>
+                        <input
+                          type="number"
+                          min="5"
+                          value={boostBudget}
+                          onChange={(e) => setBoostBudget(e.target.value)}
+                          className="input-style !p-3 text-xs"
+                        />
+                      </InputGroup>
+                    </>
+                  ) : (
+                    <div>
+                      <InputGroup label="Budget (€)" icon={FiDollarSign}>
+                        <input
+                          type="number"
+                          min="5"
+                          value={ppcAmount}
+                          onChange={(e) => setPpcAmount(e.target.value)}
+                          className="input-style !p-3 text-xs"
+                        />
+                      </InputGroup>
+                      <InputGroup label="Clicks" icon={FiMousePointer}>
+                        <input
+                          type="number"
+                          min="10"
+                          value={targetClicks}
+                          onChange={(e) => setTargetClicks(e.target.value)}
+                          className="input-style !p-3 text-xs"
+                        />
+                      </InputGroup>
+                    </div>
+                  )}
+                </div>
+
+                {/* Intensity/Bid Display: আরও কম্প্যাক্ট */}
                 <div
-                  className={`p-4 rounded-lg border flex justify-between items-center ${promoType === 'boost' ? 'bg-purple-500/5 border-purple-500/20' : 'bg-orange-500/5 border-orange-500/20'}`}
+                  className={`p-3.5 rounded-xl border flex justify-between items-center ${promoType === 'boost' ? 'bg-purple-50 dark:bg-purple-500/5 border-purple-200 dark:border-purple-500/20' : 'bg-orange-50 dark:bg-orange-500/5 border-orange-200 dark:border-orange-500/20'}`}
                 >
-                  <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-                    {promoType === 'boost' ? (
-                      <>
-                        <FiTrendingUp className="text-purple-500" /> Daily Intensity
-                      </>
-                    ) : (
-                      <>
-                        <FiMousePointer className="text-orange-500" /> Bid Intensity
-                      </>
-                    )}
+                  <span className="text-[9px] font-black uppercase text-gray-500 dark:text-gray-400">
+                    {promoType === 'boost' ? 'Daily Impact' : 'Bid Strength'}
                   </span>
-                  <span className="text-lg font-black text-white italic">
-                    {currency === 'eur' ? '€' : '$'}
-                    {promoType === 'boost' ? dailyBoostIntensity : estimatedCPC}{' '}
-                    <span className="text-[8px] text-gray-500 uppercase">
+                  <span className="text-base font-black text-gray-900 dark:text-white italic">
+                    €{promoType === 'boost' ? dailyBoostIntensity : estimatedCPC}{' '}
+                    <span className="text-[8px] text-gray-400 not-italic uppercase ml-1">
                       / {promoType === 'boost' ? 'Day' : 'Click'}
                     </span>
                   </span>
                 </div>
               </div>
 
-              {/* Currency Selector */}
-              <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/5">
-                <div className="flex gap-2">
-                  {['eur', 'usd'].map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => setCurrency(c)}
-                      className={`px-4 py-1.5 rounded text-[10px] font-black uppercase transition-all ${currency === c ? 'bg-white text-black' : 'text-gray-500 hover:text-white'}`}
-                    >
-                      {c}
-                    </button>
-                  ))}
+              {/* Footer Actions: ছোট সাইজ */}
+              <div className="flex flex-col gap-3 pt-2">
+                <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5">
+                  <div className="flex gap-1">
+                    {['eur', 'usd'].map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setCurrency(c)}
+                        className={`px-3 py-1 rounded-md text-[9px] font-black uppercase transition-all ${currency === c ? 'bg-gray-900 dark:bg-white text-white dark:text-black shadow-sm' : 'text-gray-400 hover:bg-black/5 dark:hover:bg-white/5'}`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none">
+                      Total
+                    </p>
+                    <p className="text-xl font-black text-orange-600 dark:text-orange-500 tracking-tighter">
+                      {currency === 'eur' ? '€' : '$'}
+                      {displayCost}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">
-                    Est. Investment
-                  </p>
-                  <p className="text-2xl font-black text-white tracking-tighter">
-                    {currency === 'eur' ? '€' : '$'}
-                    {displayCost}
-                  </p>
-                </div>
-              </div>
 
-              {/* Action Button */}
-              <button
-                disabled={paymentLoading}
-                onClick={handlePromotion}
-                className="w-full py-5 bg-orange-600 hover:bg-orange-500 disabled:opacity-20 text-white rounded-lg font-black uppercase text-[11px] tracking-[0.3em] transition-all hover:shadow-[0_0_30px_rgba(234,88,12,0.2)]"
-              >
-                {paymentLoading ? 'Authenticating...' : 'Start Promotion'}
-              </button>
+                <button
+                  disabled={
+                    paymentLoading ||
+                    (promoType === 'boost' && isBoostActive(selectedListing)) ||
+                    (promoType === 'ppc' && isPpcActive(selectedListing))
+                  }
+                  onClick={handlePromotion}
+                  className="w-full py-4 bg-gray-900 dark:bg-orange-600 hover:bg-black dark:hover:bg-orange-500 disabled:opacity-30 text-white rounded-xl font-black uppercase text-[10px] tracking-[0.3em] transition-all shadow-lg active:scale-95"
+                >
+                  {paymentLoading ? 'Processing Payment...' : 'Boost My Listing'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .input-style {
+          width: 100%;
+          background: rgba(0, 0, 0, 0.03);
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          border-radius: 12px;
+          padding: 16px;
+          color: #111;
+          font-weight: 900;
+          font-size: 14px;
+          transition: all 0.2s;
+        }
+        .input-style:focus {
+          outline: none;
+          border-color: #ea580c;
+          background: #fff;
+        }
+        :global(.dark) .input-style {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #fff;
+        }
+        :global(.dark) .input-style:focus {
+          border-color: #ea580c;
+          background: rgba(255, 255, 255, 0.08);
+        }
+      `}</style>
     </div>
   );
 }
 
-// Helper Components
+const Badge = ({ label, color }) => (
+  <div
+    className={`px-2 py-1 rounded text-[8px] font-black uppercase border shadow-sm ${
+      color === 'purple'
+        ? 'bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400'
+        : 'bg-orange-500/10 border-orange-500/20 text-orange-600 dark:text-orange-400'
+    }`}
+  >
+    {label}
+  </div>
+);
+
 const QuickStat = ({ label, value, icon: Icon }) => (
-  <div className="px-5 py-3 bg-white/20 border border-white/5 rounded-lg flex items-center gap-4">
-    <div className="p-2 bg-white/5 rounded-lg">
-      <Icon className="text-orange-500" size={16} />
-    </div>
+  <div className="px-6 py-4 bg-white dark:bg-white/20 border border-black/5 dark:border-white/5 rounded-2xl flex items-center gap-5 shadow-sm">
+    <Icon className="text-orange-500" size={20} />
     <div>
-      <p className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em]">{label}</p>
-      <p className="text-lg font-black text-white tracking-tighter">{value}</p>
+      <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+        {label}
+      </p>
+      <p className="text-xl font-black text-gray-900 dark:text-white tracking-tighter">{value}</p>
     </div>
   </div>
 );
 
-const ModalTab = ({ active, onClick, icon: Icon, label, color }) => (
+const ModalTab = ({ active, disabled, onClick, icon: Icon, label, subLabel, color }) => (
   <button
+    disabled={disabled}
     onClick={onClick}
-    className={`p-4 rounded-lg border transition-all text-left flex flex-col gap-3 ${active ? (color === 'purple' ? 'border-purple-500/50 bg-purple-500/10' : 'border-orange-500/50 bg-orange-500/10') : 'border-white/5 bg-white/2 hover:bg-white/5'}`}
+    className={`p-5 rounded-2xl border transition-all text-left flex flex-col gap-4 ${
+      active
+        ? color === 'purple'
+          ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10'
+          : 'border-orange-500 bg-orange-50 dark:bg-orange-500/10'
+        : disabled
+          ? 'opacity-30 grayscale cursor-not-allowed border-black/5 dark:border-white/5'
+          : 'border-black/10 dark:border-white/5 bg-gray-50 dark:bg-white/2'
+    }`}
   >
     <Icon
       className={
-        active ? (color === 'purple' ? 'text-purple-500' : 'text-orange-500') : 'text-gray-600'
+        active ? (color === 'purple' ? 'text-purple-500' : 'text-orange-500') : 'text-gray-400'
       }
-      size={20}
+      size={24}
     />
-    <span
-      className={`text-[10px] font-black uppercase tracking-widest ${active ? 'text-white' : 'text-gray-500'}`}
-    >
-      {label}
-    </span>
+    <div>
+      <span
+        className={`block text-[11px] font-black uppercase tracking-widest ${active ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+      >
+        {label}
+      </span>
+      <span className="block text-[8px] font-bold text-gray-500 uppercase mt-1 italic">
+        {subLabel}
+      </span>
+    </div>
   </button>
 );
 
 const InputGroup = ({ label, icon: Icon, children }) => (
-  <div className="space-y-2">
-    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-      <Icon size={12} /> {label}
+  <div className="space-y-3">
+    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+      <Icon size={12} className="text-orange-500" /> {label}
     </label>
     {children}
   </div>
