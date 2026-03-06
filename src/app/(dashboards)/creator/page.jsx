@@ -24,6 +24,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import Image from 'next/image';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -247,14 +248,22 @@ const CampaignBox = ({ title, icon: Icon, color, data, isPpc }) => (
         data.map((item, i) => (
           <Link key={i} href={`/listings/${item._id}`} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/2 border border-gray-100 dark:border-white/5 rounded-md hover:border-orange-500/30 transition-all group">
             <div className="flex items-center gap-4">
-              <img src={getImageUrl(item.image)} className="w-10 h-10 rounded object-cover border border-gray-200 dark:border-white/10 grayscale-[0.5] group-hover:grayscale-0 transition-all" alt="" />
-              <div>
-                <p className="text-[11px] font-black dark:text-white uppercase truncate max-w-[140px] tracking-tight">{item.title}</p>
-                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
-                  {isPpc ? `Credits: €${item.promotion.ppc.ppcBalance}` : `Exp: ${new Date(item.promotion.boost.expiresAt).toLocaleDateString()}`}
-                </p>
-              </div>
-            </div>
+  <div className="relative w-10 h-10 flex-shrink-0">
+    <Image 
+      src={getImageUrl(item.image)} 
+      fill
+      className="rounded object-cover border border-gray-200 dark:border-white/10 grayscale-[0.5] group-hover:grayscale-0 transition-all" 
+      alt={item.title || "Promotion Image"}
+      sizes="40px"
+    />
+  </div>
+  <div>
+    <p className="text-[11px] font-black dark:text-white uppercase truncate max-w-[140px] tracking-tight">{item.title}</p>
+    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
+      {isPpc ? `Credits: €${item.promotion.ppc.ppcBalance}` : `Exp: ${new Date(item.promotion.boost.expiresAt).toLocaleDateString()}`}
+    </p>
+  </div>
+</div>
             <FiChevronRight className="text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
           </Link>
         ))
