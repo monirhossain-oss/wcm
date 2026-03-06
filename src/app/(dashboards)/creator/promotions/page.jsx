@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   FiZap,
-  FiCheckCircle,
   FiX,
   FiActivity,
   FiShield,
@@ -25,8 +24,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-const FX_RATE = 0.92;
-
 export default function PromotionsPage() {
   const [listings, setListings] = useState([]);
   const [stats, setStats] = useState(null);
@@ -40,11 +37,9 @@ export default function PromotionsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Boost States (Updated: Manual input)
+  // Manual Input States
   const [boostDays, setBoostDays] = useState(7);
   const [boostBudget, setBoostBudget] = useState(20);
-
-  // PPC States
   const [ppcAmount, setPpcAmount] = useState(10);
   const [targetClicks, setTargetClicks] = useState(50);
 
@@ -52,10 +47,10 @@ export default function PromotionsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Calculations
-  const displayCost = promoType === 'boost' ? boostBudget : ppcAmount;
-  const estimatedCPC = (ppcAmount / targetClicks).toFixed(2);
-  const dailyBoostIntensity = (boostBudget / boostDays).toFixed(2);
+  // Calculations for UI feedback
+  const displayCost = promoType === 'boost' ? Number(boostBudget) : Number(ppcAmount);
+  const estimatedCPC = targetClicks > 0 ? (ppcAmount / targetClicks).toFixed(2) : 0;
+  const dailyBoostIntensity = boostDays > 0 ? (boostBudget / boostDays).toFixed(2) : 0;
 
   useEffect(() => {
     initData();
@@ -84,8 +79,6 @@ export default function PromotionsPage() {
   };
 
   const handlePromotion = async () => {
-    const finalAmountEUR = Number(displayCost);
-
     // Validation
     if (promoType === 'boost' && (boostBudget < 5 || boostDays < 1)) {
       return toast.error('Minimum investment €5 for 1 day');
@@ -100,29 +93,32 @@ export default function PromotionsPage() {
     const payload = {
       listingId: selectedListing._id,
       packageType: promoType,
-      amount: currency === 'eur' ? finalAmountEUR : (finalAmountEUR / FX_RATE).toFixed(2),
-      currency,
-      days: promoType === 'boost' ? boostDays : 0,
-      totalClicks: promoType === 'ppc' ? targetClicks : 0,
+      amount: displayCost, // সরাসরি অ্যামাউন্ট পাঠানো হচ্ছে, ব্যাকএন্ড কারেন্সি অনুযায়ী হ্যান্ডেল করবে
+      currency: currency.toLowerCase(),
+      days: promoType === 'boost' ? Number(boostDays) : 0,
+      totalClicks: promoType === 'ppc' ? Number(targetClicks) : 0,
       currentPath: pathname,
     };
 
     try {
-      // Wallet check
-      if (currency === 'eur' && stats?.walletBalance >= finalAmountEUR) {
+      // Wallet Payment Logic (Only if Currency is EUR and balance is enough)
+      // Note: Backend should handle conversion if wallet is in EUR but user pays in USD
+      if (currency === 'eur' && stats?.walletBalance >= displayCost) {
         const res = await api.post('/api/payments/pay-with-wallet', payload);
         if (res.data.success) {
           triggerConfetti();
           toast.success('Transaction Verified. Growth Active.', { id: toastId });
           setSelectedListing(null);
           initData();
+          return;
         }
-      } else {
-        const res = await api.post('/api/payments/create-checkout-session', payload);
-        if (res.data.url) {
-          toast.dismiss(toastId);
-          window.location.href = res.data.url;
-        }
+      }
+
+      // Stripe Checkout
+      const res = await api.post('/api/payments/create-checkout-session', payload);
+      if (res.data.url) {
+        toast.dismiss(toastId);
+        window.location.href = res.data.url;
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Authorization Refused', { id: toastId });
@@ -189,7 +185,7 @@ export default function PromotionsPage() {
         <div className="overflow-x-auto scrollbar-hide">
           <table className="w-full">
             <thead>
-              <tr className="bg-white/2 text-left">
+              <tr className="bg-white/20 text-left">
                 <th className="px-6 py-4 text-[9px] font-black uppercase text-gray-500 tracking-widest">
                   Item Details
                 </th>
@@ -206,13 +202,14 @@ export default function PromotionsPage() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {currentItems.map((item) => (
-                <tr key={item._id} className="hover:bg-white/3 transition-colors group">
+                <tr key={item._id} className="hover:bg-white/5 transition-colors group">
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-lg overflow-hidden border border-white/10 group-hover:border-orange-500/30 transition-all">
                         <img
                           src={getImageUrl(item.image)}
                           className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                          alt={item.title}
                         />
                       </div>
                       <div>
@@ -278,7 +275,7 @@ export default function PromotionsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 bg-white/1 border-t border-white/5 flex items-center justify-between">
+        <div className="px-6 py-4 bg-white/20 border-t border-white/5 flex items-center justify-between">
           <span className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.2em]">
             Sequence {currentPage} / {totalPages}
           </span>
@@ -311,7 +308,7 @@ export default function PromotionsPage() {
 
           <div className="relative bg-[#0c0c0c] w-full max-w-xl rounded-lg border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in zoom-in duration-300">
             {/* Modal Header */}
-            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/2">
+            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/20">
               <div>
                 <h3 className="text-sm font-black text-white uppercase tracking-widest">
                   Choose Promotion
@@ -360,7 +357,7 @@ export default function PromotionsPage() {
                         className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white font-black text-sm focus:border-purple-500 focus:outline-none"
                       />
                     </InputGroup>
-                    <InputGroup label="Total Budget (€)" icon={FiDollarSign}>
+                    <InputGroup label="Total Budget" icon={FiDollarSign}>
                       <input
                         type="number"
                         min="5"
@@ -372,7 +369,7 @@ export default function PromotionsPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-4">
-                    <InputGroup label="Budget Amount (€)" icon={FiDollarSign}>
+                    <InputGroup label="Budget Amount" icon={FiDollarSign}>
                       <input
                         type="number"
                         min="5"
@@ -409,7 +406,8 @@ export default function PromotionsPage() {
                     )}
                   </span>
                   <span className="text-lg font-black text-white italic">
-                    €{promoType === 'boost' ? dailyBoostIntensity : estimatedCPC}{' '}
+                    {currency === 'eur' ? '€' : '$'}
+                    {promoType === 'boost' ? dailyBoostIntensity : estimatedCPC}{' '}
                     <span className="text-[8px] text-gray-500 uppercase">
                       / {promoType === 'boost' ? 'Day' : 'Click'}
                     </span>
@@ -436,7 +434,7 @@ export default function PromotionsPage() {
                   </p>
                   <p className="text-2xl font-black text-white tracking-tighter">
                     {currency === 'eur' ? '€' : '$'}
-                    {currency === 'eur' ? displayCost : (displayCost / FX_RATE).toFixed(2)}
+                    {displayCost}
                   </p>
                 </div>
               </div>
@@ -459,7 +457,7 @@ export default function PromotionsPage() {
 
 // Helper Components
 const QuickStat = ({ label, value, icon: Icon }) => (
-  <div className="px-5 py-3 bg-white/5 border border-white/5 rounded-lg flex items-center gap-4">
+  <div className="px-5 py-3 bg-white/20 border border-white/5 rounded-lg flex items-center gap-4">
     <div className="p-2 bg-white/5 rounded-lg">
       <Icon className="text-orange-500" size={16} />
     </div>
