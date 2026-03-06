@@ -15,6 +15,7 @@ import {
   FiLayers,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
+
 import {
   AreaChart,
   Area,
@@ -57,11 +58,32 @@ export default function CreatorDashboard() {
     fetchDashboardData();
   }, []);
 
-  const downloadInvoice = (transactionId) => {
-    window.open(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/payments/creator/invoice/${transactionId}`,
-      '_blank'
-    );
+  const downloadInvoice = async (transactionId) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/payments/creator/invoice/${transactionId}`,
+        {
+          withCredentials: true,
+          responseType: 'blob',
+        }
+      );
+
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: 'application/pdf' })
+      );
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice-${transactionId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Invoice download failed:', error);
+      alert('Could not download invoice. Please make sure you are logged in.');
+    }
   };
 
   if (loading)
