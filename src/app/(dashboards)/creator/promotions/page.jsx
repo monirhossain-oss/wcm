@@ -252,7 +252,7 @@ export default function PromotionsPage() {
                       <button
                         title="View Detailed Analytics"
                         onClick={() => router.push(`/creator/promotions/${item._id}`)}
-                        className="p-2.5 bg-gray-100 dark:bg-white/5 hover:bg-orange-500 hover:text-white dark:hover:text-orange-500 rounded-lg transition-all border border-black/5 dark:border-white/5"
+                        className="p-2.5 bg-gray-100 dark:bg-white/5 hover:bg-orange-500 hover:text-white rounded-lg transition-all border border-black/5 dark:border-white/5"
                       >
                         <FiExternalLink size={16} />
                       </button>
