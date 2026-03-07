@@ -61,7 +61,7 @@ export default function RegisterForm() {
           <div className="relative z-10 w-full mt-10">
              <div className="relative w-full aspect-square mb-8">
                 <Image 
-                  src="/cultural1.jpg" 
+                  src="/login image.jpeg" 
                   alt="Cultural Art"
                   fill
                   className="object-contain"
