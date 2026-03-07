@@ -135,14 +135,10 @@ const CategoriesPage = () => {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2">
 
           {/* Title */}
-          <div className="text-center mb-2">
+          <div className="text-center mb-3">
             <h1 className="text-lg sm:text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tight leading-tight">
               Explore <span className="text-[#F57C00]">Collections</span>
             </h1>
-
-            <p className="hidden sm:block text-xs text-zinc-500 dark:text-zinc-400">
-              Discover authentic cultural treasures from across the globe
-            </p>
           </div>
 
           {/* Categories */}

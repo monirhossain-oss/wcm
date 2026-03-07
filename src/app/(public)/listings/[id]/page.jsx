@@ -61,6 +61,7 @@ const ListingDetails = () => {
         });
 
         const currentProduct = res.data;
+        console.log(res.data);
         setProduct(currentProduct);
         setFavCount(currentProduct.favorites?.length || 0);
 
