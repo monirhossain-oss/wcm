@@ -4,11 +4,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { FiSearch, FiMenu, FiX, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiX, FiUser, FiLogOut } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 
 const PublicNavbar = () => {
-  const [showSearch, setShowSearch] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -33,7 +32,7 @@ const PublicNavbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] dark:border-[#1F1F1F] border-b z-50">
-      <div className="flex items-center justify-between px-6 h-20">
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-6 h-20">
 
         {/* Logo */}
         <div className="flex items-center space-x-2">
@@ -57,60 +56,29 @@ const PublicNavbar = () => {
 
         {/* Center Menu */}
         <div className="flex-1 flex justify-center">
-          {showSearch ? (
-            <form
-              className="relative w-full max-w-[70%]"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <input
-                type="text"
-                placeholder="Search cultures, products, creators…"
-                className="w-full border-b-2 border-[#F57C00] bg-transparent py-2 pr-20 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-[#F57C00]"
-              >
-                Search
-              </button>
-            </form>
-          ) : (
-            <div className="hidden md:flex space-x-6">
-              {menuItems.map((item) => {
-                const isActive = pathname === item.href;
+          <div className="hidden md:flex space-x-6">
+            {menuItems.map((item) => {
+              const isActive = pathname === item.href;
 
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`text-sm font-medium transition-all duration-200 pb-1 border-b-2
-                      ${isActive
-                        ? 'text-[#F57C00] border-[#F57C00]'
-                        : 'border-transparent hover:text-[#F57C00]'
-                      }`}
-                  >
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`text-sm font-medium transition-all duration-200 pb-1 border-b-2
+                  ${isActive
+                      ? 'text-[#F57C00] border-[#F57C00]'
+                      : 'border-transparent hover:text-[#F57C00]'
+                    }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
         {/* Right Side */}
         <div className="flex items-center space-x-3">
-
-          {showSearch ? (
-            <FiX
-              className="h-9 w-9 p-2 cursor-pointer"
-              onClick={() => setShowSearch(false)}
-            />
-          ) : (
-            <FiSearch
-              className="h-9 w-9 p-2 cursor-pointer"
-              onClick={() => setShowSearch(true)}
-            />
-          )}
 
           {user ? (
             <div className="relative flex items-center space-x-2">
