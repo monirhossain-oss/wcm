@@ -42,6 +42,7 @@ const CreatorSlider = ({ creators }) => {
                                     src={creator.profile?.profileImage || "/default-avatar.png"}
                                     alt={creator.username || "creator"}
                                     fill
+                                    sizes="96px"
                                     className="rounded-full object-cover ring-2 ring-gray-100 dark:ring-zinc-800 group-hover:ring-orange-500 transition-all"
                                 />
                             </div>
