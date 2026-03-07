@@ -128,8 +128,8 @@ export default function CreatorDashboard() {
           trend="Spending (Current Month)"
         />
         <MetricCard
-          label="Active Boosts"
-          value={mainStats?.activeBoostsCount}
+          label="Total Campaign"
+          value={mainStats?.totalActivePromoted}
           icon={FiZap}
           isPrimary
           trend="Viral Active Status"
