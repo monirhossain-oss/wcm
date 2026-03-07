@@ -17,29 +17,38 @@ const RegionPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] pt-28 pb-20 px-6">
-      <div className="max-w-7xl mx-auto text-center mb-16">
-        <h1 className="text-5xl font-black text-zinc-900 dark:text-white italic uppercase tracking-tighter mb-4">
-          Explore By Region
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] py-6 px-4">
+      <div className="max-w-7xl mx-auto text-center mb-12">
+        <h1 className="text-3xl md:text-5xl font-black text-zinc-900 dark:text-white italic uppercase tracking-tighter mb-4">
+          Explore By <span className='text-orange-500'>Region</span>
         </h1>
-        <p className="text-gray-500">Select a land to discover its heritage masterminds.</p>
+        <p className="text-lg font-bold text-gray-500">
+          Select a land to discover its heritage masterminds.
+        </p>
       </div>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0">
         {regions.map((region) => (
           <Link key={region.id} href={`/regions/${region.id}`}>
-            <div className="relative h-[400px] rounded-3xl overflow-hidden cursor-pointer group bg-zinc-900 shadow-xl border border-zinc-100 dark:border-zinc-800">
+            <div className="relative  h-[200px] md:h-[300px] overflow-hidden cursor-pointer group border-[0.5px] border-zinc-200 dark:border-zinc-800">
+              {/* Image */}
               <Image
                 src={region.image}
                 alt={region.name}
                 fill
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
                 unoptimized
               />
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all" />
-              <div className="absolute bottom-8 left-8 text-left">
+
+              {/* Premium Overlay */}
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-all duration-500" />
+
+              {/* Content */}
+              <div className="absolute bottom-6 left-6 z-10 transition-transform duration-500 group-hover:translate-y-[-10px]">
                 <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">{region.name}</h3>
-                <p className="text-orange-500 text-xs font-bold uppercase tracking-widest">{region.count}</p>
+                <p className="text-orange-400 text-xs font-bold uppercase tracking-widest bg-black/50 px-2 py-1 inline-block mt-2 backdrop-blur-sm">
+                  {region.count}
+                </p>
               </div>
             </div>
           </Link>
