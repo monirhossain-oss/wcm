@@ -14,6 +14,7 @@ import {
   FiChevronRight,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
+import { useRouter } from 'next/navigation';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -25,7 +26,7 @@ export default function MyListings() {
   const [metaData, setMetaData] = useState({ categories: [], tags: [] });
   const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState(null);
-  const [viewingItem, setViewingItem] = useState(null);
+  const router = useRouter();
 
   const [editFormData, setEditFormData] = useState({});
   const [editImage, setEditImage] = useState(null);
@@ -34,7 +35,7 @@ export default function MyListings() {
 
   // --- Pagination State ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // প্রতি পেজে কয়টি লিস্টিং দেখাবে
+  const itemsPerPage = 6; 
 
   useEffect(() => {
     fetchListings();
@@ -125,7 +126,6 @@ export default function MyListings() {
     try {
       await api.delete(`/api/listings/delete/${id}`);
       setListings(listings.filter((l) => l._id !== id));
-      // যদি ডিলিট করার পর কারেন্ট পেজ খালি হয়ে যায়, তবে আগের পেজে ব্যাক করবে
       if (currentItems.length === 1 && currentPage > 1) setCurrentPage(currentPage - 1);
     } catch (err) {
       alert('Delete failed');
@@ -145,8 +145,8 @@ export default function MyListings() {
       <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/10 pb-8">
         <div>
           <h2 className="text-2xl font-black uppercase tracking-tighter dark:text-white flex items-center gap-3">
-            <FiActivity className="text-orange-500" /> Inventory{' '}
-            <span className="text-orange-500">Nodes</span>
+            <FiActivity className="text-orange-500" /> Total{' '}
+            <span className="text-orange-500">Listings</span>
           </h2>
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
             Total Assets: {listings.length}
@@ -219,7 +219,7 @@ export default function MyListings() {
                     <div className="flex items-center justify-end gap-2">
                       <ActionButton
                         icon={FiEye}
-                        onClick={() => setViewingItem(item)}
+                        onClick={() => router.push(`/listings/${item._id}`)}
                         color="hover:bg-blue-500"
                       />
                       <ActionButton
