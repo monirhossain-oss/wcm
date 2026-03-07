@@ -1,37 +1,29 @@
-// HeroSection.jsx
-import dynamic from 'next/dynamic';
+import HeroSlider from "./HeroSlider";
+import HeroActions from "./HeroActions";
 
-// Client-only components
-const HeroSlider = dynamic(() => import('./HeroSlider'), { ssr: false });
-const HeroActions = dynamic(() => import('./HeroActions'), { ssr: false });
-const HeroFilters = dynamic(() => import('./HeroFilters'), { ssr: false });
-
-export default function HeroSection({ filters = {} }) {
-  // Server component থেকে শুধুমাত্র initial filters পাঠানো যাবে
-  const handleFilterChange = (id, value) => {
-    console.log('Filter changed:', id, value);
-    // চাইলে এখানে API call করে filtered products fetch করতে পারেন
-  };
-
+export default function HeroSection() {
   return (
-    <section className="relative min-h-screen overflow-hidden flex items-center transition-all duration-500">
-
-      {/* Client Slider */}
+    <section className="relative h-[80vh] md:h-screen w-full flex items-center justify-center overflow-hidden">
+      {/* ব্যাকগ্রাউন্ড স্লাইডার */}
       <HeroSlider />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-4 flex flex-col items-center text-center w-full">
+      {/* কন্টেন্ট লেয়ার */}
+      <div className="relative z-20 max-w-4xl mx-auto px-6 text-center text-white">
 
-        <h1 className="text-5xl md:text-7xl font-bold text-white drop-shadow-2xl leading-tight">
-          Discover <br /> culture <span className="text-[#F57C00]">worldwide</span>
+        {/* Title: ছোট এবং পাওয়ারফুল */}
+        <h1 className="text-4xl md:text-7xl font-black tracking-tighter drop-shadow-2xl leading-[1.1]">
+          Discover Cultural <br className="hidden sm:block" />  <span className="text-[#F57C00]">Worldwide</span>
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg md:text-xl text-gray-100 font-medium drop-shadow-md">
-          Explore authentic products, stories, and experiences from creators around the world —
-          crafted with culture, passion, and purpose.
+        {/* Description: ছোট এবং ক্লিয়ার */}
+        <p className="mt-4 md:mt-6 max-w-xl mx-auto text-base sm:text-lg md:text-xl text-gray-200 font-medium drop-shadow-md opacity-90 leading-relaxed">
+          Explore authentic products, stories, and experiences from creators around the world.
         </p>
 
-        {/* Client Auth Buttons */}
-        <HeroActions />
+        {/* Responsive CTA Buttons */}
+        <div className="mt-8 md:mt-10">
+          <HeroActions />
+        </div>
       </div>
     </section>
   );

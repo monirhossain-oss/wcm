@@ -44,7 +44,7 @@ export default function CultureSlider({ tags, API_BASE_URL }) {
                     <SwiperSlide key={tag._id}>
                         <div
                             onClick={() => (window.location.href = `/listings?tag=${tag._id}`)}
-                            className="relative h-48 md:h-56 w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl"
+                            className="relative h-48 md:h-56 w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500"
                         >
                             <Image
                                 src={tag.image.startsWith('http') ? tag.image : `${API_BASE_URL}/${tag.image}`}
