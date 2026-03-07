@@ -139,7 +139,7 @@ export default function PromotionsPage() {
       <Toaster position="top-center" />
 
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-black/5 dark:border-white/5 pb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
@@ -153,19 +153,6 @@ export default function PromotionsPage() {
           <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">
             Manage your listing ranking and reach protocols.
           </p>
-        </div>
-
-        <div className="flex gap-4">
-          <QuickStat
-            label="Available Balance"
-            value={`€${stats?.walletBalance || '0'}`}
-            icon={FiShield}
-          />
-          <QuickStat
-            label="Active Campaigns"
-            value={stats?.activePromotions || '0'}
-            icon={FiTrendingUp}
-          />
         </div>
       </div>
 
