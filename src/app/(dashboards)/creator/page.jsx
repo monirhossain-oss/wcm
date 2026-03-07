@@ -23,6 +23,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import CreatorActivityLog from '@/components/creator/CreatorActivityLog';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -321,6 +322,10 @@ export default function CreatorDashboard() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="mt-8">
+        <CreatorActivityLog />
       </div>
     </div>
   );
