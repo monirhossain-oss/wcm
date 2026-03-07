@@ -10,7 +10,7 @@ import {
   FiTag,
   FiLayers,
   FiShield,
-  FiLink, 
+  FiLink,
 } from 'react-icons/fi';
 import {
   FaSpinner,
@@ -27,6 +27,8 @@ import Image from 'next/image';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import ListingCard from '@/components/ListingCard';
+
+// ✅ এখান থেকে FingerprintJS এর স্ট্যাটিক ইম্পোর্ট মুছে ফেলা হয়েছে (Build Error ফিক্স)
 
 const ListingDetails = () => {
   const params = useParams();
@@ -48,9 +50,16 @@ const ListingDetails = () => {
   useEffect(() => {
     const fetchListing = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/listings/${id}`, {
+        // --- ডায়নামিক ইম্পোর্ট (শুধুমাত্র ব্রাউজারে রান করবে) ---
+        const FingerprintJS = (await import('@fingerprintjs/fingerprintjs')).default;
+        const fp = await FingerprintJS.load();
+        const result = await fp.get();
+        const deviceId = result.visitorId;
+
+        const res = await axios.get(`${API_BASE_URL}/api/listings/${id}?deviceId=${deviceId}`, {
           withCredentials: true,
         });
+
         const currentProduct = res.data;
         setProduct(currentProduct);
         setFavCount(currentProduct.favorites?.length || 0);
@@ -78,6 +87,7 @@ const ListingDetails = () => {
         setLoading(false);
       }
     };
+
     if (id) fetchListing();
   }, [id, API_BASE_URL, user]);
 
@@ -101,11 +111,23 @@ const ListingDetails = () => {
   const handleVisitSite = async (url, isExternal = false, index = null) => {
     if (!url || isProcessing.current) return;
     isProcessing.current = true;
+
     if (isExternal) setExternalClickLoading(index);
     else setClickLoading(true);
 
     try {
-      await axios.post(`${API_BASE_URL}/api/listings/${id}/click`, {}, { withCredentials: true });
+      // ডায়নামিক ইম্পোর্ট এখানেও করা হয়েছে যাতে সংঘর্ষ না হয়
+      const FingerprintJS = (await import('@fingerprintjs/fingerprintjs')).default;
+      const fp = await FingerprintJS.load();
+      const result = await fp.get();
+      const deviceId = result.visitorId;
+
+      await axios.post(
+        `${API_BASE_URL}/api/listings/${id}/click`,
+        { deviceId },
+        { withCredentials: true }
+      );
+
       window.open(url, '_blank', 'noopener,noreferrer');
     } catch (err) {
       window.open(url, '_blank', 'noopener,noreferrer');
@@ -135,7 +157,7 @@ const ListingDetails = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-[#050505] pt-5 pb-10 px-4 md:px-8 font-sans">
       <div className="max-w-7xl mx-auto">
-        {/* Navigation */}
+        {/* UI Content... */}
         <div className="flex justify-between items-center mb-5">
           <button
             onClick={() => router.back()}
@@ -146,7 +168,6 @@ const ListingDetails = () => {
               Back to Previous
             </span>
           </button>
-
           <button
             onClick={handleToggleFavorite}
             className={`px-5 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center gap-2 ${isFavorited ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-white dark:bg-white/5 border-zinc-100 dark:border-white/10 text-zinc-400'}`}
@@ -157,7 +178,6 @@ const ListingDetails = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Visual Section (Left) */}
           <div className="lg:col-span-5 space-y-6">
             <div className="relative aspect-square bg-zinc-100 dark:bg-white/5 rounded-lg overflow-hidden border border-zinc-200 dark:border-white/10 group shadow-2xl">
               <Image
@@ -171,36 +191,29 @@ const ListingDetails = () => {
                 unoptimized
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
-
               {product.isPromoted && (
                 <div className="absolute top-4 left-4 bg-orange-600 px-3 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest shadow-lg">
                   Top Ranked
                 </div>
               )}
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <StatBox icon={FiShield} label="Tradition" value={product.tradition} />
               <StatBox icon={FaEye} label="Total Views" value={product.views || 0} />
             </div>
           </div>
 
-          {/* Info Section (Right) */}
           <div className="lg:col-span-7">
             <div className="flex flex-wrap gap-2 mb-6">
               <Tag label={product.country} icon={FiMapPin} color="orange" />
               <Tag label={product.category?.title} icon={FiLayers} color="zinc" />
             </div>
-
             <h1 className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white mb-6 uppercase tracking-tighter leading-[0.9]">
               {product.title}
             </h1>
-
             <p className="text-zinc-600 dark:text-gray-400 leading-relaxed text-base md:text-lg font-medium mb-10 max-w-2xl">
               {product.description}
             </p>
-
-            {/* Cultural Tags */}
             {product.culturalTags?.length > 0 && (
               <div className="mb-10">
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4">
@@ -219,7 +232,6 @@ const ListingDetails = () => {
               </div>
             )}
 
-            {/* External Matrix */}
             {product.externalUrls?.length > 0 && (
               <div className="mb-10 p-6 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-lg">
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-5">
@@ -244,7 +256,6 @@ const ListingDetails = () => {
               </div>
             )}
 
-            {/* Main Action */}
             <button
               onClick={() => handleVisitSite(product.websiteLink)}
               disabled={clickLoading || !product.websiteLink}
@@ -262,7 +273,6 @@ const ListingDetails = () => {
           </div>
         </div>
 
-        {/* Related Assets */}
         {relatedListings.length > 0 && (
           <div className="mt-10 pt-10 border-t border-white/5">
             <div className="flex justify-between items-end mb-10">
@@ -311,7 +321,6 @@ const StatBox = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-// Icon Helper
 const getSocialIcon = (url) => {
   if (url.includes('facebook')) return <FaFacebook className="text-[#1877F2]" />;
   if (url.includes('instagram')) return <FaInstagram className="text-[#E4405F]" />;
@@ -319,7 +328,7 @@ const getSocialIcon = (url) => {
   if (url.includes('twitter') || url.includes('x.com'))
     return <FaTwitter className="text-[#1DA1F2]" />;
   if (url.includes('linkedin')) return <FaLinkedin className="text-[#0A66C2]" />;
-  return <FiLink className="text-orange-500" />; // ✅ এখন কাজ করবে!
+  return <FiLink className="text-orange-500" />;
 };
 
 export default ListingDetails;
