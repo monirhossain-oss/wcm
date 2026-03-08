@@ -11,10 +11,8 @@ import {
   FiFileText,
   FiTrendingUp,
   FiAlertCircle,
-  FiChevronRight,
   FiLayers,
 } from 'react-icons/fi';
-import { getImageUrl } from '@/lib/imageHelper';
 
 import {
   AreaChart,
@@ -25,6 +23,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import CreatorActivityLog from '@/components/creator/CreatorActivityLog';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -33,21 +32,19 @@ const api = axios.create({
 
 export default function CreatorDashboard() {
   const [stats, setStats] = useState(null);
-  const [promotedListings, setPromotedListings] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [statsRes, listingsRes, transRes] = await Promise.all([
+        const [statsRes, transRes] = await Promise.all([
           api.get('/api/creator/stats'),
-          api.get('/api/listings/my-listings'),
           api.get('/api/creator/payments'),
         ]);
 
+        // ব্যাকএন্ড এখন সরাসরি { stats, chartData } পাঠাচ্ছে
         setStats(statsRes.data);
-        setPromotedListings(listingsRes.data.filter((l) => l.isPromoted));
         setTransactions(transRes.data.transactions?.slice(0, 5) || []);
       } catch (err) {
         console.error('Dashboard Data Error:', err);
@@ -60,29 +57,23 @@ export default function CreatorDashboard() {
 
   const downloadInvoice = async (transactionId) => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/payments/creator/invoice/${transactionId}`,
-        {
-          withCredentials: true,
-          responseType: 'blob',
-        }
-      );
+      const response = await api.get(`/api/payments/creator/invoice/${transactionId}`, {
+        responseType: 'blob',
+      });
 
       const url = window.URL.createObjectURL(
         new Blob([response.data], { type: 'application/pdf' })
       );
-
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `invoice-${transactionId}.pdf`);
       document.body.appendChild(link);
       link.click();
-
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Invoice download failed:', error);
-      alert('Could not download invoice. Please make sure you are logged in.');
+      alert('Could not download invoice.');
     }
   };
 
@@ -93,10 +84,12 @@ export default function CreatorDashboard() {
       </div>
     );
 
+  const mainStats = stats?.stats;
+
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700 font-sans">
-      {/* ⚠️ Low Balance Alert */}
-      {stats?.totalPpcBalance > 0 && parseFloat(stats.totalPpcBalance) < 5 && (
+      {/* ⚠️ Low Balance Alert (Wallet based) */}
+      {parseFloat(mainStats?.totalPpcBalance) < 5 && parseFloat(mainStats?.totalPpcBalance) > 0 && (
         <div className="flex items-center justify-between gap-4 p-5 bg-red-500/10 border border-red-500/20 rounded-lg shadow-sm">
           <div className="flex items-center gap-4">
             <div className="p-2.5 bg-red-500 text-white rounded-md shadow-lg shadow-red-500/20 animate-pulse">
@@ -107,7 +100,7 @@ export default function CreatorDashboard() {
                 Low Balance Warning
               </h4>
               <p className="text-[11px] dark:text-gray-400 font-bold uppercase mt-0.5">
-                Your PPC campaigns are nearing depletion: €{stats.totalPpcBalance}
+                Your PPC wallet is nearly empty: €{mainStats?.totalPpcBalance}
               </p>
             </div>
           </div>
@@ -120,37 +113,37 @@ export default function CreatorDashboard() {
         </div>
       )}
 
-      {/* 🔹 Metric Intelligence Grid */}
+      {/* 🔹 Metric Intelligence Grid (4 Cards Fixed) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
           label="Total Views"
-          value={stats?.totalViews}
+          value={mainStats?.totalViews}
           icon={FiEye}
-          trend="Organic Impressions"
+          trend="Lifetime Reach"
         />
         <MetricCard
           label="Total Spent"
-          value={`€${stats?.totalSpent || '0.00'}`}
+          value={`€${mainStats?.totalMonthlySpend || '0.00'}`}
           icon={FiDollarSign}
-          trend="Ad Expenditure"
+          trend="Spending (Current Month)"
         />
         <MetricCard
-          label="Wallet Balance"
-          value={`€${stats?.totalPpcBalance || '0.00'}`}
-          icon={FiTrendingUp}
+          label="Total Campaign"
+          value={mainStats?.totalActivePromoted}
+          icon={FiZap}
           isPrimary
-          trend="Active Channels"
+          trend="Viral Active Status"
         />
         <MetricCard
-          label="Saved by Users"
-          value={stats?.totalFavorites}
+          label="Total Clicks"
+          value={mainStats?.totalClicks}
           icon={FiActivity}
-          trend="User Engagement"
+          trend="PPC Engagement"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* 🔹 Growth Pulse Analytics */}
+        {/* 🔹 Growth Pulse Analytics (Graph Sync) */}
         <div className="lg:col-span-8 bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg p-8 shadow-sm">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
             <div>
@@ -228,17 +221,17 @@ export default function CreatorDashboard() {
             <div className="space-y-4">
               <StatusRow
                 label="Approved"
-                count={stats?.statusCount?.approved}
+                count={mainStats?.statusCount?.approved}
                 color="text-green-500"
               />
               <StatusRow
                 label="Under Review"
-                count={stats?.statusCount?.pending}
+                count={mainStats?.statusCount?.pending}
                 color="text-orange-500"
               />
               <StatusRow
                 label="Rejected"
-                count={stats?.statusCount?.rejected}
+                count={mainStats?.statusCount?.rejected}
                 color="text-red-500"
               />
             </div>
@@ -247,7 +240,7 @@ export default function CreatorDashboard() {
                 Aggregate Nodes
               </p>
               <p className="text-4xl font-black dark:text-white italic tracking-tighter mt-1">
-                {stats?.totalListings || 0}
+                {mainStats?.totalListings || 0}
               </p>
             </div>
           </div>
@@ -263,7 +256,7 @@ export default function CreatorDashboard() {
         </div>
       </div>
 
-      {/* 🔹 Transaction Ledger */}
+      {/* 🔹 Transaction Ledger (Invoice Integration) */}
       <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg overflow-hidden shadow-sm">
         <div className="px-8 py-5 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/20">
           <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-400">
@@ -280,9 +273,9 @@ export default function CreatorDashboard() {
           <table className="w-full text-left">
             <thead className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-100 dark:border-white/5">
               <tr>
-                <th className="px-8 py-5">Transaction ID</th>
+                <th className="px-8 py-5">Date</th>
                 <th className="px-8 py-5">Type</th>
-                <th className="px-8 py-5">Debit Amount</th>
+                <th className="px-8 py-5">Amount</th>
                 <th className="px-8 py-5 text-right">Invoice</th>
               </tr>
             </thead>
@@ -294,7 +287,7 @@ export default function CreatorDashboard() {
                     className="hover:bg-gray-50/50 dark:hover:bg-white/20 transition-all group"
                   >
                     <td className="px-8 py-4 text-[10px] font-bold text-gray-500">
-                      #{tx.stripeSessionId?.slice(-8).toUpperCase()}
+                      {new Date(tx.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-8 py-4">
                       <span
@@ -304,7 +297,7 @@ export default function CreatorDashboard() {
                       </span>
                     </td>
                     <td className="px-8 py-4 text-[12px] font-black dark:text-white italic">
-                      €{tx.amountPaid}
+                      {tx.currency?.toUpperCase()} {tx.amountPaid}
                     </td>
                     <td className="px-8 py-4 text-right">
                       <button
@@ -330,15 +323,17 @@ export default function CreatorDashboard() {
           </table>
         </div>
       </div>
+
+      <div className="mt-8">
+        <CreatorActivityLog />
+      </div>
     </div>
   );
 }
 
 // 🔹 Atomic UI Components
 const MetricCard = ({ label, value, icon: Icon, trend, isPrimary }) => (
-  <div
-    className={`p-6 rounded-lg border border-gray-100 dark:border-white/5 relative overflow-hidden group hover:border-orange-500/30 transition-all bg-white dark:bg-[#0c0c0c] shadow-sm`}
-  >
+  <div className="p-6 rounded-lg border border-gray-100 dark:border-white/5 relative overflow-hidden group hover:border-orange-500/30 transition-all bg-white dark:bg-[#0c0c0c] shadow-sm">
     <div className="relative z-10">
       <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">{label}</p>
       <h3

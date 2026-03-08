@@ -9,6 +9,8 @@ import {
   FiActivity,
   FiTrendingUp,
   FiEye,
+  FiFileText,
+  FiCreditCard,
 } from 'react-icons/fi';
 import axios from 'axios';
 
@@ -21,13 +23,24 @@ export default function PromotionInsightsPage() {
   const { id } = useParams();
   const router = useRouter();
   const [data, setData] = useState(null);
+  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get(`/api/creator/promotion-insights/${id}`);
-        if (response.data.success) setData(response.data.data);
+        const [insightsRes, transRes] = await Promise.all([
+          api.get(`/api/creator/promotion-insights/${id}`),
+          api.get(`/api/creator/payments`), // সব পেমেন্ট নিয়ে আসা
+        ]);
+
+        if (insightsRes.data.success) setData(insightsRes.data.data);
+
+        // শুধুমাত্র এই লিস্টিংয়ের ট্রানজেকশনগুলো ফিল্টার করা
+        const filteredTrans =
+          transRes.data.transactions?.filter((tx) => tx.listing?._id === id || tx.listing === id) ||
+          [];
+        setTransactions(filteredTrans);
       } catch (err) {
         console.error('Failed to load insights', err);
       } finally {
@@ -36,6 +49,27 @@ export default function PromotionInsightsPage() {
     };
     if (id) fetchStats();
   }, [id]);
+
+  const downloadInvoice = async (transactionId) => {
+    try {
+      const response = await api.get(`/api/payments/creator/invoice/${transactionId}`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: 'application/pdf' })
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice-${transactionId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Invoice download failed:', error);
+      alert('Could not download invoice.');
+    }
+  };
 
   if (loading)
     return (
@@ -190,6 +224,74 @@ export default function PromotionInsightsPage() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* --- PAYMENT HISTORY FOR THIS LISTING --- */}
+      <div className="bg-white dark:bg-[#0c0c0c] border border-black/10 dark:border-white/5 rounded-lg overflow-hidden shadow-sm">
+        <div className="px-8 py-5 border-b border-black/5 dark:border-white/5 flex items-center gap-3 bg-gray-50/50 dark:bg-white/2">
+          <FiCreditCard className="text-orange-500" />
+          <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-400">
+            Promotion Billing History
+          </h4>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-black/5 dark:border-white/5">
+              <tr>
+                <th className="px-8 py-5">Date</th>
+                <th className="px-8 py-5">Promotion Type</th>
+                <th className="px-8 py-5">Amount</th>
+                <th className="px-8 py-5 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-black/5 dark:divide-white/5">
+              {transactions.length > 0 ? (
+                transactions.map((tx, idx) => (
+                  <tr
+                    key={idx}
+                    className="hover:bg-gray-50/50 dark:hover:bg-white/2 transition-all group"
+                  >
+                    <td className="px-8 py-4 text-[10px] font-bold text-gray-500">
+                      {new Date(tx.createdAt).toLocaleDateString('en-GB')}
+                    </td>
+                    <td className="px-8 py-4">
+                      <span
+                        className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-sm ${
+                          tx.packageType === 'boost'
+                            ? 'bg-purple-500/10 text-purple-500'
+                            : 'bg-blue-500/10 text-blue-500'
+                        }`}
+                      >
+                        {tx.packageType}
+                      </span>
+                    </td>
+                    <td className="px-8 py-4 text-[12px] font-black dark:text-white italic">
+                      {tx.currency?.toUpperCase()} {tx.amountPaid}
+                    </td>
+                    <td className="px-8 py-4 text-right">
+                      <button
+                        onClick={() => downloadInvoice(tx._id)}
+                        className="flex items-center gap-2 ml-auto p-2 px-4 bg-orange-500/10 text-orange-600 hover:bg-orange-500 hover:text-white text-[9px] font-black uppercase tracking-widest rounded transition-all"
+                      >
+                        <FiFileText size={14} />
+                        Invoice
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="px-8 py-16 text-center text-[10px] uppercase font-bold tracking-widest text-gray-500 italic"
+                  >
+                    No payment records for this listing.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
