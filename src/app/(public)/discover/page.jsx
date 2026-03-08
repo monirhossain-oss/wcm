@@ -1,123 +1,254 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import axios from 'axios';
+import { useListings } from '@/context/ListingsContext';
 import ListingCard from '@/components/ListingCard';
-import { Search } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Loader2, MapPin, Zap } from 'lucide-react';
+
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  withCredentials: true,
+});
 
 const DiscoverPage = () => {
+  const { cachedListings } = useListings();
+
+  const [listings, setListings] = useState([]);
+  const [categories, setCategories] = useState(['All']);
+  const [regions, setRegions] = useState(['All Regions']);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('Popularity'); // Default Sort
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [sortBy, setSortBy] = useState('Popularity');
+  const [selectedRegion, setSelectedRegion] = useState('All Regions');
 
-  const categoryContent = {
-    All: { title: "Discover Culture", desc: "Immerse yourself in a global gallery of heritage." },
-    Crafts: { title: "Master Crafts", desc: "Celebrate the soul of craftsmanship." },
-    Clothing: { title: "Heritage Wear", desc: "Wear the story of a nation." },
-    Art: { title: "Cultural Art", desc: "Beyond aesthetics, these are visual voices." },
-    'Home Decor': { title: "Artisan Living", desc: "Transform your space into a sanctuary." },
-    Accessories: { title: "Ethnic Accents", desc: "Small treasures with big histories." }
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+
+  const limit = 12;
+  const observer = useRef();
+  const scrollRef = useRef(null);
+
+  // মেটা ডাটা ফেচিং এবং ক্যাশিং লজিক (টাইমস্ট্যাম্পসহ)
+  useEffect(() => {
+    const fetchMeta = async () => {
+      const CACHE_KEY = 'meta_data_cache';
+      const CACHE_DURATION = 3600000; // ১ ঘণ্টা (মিলিসেকেন্ডে)
+
+      try {
+        const cachedMeta = sessionStorage.getItem(CACHE_KEY);
+
+        // ক্যাশ চেক ও ভ্যালিডেশন
+        if (cachedMeta) {
+          const { data, timestamp } = JSON.parse(cachedMeta);
+          if (Date.now() - timestamp < CACHE_DURATION) {
+            setCategories(['All', ...data.categories.map((c) => c.title)]);
+            setRegions(['All Regions', ...(data.regions || [])]);
+            return;
+          }
+        }
+
+        // ক্যাশ না থাকলে বা এক্সপায়ারড হলে এপিআই কল
+        const res = await api.get('/api/listings/meta-data');
+        const catTitles = res.data.categories.map((c) => c.title);
+        const regionData = res.data.regions || [];
+
+        setCategories(['All', ...catTitles]);
+        setRegions(['All Regions', ...regionData]);
+
+        // নতুন ডাটা ও টাইমস্ট্যাম্প সেভ করি
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+          data: res.data,
+          timestamp: Date.now()
+        }));
+      } catch (err) { console.error('Meta fetch error:', err); }
+    };
+    fetchMeta();
+  }, []);
+
+  // ক্যাশ চেক ও প্রাথমিক লোড
+  useEffect(() => {
+    if (cachedListings && cachedListings.length > 0) {
+      setListings(cachedListings);
+      setLoading(false);
+    } else {
+      fetchListings(true);
+    }
+  }, []);
+
+  // সার্চ ডিবাউন্স
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // মেইন ফেচ ফাংশন
+  const fetchListings = useCallback(
+    async (isInitial = false) => {
+      if (isInitial) setLoading(true);
+      else setLoadingMore(true);
+
+      try {
+        let url = `/api/listings/public?limit=${limit}&offset=${isInitial ? 0 : offset}`;
+        if (activeCategory !== 'All') url += `&category=${activeCategory}`;
+        if (debouncedSearch) url += `&search=${debouncedSearch}`;
+        if (sortBy === 'Newest') url += `&filter=Today`;
+        if (selectedRegion !== 'All Regions') url += `&region=${selectedRegion}`;
+
+        const res = await api.get(url);
+        const { listings: newListings, hasMore: more } = res.data;
+
+        setListings((prev) => (isInitial ? newListings : [...prev, ...newListings]));
+        setHasMore(more);
+      } catch (err) { console.error(err); }
+      finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [activeCategory, debouncedSearch, sortBy, selectedRegion, offset]
+  );
+
+  // ফিল্টার পরিবর্তন হলে রিফ্রেশ
+  useEffect(() => {
+    setOffset(0);
+    setHasMore(true);
+    fetchListings(true);
+  }, [activeCategory, debouncedSearch, sortBy, selectedRegion]);
+
+  // ইনফিনিট স্ক্রল ট্রিগার
+  useEffect(() => {
+    if (offset > 0) fetchListings(false);
+  }, [offset]);
+
+  const lastElementRef = useCallback((node) => {
+    if (loading || loadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) setOffset((prev) => prev + limit);
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, loadingMore, hasMore]);
+
+  const slide = (direction) => {
+    if (scrollRef.current) {
+      const { scrollLeft } = scrollRef.current;
+      scrollRef.current.scrollTo({ left: direction === 'left' ? scrollLeft - 200 : scrollLeft + 200, behavior: 'smooth' });
+    }
   };
 
-  const categories = Object.keys(categoryContent);
-
-  const dummyListings = [
-    { _id: '1', title: 'Handmade Pottery', price: 45, category: 'Crafts', images: ['https://i.postimg.cc/3x9yPRpV/Pottery-craft-ceramics.jpg'], date: '2024-01-01' },
-    { _id: '2', title: 'Traditional Scarf', price: 25, category: 'Clothing', images: ['https://i.postimg.cc/sD41hXnH/Chris-Fallon.jpg'], date: '2024-02-15' },
-    { _id: '3', title: 'Wooden Totem', price: 120, category: 'Art', images: ['https://i.postimg.cc/Y0wq4KYF/essay-scruton-fakery-42-22804006.webp'], date: '2024-03-10' },
-    { _id: '4', title: 'Ceramic Vase', price: 60, category: 'Home Decor', images: ['https://i.postimg.cc/QxhdhDXX/138016039-15563697440551n.jpg'], date: '2024-03-05' },
-    { _id: '5', title: 'Oil Painting', price: 250, category: 'Art', images: ['https://i.postimg.cc/2ymrkdNw/kch-280226-ce-bagatan-p1.jpg'], date: '2024-03-20' },
-    { _id: '6', title: 'Beaded Jewelry', price: 35, category: 'Accessories', images: ['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908'], date: '2024-01-10' },
-  ];
-
-  // ফিল্টারিং এবং সর্টিং লজিক
-  const processedListings = dummyListings
-    .filter((item) => {
-      const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
-      const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'Popularity') {
-        return b.price - a.price; // Popularity হিসেবে দামিগুলো আগে দেখাচ্ছি
-      } else {
-        return b._id.localeCompare(a._id); // Newest হিসেবে লেটেস্ট আইডি আগে দেখাচ্ছি
-      }
-    });
+  const SkeletonCard = () => (
+    <div className="space-y-4 animate-pulse">
+      <div className="aspect-5/4 bg-zinc-100 dark:bg-white/5" />
+      <div className="h-4 bg-zinc-100 dark:bg-white/5 w-3/4" />
+      <div className="h-3 bg-zinc-100 dark:bg-white/5 w-1/2" />
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] transition-colors">
-      
-      {/* Search Bar */}
-      <div className="sticky top-0 z-30 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="relative max-w-2xl mx-auto">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search items..." 
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] transition-colors pb-20">
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
+      {/* Sticky Header */}
+      <div className="sticky top-20 z-40 bg-white/95 dark:bg-[#0a0a0a] border-b border-zinc-100 dark:border-white/5">
+        <div className="max-w-7xl mx-auto px-6 py-4 space-y-4">
+
+          {/* Search Bar */}
+          <div className="relative w-full">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search culture, art, nodes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-2.5 bg-gray-100 dark:bg-zinc-900 border-none rounded-full text-sm outline-none"
+              className="w-full pl-12 pr-4 py-3 bg-zinc-100 dark:bg-white/5 border-none rounded-full text-sm outline-none transition-all dark:text-white"
             />
+          </div>
+
+          {/* Filters Area */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+            {/* Categories */}
+            <div className="relative w-full flex items-center overflow-hidden md:flex-1 md:order-2">
+              <button onClick={() => slide('left')} className="p-1 hover:text-orange-500 shrink-0">
+                <ChevronLeft size={18} />
+              </button>
+
+              <div
+                ref={scrollRef}
+                className="flex items-center gap-2 overflow-x-auto no-scrollbar px-2 scroll-smooth"
+              >
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase whitespace-nowrap ${activeCategory === cat
+                      ? 'bg-orange-500 text-white'
+                      : 'text-zinc-500 bg-zinc-50 dark:bg-white/5'
+                      }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              <button onClick={() => slide('right')} className="p-1 hover:text-orange-500 shrink-0">
+                <ChevronRight size={18} />
+              </button>
+            </div>
+
+            {/* Popularity + Region */}
+            <div className="flex items-center justify-between gap-4 md:gap-6 md:order-1">
+
+              {/* Popularity */}
+              <div className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 px-3 py-2 rounded-xl shrink-0">
+                <Zap size={14} className="text-orange-500" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent text-xs font-semibold uppercase outline-none cursor-pointer text-zinc-700 dark:text-zinc-200"
+                >
+                  <option className="bg-white text-zinc-700">Popularity</option>
+                  <option className="bg-white text-zinc-700">Newest</option>
+                </select>
+              </div>
+
+
+              {/* Region */}
+              <div className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 px-3 py-2 rounded-xl shrink-0">
+                <MapPin size={14} className="text-blue-500" />
+                <select
+                  value={selectedRegion}
+                  onChange={(e) => setSelectedRegion(e.target.value)}
+                  className="bg-transparent text-xs font-semibold uppercase outline-none cursor-pointer text-zinc-700 dark:text-zinc-200"
+                >
+                  {regions.map((r) => (
+                    <option key={r} value={r} className="bg-white text-zinc-700">
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        
-        {/* Categories & Sort Buttons Row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-          
-          {/* Categories */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
-                  activeCategory === cat ? 'bg-[#1C2B4A] text-white shadow-md' : 'bg-gray-100 dark:bg-zinc-900 text-gray-500 hover:bg-gray-200'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {/* Sort Buttons (Popularity & Newest) */}
-          <div className="flex items-center bg-gray-100 dark:bg-zinc-900 p-1 rounded-full w-fit">
-            <button
-              onClick={() => setSortBy('Popularity')}
-              className={`px-6 py-2 rounded-full text-[11px] font-bold transition-all ${
-                sortBy === 'Popularity' ? 'bg-white dark:bg-zinc-800 text-[#F57C00] shadow-sm' : 'text-gray-500'
-              }`}
-            >
-              Popularity
-            </button>
-            <button
-              onClick={() => setSortBy('Newest')}
-              className={`px-6 py-2 rounded-full text-[11px] font-bold transition-all ${
-                sortBy === 'Newest' ? 'bg-white dark:bg-zinc-800 text-[#F57C00] shadow-sm' : 'text-gray-500'
-              }`}
-            >
-              Newest
-            </button>
-          </div>
-        </div>
-
-        {/* Hero Text */}
-        <div className="text-center mb-16 space-y-4">
-          <h1 className="text-2xl md:text-4xl font-black text-zinc-900 dark:text-white tracking-tighter">
-            {categoryContent[activeCategory].title}
-          </h1>
-          <p className="text-gray-400 text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
-            {categoryContent[activeCategory].desc}
-          </p>
-        </div>
-
-        {/* Listings Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {processedListings.map((item) => (
-            <ListingCard key={item._id} item={item} />
+      {/* Grid Content */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+          {listings.map((item, index) => (
+            <div key={item._id} ref={index === listings.length - 1 ? lastElementRef : null}>
+              <ListingCard item={item} />
+            </div>
           ))}
+          {loadingMore && [...Array(4)].map((_, i) => <SkeletonCard key={`more-${i}`} />)}
         </div>
       </div>
     </div>

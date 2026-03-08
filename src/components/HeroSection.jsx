@@ -14,7 +14,7 @@ export default function HeroSection({ filters = {} }) {
   };
 
   return (
-    <section className="relative overflow-hidden flex items-center transition-all duration-500">
+    <section className="relative min-h-screen overflow-hidden flex items-center transition-all duration-500">
 
       {/* Client Slider */}
       <HeroSlider />

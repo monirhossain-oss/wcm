@@ -49,12 +49,38 @@ export default function AdminDashboard() {
     { name: 'Boost Ads', value: parseFloat(cards.boostRevenue) },
   ];
 
-  const metricCards = [
-    { label: 'Aggregate Revenue', value: `€${cards.totalRevenue}`, icon: FiDollarSign, color: 'bg-white dark:bg-[#0c0c0c]', trend: 'Net Profit Flow', isPrimary: true },
-    { label: 'PPC Transmission', value: `€${cards.ppcRevenue}`, icon: FiActivity, color: 'bg-white dark:bg-[#0c0c0c]', trend: 'Click-Through Yield' },
-    { label: 'Boost Protocol', value: `€${cards.boostRevenue}`, icon: FiTrendingUp, color: 'bg-white dark:bg-[#0c0c0c]', trend: 'Time-Based Assets' },
-    { label: 'Operational Ads', value: cards.activeCampaigns, icon: FiZap, color: 'bg-orange-600', trend: `${cards.activePpc} PPC | ${cards.activeBoost} Boost`, isInverted: true },
-  ];
+const metricCards = [
+  {
+    label: 'Total Revenue', 
+    value: `€${cards.totalRevenue}`,
+    icon: FiDollarSign,
+    color: 'bg-white dark:bg-[#0c0c0c]',
+    trend: 'Total Earnings',
+    isPrimary: true,
+  },
+  {
+    label: 'PPC Revenue', 
+    value: `€${cards.ppcRevenue}`,
+    icon: FiActivity,
+    color: 'bg-white dark:bg-[#0c0c0c]',
+    trend: 'Earnings from Clicks',
+  },
+  {
+    label: 'Boost Revenue',
+    value: `€${cards.boostRevenue}`,
+    icon: FiTrendingUp,
+    color: 'bg-white dark:bg-[#0c0c0c]',
+    trend: 'Earnings from Boosts',
+  },
+  {
+    label: 'Active Ads',
+    value: cards.activeCampaigns,
+    icon: FiZap,
+    color: 'bg-orange-600',
+    trend: `${cards.activePpc} PPC | ${cards.activeBoost} Boost`,
+    isInverted: true,
+  },
+];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20 font-sans">
