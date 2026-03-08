@@ -1,4 +1,5 @@
 'use client';
+import { Country } from 'country-state-city';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -118,6 +119,7 @@ export default function AddListing() {
         }
       });
       data.append('image', image);
+      console.log(formData)
       await api.post('/api/listings/add', data);
       router.push('/creator/listings');
     } catch (err) {
@@ -264,19 +266,25 @@ export default function AddListing() {
                 </div>
               )}
             </div>
-
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
-                <FiGlobe size={10} /> Region
+                <FiMapPin size={10} /> Region
               </label>
-              <input
-                type="text"
+              <select
                 required
                 value={formData.region}
-                onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, region: e.target.value,country: e.target.value })}
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
-                placeholder="e.g. South Asia"
-              />
+              >
+                <option value="">Select Country</option>
+                {Country.getAllCountries().map((c) => (
+                  <option
+                    className="bg-white dark:bg-[#1f1f1f] text-black dark:text-white"
+                    key={c.isoCode} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="md:col-span-2 space-y-2">
@@ -298,7 +306,7 @@ export default function AddListing() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-lg">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-              Tradition & Country
+              Tradition
             </label>
             <div className="flex flex-col gap-2">
               <input
@@ -309,14 +317,6 @@ export default function AddListing() {
                 className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500"
                 placeholder="Tradition (e.g. Jamdani)"
               />
-              <input
-                type="text"
-                required
-                value={formData.country}
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500"
-                placeholder="Country (e.g. Bangladesh)"
-              />
             </div>
           </div>
 
@@ -326,7 +326,7 @@ export default function AddListing() {
             </label>
             <div
               onClick={() => setShowTagDrop(!showTagDrop)}
-              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-[10px] font-bold dark:text-white flex flex-wrap gap-1 min-h-23 cursor-pointer align-top"
+              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-[10px] font-bold dark:text-white flex flex-wrap gap-1 min-h-auto cursor-pointer align-top"
             >
               {formData.culturalTags.length === 0 && (
                 <span className="text-gray-400">Add up to 5 tags...</span>
@@ -395,7 +395,7 @@ export default function AddListing() {
                     value={url}
                     onChange={(e) => handleUrlChange(index, e.target.value)}
                     className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 pr-8 rounded-lg text-[10px] font-bold dark:text-white outline-none focus:border-orange-500"
-                    placeholder="https://..."
+                    placeholder="https://example.com"
                   />
                   {formData.externalUrls.length > 1 && (
                     <button

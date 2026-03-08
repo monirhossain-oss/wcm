@@ -213,7 +213,11 @@ export default function AdminListings() {
                     </p>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-[11px] font-black dark:text-white uppercase">{item.title}</p>
+                    <p className="text-[11px] font-black dark:text-white uppercase">
+                      {item.title.split(' ').slice(0, 3).join(' ')}
+                      {item.title.split(' ').length > 3 && '...'}
+                    </p>
+
                     <p className="text-[9px] text-orange-500 font-bold uppercase">
                       {item.categoryName}
                     </p>
@@ -258,11 +262,10 @@ export default function AdminListings() {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${
-                    currentPage === i + 1
+                  className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${currentPage === i + 1
                       ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
                       : 'bg-gray-100 dark:bg-white/10 text-gray-400 border dark:border-white/10 hover:border-orange-500'
-                  }`}
+                    }`}
                 >
                   {i + 1}
                 </button>

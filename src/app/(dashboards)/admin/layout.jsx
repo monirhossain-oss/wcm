@@ -67,6 +67,7 @@ export default function AdminLayout({ children }) {
     { name: 'User Management', path: '/admin/users', icon: FiUsers },
     { name: 'Creator Requests', path: '/admin/requests', icon: FiCheckCircle },
     { name: 'Global Listings', path: '/admin/listings', icon: FiLayout },
+    { name: 'Promoted Listings', path: '/admin/listings/promoted', icon: FiLayout },
     { name: 'All Tags', path: '/admin/tags', icon: FaTag },
     { name: 'All Categories', path: '/admin/categories', icon: FaCreativeCommonsSampling },
   ];

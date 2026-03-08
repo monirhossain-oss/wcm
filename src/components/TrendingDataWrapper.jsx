@@ -1,5 +1,5 @@
 import ListingCard from './ListingCard';
-import ListingsProviderWrapper from './ListingsProviderWrapper'; // ইমপোর্ট করলাম
+import ListingsProviderWrapper from './ListingsProviderWrapper';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
