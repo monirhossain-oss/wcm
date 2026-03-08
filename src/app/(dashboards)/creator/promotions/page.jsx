@@ -215,7 +215,8 @@ export default function PromotionsPage() {
                       </div>
                       <div>
                         <p className="text-xs font-black uppercase text-gray-900 dark:text-white tracking-tight">
-                          {item.title}
+                          {item.title.split(' ').slice(0, 3).join(' ')}
+                          {item.title.split(' ').length > 3 && '...'}
                         </p>
                         <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">
                           {item.region}, {item.country}
@@ -259,11 +260,10 @@ export default function PromotionsPage() {
                       <button
                         onClick={() => setSelectedListing(item)}
                         disabled={isBoostActive(item) && isPpcActive(item)}
-                        className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                          isBoostActive(item) && isPpcActive(item)
+                        className={`px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${isBoostActive(item) && isPpcActive(item)
                             ? 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600 cursor-not-allowed'
                             : 'bg-orange-600 hover:bg-orange-500 text-white shadow-lg active:scale-95'
-                        }`}
+                          }`}
                       >
                         {isBoostActive(item) && isPpcActive(item) ? 'Optimized' : 'Promote'}
                       </button>
@@ -358,13 +358,13 @@ export default function PromotionsPage() {
               {/* Warning Section */}
               {((promoType === 'boost' && isBoostActive(selectedListing)) ||
                 (promoType === 'ppc' && isPpcActive(selectedListing))) && (
-                <div className="p-3 bg-red-500/5 border border-red-500/20 rounded-xl flex items-start gap-2">
-                  <FiInfo className="text-red-500 mt-0.5" size={14} />
-                  <p className="text-[9px] text-red-600 dark:text-red-200 font-bold uppercase tracking-tighter">
-                    Protocol active. Please wait for completion.
-                  </p>
-                </div>
-              )}
+                  <div className="p-3 bg-red-500/5 border border-red-500/20 rounded-xl flex items-start gap-2">
+                    <FiInfo className="text-red-500 mt-0.5" size={14} />
+                    <p className="text-[9px] text-red-600 dark:text-red-200 font-bold uppercase tracking-tighter">
+                      Protocol active. Please wait for completion.
+                    </p>
+                  </div>
+                )}
 
               {/* Input & Info Section */}
               <div
@@ -503,11 +503,10 @@ export default function PromotionsPage() {
 
 const Badge = ({ label, color }) => (
   <div
-    className={`px-2 py-1 rounded text-[8px] font-black uppercase border shadow-sm ${
-      color === 'purple'
+    className={`px-2 py-1 rounded text-[8px] font-black uppercase border shadow-sm ${color === 'purple'
         ? 'bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400'
         : 'bg-orange-500/10 border-orange-500/20 text-orange-600 dark:text-orange-400'
-    }`}
+      }`}
   >
     {label}
   </div>
@@ -529,15 +528,14 @@ const ModalTab = ({ active, disabled, onClick, icon: Icon, label, subLabel, colo
   <button
     disabled={disabled}
     onClick={onClick}
-    className={`p-5 rounded-2xl border transition-all text-left flex flex-col gap-4 ${
-      active
+    className={`p-5 rounded-2xl border transition-all text-left flex flex-col gap-4 ${active
         ? color === 'purple'
           ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10'
           : 'border-orange-500 bg-orange-50 dark:bg-orange-500/10'
         : disabled
           ? 'opacity-30 grayscale cursor-not-allowed border-black/5 dark:border-white/5'
           : 'border-black/10 dark:border-white/5 bg-gray-50 dark:bg-white/2'
-    }`}
+      }`}
   >
     <Icon
       className={
