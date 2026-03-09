@@ -95,11 +95,10 @@ export default function ListingPromotedPage() {
                 setType(f);
                 setPage(1);
               }}
-              className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                type === f
+              className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${type === f
                   ? 'bg-orange-500 text-white shadow-[0_5px_15px_rgba(249,115,22,0.3)]'
                   : 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10 border border-transparent dark:border-white/5'
-              }`}
+                }`}
             >
               {f}
             </button>
@@ -166,8 +165,12 @@ export default function ListingPromotedPage() {
                   >
                     <td className="p-5">
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-orange-500 transition-colors">
-                          {item.title}
+                        <span
+                          title={item.title}
+                          className="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-orange-500 transition-colors"
+                        >
+                          {item.title.split(' ').slice(0, 3).join(' ')}
+                          {item.title.split(' ').length > 3 && '...'}
                         </span>
                         <span className="text-[10px] text-gray-400 mt-1 font-medium">
                           {item.creatorEmail}
@@ -242,11 +245,10 @@ export default function ListingPromotedPage() {
                 <button
                   key={i}
                   onClick={() => setPage(pageNum)}
-                  className={`w-10 h-10 text-[11px] font-black rounded-xl transition-all ${
-                    page === pageNum
+                  className={`w-10 h-10 text-[11px] font-black rounded-xl transition-all ${page === pageNum
                       ? 'bg-orange-500 text-white shadow-md'
                       : 'bg-transparent text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
-                  }`}
+                    }`}
                 >
                   {pageNum}
                 </button>
