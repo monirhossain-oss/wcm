@@ -87,7 +87,7 @@ export default function CreatorDashboard() {
   const mainStats = stats?.stats;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700 font-sans">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700 font-sans">
       {/* ⚠️ Low Balance Alert (Wallet based) */}
       {parseFloat(mainStats?.totalPpcBalance) < 5 && parseFloat(mainStats?.totalPpcBalance) > 0 && (
         <div className="flex items-center justify-between gap-4 p-5 bg-red-500/10 border border-red-500/20 rounded-lg shadow-sm">
@@ -144,8 +144,8 @@ export default function CreatorDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* 🔹 Growth Pulse Analytics (Graph Sync) */}
-        <div className="lg:col-span-8 bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg p-8 shadow-sm">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+        <div className="lg:col-span-8 bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg py-6 pr-6 shadow-sm">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4 pl-6">
             <div>
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
                 Daily Statistics
@@ -214,7 +214,7 @@ export default function CreatorDashboard() {
 
         {/* 🔹 Portfolio Overview */}
         <div className="lg:col-span-4 flex flex-col gap-6">
-          <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg p-8 flex-1">
+          <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg p-6 flex-1">
             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-8 flex items-center gap-2">
               <FiLayers className="text-orange-500" /> Portfolio Health
             </h3>
@@ -322,10 +322,6 @@ export default function CreatorDashboard() {
             </tbody>
           </table>
         </div>
-      </div>
-
-      <div className="mt-8">
-        <CreatorActivityLog />
       </div>
     </div>
   );
