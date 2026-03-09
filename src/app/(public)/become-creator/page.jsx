@@ -17,6 +17,7 @@ const api = axios.create({
 export default function UserProfileForm() {
   const router = useRouter();
   const { user, setUser } = useAuth();
+  // console.log(user)
   const [serverError, setServerError] = useState('');
   const [mounted, setMounted] = useState(false);
   const [previews, setPreviews] = useState({ profile: null, cover: null });
@@ -33,7 +34,6 @@ export default function UserProfileForm() {
     formState: { isSubmitting },
   } = useForm();
 
-  // কান্ট্রি ও সিটি লজিক
   const selectedCountry = watch('country');
   const cities = selectedCountry ? City.getCitiesOfCountry(selectedCountry) : [];
 
@@ -117,9 +117,8 @@ export default function UserProfileForm() {
     );
   }
 
-  // বর্ডার ও কালার মোড অনুযায়ী সেট করা হয়েছে
-  const inputStyle = 'w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none transition-all text-xs font-bold';
-  const labelStyle = 'text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-widest ml-1 mb-1 block';
+  const inputStyle = 'w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-gray-400 placeholder:text-gray-400 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none transition-all text-xs font-bold';
+  const labelStyle = 'text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 dark:bg-balck tracking-widest ml-1 mb-1 block';
   const fileBoxStyle = 'relative flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-white/10 rounded-lg p-4 transition-all hover:border-orange-500 bg-gray-50 dark:bg-white/5 cursor-pointer group h-32 overflow-hidden';
 
   return (
@@ -141,7 +140,7 @@ export default function UserProfileForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className={labelStyle}>Display Name</label>
-                  <input {...register('display_name', { required: true })} placeholder="Public brand name" className={inputStyle} />
+                  <input value={`${user?.firstName} ${user?.lastName}`} disabled className={inputStyle + ' cursor-not-allowed opacity-50'} />
                 </div>
                 <div>
                   <label className={labelStyle}>Username</label>
@@ -185,7 +184,7 @@ export default function UserProfileForm() {
                   <select {...register('country', { required: true })} className={inputStyle}>
                     <option value="">Select Country</option>
                     {Country.getAllCountries().map(c => (
-                      <option key={c.isoCode} value={c.isoCode}>
+                      <option className='dark:bg-gray-800' key={c.isoCode} value={c.isoCode}>
                         {c.name}
                       </option>
                     ))}
@@ -195,11 +194,8 @@ export default function UserProfileForm() {
                   <label className={labelStyle}>City</label>
                   <select {...register('city', { required: true })} className={inputStyle} disabled={!selectedCountry}>
                     <option value="">Select City</option>
-                    {/* // ১. যদি সিটির আলাদা ইউনিক আইডি বা লেটিটিউড-লংগিটিউড থাকে, সেটি ব্যবহার করুন। */}
                     {cities.map((c, index) => (
-                      // এখানে c.name এর বদলে c.latitude + c.longitude বা কোনো ইউনিক আইডি ব্যবহার করুন
-                      // যদি ইউনিক আইডি না থাকে, তবে ইডেক্স ব্যবহার করা নিরাপদ
-                      <option key={`${c.name}-${index}`} value={c.name}>
+                      <option className='dark:bg-gray-800' key={`${c.name}-${index}`} value={c.name}>
                         {c.name}
                       </option>
                     ))}
