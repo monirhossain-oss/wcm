@@ -119,40 +119,50 @@ export default function AdminDashboard() {
   const secondaryMetrics = [
     {
       label: 'Net Profit',
-      value: `€${cards.netProfit}`,
+      value: `€${cards.netProfit || 0}`,
       icon: FiTrendingUp,
       trend: 'Post Tax & Fees',
       isHighlight: true,
     },
     {
       label: 'Stripe Fees',
-      value: `€${cards.stripeFees}`,
+      value: `€${cards.stripeFees || 0}`,
       icon: FiActivity,
       trend: 'Estimated Cost',
     },
-    { label: 'VAT Liability', value: `€${cards.totalVat}`, icon: FiShield, trend: 'Total Tax' },
+    {
+      label: 'VAT Liability',
+      value: `€${cards.totalVat || 0}`,
+      icon: FiShield,
+      trend: 'Total Tax',
+    },
     {
       label: 'Payments',
-      value: cards.recentPayments,
+      value:
+        typeof cards.recentPayments === 'object'
+          ? Array.isArray(cards.recentPayments)
+            ? cards.recentPayments.length
+            : 'Data Error'
+          : cards.recentPayments,
       icon: FiClock,
       trend: 'Last 24 Hours',
     },
     {
       label: 'Creators',
-      value: cards.totalCreators,
+      value: cards.totalCreators || 0,
       icon: FiUsers,
       trend: 'Approved Partners',
     },
     {
       label: 'Pending Apps',
-      value: cards.pendingCreatorRequests,
+      value: cards.pendingCreatorRequests || 0,
       icon: FiShield,
       trend: 'Review Required',
       isWarning: cards.pendingCreatorRequests > 0,
     },
     {
       label: 'Pending Ads',
-      value: cards.pendingListings,
+      value: cards.pendingListings || 0,
       icon: FiLayers,
       trend: 'Manual Review',
       isWarning: cards.pendingListings > 0,
@@ -160,7 +170,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-10 font-sans">
+    <div className="space-y-8 animate-in fade-in duration-700 font-sans">
       {/* --- Header --- */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
