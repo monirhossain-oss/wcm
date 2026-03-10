@@ -1,11 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   FiActivity,
   FiClock,
   FiSearch,
-  FiInfo,
   FiEye,
   FiX,
   FiChevronLeft,
@@ -26,156 +25,154 @@ export default function AuditLogsTable() {
 
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 5;
 
   // Modal State
   const [selectedLog, setSelectedLog] = useState(null);
 
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const { data } = await api.get('/api/audit/admin/logs');
-        if (data.success) setLogs(data.logs);
-      } catch (err) {
-        console.error('Audit Log Fetch Error:', err);
-      } finally {
-        setLoading(false);
+  const fetchLogs = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get(
+        `/api/audit/admin/logs?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+      );
+      if (data.success) {
+        setLogs(data.logs);
+        setTotalPages(data.pagination.pages);
       }
-    };
-    fetchLogs();
-  }, []);
+    } catch (err) {
+      console.error('Audit Log Fetch Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, searchTerm]);
 
-  // Filter Logic
-  const filteredLogs = logs.filter(
-    (log) =>
-      log.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.action?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    // সার্চ করার সময় ইউজার টাইপ করা শেষ করলে এপিআই হিট করার জন্য ডিবান্সিং (Debouncing)
+    const delayDebounceFn = setTimeout(() => {
+      fetchLogs();
+    }, 500);
 
-  // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredLogs.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+    return () => clearTimeout(delayDebounceFn);
+  }, [fetchLogs]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // সার্চ করলে আবার প্রথম পেজ থেকে শুরু হবে
+    setCurrentPage(1); // সার্চ শুরু করলে প্রথম পেজে ফেরত যাবে
   };
-
-  if (loading)
-    return (
-      <div className="text-center py-20 text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 animate-pulse">
-        Syncing Audit Trail...
-      </div>
-    );
 
   return (
     <div className="space-y-4">
       <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-xl overflow-hidden shadow-sm">
-        {/* Table Header */}
+        {/* Table Header with Search */}
         <div className="p-6 border-b border-gray-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
           <h3 className="text-xl font-black italic uppercase tracking-tighter dark:text-white flex items-center gap-2">
             <FiActivity className="text-orange-500" /> Audit{' '}
             <span className="text-orange-500">Intelligence</span>
           </h3>
 
-          {/* <div className="relative w-full md:w-64">
+          <div className="relative w-full md:w-80">
             <FiSearch
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
               size={14}
             />
             <input
               type="text"
-              placeholder="Search Identity or Action..."
+              placeholder="Search Action, Identity or IP..."
               className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-[10px] font-bold focus:outline-none focus:border-orange-500 transition-all dark:text-white"
-              onChange={handleSearchChange}
               value={searchTerm}
+              onChange={handleSearchChange}
             />
-          </div> */}
+          </div>
         </div>
 
         {/* Table Body */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 dark:bg-white/2 border-b border-gray-100 dark:border-white/5">
-                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  Timestamp
-                </th>
-                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  Identity
-                </th>
-                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  Action
-                </th>
-                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  Target
-                </th>
-                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">
-                  Operation
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-              {currentItems.map((log) => (
-                <tr
-                  key={log._id}
-                  className="hover:bg-gray-50 dark:hover:bg-white/1 transition-colors group"
-                >
-                  <td className="p-4">
-                    <div className="flex items-center gap-2 text-[10px] font-bold dark:text-gray-300">
-                      <FiClock className="text-orange-500" />
-                      {new Date(log.createdAt).toLocaleString()}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-black uppercase dark:text-white">
-                        {log.user?.name || 'System'}
-                      </span>
-                      <span className="text-[9px] text-gray-500 font-bold">
-                        {log.user?.email || 'N/A'}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`px-2 py-1 rounded-sm text-[8px] font-black uppercase tracking-tighter border ${
-                        log.action.includes('PURCHASED') || log.action.includes('COMPLETED')
-                          ? 'bg-green-500/5 text-green-500 border-green-500/10'
-                          : 'bg-blue-500/5 text-blue-500 border-blue-500/10'
-                      }`}
-                    >
-                      {log.action.replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 uppercase tracking-tight">
-                      <FiDatabase className="text-gray-400" />
-                      {log.targetType}
-                    </div>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button
-                      onClick={() => setSelectedLog(log)}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-orange-600 hover:text-white rounded-md text-[9px] font-black uppercase transition-all shadow-sm"
-                    >
-                      <FiEye /> View Data
-                    </button>
-                  </td>
+        <div className="overflow-x-auto min-h-100">
+          {loading ? (
+            <div className="flex items-center justify-center h-64 text-[10px] font-black uppercase tracking-widest text-gray-500 animate-pulse">
+              Syncing Audit Trail...
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-white/2 border-b border-gray-100 dark:border-white/5">
+                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Timestamp
+                  </th>
+                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Identity
+                  </th>
+                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Action
+                  </th>
+                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Target
+                  </th>
+                  <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">
+                    Operation
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                {logs.map((log) => (
+                  <tr
+                    key={log._id}
+                    className="hover:bg-gray-50 dark:hover:bg-white/1 transition-colors group"
+                  >
+                    <td className="p-4">
+                      <div className="flex items-center gap-2 text-[10px] font-bold dark:text-gray-300">
+                        <FiClock className="text-orange-500" />
+                        {new Date(log.createdAt).toLocaleString()}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-black uppercase dark:text-white">
+                          {log.user?.name || 'System'}
+                        </span>
+                        <span className="text-[9px] text-gray-500 font-bold">
+                          {log.user?.email || 'N/A'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`px-2 py-1 rounded-sm text-[8px] font-black uppercase tracking-tighter border ${
+                          log.action.includes('PAYMENT') || log.action.includes('COMPLETED')
+                            ? 'bg-green-500/5 text-green-500 border-green-500/10'
+                            : 'bg-blue-500/5 text-blue-500 border-blue-500/10'
+                        }`}
+                      >
+                        {log.action.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 uppercase tracking-tight">
+                        <FiDatabase className="text-gray-400" />
+                        {log.targetType}
+                      </div>
+                    </td>
+                    <td className="p-4 text-right">
+                      <button
+                        onClick={() => setSelectedLog(log)}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-orange-600 hover:text-white rounded-md text-[9px] font-black uppercase transition-all shadow-sm"
+                      >
+                        <FiEye /> View Data
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Pagination Footer */}
         {totalPages > 1 && (
           <div className="px-6 py-4 border-t border-gray-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-50/30 dark:bg-white/1">
             <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest italic">
-              Page {currentPage} of {totalPages} — Showing {indexOfFirstItem + 1} to{' '}
-              {Math.min(indexOfLastItem, filteredLogs.length)}
+              Showing Page {currentPage} of {totalPages} — Total Records: {logs.length}
             </span>
 
             <div className="flex items-center gap-1.5">
@@ -188,13 +185,14 @@ export default function AuditLogsTable() {
                 <FiChevronLeft size={14} />
               </button>
 
-              {/* Dynamic Page Numbers */}
+              {/* Page Numbers Logic with Range & Ellipsis */}
               <div className="flex items-center gap-1.5">
                 {(() => {
                   const pages = [];
-                  const range = 1; 
+                  const range = 1; // বর্তমান পেজের আশেপাশে কয়টি নম্বর দেখাবে
 
                   for (let i = 1; i <= totalPages; i++) {
+                    // Logic: প্রথম পেজ, শেষ পেজ, এবং বর্তমান পেজের আশেপাশের range পর্যন্ত নম্বর দেখাবে
                     if (
                       i === 1 ||
                       i === totalPages ||
@@ -213,7 +211,9 @@ export default function AuditLogsTable() {
                           {String(i).padStart(2, '0')}
                         </button>
                       );
-                    } else if (i === currentPage - range - 1 || i === currentPage + range + 1) {
+                    }
+                    // Ellipsis (...) অ্যাড করার লজিক
+                    else if (i === currentPage - range - 1 || i === currentPage + range + 1) {
                       pages.push(
                         <span key={i} className="px-1 text-gray-400 text-[10px] font-black italic">
                           ...
