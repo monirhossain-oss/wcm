@@ -34,10 +34,10 @@ const HelpCenter = () => {
     return (
         <div className="min-h-screen bg-[#F9FAFB] pb-20 font-sans">
             
-            {/* --- ১. হেডার ব্যানার (ব্যাকগ্রাউন্ড ইমেজ এবং ব্যাক বাটন) --- */}
+           
             <div className="relative w-full h-80 flex flex-col items-center justify-center text-white text-center px-6 overflow-hidden">
                 
-                {/* ব্যাকগ্রাউন্ড ছবি - Next.js Image Component ব্যবহার করে */}
+                
                 <Image 
                     src="https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?q=80&w=1920" 
                     alt="Help Center Banner"
