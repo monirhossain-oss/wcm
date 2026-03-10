@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   FiUsers,
@@ -14,6 +14,7 @@ import {
   FiMousePointer,
   FiClock,
   FiAlertCircle,
+  FiRefreshCw,
 } from 'react-icons/fi';
 import {
   AreaChart,
@@ -31,29 +32,54 @@ const api = axios.create({
   withCredentials: true,
 });
 
+const CACHE_KEY = 'admin_stats_cache';
+const CACHE_TIME_KEY = 'admin_stats_time';
+const ONE_DAY = 24 * 60 * 60 * 1000;
+
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data } = await api.get('/api/admin/stats');
-        if (data.success) {
-          setData(data);
-        } else {
-          setError('Failed to fetch stats');
-        }
-      } catch (err) {
-        console.error('Dashboard Stats Error:', err);
-        setError('Connection to server failed');
-      } finally {
+  const fetchStats = useCallback(async (force = false) => {
+    try {
+      if (!force) setLoading(true);
+      else setRefreshing(true);
+
+      const cachedData = localStorage.getItem(CACHE_KEY);
+      const lastCachedTime = localStorage.getItem(CACHE_TIME_KEY);
+      const now = new Date().getTime();
+
+      // ক্যাশ লজিক: যদি ফোর্স না করা হয় এবং ক্যাশ ভ্যালিড থাকে
+      if (!force && cachedData && lastCachedTime && now - lastCachedTime < ONE_DAY) {
+        setData(JSON.parse(cachedData));
         setLoading(false);
+        return;
       }
-    };
-    fetchStats();
+
+      const { data: response } = await api.get('/api/admin/stats');
+
+      if (response.success) {
+        setData(response);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(response));
+        localStorage.setItem(CACHE_TIME_KEY, now.toString());
+        setError(null);
+      } else {
+        setError('Failed to fetch stats');
+      }
+    } catch (err) {
+      console.error('Dashboard Stats Error:', err);
+      setError('Connection to server failed');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   if (loading)
     return (
@@ -70,12 +96,17 @@ export default function AdminDashboard() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-red-500 gap-2">
         <FiAlertCircle size={24} />
         <p className="text-xs font-black uppercase tracking-widest">{error}</p>
+        <button
+          onClick={() => fetchStats(true)}
+          className="mt-4 px-4 py-2 bg-orange-500 text-white text-[10px] font-black uppercase rounded-lg"
+        >
+          Try Again
+        </button>
       </div>
     );
 
   const { cards, charts } = data;
 
-  // 🔹 Safety Calculations (To prevent NaN or Infinity errors)
   const revenueNum = parseFloat(cards.totalRevenue) || 0;
   const netProfitNum = parseFloat(cards.netProfit) || 0;
   const stripeFeesNum = parseFloat(cards.stripeFees) || 0;
@@ -83,7 +114,6 @@ export default function AdminDashboard() {
   const profitMargin = revenueNum > 0 ? ((netProfitNum / revenueNum) * 100).toFixed(1) : '0.0';
   const feeImpact = revenueNum > 0 ? ((stripeFeesNum / revenueNum) * 100).toFixed(1) : '0.0';
 
-  // 🔹 Main 4 Performance Cards
   const mainMetrics = [
     {
       label: 'Total Revenue',
@@ -115,44 +145,43 @@ export default function AdminDashboard() {
     },
   ];
 
-  // 🔹 Financial & System Cards
   const secondaryMetrics = [
     {
       label: 'Net Profit',
-      value: `€${cards.netProfit}`,
+      value: `€${cards.netProfit || 0}`,
       icon: FiTrendingUp,
       trend: 'Post Tax & Fees',
       isHighlight: true,
     },
     {
       label: 'Stripe Fees',
-      value: `€${cards.stripeFees}`,
+      value: `€${cards.stripeFees || 0}`,
       icon: FiActivity,
       trend: 'Estimated Cost',
     },
-    { label: 'VAT Liability', value: `€${cards.totalVat}`, icon: FiShield, trend: 'Total Tax' },
     {
-      label: 'Payments',
-      value: cards.recentPayments,
-      icon: FiClock,
-      trend: 'Last 24 Hours',
+      label: 'VAT Liability',
+      value: `€${cards.totalVat || 0}`,
+      icon: FiShield,
+      trend: 'Total Tax',
     },
+    { label: 'Payments', value: cards.recentPayments, icon: FiClock, trend: 'Last 24 Hours' },
     {
       label: 'Creators',
-      value: cards.totalCreators,
+      value: cards.totalCreators || 0,
       icon: FiUsers,
       trend: 'Approved Partners',
     },
     {
       label: 'Pending Apps',
-      value: cards.pendingCreatorRequests,
+      value: cards.pendingCreatorRequests || 0,
       icon: FiShield,
       trend: 'Review Required',
       isWarning: cards.pendingCreatorRequests > 0,
     },
     {
       label: 'Pending Ads',
-      value: cards.pendingListings,
+      value: cards.pendingListings || 0,
       icon: FiLayers,
       trend: 'Manual Review',
       isWarning: cards.pendingListings > 0,
@@ -160,16 +189,26 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-10 font-sans">
+    <div className="space-y-8 animate-in fade-in duration-700 font-sans">
       {/* --- Header --- */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
+        <div className="flex items-center gap-4">
           <h2 className="text-3xl font-black uppercase tracking-tighter italic dark:text-white">
             Admin <span className="text-orange-500">Overview</span>
           </h2>
+          <button
+            onClick={() => fetchStats(true)}
+            disabled={refreshing}
+            className={`p-2 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-orange-500 transition-all ${refreshing ? 'animate-spin text-orange-500' : ''}`}
+            title="Refresh Intelligence"
+          >
+            <FiRefreshCw size={16} />
+          </button>
         </div>
-        <div className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded text-[9px] font-black uppercase tracking-widest text-gray-500">
-          Last Check: {new Date().toLocaleTimeString()}
+        <div className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded text-[9px] font-black uppercase tracking-widest text-gray-500 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+          Data Integrity Verified:{' '}
+          {new Date(parseInt(localStorage.getItem(CACHE_TIME_KEY))).toLocaleTimeString()}
         </div>
       </div>
 
@@ -233,7 +272,6 @@ export default function AdminDashboard() {
 
       {/* --- 3. Charts Section --- */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Revenue Flow Chart */}
         <div className="lg:col-span-8 bg-white dark:bg-[#0c0c0c] rounded-xl border border-gray-100 dark:border-white/5 py-6 pr-6 shadow-sm">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
             <h3 className="text-xl pl-6 font-black italic uppercase tracking-tighter dark:text-white">
@@ -276,10 +314,8 @@ export default function AdminDashboard() {
                     border: '1px solid #333',
                     borderRadius: '8px',
                     fontSize: '10px',
-                    fontFamily: 'sans-serif',
                     fontWeight: '800',
                   }}
-                  itemStyle={{ padding: '2px 0' }}
                 />
                 <Area
                   type="monotone"
@@ -302,7 +338,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Profitability Meter */}
         <div className="lg:col-span-4 bg-white dark:bg-[#0c0c0c] rounded-xl border border-gray-100 dark:border-white/5 p-6 flex flex-col justify-between shadow-sm">
           <div>
             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-8 flex items-center gap-2">
@@ -318,13 +353,12 @@ export default function AdminDashboard() {
               <StatBlock label="VAT Liability" value={`€${cards.totalVat}`} color="text-blue-500" />
             </div>
           </div>
-
           <div className="mt-8 p-4 bg-orange-500/5 border border-orange-500/10 rounded-lg">
             <p className="text-[9px] font-black uppercase text-orange-500 tracking-widest mb-1">
               Business Health
             </p>
             <p className="text-[11px] text-gray-500 leading-relaxed italic font-medium">
-              Revenue is successfully distributed. System is calculating Stripe fees at{' '}
+              System calculates Stripe fees at{' '}
               <span className="text-orange-500 font-bold">2.9% + 0.30€</span>. Net margin is
               healthy.
             </p>
@@ -339,7 +373,6 @@ export default function AdminDashboard() {
   );
 }
 
-// 🔹 Atomic UI Components
 const LegendItem = ({ color, label }) => (
   <div className="flex items-center gap-2">
     <div className={`w-2 h-2 rounded-full ${color}`}></div>
