@@ -64,6 +64,7 @@ export default function AdminDashboard() {
         setData(response);
         localStorage.setItem(CACHE_KEY, JSON.stringify(response));
         localStorage.setItem(CACHE_TIME_KEY, now.toString());
+        console.log(response)
         setError(null);
       } else {
         setError('Failed to fetch stats');
@@ -121,6 +122,13 @@ export default function AdminDashboard() {
       icon: FiDollarSign,
       sub: 'Lifetime Gross',
       color: 'bg-orange-600',
+    },
+    {
+      label: 'Net Earned Revenue',
+      value: `€${cards.netEarnedRevenue}`,
+      icon: FiTrendingUp, 
+      sub: 'Non-refundable Earned',
+      color: 'bg-emerald-600',
     },
     {
       label: 'Total Clicks',
@@ -213,7 +221,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* --- 1. Top 4 Priority Cards --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {mainMetrics.map((card, i) => (
           <div
             key={i}
