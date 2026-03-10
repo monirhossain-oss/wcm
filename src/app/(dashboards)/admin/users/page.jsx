@@ -47,22 +47,44 @@ export default function UsersPage() {
     fetchUsers();
   }, []);
 
-  const handleDownload = async () => {
-    try {
-      const response = await api.get('/api/admin/export-users', {
-        responseType: 'blob',
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'Users_List.xlsx');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      console.error('Export failed', err);
-    }
-  };
+const handleDownload = async () => {
+  // ১. এক্সপোর্টের আগে প্রফেশনাল ওয়ার্নিং কনফার্মেশন
+  const warningMessage =
+    'CAUTION: Exporting the full user database is a resource-intensive operation. ' +
+    'To prevent high CPU usage and potential server latency, please perform this action only during server migrations or essential audits. ' +
+    'Are you sure you want to proceed?';
+
+  if (!window.confirm(warningMessage)) return;
+
+  try {
+    // সেটআপ লোডিং স্টেট (যদি থাকে)
+    // setExporting(true);
+
+    const response = await api.get('/api/admin/export-users', {
+      responseType: 'blob',
+    });
+
+    // ২. ফাইল ডাউনলোড প্রসেস
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute(
+      'download',
+      `Drakilo_Users_List_${new Date().toISOString().split('T')[0]}.xlsx`
+    );
+    document.body.appendChild(link);
+    link.click();
+
+    // ৩. ক্লিনআপ (মেমোরি সেভ করার জন্য)
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('User Export failed:', err);
+    // toast.error('User export failed');
+  } finally {
+    // setExporting(false);
+  }
+};
 
   const handleToggleStatus = async (userId) => {
     const confirmAction = confirm("Are you sure you want to change this user's status?");

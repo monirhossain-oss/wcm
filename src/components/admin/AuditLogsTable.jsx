@@ -138,7 +138,7 @@ export default function AuditLogsTable() {
                     </td>
                     <td className="p-4">
                       <span
-                        className={`px-2 py-1 rounded-sm text-[8px] font-black uppercase tracking-tighter border ${
+                        className={`px-2 py-1 rounded-sm text-[8px] font-black uppercase tracking-tighter border whitespace-nowrap ${
                           log.action.includes('PAYMENT') || log.action.includes('COMPLETED')
                             ? 'bg-green-500/5 text-green-500 border-green-500/10'
                             : 'bg-blue-500/5 text-blue-500 border-blue-500/10'
@@ -156,7 +156,7 @@ export default function AuditLogsTable() {
                     <td className="p-4 text-right">
                       <button
                         onClick={() => setSelectedLog(log)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-orange-600 hover:text-white rounded-md text-[9px] font-black uppercase transition-all shadow-sm"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-orange-600 hover:text-white rounded-md text-[9px] font-black uppercase transition-all shadow-sm whitespace-nowrap"
                       >
                         <FiEye /> View Data
                       </button>
