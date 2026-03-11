@@ -56,26 +56,40 @@ export default function TransactionsPage() {
   };
 
   // ১. Bulk Export (Full Data)
-  const handleFullExport = async () => {
-    try {
-      setExporting(true);
-      const response = await api.get('/api/admin/export-transactions', { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute(
-        'download',
-        `Drakilo_Full_Report_${new Date().toISOString().split('T')[0]}.xlsx`
-      );
-      document.body.appendChild(link);
-      link.click();
-      toast.success('Full Excel Report Downloaded');
-    } catch (err) {
-      toast.error('Bulk export failed');
-    } finally {
-      setExporting(false);
-    }
-  };
+ const handleFullExport = async () => {
+   // ১. ওয়ার্নিং মেসেজ দেখানো
+   const isConfirmed = window.confirm(
+     'WARNING: This action is resource-intensive. High CPU usage may occur during the data aggregation process. It is recommended to perform this only for server migrations or deep audits. Do you want to proceed?'
+   );
+
+   if (!isConfirmed) return;
+
+   try {
+     setExporting(true);
+     const response = await api.get('/api/admin/export-transactions', { responseType: 'blob' });
+
+     const url = window.URL.createObjectURL(new Blob([response.data]));
+     const link = document.createElement('a');
+     link.href = url;
+     link.setAttribute(
+       'download',
+       `Drakilo_Full_Report_${new Date().toISOString().split('T')[0]}.xlsx`
+     );
+     document.body.appendChild(link);
+     link.click();
+
+     // ক্লিনআপ
+     document.body.removeChild(link);
+     window.URL.revokeObjectURL(url);
+
+     toast.success('Full Excel Report Downloaded');
+   } catch (err) {
+     console.error('Export Error:', err);
+     toast.error('Bulk export failed');
+   } finally {
+     setExporting(false);
+   }
+ };
 
   // ২. Individual Export (Single Receipt) - Client Side Generation logic or call specific API if exists
   const handleIndividualExport = (tx) => {
@@ -346,13 +360,13 @@ export default function TransactionsPage() {
                   {selectedTx.stripeId}
                 </p>
               </div>
-
+{/* 
               <button
                 onClick={() => handleIndividualExport(selectedTx)}
                 className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-orange-600/20"
               >
                 Download Individual Statement
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

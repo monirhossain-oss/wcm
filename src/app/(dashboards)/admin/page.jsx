@@ -64,6 +64,7 @@ export default function AdminDashboard() {
         setData(response);
         localStorage.setItem(CACHE_KEY, JSON.stringify(response));
         localStorage.setItem(CACHE_TIME_KEY, now.toString());
+        console.log(response)
         setError(null);
       } else {
         setError('Failed to fetch stats');
@@ -123,6 +124,13 @@ export default function AdminDashboard() {
       color: 'bg-orange-600',
     },
     {
+      label: 'Net Earned Revenue',
+      value: `€${cards.netEarnedRevenue}`,
+      icon: FiTrendingUp, 
+      sub: 'Non-refundable Earned',
+      color: 'bg-emerald-600',
+    },
+    {
       label: 'Total Clicks',
       value: cards.totalClicks,
       icon: FiMousePointer,
@@ -172,15 +180,15 @@ export default function AdminDashboard() {
       icon: FiUsers,
       trend: 'Approved Partners',
     },
+    // {
+    //   label: 'Pending Creators',
+    //   value: cards.pendingCreatorRequests || 0,
+    //   icon: FiShield,
+    //   trend: 'Review Required',
+    //   isWarning: cards.pendingCreatorRequests > 0,
+    // },
     {
-      label: 'Pending Apps',
-      value: cards.pendingCreatorRequests || 0,
-      icon: FiShield,
-      trend: 'Review Required',
-      isWarning: cards.pendingCreatorRequests > 0,
-    },
-    {
-      label: 'Pending Ads',
+      label: 'Pending Listings',
       value: cards.pendingListings || 0,
       icon: FiLayers,
       trend: 'Manual Review',
@@ -213,7 +221,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* --- 1. Top 4 Priority Cards --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {mainMetrics.map((card, i) => (
           <div
             key={i}
@@ -237,7 +245,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* --- 2. Financial & Meta Grid --- */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
         {secondaryMetrics.map((card, i) => (
           <div
             key={i}
@@ -273,8 +281,8 @@ export default function AdminDashboard() {
       {/* --- 3. Charts Section --- */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 bg-white dark:bg-[#0c0c0c] rounded-xl border border-gray-100 dark:border-white/5 py-6 pr-6 shadow-sm">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
-            <h3 className="text-xl pl-6 font-black italic uppercase tracking-tighter dark:text-white">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 pl-6">
+            <h3 className="text-xl font-black italic uppercase tracking-tighter dark:text-white">
               Revenue <span className="text-orange-500">&</span> Profit{' '}
               <span className="text-gray-400 text-[10px] font-black ml-2 tracking-widest bg-gray-100 dark:bg-white/5 px-2 py-1 rounded uppercase">
                 7 Day Performance
