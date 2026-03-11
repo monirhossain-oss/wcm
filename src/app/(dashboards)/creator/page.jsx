@@ -9,7 +9,7 @@ import {
   FiActivity,
   FiArrowUpRight,
   FiFileText,
-  FiTrendingUp,
+  FiRefreshCw, // রিফ্রেশ আইকন
   FiAlertCircle,
   FiLayers,
 } from 'react-icons/fi';
@@ -23,7 +23,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import CreatorActivityLog from '@/components/creator/CreatorActivityLog';
+import { Wallet } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -34,24 +35,35 @@ export default function CreatorDashboard() {
   const [stats, setStats] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchDashboardData = async (isRefresh = false) => {
+    try {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+
+      const statsUrl = isRefresh ? '/api/creator/stats?refresh=true' : '/api/creator/stats';
+
+      const [statsRes, transRes] = await Promise.all([
+        api.get(statsUrl),
+        api.get('/api/creator/my-transactions'),
+        ,
+      ]);
+
+      setStats(statsRes.data);
+      setTransactions(transRes.data.transactions?.slice(0, 5) || []);
+
+      if (isRefresh) toast.success('Dashboard Updated');
+    } catch (err) {
+      console.error('Dashboard Data Error:', err);
+      if (isRefresh) toast.error('Failed to sync data');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [statsRes, transRes] = await Promise.all([
-          api.get('/api/creator/stats'),
-          api.get('/api/creator/payments'),
-        ]);
-
-        // ব্যাকএন্ড এখন সরাসরি { stats, chartData } পাঠাচ্ছে
-        setStats(statsRes.data);
-        setTransactions(transRes.data.transactions?.slice(0, 5) || []);
-      } catch (err) {
-        console.error('Dashboard Data Error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchDashboardData();
   }, []);
 
@@ -60,7 +72,6 @@ export default function CreatorDashboard() {
       const response = await api.get(`/api/payments/creator/invoice/${transactionId}`, {
         responseType: 'blob',
       });
-
       const url = window.URL.createObjectURL(
         new Blob([response.data], { type: 'application/pdf' })
       );
@@ -69,92 +80,130 @@ export default function CreatorDashboard() {
       link.setAttribute('download', `invoice-${transactionId}.pdf`);
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link);
+      link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Invoice download failed:', error);
-      alert('Could not download invoice.');
+      toast.error('Could not download invoice.');
     }
   };
 
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
 
   const mainStats = stats?.stats;
+  const walletBalance = stats?.walletBalance || '0.00';
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700 font-sans">
-      {/* ⚠️ Low Balance Alert (Wallet based) */}
-      {parseFloat(mainStats?.totalPpcBalance) < 5 && parseFloat(mainStats?.totalPpcBalance) > 0 && (
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
+      {/* 🚀 Header Section with Refresh */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-black italic uppercase tracking-tighter dark:text-white">
+            Creator <span className="text-orange-500">Command Center</span>
+          </h2>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
+            Last Sync:{' '}
+            {stats?.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : 'Just now'}
+          </p>
+        </div>
+        <button
+          onClick={() => fetchDashboardData(true)}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50"
+        >
+          <FiRefreshCw
+            className={`text-orange-500 ${refreshing ? 'animate-spin' : ''}`}
+            size={14}
+          />
+          <span className="text-[10px] font-black uppercase tracking-widest dark:text-gray-300">
+            {refreshing ? 'Syncing...' : 'Force Refresh'}
+          </span>
+        </button>
+      </div>
+
+      {/* ⚠️ Low Balance Alert */}
+      {parseFloat(walletBalance) < 5 && parseFloat(walletBalance) > 0 && (
         <div className="flex items-center justify-between gap-4 p-5 bg-red-500/10 border border-red-500/20 rounded-lg shadow-sm">
           <div className="flex items-center gap-4">
             <div className="p-2.5 bg-red-500 text-white rounded-md shadow-lg shadow-red-500/20 animate-pulse">
               <FiAlertCircle size={20} />
             </div>
-            <div>
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">
-                Low Balance Warning
-              </h4>
-              <p className="text-[11px] dark:text-gray-400 font-bold uppercase mt-0.5">
-                Your PPC wallet is nearly empty: €{mainStats?.totalPpcBalance}
-              </p>
-            </div>
+            <p className="text-[11px] dark:text-gray-300 font-bold uppercase">
+              Operational Hazard: Your wallet balance is critically low (€{walletBalance})
+            </p>
           </div>
           <Link
             href="/creator/promote"
-            className="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-md transition-all active:scale-95 shadow-lg"
+            className="px-6 py-2.5 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-md hover:bg-red-600"
           >
-            Add Funds
+            Recharge Now
           </Link>
         </div>
       )}
 
-      {/* 🔹 Metric Intelligence Grid (4 Cards Fixed) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* 🔹 Metric Intelligence Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard
-          label="Total Views"
+          label="Operational Wallet"
+          value={`€${walletBalance}`}
+          icon={Wallet}
+          trend="Current Balance"
+          color="border-emerald-500/20 text-emerald-500"
+          bg="bg-emerald-500/5"
+        />
+        <MetricCard
+          label="Total Reach"
           value={mainStats?.totalViews}
           icon={FiEye}
-          trend="Lifetime Reach"
+          trend="Lifetime Views"
+          color="border-blue-500/20 text-blue-500"
+          bg="bg-blue-500/5"
         />
         <MetricCard
-          label="Total Spent"
+          label="Expense"
           value={`€${mainStats?.totalMonthlySpend || '0.00'}`}
           icon={FiDollarSign}
-          trend="Spending (Current Month)"
+          trend="This Month"
+          color="border-orange-500/20 text-orange-500"
+          bg="bg-orange-500/5"
         />
         <MetricCard
-          label="Total Campaign"
+          label="Active Campaign"
           value={mainStats?.totalActivePromoted}
           icon={FiZap}
+          trend="Viral Status"
+          color="border-purple-500/20 text-purple-500"
+          bg="bg-purple-500/5"
           isPrimary
-          trend="Viral Active Status"
         />
         <MetricCard
-          label="Total Clicks"
+          label="Engagement"
           value={mainStats?.totalClicks}
           icon={FiActivity}
-          trend="PPC Engagement"
+          trend="PPC Clicks"
+          color="border-pink-500/20 text-pink-500"
+          bg="bg-pink-500/5"
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* 🔹 Growth Pulse Analytics (Graph Sync) */}
-        <div className="lg:col-span-8 bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg py-6 pr-6 shadow-sm">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4 pl-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* 🔹 Growth Analytics Chart */}
+        <div className="lg:col-span-8 bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-xl pr-6 py-6 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-[80px] rounded-full"></div>
+          <div className="flex justify-between items-center mb-10 pl-6">
             <div>
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
-                Daily Statistics
+                Nodes Performance
               </h3>
-              <p className="text-2xl font-black dark:text-white mt-1 italic uppercase tracking-tighter">
-                Performance <span className="text-orange-500">Overview</span>
+              <p className="text-xl font-black dark:text-white italic uppercase tracking-tighter mt-1">
+                Growth <span className="text-orange-500">Pulse</span>
               </p>
             </div>
-            <div className="flex gap-6">
+            <div className="flex gap-4">
               <LegendItem color="bg-orange-500" label="Views" />
               <LegendItem color="bg-purple-500" label="Clicks" />
             </div>
@@ -162,18 +211,11 @@ export default function CreatorDashboard() {
 
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={stats?.chartData || []}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-              >
+              <AreaChart data={stats?.chartData || []}>
                 <defs>
                   <linearGradient id="vGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.2} />
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.1} />
                     <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="cGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#88888810" />
@@ -182,14 +224,13 @@ export default function CreatorDashboard() {
                   axisLine={false}
                   tickLine={false}
                   tick={{ fontSize: 9, fill: '#888', fontWeight: 'bold' }}
-                  dy={10}
                 />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#888' }} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: '#0c0c0c',
                     border: '1px solid #ffffff10',
-                    borderRadius: '4px',
+                    borderRadius: '8px',
                     fontSize: '10px',
                   }}
                 />
@@ -205,78 +246,83 @@ export default function CreatorDashboard() {
                   dataKey="clicks"
                   stroke="#a855f7"
                   strokeWidth={3}
-                  fill="url(#cGrad)"
+                  fill="none"
+                  strokeDasharray="5 5"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* 🔹 Portfolio Overview */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg p-6 flex-1">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-8 flex items-center gap-2">
-              <FiLayers className="text-orange-500" /> Portfolio Health
-            </h3>
-            <div className="space-y-4">
-              <StatusRow
-                label="Approved"
-                count={mainStats?.statusCount?.approved}
-                color="text-green-500"
-              />
-              <StatusRow
-                label="Under Review"
-                count={mainStats?.statusCount?.pending}
-                color="text-orange-500"
-              />
-              <StatusRow
-                label="Rejected"
-                count={mainStats?.statusCount?.rejected}
-                color="text-red-500"
-              />
+        {/* 🔹 Status Overview */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-xl p-6 h-full flex flex-col justify-between">
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6 flex items-center gap-2">
+                <FiLayers className="text-orange-500" /> Portfolio Health
+              </h3>
+              <div className="space-y-3">
+                <StatusRow
+                  label="Approved"
+                  count={mainStats?.statusCount?.approved}
+                  color="text-emerald-500"
+                  bg="bg-emerald-500/5"
+                />
+                <StatusRow
+                  label="Reviewing"
+                  count={mainStats?.statusCount?.pending}
+                  color="text-orange-500"
+                  bg="bg-orange-500/5"
+                />
+                <StatusRow
+                  label="Rejected"
+                  count={mainStats?.statusCount?.rejected}
+                  color="text-red-500"
+                  bg="bg-red-500/5"
+                />
+              </div>
             </div>
-            <div className="mt-10 pt-8 border-t border-gray-100 dark:border-white/5">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                Aggregate Nodes
-              </p>
-              <p className="text-4xl font-black dark:text-white italic tracking-tighter mt-1">
-                {mainStats?.totalListings || 0}
-              </p>
+            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-white/5 flex items-end justify-between">
+              <div>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                  Total Active Nodes
+                </p>
+                <p className="text-5xl font-black dark:text-white italic tracking-tighter mt-1">
+                  {mainStats?.totalListings || 0}
+                </p>
+              </div>
+              <Link
+                href="/creator/add"
+                className="bg-orange-600 p-4 rounded-lg hover:bg-orange-500 transition-all shadow-lg shadow-orange-600/20"
+              >
+                <FiArrowUpRight className="text-white" size={20} />
+              </Link>
             </div>
           </div>
-          <Link
-            href="/creator/add"
-            className="bg-orange-600 hover:bg-orange-500 p-5 rounded-lg flex items-center justify-between group transition-all shadow-lg shadow-orange-600/10"
-          >
-            <span className="text-[11px] font-black text-white uppercase tracking-[0.2em]">
-              Add New Listing
-            </span>
-            <FiArrowUpRight className="text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-          </Link>
         </div>
       </div>
 
-      {/* 🔹 Transaction Ledger (Invoice Integration) */}
-      <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-lg overflow-hidden shadow-sm">
-        <div className="px-8 py-5 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/20">
+      {/* 🔹 Payment Ledger */}
+      <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-xl overflow-hidden">
+        <div className="px-8 py-5 flex justify-between items-center bg-gray-50/50 dark:bg-white/20">
           <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-400">
-            Recent Payments
+            Capital Ledger
           </h4>
           <Link
-            href="/creator/payments"
-            className="text-[10px] font-black text-orange-500 uppercase tracking-widest hover:underline"
+            href="/creator/transactions"
+            className="text-[9px] font-black text-orange-500 uppercase tracking-widest hover:tracking-[0.4em] transition-all"
           >
-            Full History
+            View All Entries
           </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-100 dark:border-white/5">
+            <thead className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-100 dark:border-white/5 bg-gray-50/30 dark:bg-transparent">
               <tr>
-                <th className="px-8 py-5">Date</th>
-                <th className="px-8 py-5">Type</th>
-                <th className="px-8 py-5">Amount</th>
-                <th className="px-8 py-5 text-right">Invoice</th>
+                <th className="px-8 py-4">Transaction Date</th>
+                <th className="px-8 py-4">Protocol</th>
+                <th className="px-8 py-4">Amount</th>
+                <th className="px-8 py-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
@@ -287,17 +333,17 @@ export default function CreatorDashboard() {
                     className="hover:bg-gray-50/50 dark:hover:bg-white/20 transition-all group"
                   >
                     <td className="px-8 py-4 text-[10px] font-bold text-gray-500">
-                      {new Date(tx.createdAt).toLocaleDateString()}
+                      {new Date(tx.createdAt).toDateString()}
                     </td>
                     <td className="px-8 py-4">
                       <span
-                        className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-sm ${tx.packageType === 'boost' ? 'bg-purple-500/10 text-purple-500' : 'bg-orange-500/10 text-orange-500'}`}
+                        className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full border ${tx.packageType === 'boost' ? 'border-purple-500/30 text-purple-500' : 'border-orange-500/30 text-orange-500'}`}
                       >
                         {tx.packageType}
                       </span>
                     </td>
                     <td className="px-8 py-4 text-[12px] font-black dark:text-white italic">
-                      {tx.currency?.toUpperCase()} {tx.amountPaid}
+                      €{tx.amountPaid}
                     </td>
                     <td className="px-8 py-4 text-right">
                       <button
@@ -313,9 +359,9 @@ export default function CreatorDashboard() {
                 <tr>
                   <td
                     colSpan="4"
-                    className="px-8 py-16 text-center text-[10px] uppercase font-bold tracking-widest text-gray-500 italic"
+                    className="px-8 py-12 text-center text-[10px] uppercase font-bold text-gray-500 italic"
                   >
-                    No Operational Transactions Found.
+                    No activity logs found.
                   </td>
                 </tr>
               )}
@@ -328,36 +374,40 @@ export default function CreatorDashboard() {
 }
 
 // 🔹 Atomic UI Components
-const MetricCard = ({ label, value, icon: Icon, trend, isPrimary }) => (
-  <div className="p-6 rounded-lg border border-gray-100 dark:border-white/5 relative overflow-hidden group hover:border-orange-500/30 transition-all bg-white dark:bg-[#0c0c0c] shadow-sm">
+const MetricCard = ({ label, value, icon: Icon, trend, color, bg, isPrimary }) => (
+  <div
+    className={`p-6 rounded-xl border border-gray-100 dark:border-white/5 relative overflow-hidden group transition-all hover:-translate-y-1 bg-white dark:bg-[#0c0c0c] ${bg}`}
+  >
     <div className="relative z-10">
-      <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">{label}</p>
+      <p className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em]">{label}</p>
       <h3
-        className={`text-3xl font-black mt-2 italic tracking-tighter ${isPrimary ? 'text-orange-500' : 'dark:text-white'}`}
+        className={`text-2xl font-black mt-2 italic tracking-tighter ${isPrimary ? 'text-orange-500 underline decoration-orange-500/20 underline-offset-4' : 'dark:text-white'}`}
       >
         {value || 0}
       </h3>
-      <p className="text-[9px] mt-3 font-bold uppercase text-gray-500 tracking-widest italic">
+      <p className="text-[8px] mt-3 font-bold uppercase text-gray-500 tracking-widest italic opacity-60">
         {trend}
       </p>
     </div>
     <Icon
-      className="absolute -right-6 -bottom-6 text-gray-100 dark:text-white/2 group-hover:scale-110 group-hover:text-orange-500/10 transition-all duration-700"
-      size={120}
+      className={`absolute -right-4 -bottom-4 opacity-[0.03] dark:opacity-[0.05] group-hover:opacity-[0.15] group-hover:scale-110 transition-all duration-700 ${color}`}
+      size={100}
     />
   </div>
 );
 
 const LegendItem = ({ color, label }) => (
-  <div className="flex items-center gap-2">
-    <div className={`w-2.5 h-2.5 rounded-full ${color}`}></div>
-    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{label}</span>
+  <div className="flex items-center gap-1.5">
+    <div className={`w-1.5 h-1.5 rounded-full ${color}`}></div>
+    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{label}</span>
   </div>
 );
 
-const StatusRow = ({ label, count, color }) => (
-  <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-white/2 border border-gray-100 dark:border-white/5 rounded-md">
-    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">{label}</span>
-    <span className={`text-sm font-black italic tracking-widest ${color}`}>{count || 0}</span>
+const StatusRow = ({ label, count, color, bg }) => (
+  <div
+    className={`flex justify-between items-center p-3 rounded-lg border border-gray-100 dark:border-white/5 ${bg}`}
+  >
+    <span className="text-[9px] font-black uppercase tracking-tight text-gray-500">{label}</span>
+    <span className={`text-[12px] font-black italic ${color}`}>{count || 0}</span>
   </div>
 );
