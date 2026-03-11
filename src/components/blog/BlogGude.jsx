@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 const BlogGude = () => {
   // WCM বা কালচারাল ক্যাটাগরি ডেটা
@@ -18,11 +19,11 @@ const BlogGude = () => {
   ];
 
   return (
-    <div className="w-full">
-      {/* হেডার সেকশন - নেভি ব্লু ব্যাকগ্রাউন্ড (ইমেজ ৪ অনুসরণ করে) */}
-      <section className="bg-[#1a2b49] text-white py-12 px-4 text-center">
-        <h1 className="text-3xl md:text-5xl font-serif mb-4">WCM's Guide to Home</h1>
-        <p className="text-lg font-light opacity-90">
+    <div className="w-full bg-white dark:bg-slate-950 transition-colors duration-300">
+      {/* হেডার সেকশন - নেভি ব্লু ব্যাকগ্রাউন্ড */}
+      <section className="bg-[#1a2b49] dark:bg-slate-900 text-white py-16 px-4 text-center">
+        <h1 className="text-3xl md:text-5xl font-serif mb-4 tracking-tight">WCM's Guide to Home</h1>
+        <p className="text-lg font-light opacity-90 max-w-2xl mx-auto">
           Discover original wall art, comfy bedding, unique lighting, and more from small shops.
         </p>
       </section>
@@ -32,19 +33,21 @@ const BlogGude = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-12">
           {categories.map((item) => (
             <div key={item.id} className="group flex flex-col items-center text-center cursor-pointer">
-              {/* সার্কুলার ইমেজ (ইমেজ ৪ অনুসরণ করে) */}
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-100 mb-4 transition-transform duration-300 group-hover:scale-105 shadow-sm">
-                <img 
+              
+              {/* সার্কুলার ইমেজ (Next.js Image) */}
+              <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-100 dark:bg-slate-800 mb-5 transition-all duration-300 group-hover:scale-105 shadow-sm ring-1 ring-gray-100 dark:ring-slate-800">
+                <Image 
                   src={item.img} 
                   alt={item.title} 
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 150px, 200px"
+                  className="object-cover"
                 />
               </div>
               
-              {/* টাইটেল এবং অ্যারো */}
-              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-1 group-hover:underline">
+              {/* টাইটেল: dark:text-gray-200 */}
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1 group-hover:underline decoration-orange-500 underline-offset-4 transition-colors">
                 {item.title} 
-                
               </h3>
             </div>
           ))}

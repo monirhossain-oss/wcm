@@ -31,7 +31,7 @@ const PublicNavbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] dark:border-[#1F1F1F] border-b z-50">
+    <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a]   z-50">
       <div className="flex items-center justify-between max-w-7xl mx-auto px-6 h-20">
 
         {/* Logo */}
