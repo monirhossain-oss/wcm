@@ -14,7 +14,11 @@ import {
   FiUser,
   FiX,
   FiSettings,
-  FiShield
+  FiShield,
+  FiTag,
+  FiLayers,
+  FiDollarSign,
+  FiTrendingUp
 } from 'react-icons/fi';
 import Image from 'next/image';
 import { FaCreativeCommonsSampling, FaTag } from 'react-icons/fa';
@@ -62,16 +66,23 @@ export default function AdminLayout({ children }) {
 
   if (!user || user.role !== 'admin') return null;
 
-  const menuItems = [
-    { name: 'Overview', path: '/admin', icon: FiGrid },
-    { name: 'User Management', path: '/admin/users', icon: FiUsers },
-    { name: 'Creator Requests', path: '/admin/requests', icon: FiCheckCircle },
-    { name: 'Global Listings', path: '/admin/listings', icon: FiLayout },
-    { name: 'Promoted Listings', path: '/admin/listings/promoted', icon: FiLayout },
-    { name: 'All Transactions', path: '/admin/transactions', icon: FiLayout },
-    { name: 'All Tags', path: '/admin/tags', icon: FaTag },
-    { name: 'All Categories', path: '/admin/categories', icon: FaCreativeCommonsSampling },
-  ];
+const menuItems = [
+  { name: 'Overview', path: '/admin', icon: FiGrid },
+  { name: 'User Management', path: '/admin/users', icon: FiUsers },
+  { name: 'Creator Requests', path: '/admin/requests', icon: FiCheckCircle },
+
+  // Content & Moderation
+  { name: 'Global Listings', path: '/admin/listings', icon: FiLayout },
+  { name: 'Promoted Assets', path: '/admin/listings/promoted', icon: FiTrendingUp },
+
+  // Financials
+  { name: 'All Transactions', path: '/admin/transactions', icon: FiDollarSign }, 
+
+  // System & Structure
+  { name: 'Audit Logs', path: '/admin/logs', icon: FiShield },
+  { name: 'System Tags', path: '/admin/tags', icon: FiTag }, 
+  { name: 'Categories', path: '/admin/categories', icon: FiLayers },
+];
 
   const profileImage = user?.profile?.profileImage
     ? getImageUrl(user.profile.profileImage, 'avatar')

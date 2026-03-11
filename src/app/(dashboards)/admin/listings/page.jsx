@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   FiCheck,
@@ -18,41 +18,79 @@ import {
   FiAward,
   FiChevronLeft,
   FiChevronRight,
+  FiRefreshCw,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
+import toast, { Toaster } from 'react-hot-toast';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   withCredentials: true,
 });
 
+const LISTINGS_CACHE_KEY = 'drakilo_admin_listings_cache';
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
+
 export default function AdminListings() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('all');
   const [viewItem, setViewItem] = useState(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setrejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [lastSynced, setLastSynced] = useState(null);
 
   // --- Pagination State ---
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  useEffect(() => {
-    fetchListings();
-  }, []);
-
-  const fetchListings = async () => {
+  // --- Fetch Logic with Cache ---
+  const fetchListings = useCallback(async (isForce = false) => {
     try {
+      if (!isForce) {
+        const cached = localStorage.getItem(LISTINGS_CACHE_KEY);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_EXPIRY) {
+            setListings(data);
+            setLastSynced(timestamp);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
+      if (isForce) setRefreshing(true);
+      else setLoading(true);
+
       const res = await api.get('/api/admin/listings');
-      setListings(res.data);
+      if (res.data) {
+        setListings(res.data);
+        const timestamp = Date.now();
+        setLastSynced(timestamp);
+        localStorage.setItem(
+          LISTINGS_CACHE_KEY,
+          JSON.stringify({
+            data: res.data,
+            timestamp: timestamp,
+          })
+        );
+        if (isForce) toast.success('Listings Synchronized');
+      }
     } catch (err) {
       console.error('Error fetching admin listings:', err);
+      toast.error('Failed to sync listings');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
 
   const handleStatusUpdate = async (id, newStatus, reason = '') => {
     setActionLoading(true);
@@ -65,16 +103,26 @@ export default function AdminListings() {
       const updated = listings.map((l) =>
         l._id === id ? { ...l, status: newStatus, rejectionReason: reason } : l
       );
+
       setListings(updated);
+      // আপডেট হওয়ার পর ক্যাশও আপডেট করে দেওয়া ভালো
+      localStorage.setItem(
+        LISTINGS_CACHE_KEY,
+        JSON.stringify({
+          data: updated,
+          timestamp: Date.now(),
+        })
+      );
 
       if (viewItem?._id === id) {
         setViewItem({ ...viewItem, status: newStatus, rejectionReason: reason });
       }
 
+      toast.success(`Asset ${newStatus} successfully`);
       setShowRejectModal(false);
       setrejectionReason('');
     } catch (err) {
-      alert(err.response?.data?.message || 'Action failed');
+      toast.error(err.response?.data?.message || 'Action failed');
     } finally {
       setActionLoading(false);
     }
@@ -90,18 +138,16 @@ export default function AdminListings() {
   const filteredListings =
     filter === 'all' ? listings : listings.filter((l) => l.status === filter);
 
-  // --- Pagination Logic ---
   const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredListings.slice(indexOfFirstItem, indexOfLastItem);
 
-  // ফিল্টার চেঞ্জ হলে প্রথম পেজে ফেরত যাওয়া
   useEffect(() => {
     setCurrentPage(1);
   }, [filter]);
 
-  if (loading)
+  if (loading && !refreshing)
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-10 h-10 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
@@ -110,11 +156,13 @@ export default function AdminListings() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20 font-sans">
+      <Toaster position="top-right" />
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
           {
-            label: 'Total Listings',
+            label: 'Total Assets',
             value: stats.total,
             icon: FiLayers,
             color: 'text-blue-500',
@@ -163,16 +211,26 @@ export default function AdminListings() {
 
       {/* Filter & Table Wrapper */}
       <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm">
-        <div className="p-6 border-b border-gray-50 dark:border-white/10 flex flex-col md:flex-row justify-between gap-4">
-          <h2 className="text-xl font-black uppercase italic dark:text-white">
-            Moderation <span className="text-orange-500">Terminal</span>
-          </h2>
-          <div className="flex gap-2">
+        <div className="p-6 border-b border-gray-50 dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-black uppercase italic dark:text-white">
+              Moderation <span className="text-orange-500">Terminal</span>
+            </h2>
+            <button
+              onClick={() => fetchListings(true)}
+              disabled={refreshing}
+              className={`p-2 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 transition-all ${refreshing ? 'animate-spin' : 'hover:bg-orange-500 hover:text-white'}`}
+            >
+              <FiRefreshCw size={14} />
+            </button>
+          </div>
+
+          <div className="flex gap-2 bg-gray-100 dark:bg-white/5 p-1 rounded-xl">
             {['all', 'pending', 'approved', 'rejected'].map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${filter === f ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400'}`}
+                className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${filter === f ? 'bg-orange-500 text-white shadow-lg' : 'text-gray-400 hover:text-orange-500'}`}
               >
                 {f}
               </button>
@@ -184,10 +242,10 @@ export default function AdminListings() {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50/50 dark:bg-white/20 text-[9px] font-black uppercase tracking-widest text-gray-400 border-b dark:border-white/10">
-                <th className="px-8 py-4">Image</th>
+                <th className="px-8 py-4">Preview</th>
                 <th className="px-6 py-4">Creator</th>
-                <th className="px-6 py-4">Title & Category</th>
-                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Classification</th>
+                <th className="px-6 py-4">Protocol Status</th>
                 <th className="px-8 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -200,7 +258,7 @@ export default function AdminListings() {
                   <td className="px-8 py-4">
                     <img
                       src={getImageUrl(item.image)}
-                      className="h-10 w-10 rounded-lg object-cover grayscale group-hover:grayscale-0 transition-all"
+                      className="h-10 w-10 rounded-lg object-cover grayscale group-hover:grayscale-0 transition-all border border-black/10 dark:border-white/10"
                       alt=""
                     />
                   </td>
@@ -209,15 +267,13 @@ export default function AdminListings() {
                       {item.creatorName}
                     </p>
                     <p className="text-[9px] text-gray-400 lowercase italic">
-                      @{item.creatorId?.username}
+                      @{item.creatorId?.username || 'unknown'}
                     </p>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-[11px] font-black dark:text-white uppercase">
-                      {item.title.split(' ').slice(0, 3).join(' ')}
-                      {item.title.split(' ').length > 3 && '...'}
+                    <p className="text-[11px] font-black dark:text-white uppercase truncate max-w-[150px]">
+                      {item.title}
                     </p>
-
                     <p className="text-[9px] text-orange-500 font-bold uppercase">
                       {item.categoryName}
                     </p>
@@ -232,22 +288,32 @@ export default function AdminListings() {
                   <td className="px-8 py-4 text-right">
                     <button
                       onClick={() => setViewItem(item)}
-                      className="p-2 bg-gray-100 dark:bg-white/5 rounded-lg hover:bg-orange-500 hover:text-white transition-all text-gray-500"
+                      className="p-2.5 bg-gray-100 dark:bg-white/5 rounded-xl hover:bg-orange-500 hover:text-white transition-all text-gray-500"
                     >
-                      <FiEye size={14} />
+                      <FiEye size={16} />
                     </button>
                   </td>
                 </tr>
               ))}
+              {currentItems.length === 0 && (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="p-20 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest italic opacity-50"
+                  >
+                    No items detected in this sector
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Pagination Section */}
         <div className="p-6 border-t border-gray-50 dark:border-white/10 flex items-center justify-between bg-gray-50/30 dark:bg-white/20">
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-            Protocol Range: {indexOfFirstItem + 1} —{' '}
-            {Math.min(indexOfLastItem, filteredListings.length)} of {filteredListings.length}
+          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic flex items-center gap-2">
+            <FiClock size={10} className="text-orange-500" />
+            Sync: {lastSynced ? new Date(lastSynced).toLocaleTimeString() : 'Establishing...'}
           </p>
           <div className="flex gap-2">
             <button
@@ -262,10 +328,7 @@ export default function AdminListings() {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${currentPage === i + 1
-                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
-                      : 'bg-gray-100 dark:bg-white/10 text-gray-400 border dark:border-white/10 hover:border-orange-500'
-                    }`}
+                  className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${currentPage === i + 1 ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-gray-100 dark:bg-white/10 text-gray-400 border dark:border-white/10 hover:border-orange-500'}`}
                 >
                   {i + 1}
                 </button>

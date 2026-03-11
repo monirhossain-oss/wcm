@@ -52,7 +52,7 @@ export default function CreatorLayout({ children }) {
 
   const navItems = [
     { name: 'Overview', path: '/creator', icon: FiGrid },
-    { name: 'Ad Promotions', path: '/creator/promotions', icon: DollarSign },
+    { name: 'Wallet & Promotions', path: '/creator/promotions', icon: DollarSign },
     { name: 'Transactions', path: '/creator/transactions', icon: DollarSign },
     { name: 'My Listings', path: '/creator/listings', icon: FiList },
     { name: 'Add Listing', path: '/creator/add', icon: FiPlus },

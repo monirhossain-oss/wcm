@@ -25,7 +25,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import AuditLogsTable from '@/components/admin/AuditLogsTable';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -372,10 +371,6 @@ export default function AdminDashboard() {
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="mt-12">
-        <AuditLogsTable />
       </div>
     </div>
   );

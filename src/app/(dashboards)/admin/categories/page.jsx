@@ -121,7 +121,7 @@ export default function AdminCategories() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20 font-sans">
       {/* Header Form */}
-      <div className="bg-white dark:bg-[#0c0c0c] p-6 rounded-lg border border-gray-100 dark:border-white/10 shadow-sm">
+      <div className="">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <h1 className="text-xl font-black uppercase italic tracking-tighter dark:text-white text-orange-500">

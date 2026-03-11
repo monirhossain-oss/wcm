@@ -134,7 +134,7 @@ export default function AdminTags() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20 font-sans">
       {/* Create Form */}
-      <div className="bg-white dark:bg-[#0c0c0c] p-6 rounded-lg border border-gray-100 dark:border-white/10 shadow-sm">
+      <div className="">
         <h1 className="text-xl font-black uppercase italic tracking-tighter dark:text-white mb-6">
           System <span className="text-orange-500">Tags</span>
         </h1>
