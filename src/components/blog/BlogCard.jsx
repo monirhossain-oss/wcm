@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 const BlogCard = () => {
   const blogs = [
@@ -24,7 +25,7 @@ const BlogCard = () => {
       title: "Thoughtful jewelry gift ideas for football lovers",
       description: "Find the perfect token of appreciation for that special someone who lives and breathes the beautiful game.",
       image: "https://i.postimg.cc/vBC8z8jD/il-794x-N-7803156945-szxb.webp",
-      accent: "border-t-4 border-[#1A1A1A]"
+      accent: "border-t-4 border-[#1A1A1A] dark:border-gray-500"
     },
     {
       id: 4,
@@ -32,7 +33,7 @@ const BlogCard = () => {
       title: "The evolution of football-themed silver adornments",
       description: "A deep dive into how fan culture has influenced jewelry design from the 70s to the modern era.",
       image: "https://i.postimg.cc/KvZwWh2b/image-(12).jpg",
-      accent: "border-t-4 border-gray-300"
+      accent: "border-t-4 border-gray-300 dark:border-slate-600"
     },
     {
       id: 5,
@@ -53,28 +54,39 @@ const BlogCard = () => {
   ];
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-16 bg-white">
+    // bg-white (Light) | dark:bg-slate-950 (Dark)
+    <section className="max-w-7xl mx-auto px-6 py-16 bg-white dark:bg-slate-950 transition-colors duration-300">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
         {blogs.map((blog) => (
           <div key={blog.id} className="group flex flex-col cursor-pointer">
-            {/* Image Container with Accent Border */}
-            <div className={`relative h-64 overflow-hidden rounded-xl ${blog.accent}`}>
-              <img 
+            
+            {/* Image Container with Next.js Image */}
+            <div className={`relative h-64 overflow-hidden rounded-xl shadow-sm ${blog.accent}`}>
+              <Image 
                 src={blog.image} 
                 alt={blog.title} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
+              {/* Overlay for dark mode to make images blend better */}
+              <div className="absolute inset-0 bg-black/0 dark:bg-black/10 group-hover:bg-transparent transition-colors"></div>
             </div>
 
             {/* Card Body */}
             <div className="pt-5 space-y-2">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+              {/* Category: dark:text-gray-500 */}
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest transition-colors">
                 {blog.category}
               </p>
-              <h3 className="text-xl font-serif text-[#222222] leading-snug group-hover:underline decoration-1 underline-offset-4">
+              
+              {/* Title: dark:text-gray-100 */}
+              <h3 className="text-xl font-serif text-[#222222] dark:text-gray-100 leading-snug group-hover:underline decoration-1 underline-offset-4 transition-colors">
                 {blog.title}
               </h3>
-              <p className="text-[15px] text-gray-600 leading-relaxed line-clamp-2">
+              
+              {/* Description: dark:text-gray-400 */}
+              <p className="text-[15px] text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2 transition-colors">
                 {blog.description}
               </p>
             </div>
