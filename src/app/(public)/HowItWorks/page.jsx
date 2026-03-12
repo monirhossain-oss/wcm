@@ -65,6 +65,7 @@ const howItWorksPage = () => {
           ))}
         </div>
 
+
         {/* Action Button */}
         <div className="flex justify-center">
           <Link 
@@ -81,3 +82,4 @@ const howItWorksPage = () => {
 };
 
 export default howItWorksPage;
+
