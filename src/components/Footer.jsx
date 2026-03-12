@@ -70,6 +70,7 @@ const Footer = () => {
               <li><Link href="/contact" className="hover:text-black dark:hover:text-white transition-colors">Contact</Link></li>
             </ul>
           </div>
+          
 
           {/* Column 4 - Newsletter */}
           <div>
