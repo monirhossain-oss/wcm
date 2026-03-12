@@ -158,7 +158,7 @@ export default function PromotionsPage() {
               Available Credits
             </p>
             <h2 className="text-4xl font-bold tracking-tight text-white italic">
-              €{walletBalance.toFixed(2)}
+              €{walletBalance?.toFixed(2) || '0.00'}
             </h2>
           </div>
           <button
