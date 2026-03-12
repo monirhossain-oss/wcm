@@ -10,7 +10,7 @@ const ContactPage = () => {
     const router = useRouter();
     const formRef = useRef();
     const [fileName, setFileName] = useState('');
-    const [previewUrl, setPreviewUrl] = useState(null); // ইমেজের জন্য স্টেট
+    const [previewUrl, setPreviewUrl] = useState(null); 
     const [loading, setLoading] = useState(false);
 
     const handleFileChange = (event) => {
