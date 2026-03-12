@@ -31,7 +31,7 @@ export default function PromotionInsightsPage() {
       try {
         const [insightsRes, transRes] = await Promise.all([
           api.get(`/api/creator/promotion-insights/${id}`),
-          api.get(`/api/creator/payments`), // সব পেমেন্ট নিয়ে আসা
+          api.get(`/api/creator/my-transactions`), // সব পেমেন্ট নিয়ে আসা
         ]);
 
         if (insightsRes.data.success) setData(insightsRes.data.data);

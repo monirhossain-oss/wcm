@@ -100,7 +100,7 @@ export default function PromotionsPage() {
       const payload = {
         listingId: selectedListing._id,
         packageType: promoType,
-        amountInEUR: currentCost, 
+        amountInEUR: currentCost,
         days: promoType === 'boost' ? Number(boostDays) : 0,
         totalClicks: promoType === 'ppc' ? Number(targetClicks) : 0,
       };
@@ -158,7 +158,7 @@ export default function PromotionsPage() {
               Available Credits
             </p>
             <h2 className="text-4xl font-bold tracking-tight text-white italic">
-              €{walletBalance.toFixed(2)}
+              €{walletBalance?.toFixed(2) || '0.00'}
             </h2>
           </div>
           <button
