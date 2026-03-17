@@ -146,7 +146,7 @@ export default function PromotionInsightsPage() {
   const { ppc, boost } = data;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans mt-10">
+    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans">
       <Toaster position="top-center" />
 
       {/* Header */}

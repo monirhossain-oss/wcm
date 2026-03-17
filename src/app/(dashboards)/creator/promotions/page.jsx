@@ -123,9 +123,9 @@ export default function PromotionsPage() {
 
       {/* Wallet Header */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 bg-zinc-900 rounded-2xl p-8 text-white flex justify-between items-center border border-white/5 shadow-2xl relative overflow-hidden">
+        <div className="md:col-span-2 bg-zinc-900 rounded-lg p-6 text-white flex justify-between md:items-center border border-white/5 shadow-2xl relative overflow-hidden max-md:flex-col gap-4">
           <div className="relative z-10">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-black mb-2">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-black mb-2 whitespace-nowrap">
               Available Balance
             </p>
             <h2 className="text-4xl font-black tracking-tighter italic">
@@ -134,15 +134,15 @@ export default function PromotionsPage() {
           </div>
           <button
             onClick={() => setShowTopUpModal(true)}
-            className="relative z-10 bg-orange-500 hover:bg-orange-600 px-6 py-3.5 rounded-xl flex items-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest active:scale-95"
+            className="relative z-10 bg-orange-500 hover:bg-orange-600 px-6 py-3.5 rounded-lg flex items-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest active:scale-95 whitespace-nowrap justify-center cursor-pointer"
           >
-            <FiPlus size={18} /> Add Funds
+            <FiPlus size={18} /> Add Money
           </button>
           <div className="absolute -right-10 -bottom-10 opacity-10">
             <FiCreditCard size={200} />
           </div>
         </div>
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 flex flex-col justify-center">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 flex flex-col justify-center">
           <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-black">
             Managed Assets
           </p>
@@ -153,7 +153,7 @@ export default function PromotionsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden shadow-sm">
         <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30">
           <h3 className="font-black text-[10px] uppercase tracking-[0.3em] text-zinc-500 flex items-center gap-3">
             <FiActivity className="text-orange-500" size={16} /> Asset Deployment
@@ -184,7 +184,7 @@ export default function PromotionsPage() {
                       <div className="flex items-center gap-5">
                         <img
                           src={getImageUrl(item.image)}
-                          className="w-14 h-14 rounded-xl object-cover border border-zinc-200 dark:border-zinc-800"
+                          className="w-14 h-14 rounded-lg object-cover border border-zinc-200 dark:border-zinc-800"
                           alt=""
                         />
                         <div>
@@ -234,7 +234,7 @@ export default function PromotionsPage() {
                       <div className="flex justify-end items-center gap-3">
                         <Link
                           href={`/creator/promotions/${item._id}`}
-                          className="flex items-center gap-2 px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
+                          className="flex items-center gap-2 px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
                         >
                           <FiEye size={14} />
                           <span className="text-[9px] font-black uppercase tracking-widest">
@@ -245,7 +245,7 @@ export default function PromotionsPage() {
                         <button
                           disabled={isFullyPromoted}
                           onClick={() => setSelectedListing(item)}
-                          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
                             isFullyPromoted
                               ? 'bg-zinc-50 dark:bg-zinc-900 text-zinc-300 dark:text-zinc-600 border border-zinc-100 dark:border-zinc-800 cursor-not-allowed opacity-50'
                               : 'bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-orange-600 dark:hover:text-white shadow-md'
@@ -273,14 +273,14 @@ export default function PromotionsPage() {
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => p - 1)}
-                className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 disabled:opacity-30"
+                className="p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 disabled:opacity-30"
               >
                 <FiChevronLeft size={16} />
               </button>
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((p) => p + 1)}
-                className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 disabled:opacity-30"
+                className="p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 disabled:opacity-30"
               >
                 <FiChevronRight size={16} />
               </button>
@@ -292,7 +292,7 @@ export default function PromotionsPage() {
       {/* --- Top-up Modal --- */}
       {showTopUpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-lg shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
             <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
               <h3 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-3 dark:text-white">
                 <FiCreditCard className="text-orange-500" size={18} /> Deposit Funds
@@ -315,14 +315,14 @@ export default function PromotionsPage() {
                     type="number"
                     value={topUpAmount}
                     onChange={(e) => setTopUpAmount(e.target.value)}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 pl-10 pr-4 py-4 rounded-xl text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 pl-10 pr-4 py-4 rounded-lg text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
                   />
                 </div>
               </div>
               <button
                 onClick={handleTopUpSubmit}
                 disabled={actionLoading}
-                className="w-full py-4 bg-orange-600 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-orange-700 transition-all"
+                className="w-full py-4 bg-orange-600 text-white rounded-lg font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-orange-700 transition-all"
               >
                 {actionLoading ? 'Initializing...' : 'Checkout Securely'}
               </button>
@@ -334,7 +334,7 @@ export default function PromotionsPage() {
       {/* Promotion Config Modal */}
       {selectedListing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800">
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-lg overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800">
             <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
               <h3 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-3 dark:text-white">
                 <FiZap className="text-orange-500" size={18} /> Configure Strategy
@@ -347,7 +347,7 @@ export default function PromotionsPage() {
               </button>
             </div>
             <div className="p-8 space-y-8">
-              <div className="flex p-1.5 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl">
+              <div className="flex p-1.5 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg">
                 <button
                   onClick={() => setPromoType('boost')}
                   className={`flex-1 py-3 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${promoType === 'boost' ? 'bg-white dark:bg-zinc-700 shadow-sm text-orange-600' : 'text-zinc-500'}`}
@@ -372,7 +372,7 @@ export default function PromotionsPage() {
                       type="number"
                       value={boostDays}
                       onChange={(e) => setBoostDays(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-xl text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -383,7 +383,7 @@ export default function PromotionsPage() {
                       type="number"
                       value={boostBudget}
                       onChange={(e) => setBoostBudget(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-xl text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
                     />
                   </div>
                 </div>
@@ -397,7 +397,7 @@ export default function PromotionsPage() {
                       type="number"
                       value={ppcAmount}
                       onChange={(e) => setPpcAmount(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-xl text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -408,13 +408,13 @@ export default function PromotionsPage() {
                       type="number"
                       value={targetClicks}
                       onChange={(e) => setTargetClicks(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-xl text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
                     />
                   </div>
                 </div>
               )}
 
-              <div className="p-5 bg-orange-500/5 rounded-2xl border border-orange-500/10 flex justify-between items-center">
+              <div className="p-5 bg-orange-500/5 rounded-lg border border-orange-500/10 flex justify-between items-center">
                 <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
                   Total Investment
                 </span>
@@ -426,7 +426,7 @@ export default function PromotionsPage() {
               <button
                 onClick={handlePurchase}
                 disabled={actionLoading || walletBalance < currentCost}
-                className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl font-black uppercase text-[10px] tracking-[0.3em] transition-all hover:bg-orange-600 active:scale-[0.98] shadow-xl disabled:opacity-20"
+                className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-lg font-black uppercase text-[10px] tracking-[0.3em] transition-all hover:bg-orange-600 active:scale-[0.98] shadow-xl disabled:opacity-20"
               >
                 {actionLoading ? 'Activating...' : 'Execute Promotion'}
               </button>
