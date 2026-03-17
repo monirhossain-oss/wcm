@@ -32,7 +32,7 @@ export default function PromotionsPage() {
   // Modals & Promo States
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState(10);
-  const [topUpCurrency, setTopUpCurrency] = useState('EUR');
+  const [topUpCurrency, setTopUpCurrency] = useState('EUR'); // Default
   const [promoType, setPromoType] = useState('boost');
   const [boostDays, setBoostDays] = useState(7);
   const [boostBudget, setBoostBudget] = useState(20);
@@ -66,7 +66,7 @@ export default function PromotionsPage() {
   };
 
   const handleTopUpSubmit = async () => {
-    if (topUpAmount < 1) return toast.error('Minimum amount is 1');
+    if (topUpAmount < 5) return toast.error('Minimum top-up is 5 units');
     setActionLoading(true);
     try {
       const res = await api.post('/api/payments/create-checkout-session', {
@@ -118,7 +118,7 @@ export default function PromotionsPage() {
   if (loading) return <div className="min-h-screen bg-zinc-50 dark:bg-[#050505] animate-pulse" />;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 font-sans pb-20 md:px-0">
+    <div className="max-w-7xl mx-auto space-y-8 font-sans pb-20">
       <Toaster position="top-center" />
 
       {/* Wallet Header */}
@@ -152,7 +152,7 @@ export default function PromotionsPage() {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table Section */}
       <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden shadow-sm">
         <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30">
           <h3 className="font-black text-[10px] uppercase tracking-[0.3em] text-zinc-500 flex items-center gap-3">
@@ -191,7 +191,6 @@ export default function PromotionsPage() {
                           <p className="font-black text-zinc-900 dark:text-zinc-100 text-sm tracking-tight mb-1">
                             {item.title}
                           </p>
-                          {/* fix: ensuring string render */}
                           <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest italic">
                             {typeof item.category === 'object'
                               ? item.category.title
@@ -224,13 +223,11 @@ export default function PromotionsPage() {
                           </span>
                         )}
                         {!boost && !ppc && (
-                          <span className="text-[10px] text-zinc-400 italic opacity-40">
-                            --
-                          </span>
+                          <span className="text-[10px] text-zinc-400 italic opacity-40">--</span>
                         )}
                       </div>
                     </td>
-                    <td className="px-8 py-5">
+                    <td className="px-8 py-5 text-right">
                       <div className="flex justify-end items-center gap-3">
                         <Link
                           href={`/creator/promotions/${item._id}`}
@@ -241,7 +238,6 @@ export default function PromotionsPage() {
                             Insights
                           </span>
                         </Link>
-
                         <button
                           disabled={isFullyPromoted}
                           onClick={() => setSelectedListing(item)}
@@ -262,34 +258,9 @@ export default function PromotionsPage() {
             </tbody>
           </table>
         </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="p-6 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
-            <p className="text-[10px] text-zinc-500 font-black uppercase">
-              Page {currentPage} / {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-                className="p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 disabled:opacity-30"
-              >
-                <FiChevronLeft size={16} />
-              </button>
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className="p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 disabled:opacity-30"
-              >
-                <FiChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* --- Top-up Modal --- */}
+      {/* --- Top-up Modal with Currency Toggle --- */}
       {showTopUpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <div className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-lg shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
@@ -299,30 +270,59 @@ export default function PromotionsPage() {
               </h3>
               <button
                 onClick={() => setShowTopUpModal(false)}
-                className="text-zinc-400 hover:text-red-500"
+                className="text-zinc-400 hover:text-red-500 transition-colors"
               >
                 <FiX size={20} />
               </button>
             </div>
+
             <div className="p-8 space-y-6">
+              {/* Currency Toggle */}
+              <div className="space-y-3">
+                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
+                  Select Currency
+                </label>
+                <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                  <button
+                    onClick={() => setTopUpCurrency('EUR')}
+                    className={`flex-1 py-3 rounded-lg text-[10px] font-black transition-all ${topUpCurrency === 'EUR' ? 'bg-white dark:bg-zinc-700 text-orange-600 shadow-sm' : 'text-zinc-500'}`}
+                  >
+                    EUR (€)
+                  </button>
+                  <button
+                    onClick={() => setTopUpCurrency('USD')}
+                    className={`flex-1 py-3 rounded-lg text-[10px] font-black transition-all ${topUpCurrency === 'USD' ? 'bg-white dark:bg-zinc-700 text-orange-600 shadow-sm' : 'text-zinc-500'}`}
+                  >
+                    USD ($)
+                  </button>
+                </div>
+              </div>
+
+              {/* Amount Input */}
               <div className="space-y-2">
                 <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
                   Credits Amount
                 </label>
                 <div className="relative">
-                  <FiDollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">
+                    {topUpCurrency === 'EUR' ? '€' : '$'}
+                  </div>
                   <input
                     type="number"
                     value={topUpAmount}
                     onChange={(e) => setTopUpAmount(e.target.value)}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 pl-10 pr-4 py-4 rounded-lg text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 pl-10 pr-4 py-4 rounded-xl text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
                   />
                 </div>
+                <p className="text-[8px] text-zinc-500 font-bold italic ml-1">
+                  * Minimum 5 {topUpCurrency} required.
+                </p>
               </div>
+
               <button
                 onClick={handleTopUpSubmit}
                 disabled={actionLoading}
-                className="w-full py-4 bg-orange-600 text-white rounded-lg font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-orange-700 transition-all"
+                className="w-full py-4 bg-orange-600 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-orange-700 transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {actionLoading ? 'Initializing...' : 'Checkout Securely'}
               </button>
