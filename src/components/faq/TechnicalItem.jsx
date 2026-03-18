@@ -1,4 +1,5 @@
 "use client";
+import Link from 'next/link';
 import React, { useState } from 'react';
 
 const TechnicalItem = ({ question, answer }) => {
@@ -10,10 +11,10 @@ const TechnicalItem = ({ question, answer }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex justify-between items-center p-5 text-left focus:outline-none group"
       >
-        <span className="text-base font-bold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+        <span className="text-base font-bold text-gray-800 dark:text-[#F57C00] group-hover:text-[#F57C00] dark:group-hover:text-[#F57C00] transition-colors">
           {question}
         </span>
-        <span className={`ml-4 transition-transform duration-500 font-mono text-xl ${isOpen ? 'rotate-180 text-blue-500' : 'text-gray-400'}`}>
+        <span className={`ml-4 transition-transform duration-500 font-mono text-xl ${isOpen ? 'rotate-180 text-[#F57C00]' : 'text-gray-400'}`}>
           ↓
         </span>
       </button>
@@ -70,11 +71,9 @@ const TechnicalFaq = () => {
         
         {/* Section Header */}
         <div className="mb-10 text-center">
-          <h2 className="inline-block px-4 py-1 mb-4 text-xs font-bold tracking-[0.3em] uppercase bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 rounded-full">
-            Technical Support
-          </h2>
+         
           <h3 className="text-3xl font-black text-gray-900 dark:text-white">
-            Technical <span className="text-blue-600">Questions</span>
+            Technical <span className="text-[#F57C00]">Questions</span>
           </h3>
         </div>
 
@@ -89,10 +88,16 @@ const TechnicalFaq = () => {
           ))}
         </div>
 
-        {/* Support Link */}
-        <p className="mt-12 text-center text-gray-500 dark:text-gray-500 text-sm">
-          Having other technical issues? <a href="mailto:contact@worldculturemarketplace.com" className="text-blue-600 dark:text-blue-400 underline decoration-2 underline-offset-4 hover:text-blue-700 transition-colors">Email our support team</a>
-        </p>
+      {/* Support Link */}
+<p className="mt-12 text-center text-gray-500 dark:text-gray-500 text-sm">
+  Having other technical issues?{" "}
+  <Link
+    href="/contact" 
+    className="text-[#F57C00] dark:text-[#F57C00] underline decoration-2 underline-offset-4 hover:opacity-80 transition-all font-semibold"
+  >
+    Visit our contact page
+  </Link>
+</p>
 
       </div>
     </section>
