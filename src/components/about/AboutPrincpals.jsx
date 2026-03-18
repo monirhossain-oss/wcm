@@ -38,11 +38,6 @@ const AboutPrincpals = () => {
                             The core values that guide our curation and community growth.
                         </p>
                     </div>
-                    
-                    <button className="flex items-center gap-2 text-[#F57C00] font-bold text-xs uppercase tracking-widest hover:gap-4 transition-all duration-300 group">
-                        Read the full manifesto 
-                        {/* <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" /> */}
-                    </button>
                 </div>
 
                 {/* Cards Grid */}
