@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaInstagram, FaPinterestP, FaLinkedinIn } from 'react-icons/fa';
+import { FaInstagram, FaPinterestP, FaLinkedinIn, FaFacebook } from 'react-icons/fa';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -42,6 +42,7 @@ const Footer = () => {
               <FaInstagram className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
               <FaPinterestP className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
               <FaLinkedinIn className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
+              <FaFacebook className='hover:text-black dark:hover:text-white cursor-pointer transition-colors' />
             </div>
           </div>
 
