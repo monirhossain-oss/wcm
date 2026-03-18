@@ -10,7 +10,7 @@ const PolicyItem = ({ question, answer }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex justify-between items-center py-6 text-left focus:outline-none group"
       >
-        <span className="text-lg font-bold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+        <span className="text-lg font-bold text-gray-800 dark:text-gray-100 group-hover:text-[#F57C00] dark:group-hover:text-[#F57C00] transition-colors">
           {question}
         </span>
         <span className={`ml-4 transition-transform duration-300 ${isOpen ? 'rotate-180 text-blue-500' : 'text-gray-400'}`}>
@@ -54,7 +54,7 @@ const PlatformPolicies = () => {
         
         {/* Section Header */}
         <div className="mb-10 flex items-center gap-4">
-          <div className="h-8 w-1 bg-blue-600 rounded-full"></div>
+          <div className="h-8 w-1 bg-[#F57C00] rounded-full"></div>
           <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
             Platform Policies
           </h2>
