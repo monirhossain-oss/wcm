@@ -31,7 +31,7 @@ const PublicNavbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a]   z-50">
+    <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] z-50">
       <div className="flex items-center justify-between max-w-7xl mx-auto px-6 h-20">
 
         {/* Logo */}
@@ -134,12 +134,20 @@ const PublicNavbar = () => {
               </div>
             </div>
           ) : (
-            <Link
-              href="/auth/login"
-              className="hidden md:block px-6 py-2 rounded-lg border border-[#F57C00] text-[#F57C00] text-sm font-bold hover:bg-[#F57C00] hover:text-white transition-all"
-            >
-              Login
-            </Link>
+            <div className="hidden md:flex items-center space-x-2">
+              <Link
+                href="/auth/login"
+                className="px-5 py-2 rounded-lg text-[#F57C00] text-sm font-bold hover:bg-gray-50 transition-all"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth/register"
+                className="px-5 py-2 rounded-lg bg-[#F57C00] text-white text-sm font-bold hover:bg-[#e67600] transition-all shadow-md"
+              >
+                Sign Up
+              </Link>
+            </div>
           )}
 
           <FiMenu
@@ -200,13 +208,22 @@ const PublicNavbar = () => {
               </button>
             </>
           ) : (
-            <Link
-              href="/auth/login"
-              className="text-[#F57C00] font-bold"
-              onClick={() => setIsMobileDrawerOpen(false)}
-            >
-              Login
-            </Link>
+            <div className="flex flex-col space-y-4">
+              <Link
+                href="/auth/login"
+                className="text-[#F57C00] font-bold"
+                onClick={() => setIsMobileDrawerOpen(false)}
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth/register"
+                className="bg-[#F57C00] text-white px-4 py-2 rounded-lg text-center font-bold"
+                onClick={() => setIsMobileDrawerOpen(false)}
+              >
+                Sign Up
+              </Link>
+            </div>
           )}
         </div>
       </div>
