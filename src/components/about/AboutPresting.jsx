@@ -8,7 +8,7 @@ const AboutPresting = () => {
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
                 <Image
-                    src="https://i.postimg.cc/QtkdJ5n2/cultural-preservation-ensuring-our-legacy-endures.webp"
+                    src="https://i.postimg.cc/hv36wd4y/image-(17).jpg"
                     alt="Preserving Identity Background"
                     fill
                     className="object-cover"

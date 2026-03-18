@@ -19,7 +19,10 @@ const AboutContent = () => {
                     <p className="text-base sm:text-lg md:text-xl 
                                   text-gray-600 dark:text-gray-300 
                                   max-w-md leading-relaxed">
-                        A global platform connecting cultural creators with explorers who value authenticity and heritage.
+                        World Culture Marketplace (WCM)
+                is a global platform dedicated to showcasing cultural
+                creators, artisans, and storytellers from around the world. Our mission is to provide a space
+                where culture can be discovered, appreciated, and shared with respect and authenticity.
                     </p>
 
                     <div className="flex items-center gap-5 pt-6">
@@ -51,7 +54,7 @@ const AboutContent = () => {
                     <div className="space-y-5">
                         <div className="relative h-[70%] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition duration-500">
                             <Image
-                                src="https://i.postimg.cc/8kJLjSVK/Pottery-DEL-10-1080x.webp"
+                                src="https://i.postimg.cc/85QQHWKK/image-(4).jpg"
                                 alt="Pottery"
                                 fill
                                 className="object-cover transition-transform duration-700 hover:scale-105"
@@ -60,7 +63,7 @@ const AboutContent = () => {
 
                         <div className="relative h-[28%] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition duration-500">
                             <Image
-                                src="https://i.postimg.cc/BQbk8tnw/138016039-15563697440551n.jpg"
+                                src="https://i.postimg.cc/T1nrb8y4/image-(13).jpg"
                                 alt="People"
                                 fill
                                 className="object-cover transition-transform duration-700 hover:scale-105"
@@ -71,7 +74,7 @@ const AboutContent = () => {
                     <div className="space-y-5 pt-10 md:pt-12">
                         <div className="relative h-[30%] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition duration-500">
                             <Image
-                                src="https://i.postimg.cc/GhTzwD2h/istockphoto-1137526672-612x612.jpg"
+                                src="https://i.postimg.cc/K8hmf61T/image-(14).jpg"
                                 alt="Fabric"
                                 fill
                                 className="object-cover transition-transform duration-700 hover:scale-105"
@@ -80,7 +83,7 @@ const AboutContent = () => {
 
                         <div className="relative h-[65%] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition duration-500">
                             <Image
-                                src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80"
+                                src="https://i.postimg.cc/wTTvL8sJ/Whats-App-Image-2026-03-18-at-2-41-26-PM.jpg"
                                 alt="Architecture"
                                 fill
                                 className="object-cover transition-transform duration-700 hover:scale-105"
