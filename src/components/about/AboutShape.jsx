@@ -24,9 +24,9 @@ const AboutContent = () => {
 
                 {/* Image & Badge Section */}
                 <div className="relative order-1 lg:order-2">
-                    <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-2xl transform transition-transform duration-500 hover:scale-105">
+                    <div className="relative aspect-[4/3]  w-full rounded-2xl overflow-hidden shadow-2xl transform transition-transform duration-500 hover:scale-105">
                         <Image
-                            src="https://i.postimg.cc/k4nM8YqR/Acrylic-Painting-Techniques-768x512.jpg"
+                            src="https://i.postimg.cc/NjG2b29W/image-(16).jpg"
                             alt="Artist at work"
                             fill
                             className="object-cover"

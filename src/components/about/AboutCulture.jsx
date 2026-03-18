@@ -33,7 +33,7 @@ const AboutCulture = () => {
                             Featured Creator
                         </span>
                         <Image
-                            src="https://i.postimg.cc/C1ddZ6wc/Bahai-House-of-Worship-Lotus-Temple-Delhi-India.webp"
+                            src="https://i.postimg.cc/8CSpwq08/image-(18).jpg"
                             alt="Ancient Cedar Totem"
                             fill
                             className="object-contain p-12"
