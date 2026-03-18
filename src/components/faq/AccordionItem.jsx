@@ -10,10 +10,10 @@ const AccordionItem = ({ question, answer, list }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex justify-between items-center py-5 text-left focus:outline-none group"
       >
-        <span className="text-lg font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+        <span className="text-lg font-semibold text-gray-800 dark:text-gray-100 group-hover:text-[#F57C00] dark:group-hover:text-[#F57C00] transition-colors">
           {question}
         </span>
-        <span className={`ml-4 text-2xl transition-transform duration-300 ${isOpen ? 'rotate-45 text-blue-500' : 'text-gray-400'}`}>
+        <span className={`ml-4 text-2xl transition-transform duration-300 ${isOpen ? 'rotate-45 text-[#F57C00]' : 'text-gray-400'}`}>
           +
         </span>
       </button>
@@ -80,8 +80,8 @@ const VisitorsAndPolicies = () => {
         
         {/* Visitors Section */}
         <div>
-          <h2 className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-6 flex items-center">
-            <span className="w-10 h-[2px] bg-blue-600 mr-3"></span>
+          <h2 className="text-sm font-bold text-[#F57C00] dark:text-[#F57C00] uppercase tracking-widest mb-6 flex items-center">
+            <span className="w-10 h-[2px] bg-[#F57C00] mr-3"></span>
             For Visitors and Buyers
           </h2>
           <div className="bg-white dark:bg-white/5 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-gray-100 dark:border-white/10 shadow-xl shadow-gray-100 dark:shadow-none">
@@ -90,19 +90,6 @@ const VisitorsAndPolicies = () => {
             ))}
           </div>
         </div>
-
-        {/* Policies Section */}
-        {/* <div>
-          <h2 className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-6 flex items-center">
-            <span className="w-10 h-[2px] bg-blue-600 mr-3"></span>
-            Platform Policies
-          </h2>
-          <div className="bg-white dark:bg-white/5 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-gray-100 dark:border-white/10 shadow-xl shadow-gray-100 dark:shadow-none">
-            {policyFaqs.map((faq, index) => (
-              <AccordionItem key={index} {...faq} />
-            ))}
-          </div>
-        </div> */}
 
       </div>
     </section>
