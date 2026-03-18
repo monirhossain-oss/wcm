@@ -19,8 +19,8 @@ const AboutVisibility = () => {
 
             {/* কোটেশন টেক্সট */}
             <p className="max-w-2xl text-gray-500 dark:text-gray-400 text-lg md:text-xl  font-light mb-12 leading-relaxed">
-                "We are not just selling products; we are sharing the lived <br className="hidden md:block" />
-                experiences of humanity."
+                World Culture Marketplace was founded with a simple idea: culture deserves to be seen,
+                    understood, and respected in the digital world.
             </p>
 
             {/* এক্সপ্লোর বাটন */}
