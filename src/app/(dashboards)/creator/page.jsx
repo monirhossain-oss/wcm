@@ -137,7 +137,7 @@ export default function CreatorDashboard() {
             </p>
           </div>
           <Link
-            href="/creator/promote"
+            href="/creator/promotions"
             className="px-6 py-2.5 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-md hover:bg-red-600"
           >
             Recharge Now
@@ -164,7 +164,7 @@ export default function CreatorDashboard() {
           bg="bg-blue-500/5"
         />
         <MetricCard
-          label="Expense"
+          label="Promotion Spend"
           value={`€${mainStats?.totalMonthlySpend || '0.00'}`}
           icon={FiDollarSign}
           trend="This Month"

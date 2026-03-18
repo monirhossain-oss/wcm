@@ -1,18 +1,24 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   FiZap,
-  FiClock,
-  FiMousePointer,
   FiArrowLeft,
   FiActivity,
   FiTrendingUp,
   FiEye,
   FiFileText,
   FiCreditCard,
+  FiPauseCircle,
+  FiPlayCircle,
+  FiXCircle,
+  FiRefreshCcw,
+  FiEdit3,
+  FiSave,
+  FiX,
 } from 'react-icons/fi';
 import axios from 'axios';
+import { toast, Toaster } from 'react-hot-toast';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -25,30 +31,90 @@ export default function PromotionInsightsPage() {
   const [data, setData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
+
+  // Edit States
+  const [editMode, setEditMode] = useState(null);
+  const [editData, setEditData] = useState({ days: 7, budget: 20, clicks: 50 });
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const [insightsRes, transRes] = await Promise.all([
+        api.get(`/api/creator/promotion-insights/${id}`),
+        api.get(`/api/creator/my-transactions`),
+      ]);
+      if (insightsRes.data.success) setData(insightsRes.data.data);
+      const filteredTrans =
+        transRes.data.transactions?.filter((tx) => (tx.listing?._id || tx.listing) === id) || [];
+      setTransactions(filteredTrans);
+    } catch (err) {
+      toast.error('Data load failed');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const [insightsRes, transRes] = await Promise.all([
-          api.get(`/api/creator/promotion-insights/${id}`),
-          api.get(`/api/creator/my-transactions`), // সব পেমেন্ট নিয়ে আসা
-        ]);
-
-        if (insightsRes.data.success) setData(insightsRes.data.data);
-
-        // শুধুমাত্র এই লিস্টিংয়ের ট্রানজেকশনগুলো ফিল্টার করা
-        const filteredTrans =
-          transRes.data.transactions?.filter((tx) => tx.listing?._id === id || tx.listing === id) ||
-          [];
-        setTransactions(filteredTrans);
-      } catch (err) {
-        console.error('Failed to load insights', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     if (id) fetchStats();
-  }, [id]);
+  }, [id, fetchStats]);
+
+  const handleTogglePause = async (packageType) => {
+    setActionLoading(`${packageType}_pause`);
+    try {
+      const res = await api.post('/api/payments/toggle-pause-promotion', {
+        listingId: id,
+        packageType,
+      });
+      if (res.data.success) {
+        toast.success(res.data.isPaused ? 'Campaign Paused' : 'Campaign Resumed');
+        fetchStats();
+      }
+    } catch (err) {
+      toast.error('Action failed');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCancel = async (packageType) => {
+    if (
+      !window.confirm(`Stop this ${packageType.toUpperCase()}? Credits will be refunded to wallet.`)
+    )
+      return;
+    setActionLoading(`${packageType}_cancel`);
+    try {
+      const res = await api.post('/api/payments/cancel-promotion', { listingId: id, packageType });
+      if (res.data.success) {
+        toast.success(`Cancelled! €${res.data.refundAmount} refunded.`);
+        fetchStats();
+      }
+    } catch (err) {
+      toast.error('Cancellation failed');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleEditSubmit = async (packageType) => {
+    setActionLoading(`${packageType}_edit`);
+    try {
+      const payload = {
+        listingId: id,
+        packageType,
+        amountInEUR: Number(editData.budget),
+        days: packageType === 'boost' ? Number(editData.days) : 0,
+        totalClicks: packageType === 'ppc' ? Number(editData.clicks) : 0,
+      };
+      await api.post('/api/payments/purchase-promotion', payload);
+      toast.success('Campaign Updated!');
+      setEditMode(null);
+      fetchStats();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Update failed');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const downloadInvoice = async (transactionId) => {
     try {
@@ -63,17 +129,15 @@ export default function PromotionInsightsPage() {
       link.setAttribute('download', `invoice-${transactionId}.pdf`);
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
     } catch (error) {
-      console.error('Invoice download failed:', error);
-      alert('Could not download invoice.');
+      toast.error('Download failed');
     }
   };
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#050505]">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-[#050505]">
         <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -82,214 +146,218 @@ export default function PromotionInsightsPage() {
   const { ppc, boost } = data;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans animate-in fade-in duration-500">
-      {/* Top Navigation */}
+    <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans">
+      <Toaster position="top-center" />
+
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-black/5 dark:border-white/5 pb-10">
         <div className="flex items-center gap-5">
           <button
             onClick={() => router.back()}
-            className="p-3 bg-white dark:bg-white/5 hover:bg-orange-500 hover:text-white rounded-lg transition-all border border-black/10 dark:border-white/5 shadow-sm"
+            className="p-3 bg-white dark:bg-white/5 hover:bg-orange-500 hover:text-white rounded-xl border border-black/10 dark:border-white/5 shadow-sm transition-all"
           >
             <FiArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-3xl font-black uppercase tracking-tighter text-gray-900 dark:text-white flex items-center gap-3">
-              All <span className="text-orange-600 italic">Insights</span>
+            <h1 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white">
+              Promo <span className="text-orange-600 italic">Insights</span>
             </h1>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mt-1">
-              Listing: <span className="text-orange-500">{data.title}</span> • ID: {id.slice(-8)}
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] mt-1">
+              Asset: <span className="text-orange-500">{data.title}</span>
             </p>
           </div>
         </div>
-
         <div className="flex gap-3">
           <QuickStat
             icon={FiTrendingUp}
-            label="Visibility Level"
-            value={`Level ${data.level}`}
+            label="Rank Score"
+            value={`Lvl ${data.level}`}
             color="text-orange-500"
           />
-          <QuickStat icon={FiEye} label="Total Views" value={data.views} color="text-blue-500" />
+          <QuickStat icon={FiEye} label="Organic Reach" value={data.views} color="text-blue-500" />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* PPC ENGINE CARD */}
-        <div className="lg:col-span-2 bg-white dark:bg-[#0c0c0c] rounded-lg p-8 border border-black/10 dark:border-white/5 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 text-blue-500/5 group-hover:text-blue-500/10 transition-colors pointer-events-none">
-            <FiMousePointer size={140} />
-          </div>
-
-          <div className="flex justify-between items-center mb-10">
-            <div className="flex items-center gap-3">
+        {/* PPC ENGINE */}
+        <div className="lg:col-span-2 bg-white dark:bg-[#0c0c0c] rounded-2xl p-6 border border-black/10 dark:border-white/5 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-10">
               <div className="p-2.5 bg-blue-500/10 rounded-lg">
-                <FiActivity className="text-blue-600 dark:text-blue-500" size={20} />
+                <FiActivity className="text-blue-500" size={20} />
               </div>
-              <h2 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white">
-                Click Campaign Results
+              <h2 className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-white">
+                PPC Management
               </h2>
             </div>
-            <div
-              className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2 border ${
-                ppc.isActive
-                  ? 'bg-green-500/10 text-green-600 border-green-500/20'
-                  : 'bg-gray-500/10 text-gray-500 border-gray-500/20'
-              }`}
-            >
-              <div
-                className={`h-1.5 w-1.5 rounded-full ${ppc.isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}
+
+            {editMode === 'ppc' ? (
+              <EditPanel
+                type="ppc"
+                values={editData}
+                setValues={setEditData}
+                onClose={() => setEditMode(null)}
+                onSubmit={() => handleEditSubmit('ppc')}
+                loading={actionLoading === 'ppc_edit'}
               />
-              {ppc.isActive ? 'Live & Active' : 'Campaign Ended'}
-            </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                  <MetricBox label="In Queue" value={ppc.clicksRemaining} sub="Clicks Left" />
+                  <MetricBox label="Delivered" value={ppc.clicksUsed} sub="Total Sent" />
+                  <MetricBox label="Budget" value={`€${ppc.balance}`} sub="Remaining" />
+                  <MetricBox
+                    label="Status"
+                    value={ppc.isActive ? (ppc.isPaused ? 'Paused' : 'Live') : 'Ended'}
+                    sub="Current State"
+                  />
+                </div>
+                <div className="space-y-4 mb-10">
+                  <div className="flex justify-between items-end">
+                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">
+                      Delivery Progress
+                    </p>
+                    <p className="text-sm font-black text-blue-500 italic">
+                      {ppc.consumptionRate}%
+                    </p>
+                  </div>
+                  <div className="h-2 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-1000 ${ppc.isPaused ? 'bg-zinc-400' : 'bg-blue-600 shadow-lg'}`}
+                      style={{ width: `${ppc.consumptionRate}%` }}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            <MetricBox label="Clicks Remaining" value={ppc.clicksRemaining} sub="In Queue" />
-            <MetricBox label="Clicks Delivered" value={ppc.clicksUsed} sub="Successfully" />
-            <MetricBox label="Current Balance" value={`€${ppc.balance}`} sub="In Wallet" />
-            <MetricBox label="Avg. Cost" value={`€${ppc.costPerClick}`} sub="Per Click" />
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex justify-between items-end">
-              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                Budget Consumption
-              </p>
-              <p className="text-sm font-black text-blue-600 dark:text-blue-500 italic">
-                {ppc.consumptionRate}%
-              </p>
-            </div>
-            <div className="h-2.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
-              <div
-                className="h-full bg-linear-to-r from-blue-600 to-blue-400 transition-all duration-1000 shadow-[0_0_15px_rgba(59,130,246,0.3)]"
-                style={{ width: `${ppc.consumptionRate}%` }}
+          {/* Action Buttons at Bottom */}
+          {ppc.isActive && editMode !== 'ppc' && (
+            <div className="flex items-center pt-6 border-t border-black/5 dark:border-white/5">
+              <ControlBtn
+                icon={ppc.isPaused ? FiPlayCircle : FiPauseCircle}
+                label={ppc.isPaused ? 'Resume' : 'Pause'}
+                onClick={() => handleTogglePause('ppc')}
+                loading={actionLoading === 'ppc_pause'}
               />
-            </div>
-          </div>
-        </div>
-
-        {/* BOOST STATUS CARD */}
-        <div
-          className={`rounded-lg p-8 border transition-all flex flex-col justify-between overflow-hidden relative shadow-sm ${
-            boost.isExpiringSoon
-              ? 'bg-orange-50 dark:bg-orange-500/5 border-orange-200 dark:border-orange-500/30'
-              : 'bg-white dark:bg-[#0c0c0c] border-black/10 dark:border-white/5'
-          }`}
-        >
-          {boost.isExpiringSoon && (
-            <div className="absolute top-0 left-0 w-full py-1.5 bg-orange-500 text-[8px] font-black text-center text-white uppercase tracking-[0.3em]">
-              Ending Soon • Urgent
+              <ControlBtn icon={FiEdit3} label="Extend" onClick={() => setEditMode('ppc')} />
+              <ControlBtn
+                icon={FiXCircle}
+                label="Refund"
+                onClick={() => handleCancel('ppc')}
+                color="text-red-500 hover:bg-red-500/10"
+                loading={actionLoading === 'ppc_cancel'}
+              />
             </div>
           )}
+        </div>
 
+        {/* BOOST CARD */}
+        <div
+          className={`rounded-2xl p-6 border transition-all flex flex-col justify-between relative shadow-sm ${boost.isActive ? 'bg-white dark:bg-[#0c0c0c] border-orange-500/20' : 'bg-zinc-50 dark:bg-white/2 opacity-60'}`}
+        >
           <div>
             <div className="flex items-center gap-3 mb-10">
               <div className="p-2.5 bg-orange-500/10 rounded-lg">
-                <FiZap className="text-orange-600 dark:text-orange-500" size={20} />
+                <FiZap className="text-orange-500" size={20} />
               </div>
-              <h2 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white">
-                Viral Boost
-              </h2>
+              <h2 className="text-[11px] font-black uppercase tracking-widest">Viral Boost</h2>
             </div>
 
-            <div className="text-center py-6">
-              <div
-                className={`text-7xl font-black tracking-tighter mb-2 ${
-                  boost.isExpiringSoon ? 'text-orange-600' : 'text-gray-900 dark:text-white'
-                }`}
-              >
-                {boost.isExpiringSoon ? boost.hoursRemaining : boost.daysRemaining}
-              </div>
-              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.4em]">
-                {boost.isExpiringSoon ? 'Hours Left' : 'Days Remaining'}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-10">
-            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-white/5 rounded-lg border border-black/5 dark:border-white/5">
-              <FiClock
-                className={boost.isExpiringSoon ? 'text-orange-500' : 'text-gray-400'}
-                size={20}
+            {editMode === 'boost' ? (
+              <EditPanel
+                type="boost"
+                values={editData}
+                setValues={setEditData}
+                onClose={() => setEditMode(null)}
+                onSubmit={() => handleEditSubmit('boost')}
+                loading={actionLoading === 'boost_edit'}
               />
-              <div className="overflow-hidden">
-                <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                  Expires On
-                </p>
-                <p className="text-[11px] font-bold text-gray-800 dark:text-white truncate">
+            ) : (
+              <div className="text-center py-6 mb-10">
+                <div
+                  className={`text-7xl font-black tracking-tighter mb-2 ${boost.isPaused ? 'text-zinc-400' : 'text-zinc-900 dark:text-white'}`}
+                >
                   {boost.isActive
-                    ? new Date(boost.expiresAt).toLocaleDateString(undefined, { dateStyle: 'long' })
-                    : 'Promotion Ended'}
+                    ? boost.isExpiringSoon
+                      ? boost.hoursRemaining
+                      : boost.daysRemaining
+                    : '0'}
+                </div>
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em]">
+                  {boost.isPaused ? 'PAUSED' : boost.isExpiringSoon ? 'Hours Left' : 'Days Left'}
                 </p>
               </div>
-            </div>
+            )}
           </div>
+
+          {/* Action Buttons at Bottom */}
+          {boost.isActive && editMode !== 'boost' && (
+            <div className="flex items-center pt-6 border-t border-black/5 dark:border-white/5">
+              <ControlBtn
+                icon={boost.isPaused ? FiPlayCircle : FiPauseCircle}
+                label={boost.isPaused ? 'Resume' : 'Pause'}
+                onClick={() => handleTogglePause('boost')}
+                loading={actionLoading === 'boost_pause'}
+              />
+              <ControlBtn icon={FiEdit3} label="Extend" onClick={() => setEditMode('boost')} />
+              <ControlBtn
+                icon={FiXCircle}
+                label="Refund"
+                onClick={() => handleCancel('boost')}
+                color="text-red-500 hover:bg-red-500/10"
+                loading={actionLoading === 'boost_cancel'}
+              />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* --- PAYMENT HISTORY FOR THIS LISTING --- */}
-      <div className="bg-white dark:bg-[#0c0c0c] border border-black/10 dark:border-white/5 rounded-lg overflow-hidden shadow-sm">
-        <div className="px-8 py-5 border-b border-black/5 dark:border-white/5 flex items-center gap-3 bg-gray-50/50 dark:bg-white/2">
+      {/* Transaction Table */}
+      <div className="bg-white dark:bg-[#0c0c0c] border border-black/10 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm">
+        <div className="px-8 py-5 border-b border-black/5 dark:border-white/5 flex items-center gap-3">
           <FiCreditCard className="text-orange-500" />
-          <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-400">
-            Promotion Billing History
+          <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-zinc-400">
+            Payment History
           </h4>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-black/5 dark:border-white/5">
+            <thead className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 border-b border-black/5 dark:border-white/5">
               <tr>
                 <th className="px-8 py-5">Date</th>
-                <th className="px-8 py-5">Promotion Type</th>
+                <th className="px-8 py-5">Type</th>
                 <th className="px-8 py-5">Amount</th>
-                <th className="px-8 py-5 text-right">Action</th>
+                <th className="px-8 py-5 text-right">Invoice</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
-              {transactions.length > 0 ? (
-                transactions.map((tx, idx) => (
-                  <tr
-                    key={idx}
-                    className="hover:bg-gray-50/50 dark:hover:bg-white/2 transition-all group"
-                  >
-                    <td className="px-8 py-4 text-[10px] font-bold text-gray-500">
-                      {new Date(tx.createdAt).toLocaleDateString('en-GB')}
-                    </td>
-                    <td className="px-8 py-4">
-                      <span
-                        className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-sm ${
-                          tx.packageType === 'boost'
-                            ? 'bg-purple-500/10 text-purple-500'
-                            : 'bg-blue-500/10 text-blue-500'
-                        }`}
-                      >
-                        {tx.packageType}
-                      </span>
-                    </td>
-                    <td className="px-8 py-4 text-[12px] font-black dark:text-white italic">
-                      {tx.currency?.toUpperCase()} {tx.amountPaid}
-                    </td>
-                    <td className="px-8 py-4 text-right">
-                      <button
-                        onClick={() => downloadInvoice(tx._id)}
-                        className="flex items-center gap-2 ml-auto p-2 px-4 bg-orange-500/10 text-orange-600 hover:bg-orange-500 hover:text-white text-[9px] font-black uppercase tracking-widest rounded transition-all"
-                      >
-                        <FiFileText size={14} />
-                        Invoice
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="4"
-                    className="px-8 py-16 text-center text-[10px] uppercase font-bold tracking-widest text-gray-500 italic"
-                  >
-                    No payment records for this listing.
+              {transactions.map((tx, idx) => (
+                <tr key={idx} className="hover:bg-zinc-50 dark:hover:bg-white/2 transition-all">
+                  <td className="px-8 py-4 text-[10px] font-bold text-zinc-500">
+                    {new Date(tx.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-8 py-4">
+                    <span
+                      className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-sm ${tx.packageType === 'boost' ? 'bg-orange-500/10 text-orange-500' : 'bg-blue-500/10 text-blue-500'}`}
+                    >
+                      {tx.packageType}
+                    </span>
+                  </td>
+                  <td className="px-8 py-4 text-[12px] font-black dark:text-white">
+                    €{tx.amountPaid}
+                  </td>
+                  <td className="px-8 py-4 text-right">
+                    <button
+                      onClick={() => downloadInvoice(tx._id)}
+                      className="p-2 text-zinc-400 hover:text-orange-500 transition-colors"
+                    >
+                      <FiFileText size={16} />
+                    </button>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>
@@ -298,27 +366,94 @@ export default function PromotionInsightsPage() {
   );
 }
 
-// Visual Components
+// --- New Control Button Component ---
+const ControlBtn = ({
+  icon: Icon,
+  label,
+  onClick,
+  loading,
+  color = 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5',
+}) => (
+  <button
+    onClick={onClick}
+    disabled={loading}
+    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${color}`}
+  >
+    {loading ? <FiRefreshCcw className="animate-spin" size={14} /> : <Icon size={14} />}
+    {label}
+  </button>
+);
+
 const QuickStat = ({ icon: Icon, label, value, color }) => (
-  <div className="bg-white dark:bg-[#0c0c0c] border border-black/10 dark:border-white/5 px-6 py-4 rounded-lg flex items-center gap-4 shadow-sm">
+  <div className="bg-white dark:bg-[#0c0c0c] border border-black/10 dark:border-white/5 px-6 py-4 rounded-xl flex items-center gap-4 shadow-sm">
     <Icon size={18} className={color} />
     <div>
-      <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-        {label}
-      </p>
+      <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{label}</p>
       <p className={`text-xl font-black tracking-tighter ${color}`}>{value}</p>
     </div>
   </div>
 );
 
 const MetricBox = ({ label, value, sub }) => (
-  <div className="bg-gray-50 dark:bg-white/2 border border-black/5 dark:border-white/5 p-5 rounded-lg transition-all hover:border-blue-500/30">
-    <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">
-      {label}
-    </p>
-    <div className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">
+  <div className="bg-zinc-50 dark:bg-white/2 border border-black/5 dark:border-white/5 p-5 rounded-xl transition-all hover:border-blue-500/30">
+    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-2">{label}</p>
+    <div className="text-2xl font-black text-zinc-900 dark:text-white tracking-tighter">
       {value}
     </div>
-    <p className="text-[7px] text-gray-500 uppercase font-bold italic mt-1">{sub}</p>
+    <p className="text-[7px] text-zinc-500 uppercase font-bold italic mt-1">{sub}</p>
+  </div>
+);
+
+const EditPanel = ({ type, values, setValues, onClose, onSubmit, loading }) => (
+  <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+    <div className="flex justify-between items-center mb-6">
+      <h3 className="text-[10px] font-black uppercase tracking-widest text-orange-500">
+        Update Campaign
+      </h3>
+      <button onClick={onClose} className="text-zinc-400 hover:text-red-500">
+        <FiX size={18} />
+      </button>
+    </div>
+    <div className="grid grid-cols-2 gap-4 mb-6">
+      {type === 'boost' ? (
+        <InputBox
+          label="Add Days"
+          value={values.days}
+          onChange={(v) => setValues({ ...values, days: v })}
+        />
+      ) : (
+        <InputBox
+          label="Add Clicks"
+          value={values.clicks}
+          onChange={(v) => setValues({ ...values, clicks: v })}
+        />
+      )}
+      <InputBox
+        label="Extra Budget (€)"
+        value={values.budget}
+        onChange={(v) => setValues({ ...values, budget: v })}
+      />
+    </div>
+    <button
+      onClick={onSubmit}
+      disabled={loading}
+      className="w-full py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-600 dark:hover:bg-orange-600 dark:hover:text-white transition-all shadow-lg"
+    >
+      {loading ? <FiRefreshCcw className="animate-spin" /> : <FiSave />} Add & Proceed
+    </button>
+  </div>
+);
+
+const InputBox = ({ label, value, onChange }) => (
+  <div className="space-y-1.5">
+    <label className="text-[8px] font-black text-zinc-400 uppercase tracking-widest ml-1">
+      {label}
+    </label>
+    <input
+      type="number"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 p-3 rounded-xl text-xs font-black outline-none focus:ring-1 ring-orange-500/50 dark:text-white"
+    />
   </div>
 );
