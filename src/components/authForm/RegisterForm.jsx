@@ -65,6 +65,7 @@ export default function RegisterForm() {
                   alt="Cultural Art"
                   fill
                   className="object-contain"
+                  
                 />
              </div>
              <h2 className="text-3xl font-bold mb-2 text-[#e5d5bc]">Join the Marketplace.</h2>
