@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaInstagram, FaPinterestP, FaLinkedinIn, FaFacebook } from 'react-icons/fa';
-import { useState } from 'react'; // useState যোগ করা হয়েছে
-import emailjs from '@emailjs/browser'; // emailjs ইমপোর্ট করা হয়েছে
+import { useState } from 'react'; 
+import emailjs from '@emailjs/browser'; 
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   
-  // স্টেট ম্যানেজমেন্ট
+
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState(""); // loading, success, error
 
@@ -19,20 +19,20 @@ const Footer = () => {
 
     setStatus("loading");
 
-    // EmailJS কনফিগারেশন
+    // EmailJS 
     const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
     const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
     const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC;
 
     const templateParams = {
-      user_email: email, // আপনার EmailJS টেমপ্লেটে এই ভেরিয়েবলটি থাকতে হবে
+      user_email: email, 
       message: "New Newsletter Subscription",
     };
 
     try {
       await emailjs.send(serviceId, templateId, templateParams, publicKey);
       setStatus("success");
-      setEmail(""); // ইমেইল পাঠানো হলে ইনপুট খালি করে দিবে
+      setEmail(""); 
       alert("Subscription Successful!");
     } catch (error) {
       console.error("EmailJS Error:", error);
@@ -46,7 +46,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-6 pt-16 pb-10">
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Column 1 - Logo (অপরিবর্তিত) */}
+          {/* Column 1 - Logo */}
           <div>
             <Link href="/" className="flex items-center space-x-3 mb-6">
               <Image src="/wc,-web-logo.png" alt="Logo Light" width={100} height={100} className="dark:hidden brightness-125 h-auto w-auto" />
@@ -61,7 +61,7 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Column 2 & 3 (অপরিবর্তিত) */}
+          {/* Column 2 & 3 */}
           <div>
             <h4 className="text-black dark:text-white text-sm font-semibold uppercase tracking-wider mb-6">Platform</h4>
             <ul className="space-y-3 text-sm">
@@ -82,7 +82,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Column 4 - Newsletter (পরিবর্তিত) */}
+          {/* Column 4 - Newsletter */}
           <div>
             <h4 className="text-black dark:text-white text-sm font-semibold uppercase tracking-wider mb-6">Stay Connected</h4>
             <p className="text-sm mb-4">Weekly cultural stories, delivered to your inbox.</p>
@@ -107,7 +107,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar (অপরিবর্তিত) */}
+        {/* Bottom Bar */}
         <div className="border-t border-gray-300 dark:border-gray-600 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center text-sm">
           <p className="mb-4 md:mb-0">© {currentYear} World Culture Marketplace. All rights reserved.</p>
           <div className="flex space-x-6">
