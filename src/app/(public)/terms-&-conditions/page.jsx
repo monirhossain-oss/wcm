@@ -151,7 +151,7 @@ const TermsAndConditionsPage = () => {
                             <li>Scrape or copy Platform content for resale or reproduction.</li>
                         </ul>
 
-                        <p className="font-bold text-red-600 dark:text-red-400 border-l-2 border-red-600 pl-4">
+                        <p className="font-bold text-gray-600 dark:text-red-400 border-l-2 border-gray-600 pl-4">
                             Violations may result in permanent account termination.
                         </p>
                     </div>
@@ -250,7 +250,7 @@ const TermsAndConditionsPage = () => {
 
                {/* 9. Third-Party Links */}
                 <div>
-                    <h2 className="text-xl font-black mb-6 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
+                    <h2 className="text-xl font-black mb-3 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
                         <span className="h-[2px] w-8 bg-[#F57C00]"></span> 9. Third-Party Links
                     </h2>
                     <div className="space-y-8 ml-11">
@@ -274,14 +274,150 @@ const TermsAndConditionsPage = () => {
                             </ul>
                         </div>
 
-                        <p className="font-bold text-gray-900 dark:text-white underline decoration-[#F57C00] underline-offset-4">
+                        <p className="font-bold text-gray-900 dark:text-white">
                             Users navigate external links at their own risk.
                         </p>
                     </div>
                 </div>
+                {/* 10. Advertising Services */}
+                <div>
+                    <h2 className="text-xl font-black mb-3 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
+                        <span className="h-[2px] w-8 bg-[#F57C00]"></span> 10. Advertising Services
+                    </h2>
+                    <div className="space-y-6 ml-11">
+                        <div className="space-y-3">
+                            <p>WCM may offer:</p>
+                            <ul className="list-disc ml-6 space-y-2 text-gray-600 dark:text-gray-400">
+                                <li>Banner ads</li>
+                                <li>Sponsored cultural content</li>
+                                <li>Boosted visibility</li>
+                                <li>PPC-based advertising</li>
+                            </ul>
+                        </div>
+                        <p className="text-sm font-bold border-l-2 border-[#F57C00] pl-4 py-1">
+                            All advertising activities are governed by the <span className="underline decoration-[#F57C00]">Advertising Terms</span>, which form part of this legal suite.
+                        </p>
+                    </div>
+                </div>
+
+                {/* 11. Disclaimers */}
+                <div>
+                    <h2 className="text-xl font-black mb-6 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
+                        <span className="h-[2px] w-8 bg-[#F57C00]"></span> 11. Disclaimers
+                    </h2>
+                    <div className="space-y-8 ml-11">
+                        <div className="space-y-3">
+                            <p>WCM provides the Platform <span className="italic font-serif">“as is”</span> without guarantees of:</p>
+                            <ul className="list-disc ml-6 space-y-1 text-gray-600 dark:text-gray-400">
+                                <li>Uninterrupted operation</li>
+                                <li>Accuracy of cultural information</li>
+                                <li>Error-free performance</li>
+                                <li>Continuous availability</li>
+                                <li>Completeness of user-submitted content</li>
+                            </ul>
+                        </div>
+
+                        <p className="p-4 bg-orange-50 dark:bg-orange-500/5 text-gray-700 dark:text-gray-300 rounded-sm italic border-r-4 border-[#F57C00] text-right">
+                            "WCM does not provide academic or anthropological certification of cultural content."
+                        </p>
+                    </div>
+                </div>
+                {/* 12. Limitation of Liability */}
+                <div>
+                    <h2 className="text-xl font-black mb-3 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
+                        <span className="h-[2px] w-8 bg-[#F57C00]"></span> 12. Limitation of Liability
+                    </h2>
+                    <div className="space-y-8 ml-11">
+                        <div className="space-y-3">
+                            <p>To the maximum extent permitted by law, WCM is <strong className="uppercase">not liable</strong> for:</p>
+                            <ul className="list-disc ml-6 space-y-1 text-gray-600 dark:text-gray-400">
+                                <li>Loss of data</li>
+                                <li>Loss of revenue</li>
+                                <li>Indirect or consequential damages</li>
+                                <li>Cultural interpretation disputes</li>
+                                <li>Reliance on user-generated content</li>
+                                <li>Unauthorized access to user accounts</li>
+                            </ul>
+                        </div>
+
+                        <p className="font-bold text-gray-900 dark:text-white  pb-1">
+                            Your use of the Platform is at your own risk.
+                        </p>
+                    </div>
+                </div>
+                {/* 13. Privacy & GDPR */}
+                <div>
+                    <h2 className="text-xl font-black mb-3 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
+                        <span className="h-[2px] w-8 bg-[#F57C00]"></span> 13. Privacy & GDPR
+                    </h2>
+                    <div className="space-y-6 ml-11">
+                        <p>
+                            Your data is governed by the <strong className="text-gray-900 dark:text-white ">WCM Privacy Policy</strong>, which is incorporated into these Terms.
+                        </p>
+                        
+                        <div className="space-y-3">
+                            <p>This includes information on:</p>
+                            <ul className="list-disc ml-6 space-y-2 text-gray-600 dark:text-gray-400">
+                                <li>Data collection</li>
+                                <li>Cookies</li>
+                                <li>GDPR rights</li>
+                                <li>Data retention</li>
+                                <li>Security measures</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {/* 14. Termination */}
+                <div>
+                    <h2 className="text-xl font-black mb-3 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
+                        <span className="h-[2px] w-8 bg-[#F57C00]"></span> 14. Termination
+                    </h2>
+                    <div className="space-y-6 ml-11">
+                        <div className="space-y-3">
+                            <p>WCM may suspend or terminate accounts for:</p>
+                            <ul className="list-disc ml-6 space-y-1 text-gray-600 dark:text-gray-400 font-medium">
+                                <li>Violating these Terms</li>
+                                <li>Harmful or abusive behavior</li>
+                                <li>Cultural misrepresentation</li>
+                                <li>Copyright infringement</li>
+                                <li>Security risks</li>
+                            </ul>
+                        </div>
+                        <p className="text-sm italic text-gray-500">
+                            Users may request account deletion at any time.
+                        </p>
+                    </div>
+                </div>
+
+                {/* 15. Governing Law */}
+                <div>
+                    <h2 className="text-xl font-black mb-3 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
+                        <span className="h-[2px] w-8 bg-[#F57C00]"></span> 15. Governing Law
+                    </h2>
+                    <div className="ml-11">
+                        <p>
+                            These Terms are governed by the laws of the jurisdiction in which WCM operates. Any disputes shall be resolved in the competent courts of that jurisdiction.
+                        </p>
+                    </div>
+                </div>
+
+              {/* 16. Contact Information */}
+            <section className="pt-5 border-t border-gray-200 dark:border-zinc-800">
+                <h2 className="text-xl font-black mb-6 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
+                    <span className="h-[2px] w-8 bg-[#F57C00]"></span> 16. Contact Information
+                </h2>
+                <div className="ml-11 space-y-6">
+                    <div>
+                        <p className=" text-lg">World Culture Marketplace (WCM)</p>
+                        <p className="">contact@worldculturemarketplace.com</p>
+                        <p><strong>Business Locations:</strong> Paris, France | Washington, USA</p>
+                    </div>
+
+                </div>
+            </section>
 
                 {/* 5. Liability & Infrastructure */}
-                <div>
+                {/* <div>
                     <h2 className="text-xl font-black mb-6 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
                         <span className="h-[2px] w-8 bg-[#F57C00]"></span> 5. Stability & Liability
                     </h2>
@@ -293,10 +429,10 @@ const TermsAndConditionsPage = () => {
                             Navigation to external third-party links or transactions performed outside WCM is at the user's own risk.
                         </p>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Footer/Contact Info */}
-                <div className="pt-16 border-t border-gray-100 dark:border-zinc-800 mt-20">
+                {/* <div className="pt-16 border-t border-gray-100 dark:border-zinc-800 mt-20">
                     <div className="flex flex-col md:flex-row justify-between items-start gap-12 ml-11">
                         <div className="space-y-2">
                             <p className="font-black text-xl text-[#F57C00] uppercase tracking-tighter">Contact & Compliance</p>
@@ -313,7 +449,7 @@ const TermsAndConditionsPage = () => {
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </section>
         </div>
     );
