@@ -17,24 +17,20 @@ export default function HeroActions() {
                 </button>
             </Link>
 
-            {isCreator || isAdmin ? (
-                <button
-                    disabled
-                    className="px-8 py-3 rounded-lg bg-gray-400/50 text-white"
-                >
-                    {isAdmin ? "Admin Access Active" : "Creator Mode Active"}
-                </button>
-            ) : (
-                <Link href={user ? `/become-creator` : `/auth/login`}>
-                    <button className="
-    px-8 py-3 rounded-lg font-medium transition-all duration-300
-    border border-gray-300 text-gray-800 bg-white hover:bg-gray-100
-    dark:border-white/30 dark:text-white dark:bg-white/10 dark:hover:bg-white/20
+            <Link href={user ? `/become-creator` : `/auth/login`}>
+                <button className="
+    px-8 py-3 rounded-lg font-medium
+    border border-[#F57C00] text-[#F57C00] bg-transparent
+    transition-all duration-300 cursor-pointer
+
+    hover:bg-[#F57C00] hover:text-white hover:shadow-md
+
+    dark:border-[#F57C00] dark:text-[#F57C00]
+    dark:hover:bg-[#F57C00] dark:hover:text-white
   ">
-                        Become a Creator
-                    </button>
-                </Link>
-            )}
+                    Become a Creator
+                </button>
+            </Link>
         </div>
     );
 }
