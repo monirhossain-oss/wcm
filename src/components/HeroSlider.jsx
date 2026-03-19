@@ -19,7 +19,7 @@ export default function HeroSlider() {
     }, []);
 
     return (
-        <div className="absolute inset-0 w-full h-full overflow-hidden bg-black">
+        <div className="absolute rounded-2xl mt-10 inset-0 w-full h-full overflow-hidden bg-black">
             {images.map((img, index) => (
                 <div
                     key={index}

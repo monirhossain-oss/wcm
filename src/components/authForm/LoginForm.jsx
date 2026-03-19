@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react'; // EyeOff ও ইম্পোর্ট করতে হবে
+import { Eye, EyeOff, Link } from 'lucide-react'; 
 
 export default function LoginForm() {
   const router = useRouter();
   const { loginUser } = useAuth();
   const [serverError, setServerError] = useState('');
-  
+
   // ১. পাসওয়ার্ড দেখানোর জন্য একটি স্টেট নিতে হবে
   const [showPassword, setShowPassword] = useState(false);
 
@@ -33,25 +33,25 @@ export default function LoginForm() {
 
   return (
     <div className="min-h-screen w-full bg-[#f3eee7] flex items-center justify-center p-4 md:p-10 font-serif">
-      
+
       <div className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 gap-0 rounded-[40px] overflow-hidden shadow-2xl bg-white/50 backdrop-blur-md border border-white/30">
-        
+
         {/* বাম পাশ: কালচারাল আর্ট সেকশন */}
         <div className="relative hidden md:flex flex-col items-center justify-between bg-[#1a2b4b] p-12 text-center text-white overflow-hidden">
           <div className="absolute top-6 left-6 text-[#e5d5bc]/30 text-xl tracking-[0.5em]">◈◈◈</div>
           <div className="absolute top-6 right-6 text-[#e5d5bc]/30 text-xl tracking-[0.5em]">◈◈◈</div>
-          
+
           <div className="relative z-10 w-full mt-10">
-             <div className="relative w-full aspect-square mb-8">
-                <Image 
-                  src="/login image.jpeg" 
-                  alt="Cultural Art"
-                  fill
-                  className="object-contain"
-                />
-             </div>
-             <h2 className="text-3xl font-bold mb-2 text-[#e5d5bc]">Connecting Cultures.</h2>
-             <h2 className="text-3xl font-bold text-[#e5d5bc]">Empowering Creators.</h2>
+            <div className="relative w-full aspect-square mb-8">
+              <Image
+                src="/login image.jpeg"
+                alt="Cultural Art"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <h2 className="text-3xl font-bold mb-2 text-[#e5d5bc]">Connecting Cultures.</h2>
+            <h2 className="text-3xl font-bold text-[#e5d5bc]">Empowering Creators.</h2>
           </div>
 
           <div className="absolute bottom-6 left-6 text-[#e5d5bc]/30 text-xl tracking-[0.5em]">◈◈◈</div>
@@ -60,9 +60,9 @@ export default function LoginForm() {
 
         {/* ডান পাশ: লগইন ফর্ম */}
         <div className="relative p-8 md:p-16 flex flex-col justify-center bg-[#fdfaf6]/70 backdrop-blur-xl">
-          
+
           <div className="mb-8 flex justify-center md:justify-start">
-             <Image src="/wc,-web-logo.png" alt="Logo" width={100} height={40} className="h-auto" />
+            <Image src="/wc,-web-logo.png" alt="Logo" width={100} height={40} className="h-auto cursor-pointer" onClick={() => router.push('/')} />
           </div>
 
           <div className="text-center md:text-left mb-10">
@@ -91,13 +91,13 @@ export default function LoginForm() {
             {/* Password Input */}
             <div className="relative">
               <input
-                
+
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
                 {...register('password', { required: 'Password required' })}
                 className="w-full bg-white border border-[#e5d5bc] rounded-full px-6 py-4 outline-none focus:ring-2 focus:ring-[#c5a367] transition shadow-sm text-gray-700"
               />
-              
+
               {/* ৩. আইকন ক্লিক করলে স্টেট টগল হবে */}
               <button
                 type="button"

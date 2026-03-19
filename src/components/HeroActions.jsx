@@ -26,7 +26,11 @@ export default function HeroActions() {
                 </button>
             ) : (
                 <Link href={user ? `/become-creator` : `/auth/login`}>
-                    <button className="px-8 py-3 border border-white/30 text-white bg-white/10 rounded-lg">
+                    <button className="
+    px-8 py-3 rounded-lg font-medium transition-all duration-300
+    border border-gray-300 text-gray-800 bg-white hover:bg-gray-100
+    dark:border-white/30 dark:text-white dark:bg-white/10 dark:hover:bg-white/20
+  ">
                         Become a Creator
                     </button>
                 </Link>
