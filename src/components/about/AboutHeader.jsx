@@ -16,9 +16,10 @@ const AboutHeader = () => {
                               text-[#555555] dark:text-gray-300 
                               leading-relaxed font-light 
                               max-w-2xl mx-auto">
-                    We are dedicated to preserving traditional craftsmanship by connecting
-                    talented creators with a global audience. Our platform celebrates
-                    culture, heritage, and authentic handmade products.
+                    World Culture Marketplace (WCM)
+is a global platform dedicated to showcasing cultural
+creators, artisans, and storytellers from around the world. Our mission is to provide a space
+where culture can be discovered, appreciated, and shared with respect and authenticity.
                 </p>
 
             </div>

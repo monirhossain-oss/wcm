@@ -10,10 +10,8 @@ const FaqSection = () => {
         { id: 'General', icon: <Globe size={16} />, label: 'General' },
         { id: 'Artists', icon: <Users size={16} />, label: 'For Creators and Artists' },
         { id: 'Creators', icon: <Rocket size={16} />, label: 'For Visitors and Buyers' },
-        { id: 'Boost', icon: <Zap size={16} />, label: 'Boost & PPC' },
-        { id: 'Payments', icon: <Wallet size={16} />, label: 'Payments & Wallet' },
-        { id: 'Privacy', icon: <Lock size={16} />, label: 'Privacy & GDPR' },
-        { id: 'Technical', icon: <ShieldQuestion size={16} />, label: 'Technical & Support' },
+        { id: 'Platform', icon: <Zap size={16} />, label: 'Platform Policies' },
+        { id: 'Technical', icon: <ShieldQuestion size={16} />, label: 'Technical Questions' },
     ];
 
     const faqData = {
@@ -141,22 +139,33 @@ ural creations
 from artists
 and artisans worldwide` }
         ],
-        Boost: [
-            { question: "Does WCM verify creators?", answer: `WCM aims to promote authentic cultural creators and heritage
--
-based work. While the
-platform may review profiles and submissions, creators remain responsible for the content
-and
-information they share"` }
-        ],
-        Payments: [
-            { question: "Are there hidden fees?", answer: "No, we ensure fair representation with no hidden fees or aggressive algorithms." }
-        ],
-        Privacy: [
-            { question: "Is my data secure?", answer: "We follow strict privacy and GDPR protocols to protect our community." }
+        Platform: [
+            { question: "How does WCM protect cultural authenticity?", answer: `The platform promotes r
+espectful representation of cultur
+al heritage
+.
+Listings must not
+misrepresent cultural traditions or violate intellectual property rights.
+Content that misrepresents cultural heritage, violates intellectual property rights, or is deemed offensive
+may be re
+moved` },
+            { question: "How are listings moderated?", answer: `The platform promotes r
+espectful representation of cultur
+al heritage
+.
+Listings must not
+misrepresent cultural traditions or violate intellectual property rights.
+Content that misrepresents cultural heritage, violates intellectual property rights, or is deemed offensive
+may be re
+moved` },
+            { question: "What happens if a listing violates platform rules?", answer: `Listings that violate platform policies
+may be removed and creator accounts may be subject
+to review.` },
+            { question: "How can I report inappropriate content?", answer: `Users can report content directly through the platform using the reporting tools provided on
+listing pages` }
         ],
         Technical: [
-            { question: "Where is the support center?", answer: "Our support center is available for any technical assistance you may need." }
+            { question: "What curriencies are supported for promotional features?", answer: "Our support center is available for any technical assistance you may need." }
         ]
     };
 
@@ -223,7 +232,7 @@ information they share"` }
                                 />
                             </button>
                             
-                            {/* এখানে dangerouslySetInnerHTML*/}
+                            {/* dangerouslySetInnerHTML*/}
                             <div className={`overflow-hidden transition-all duration-300 ${
                                 openIndex === index ? 'max-h-96 pb-6 opacity-100' : 'max-h-0 opacity-0'
                             }`}>
