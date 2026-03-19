@@ -14,11 +14,12 @@ export default function HeroSection() {
 
         {/* Title */}
         <h1 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-extrabold leading-snug md:leading-tight 
-      text-gray-900 dark:text-white drop-shadow-sm dark:drop-shadow-lg">
+text-center md:text-left
+text-gray-900 dark:text-white drop-shadow-sm dark:drop-shadow-lg">
 
           Join a{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F57C00] to-[#FFB347]">
-            growing global community
+            growing global community{" "}
           </span>
           <br className="hidden sm:block" />
           of <span className="text-[#F57C00]">artists & creators</span>
