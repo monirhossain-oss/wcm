@@ -416,40 +416,6 @@ const TermsAndConditionsPage = () => {
                 </div>
             </section>
 
-                {/* 5. Liability & Infrastructure */}
-                {/* <div>
-                    <h2 className="text-xl font-black mb-6 text-[#F57C00] uppercase tracking-widest flex items-center gap-3">
-                        <span className="h-[2px] w-8 bg-[#F57C00]"></span> 5. Stability & Liability
-                    </h2>
-                    <div className="space-y-4 ml-11">
-                        <p>
-                            WCM is provided "as is". While we maintain <strong>automated database backups (7–14 days)</strong> and secure HTTPS enforcement, we are not liable for data loss or service interruptions beyond our disaster recovery protocols.
-                        </p>
-                        <p>
-                            Navigation to external third-party links or transactions performed outside WCM is at the user's own risk.
-                        </p>
-                    </div>
-                </div> */}
-
-                {/* Footer/Contact Info */}
-                {/* <div className="pt-16 border-t border-gray-100 dark:border-zinc-800 mt-20">
-                    <div className="flex flex-col md:flex-row justify-between items-start gap-12 ml-11">
-                        <div className="space-y-2">
-                            <p className="font-black text-xl text-[#F57C00] uppercase tracking-tighter">Contact & Compliance</p>
-                            <p className="font-bold text-gray-900 dark:text-white uppercase tracking-widest text-xs">World Culture Marketplace (WCM)</p>
-                            <p className="text-gray-500 dark:text-gray-500 text-sm">Paris, France | Washington, USA</p>
-                        </div>
-                        <div className="space-y-2">
-                            <p className="text-xs font-bold uppercase text-gray-400 tracking-widest">Official Email</p>
-                            <a 
-                                href="mailto:contact@worldculturemarketplace.com" 
-                                className="text-gray-900 dark:text-white font-black text-lg hover:text-[#F57C00] transition-colors underline decoration-[#F57C00] decoration-2 underline-offset-8"
-                            >
-                                contact@worldculturemarketplace.com
-                            </a>
-                        </div>
-                    </div>
-                </div> */}
             </section>
         </div>
     );
