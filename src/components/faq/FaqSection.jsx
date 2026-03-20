@@ -137,10 +137,24 @@ y with platform policies.`
 authentic handmade crafts and cult
 ural creations
 from artists
-and artisans worldwide` }
+and artisans worldwide.` },
+            { question: "Does WCM verify creators?", answer: `WCM aims to promote authentic cultural creators and heritage
+-
+based work. While the
+platform may review profiles and submissions, creators remain responsible for the content
+and
+information they share.` },
+            { question: "Does the marketplace ship products?", answer: `No. WCM does not conduct any sell. C
+reators manage their own fulfillment and shipping.` },
+            { question: "How do I purchase items?", answer: `Buyers can browse the platform, discover creations from different cultures, an
+d follow links
+to complete purchases depending on the seller’s fulfillment method.` },
+            { question: "Does the marketplace ship products?", answer: `Yes.
+Many creators provide links to their websites, social media pages, or other contact
+methods on their profile pages. Visitors can use these links to reach out directly` },
         ],
         Platform: [
-            { question: "How does WCM protect cultural authenticity?", answer: `The platform promotes r
+            { question: "Can I contact creators directly?", answer: `The platform promotes r
 espectful representation of cultur
 al heritage
 .
@@ -148,24 +162,39 @@ Listings must not
 misrepresent cultural traditions or violate intellectual property rights.
 Content that misrepresents cultural heritage, violates intellectual property rights, or is deemed offensive
 may be re
-moved` },
-            { question: "How are listings moderated?", answer: `The platform promotes r
-espectful representation of cultur
-al heritage
-.
-Listings must not
-misrepresent cultural traditions or violate intellectual property rights.
-Content that misrepresents cultural heritage, violates intellectual property rights, or is deemed offensive
-may be re
-moved` },
+moved.` },
+            { question: "How are listings moderated?", answer: `Listings are subject to moderation to ensure they meet platform standards regarding quality,
+legality, and cultural respect.` },
             { question: "What happens if a listing violates platform rules?", answer: `Listings that violate platform policies
 may be removed and creator accounts may be subject
 to review.` },
             { question: "How can I report inappropriate content?", answer: `Users can report content directly through the platform using the reporting tools provided on
-listing pages` }
+listing pages.` }
         ],
         Technical: [
-            { question: "What curriencies are supported for promotional features?", answer: "Our support center is available for any technical assistance you may need." }
+            { question: "What curriencies are supported for promotional features?", answer: "Our support center is available for any technical assistance you may need." },
+            { question: "Do I need special software to use the platform?", answer: `No. The platform is accessible through any modern web brow
+ser on desktop or mobile
+devices.` },
+            { question: "Can I edit my listings after publishing?", answer: `Yes. Creators can update descriptions, images, pricing, and other details from their creator
+dashboard.`},
+            { question: "Is my data safe on WCM?", answer: `WCM is committed to protecting user information
+and follows modern security practices to
+safeguard personal and platform data. More details can be found in our Privacy Policy.`},
+           { 
+  question: "How can I report a problem or request support?", 
+  answer: `If you encounter a technical issue or have questions about the platform, you
+  can contact the
+  WCM team through the contact page or by email at: <strong class="font-bold text-gray-800">contact@worldculturemarketplace.com</strong>` 
+},
+            { question: `I
+s World Culture Marketplace mobile friendly?`, answer: `Yes. The platform is designed to work smoothly on smartphones, tablets, and desktop
+devices` },
+            { question: "Is it safe to use the platform?", answer: `The platform uses secure technologies to protect user data and provide safe browsin
+g
+experiences.`},
+            { question: "How can I stay informed about new cultural creations?", answer: `Visitors can follow creators, browse curated collections, and explore new listings regularly
+added to the marketplace.`},
         ]
     };
 
