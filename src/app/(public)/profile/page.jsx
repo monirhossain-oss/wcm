@@ -127,7 +127,7 @@ export default function ProfilePage() {
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden rounded-lg">
               <div className="h-32 w-full bg-gray-100 dark:bg-white/5 relative border-b border-gray-100 dark:border-white/5">
-                <img src={previews.cover || getImageUrl(user.profile?.coverImage) || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'} className="w-full h-full object-cover grayscale-[0.5]" alt="cover" />
+                <img src={previews.cover || getImageUrl(user?.profile?.coverImage) || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'} className="w-full h-full object-cover grayscale-[0.5]" alt="cover" />
                 {isEditing && (
                   <label className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer backdrop-blur-sm transition-all hover:bg-black/40">
                     <FiCamera className="text-white" size={24} />
@@ -139,7 +139,7 @@ export default function ProfilePage() {
               <div className="px-6 pb-8 -mt-12 flex flex-col items-center text-center relative z-10">
                 <div className="relative group">
                   <div className="h-28 w-28 rounded-full border-4 border-white dark:border-[#0c0c0c] bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-xl">
-                    <img src={previews.profile || getImageUrl(user.profile?.profileImage, 'avatar')} className="w-full h-full object-cover" alt="avatar" />
+                    <img src={previews.profile || getImageUrl(user?.profile?.profileImage, 'avatar')} className="w-full h-full object-cover" alt="avatar" />
                   </div>
                   {isEditing && (
                     <label className="absolute inset-0 bg-black/70 flex items-center justify-center cursor-pointer backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all rounded-full">
@@ -150,17 +150,17 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className="mt-4">
-                    <h2 className="text-sm font-black dark:text-white uppercase tracking-tight">{user.profile?.displayName || `${user.firstName} ${user.lastName}`}</h2>
+                    <h2 className="text-sm font-black dark:text-white uppercase tracking-tight">{user?.profile?.displayName || `${user?.firstName} ${user?.lastName}`}</h2>
                     <div className="inline-flex items-center gap-2 mt-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                        <p className="text-orange-500 text-[9px] font-black tracking-widest uppercase italic">@{user.username}</p>
+                        <p className="text-orange-500 text-[9px] font-black tracking-widest uppercase italic">@{user?.username}</p>
                     </div>
                 </div>
 
                 <div className="mt-8 w-full border-t border-gray-100 dark:border-white/5 pt-6 grid grid-cols-2 gap-4">
                     <div className="text-left bg-gray-50 dark:bg-white/5 p-3 rounded-md">
                         <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Auth Role</p>
-                        <p className="text-[10px] font-black text-black dark:text-white uppercase mt-1">{user.role}</p>
+                        <p className="text-[10px] font-black text-black dark:text-white uppercase mt-1">{user?.role}</p>
                     </div>
                     <div className="text-left bg-gray-50 dark:bg-white/5 p-3 rounded-md">
                         <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Network</p>
@@ -170,10 +170,10 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {user.creatorRequest?.status === 'rejected' && (
+            {user?.creatorRequest?.status === 'rejected' && (
               <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-md">
                 <p className="text-[9px] font-black text-red-500 uppercase flex items-center gap-2 tracking-widest"><FiAlertCircle /> REJECTION NOTICE</p>
-                <p className="text-[10px] mt-2 text-gray-400 italic font-medium leading-relaxed">"{user.creatorRequest.rejectionReason}"</p>
+                <p className="text-[10px] mt-2 text-gray-400 italic font-medium leading-relaxed">"{user?.creatorRequest?.rejectionReason}"</p>
               </div>
             )}
           </div>
@@ -191,17 +191,17 @@ export default function ProfilePage() {
                 {!isEditing ? (
                   <div className="space-y-8 animate-in fade-in duration-500">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                        <InfoRow label="Access Name" value={`${user.firstName} ${user.lastName}`} icon={FiUser} />
-                        <InfoRow label="Network Node" value={user.profile?.displayName} icon={FiType} />
-                        <InfoRow label="Geo Region" value={user.profile?.country} icon={FiMapPin} />
-                        <InfoRow label="Station" value={user.profile?.city} icon={FiMapPin} />
-                        <InfoRow label="Protocol" value={user.profile?.language} icon={FiGlobe} />
-                        <InfoRow label="Direct Link" value={user.profile?.socialLink} icon={FiLink} />
+                        <InfoRow label="Access Name" value={`${user?.firstName} ${user?.lastName}`} icon={FiUser} />
+                        <InfoRow label="Network Node" value={user?.profile?.displayName} icon={FiType} />
+                        <InfoRow label="Geo Region" value={user?.profile?.country} icon={FiMapPin} />
+                        <InfoRow label="Station" value={user?.profile?.city} icon={FiMapPin} />
+                        <InfoRow label="Protocol" value={user?.profile?.language} icon={FiGlobe} />
+                        <InfoRow label="Direct Link" value={user?.profile?.socialLink} icon={FiLink} />
                     </div>
 
                     <div className="bg-gray-50 dark:bg-black/20 p-6 border border-gray-100 dark:border-white/5 rounded-md">
                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2"><FiInfo /> Professional Brief</p>
-                      <p className="text-[11px] font-bold leading-relaxed dark:text-gray-400 italic">{user.profile?.bio || 'No system brief initialized...'}</p>
+                      <p className="text-[11px] font-bold leading-relaxed dark:text-gray-400 italic">{user?.profile?.bio || 'No system brief initialized...'}</p>
                     </div>
 
                     <div className="pt-8 border-t border-gray-100 dark:border-white/5">
