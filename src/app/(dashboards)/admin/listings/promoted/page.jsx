@@ -9,12 +9,28 @@ import {
   FiChevronRight,
   FiRefreshCw,
   FiClock,
+  FiShieldOff,
+  FiX,
 } from 'react-icons/fi';
 import { toast, Toaster } from 'react-hot-toast';
 
+// Frontend Dropdown-এর জন্য রিজন কোডসমূহ
+const REASON_CODES = [
+  'ILLEGAL_CONTENT',
+  'HATE_OR_EXTREMISM',
+  'CULTURAL_MISREPRESENTATION',
+  'COPYRIGHT_ISSUE',
+  'COUNTERFEIT_OR_FRAUD',
+  'QUALITY_ISSUE',
+  'MISLEADING_LINK',
+  'SPAM',
+  'ADMIN_DECISION',
+  'NOT_RELEVANT_TO_OUR_BUSINESS_MODEL',
+];
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 const PROMOTED_CACHE_KEY = 'drakilo_promoted_cache';
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
 
 export default function ListingPromotedPage() {
   const [listings, setListings] = useState([]);
@@ -26,10 +42,15 @@ export default function ListingPromotedPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [lastSynced, setLastSynced] = useState(null);
 
+  // Restriction Modal States
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState(null);
+  const [reasonCode, setReasonCode] = useState('');
+  const [notes, setNotes] = useState('');
+
   const fetchPromotedListings = useCallback(
     async (isForce = false) => {
       try {
-        // ১. ক্যাশ চেক (যদি ফোর্স রিফ্রেশ না হয় এবং সার্চ খালি থাকে)
         if (!isForce && page === 1 && search === '' && type === 'all') {
           const cached = localStorage.getItem(PROMOTED_CACHE_KEY);
           if (cached) {
@@ -58,7 +79,6 @@ export default function ListingPromotedPage() {
           const timestamp = Date.now();
           setLastSynced(timestamp);
 
-          // ২. লোকাল স্টোরেজ আপডেট (শুধুমাত্র ডিফল্ট ফিল্টারের জন্য)
           if (page === 1 && search === '' && type === 'all') {
             localStorage.setItem(
               PROMOTED_CACHE_KEY,
@@ -84,14 +104,37 @@ export default function ListingPromotedPage() {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       fetchPromotedListings();
-    }, 500); // সার্চের জন্য ডিবউন্স
+    }, 500);
     return () => clearTimeout(delayDebounce);
   }, [fetchPromotedListings]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setPage(1);
-    fetchPromotedListings(true);
+  const openBlockModal = (asset) => {
+    setSelectedAsset(asset);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmBlock = async () => {
+    if (!reasonCode) return toast.error('Please select a mandatory Reason Code');
+
+    const loadingToast = toast.loading('Executing Restriction Protocol...');
+    try {
+      await axios.put(
+        `${API_BASE}/api/admin/update-status/${selectedAsset._id}`,
+        {
+          status: 'blocked',
+          reasonCode: reasonCode, // maps to rejectionReason in backend
+          additionalReason: notes, // maps to additionalReason in backend
+        },
+        { withCredentials: true }
+      );
+      toast.success('Asset Restricted Successfully', { id: loadingToast });
+      setIsModalOpen(false);
+      setReasonCode('');
+      setNotes('');
+      fetchPromotedListings(true); // লিস্ট রিফ্রেশ করা
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Action failed', { id: loadingToast });
+    }
   };
 
   const downloadInvoice = async (id, invoiceNo) => {
@@ -123,6 +166,79 @@ export default function ListingPromotedPage() {
     <div className="min-h-screen font-sans transition-colors duration-300 pb-10">
       <Toaster />
 
+      {/* --- Restriction Modal (Blocked/Rejected Logic) --- */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setIsModalOpen(false)}
+          />
+          <div className="relative bg-white dark:bg-[#121212] w-full max-w-md rounded-3xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center">
+              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-orange-500">
+                Restriction Protocol
+              </h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <FiX size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div>
+                <label className="text-[10px] font-black uppercase text-gray-400 block mb-2 tracking-widest">
+                  Selected Asset
+                </label>
+                <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-xl border dark:border-white/5 text-[11px] font-bold text-gray-500 italic">
+                  {selectedAsset?.title}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black uppercase text-gray-400 block mb-2 tracking-widest">
+                  Reason Code (Mandatory)
+                </label>
+                <select
+                  value={reasonCode}
+                  onChange={(e) => setReasonCode(e.target.value)}
+                  className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-3.5 rounded-xl text-[11px] font-bold focus:ring-1 focus:ring-orange-500 outline-none text-gray-800 dark:text-white transition-all uppercase"
+                >
+                  <option value="" className="bg-[#121212]">
+                    -- SELECT REASON --
+                  </option>
+                  {REASON_CODES.map((code) => (
+                    <option key={code} value={code} className="bg-[#121212]">
+                      {code.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black uppercase text-gray-400 block mb-2 tracking-widest">
+                  Additional Reason (Optional)
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Provide internal details about this block..."
+                  className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-3.5 rounded-xl text-[11px] font-bold focus:ring-1 focus:ring-orange-500 outline-none text-gray-800 dark:text-white transition-all min-h-20 resize-none"
+                />
+              </div>
+
+              <button
+                onClick={handleConfirmBlock}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase text-[10px] tracking-[0.3em] py-4 rounded-xl shadow-lg shadow-red-600/20 transition-all"
+              >
+                Confirm Permanent Block
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* --- Header Section --- */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
         <div>
@@ -139,15 +255,15 @@ export default function ListingPromotedPage() {
         </div>
 
         <div className="flex items-center gap-3 w-full lg:w-auto">
-          <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-xl border border-gray-200 dark:border-white/10">
-            {['all', 'boost', 'ppc'].map((f) => (
+          <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-xl border border-gray-200 dark:border-white/10 overflow-x-auto no-scrollbar">
+            {['all', 'boost', 'ppc', 'blocked'].map((f) => (
               <button
                 key={f}
                 onClick={() => {
                   setType(f);
                   setPage(1);
                 }}
-                className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                   type === f
                     ? 'bg-orange-500 text-white shadow-lg'
                     : 'text-gray-500 hover:text-orange-500'
@@ -171,7 +287,14 @@ export default function ListingPromotedPage() {
       </div>
 
       {/* --- Search Bar --- */}
-      <form onSubmit={handleSearch} className="relative mb-6">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setPage(1);
+          fetchPromotedListings(true);
+        }}
+        className="relative mb-6"
+      >
         <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
@@ -184,7 +307,7 @@ export default function ListingPromotedPage() {
 
       {/* --- Table Section --- */}
       <div className="bg-white dark:bg-[#0c0c0c] border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto min-h-[400px]">
+        <div className="overflow-x-auto min-h-100">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50/50 dark:bg-white/2 border-b border-gray-200 dark:border-white/10">
@@ -192,13 +315,13 @@ export default function ListingPromotedPage() {
                   Asset Identity
                 </th>
                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  Campaign Logic
+                  Campaign Status
                 </th>
                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-gray-400">
                   Priority Level
                 </th>
                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-right text-gray-400">
-                  Financial Audit
+                  Operations
                 </th>
               </tr>
             </thead>
@@ -230,8 +353,7 @@ export default function ListingPromotedPage() {
                     <td className="p-6">
                       <div className="flex flex-col">
                         <span className="text-[12px] font-black text-gray-800 dark:text-white uppercase italic group-hover:text-orange-500 transition-colors">
-                          {item.title.split(' ').slice(0, 3).join(' ')}
-                          {item.title.split(' ').length > 3 && '...'}
+                          {item.title}
                         </span>
                         <span className="text-[9px] text-gray-500 mt-1 font-bold lowercase italic">
                           {item.creatorEmail}
@@ -240,45 +362,80 @@ export default function ListingPromotedPage() {
                     </td>
                     <td className="p-6">
                       <div className="flex flex-col gap-2">
-                        {item.boostStatus !== 'Inactive' && (
-                          <div className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-                            <span className="text-[9px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-tighter">
-                              BOOST: {item.boostStatus}
+                        {item.status === 'blocked' ? (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[8px] font-black text-red-500 uppercase bg-red-500/10 px-2 py-0.5 rounded w-fit border border-red-500/20">
+                              REASON:{' '}
+                              {item.rejectionReason?.replace(/_/g, ' ') || 'POLICY VIOLATION'}
                             </span>
+                            {item.additionalReason && (
+                              <span className="text-[7px] text-gray-400 italic">
+                                Note: {item.additionalReason}
+                              </span>
+                            )}
                           </div>
-                        )}
-                        {parseFloat(item.ppcBalance?.replace('€', '') || 0) > 0 && (
-                          <div className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                            <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter">
-                              PPC Reserve: {item.ppcBalance}
-                            </span>
-                          </div>
+                        ) : (
+                          <>
+                            {item.boostStatus !== 'Inactive' && (
+                              <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                                <span className="text-[9px] font-black uppercase tracking-tighter text-orange-600 dark:text-orange-400">
+                                  BOOST: {item.boostStatus}
+                                </span>
+                              </div>
+                            )}
+                            {parseFloat(item.ppcBalance?.replace('€', '') || 0) > 0 && (
+                              <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                <span className="text-[9px] font-black uppercase tracking-tighter text-blue-600 dark:text-blue-400">
+                                  PPC Reserve: {item.ppcBalance}
+                                </span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </td>
                     <td className="p-6">
                       <div className="flex items-center gap-2 bg-gray-100 dark:bg-white/5 w-fit px-3 py-1.5 rounded-lg border dark:border-white/10">
-                        <FiActivity className="text-orange-500" size={12} />
-                        <span className="text-[10px] font-black dark:text-gray-300">
-                          RANK LVL {item.promotionLevel}
+                        <FiActivity
+                          className={
+                            item.status === 'blocked' ? 'text-gray-600' : 'text-orange-500'
+                          }
+                          size={12}
+                        />
+                        <span
+                          className={`text-[10px] font-black ${item.status === 'blocked' ? 'text-gray-600' : 'dark:text-gray-300'}`}
+                        >
+                          RANK LVL {item.status === 'blocked' ? '0' : item.promotionLevel}
                         </span>
                       </div>
                     </td>
                     <td className="p-6 text-right">
-                      {item.invoiceId ? (
-                        <button
-                          onClick={() => downloadInvoice(item.invoiceId, item.invoiceNo)}
-                          className="inline-flex items-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-orange-600 hover:text-white border border-gray-200 dark:border-white/10 px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-gray-600 dark:text-gray-300 shadow-sm"
-                        >
-                          <FiDownload /> INV {item.invoiceNo?.split('-')[1] || 'DOC'}
-                        </button>
-                      ) : (
-                        <span className="text-[9px] text-gray-400 dark:text-gray-600 italic font-black uppercase tracking-tighter bg-gray-50 dark:bg-white/2 px-3 py-1.5 rounded-lg">
-                          Internal Ledger
-                        </span>
-                      )}
+                      <div className="flex items-center justify-end gap-2">
+                        {item.invoiceId && (
+                          <button
+                            onClick={() => downloadInvoice(item.invoiceId, item.invoiceNo)}
+                            className="p-2.5 bg-gray-100 dark:bg-white/5 hover:bg-orange-600 hover:text-white border border-gray-200 dark:border-white/10 rounded-xl transition-all shadow-sm"
+                          >
+                            <FiDownload size={14} />
+                          </button>
+                        )}
+
+                        {item.status === 'blocked' ? (
+                          <div className="px-3 py-1.5 bg-red-600 text-white text-[8px] font-black uppercase rounded-lg shadow-lg shadow-red-600/20 flex items-center gap-1.5">
+                            <FiShieldOff size={10} /> Permanent Block
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => openBlockModal(item)}
+                            className="p-2.5 bg-red-500/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 rounded-xl transition-all shadow-sm"
+                            title="Restrict Asset"
+                          >
+                            <FiShieldOff size={14} />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -303,28 +460,14 @@ export default function ListingPromotedPage() {
             <div className="flex gap-1.5">
               {[...Array(totalPages)].map((_, i) => {
                 const pageNum = i + 1;
-                if (
-                  totalPages > 5 &&
-                  Math.abs(page - pageNum) > 1 &&
-                  pageNum !== 1 &&
-                  pageNum !== totalPages
-                ) {
-                  if (pageNum === 2 || pageNum === totalPages - 1)
-                    return (
-                      <span key={i} className="px-1 text-gray-400 text-[10px]">
-                        ...
-                      </span>
-                    );
-                  return null;
-                }
                 return (
                   <button
                     key={i}
                     onClick={() => setPage(pageNum)}
                     className={`w-9 h-9 text-[10px] font-black rounded-xl transition-all border ${
                       page === pageNum
-                        ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20'
-                        : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-500 hover:border-orange-500'
+                        ? 'bg-orange-500 border-orange-500 text-white shadow-lg'
+                        : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-500'
                     }`}
                   >
                     {pageNum}

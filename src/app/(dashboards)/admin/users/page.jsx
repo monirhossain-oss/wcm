@@ -86,17 +86,35 @@ export default function UsersPage() {
   };
 
   const handleToggleStatus = async (userId) => {
-    if (!window.confirm('Are you sure?')) return;
+    const targetUser = users.find((u) => u._id === userId);
+    if (!targetUser) return;
+
+    const isBlocking = targetUser.status === 'active';
+
+    const confirmMessage = isBlocking
+      ? `Are you sure you want to BLOCK ${targetUser.firstName}'s profile?`
+      : `Are you sure you want to UNBLOCK ${targetUser.firstName}'s profile?`;
+
+    if (!window.confirm(confirmMessage)) return;
+
     try {
+      const toastId = toast.loading('Updating status...');
+
       await api.put(`/api/admin/toggle-status/${userId}`);
-      setUsers(
-        users.map((u) =>
-          u._id === userId ? { ...u, status: u.status === 'active' ? 'blocked' : 'active' } : u
+
+      setUsers((prevUsers) =>
+        prevUsers.map((u) =>
+          u._id === userId ? { ...u, status: isBlocking ? 'blocked' : 'active' } : u
         )
       );
-      toast.success('User status updated');
+
+      toast.success(
+        `${targetUser.firstName} has been ${isBlocking ? 'blocked' : 'activated'} successfully`,
+        { id: toastId }
+      );
     } catch (error) {
-      toast.error('Update failed');
+      console.error('Update error:', error);
+      toast.error(error.response?.data?.message || 'Update failed');
     }
   };
 
@@ -239,11 +257,21 @@ export default function UsersPage() {
                     <td className="px-8 py-4">
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm flex items-center justify-center relative">
-                          <img
-                            src={getImageUrl(user.profileImage, 'avatar')}
-                            alt=""
-                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                          />
+                          <div className="w-full h-full flex items-center justify-center bg-zinc-800 overflow-hidden">
+                            <div className="w-full h-full flex items-center justify-center bg-zinc-900 overflow-hidden relative group">
+                              {user?.profile?.profileImage && user.profile.profileImage !== '' ? (
+                                <img
+                                  src={getImageUrl(user.profile.profileImage, 'avatar')}
+                                  alt={user?.firstName}
+                                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-orange-500/10 text-orange-500 font-black text-xl uppercase italic tracking-tighter border border-orange-500/20 group-hover:bg-orange-500/20 transition-colors duration-300">
+                                  {user?.firstName?.charAt(0) || user?.email?.charAt(0) || '?'}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-tight text-[#1f1f1f] dark:text-white">
