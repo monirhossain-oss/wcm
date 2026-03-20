@@ -7,20 +7,42 @@ import {
   FiActivity,
   FiPlus,
   FiCreditCard,
-  FiChevronLeft,
-  FiChevronRight,
+  FiInfo,
   FiEye,
-  FiDollarSign,
+  FiGlobe,
+  FiBriefcase,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import { usePathname } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
+import CreatorWallet from '@/components/creator/CreatorWallet';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   withCredentials: true,
 });
+
+// EU Countries for VAT dropdown
+const EU_COUNTRIES = [
+  { code: 'FR', name: 'France' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'AT', name: 'Austria' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'FI', name: 'Finland' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'US', name: 'United States (Non-EU)' },
+  { code: 'GB', name: 'United Kingdom (Non-EU)' },
+  { code: 'CA', name: 'Canada (Non-EU)' },
+];
 
 export default function PromotionsPage() {
   const [listings, setListings] = useState([]);
@@ -29,17 +51,13 @@ export default function PromotionsPage() {
   const [selectedListing, setSelectedListing] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Modals & Promo States
-  const [showTopUpModal, setShowTopUpModal] = useState(false);
-  const [topUpAmount, setTopUpAmount] = useState(10);
-  const [topUpCurrency, setTopUpCurrency] = useState('EUR'); // Default
+  // Promo States
   const [promoType, setPromoType] = useState('boost');
   const [boostDays, setBoostDays] = useState(7);
   const [boostBudget, setBoostBudget] = useState(20);
   const [ppcAmount, setPpcAmount] = useState(10);
   const [targetClicks, setTargetClicks] = useState(50);
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -62,23 +80,6 @@ export default function PromotionsPage() {
       toast.error('Synchronization failed');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleTopUpSubmit = async () => {
-    if (topUpAmount < 5) return toast.error('Minimum top-up is 5 units');
-    setActionLoading(true);
-    try {
-      const res = await api.post('/api/payments/create-checkout-session', {
-        amount: Number(topUpAmount),
-        currency: topUpCurrency,
-        currentPath: pathname,
-      });
-      if (res.data.url) window.location.href = res.data.url;
-    } catch (err) {
-      toast.error('Top-up request failed');
-    } finally {
-      setActionLoading(false);
     }
   };
 
@@ -123,25 +124,8 @@ export default function PromotionsPage() {
 
       {/* Wallet Header */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 bg-zinc-900 rounded-lg p-6 text-white flex justify-between md:items-center border border-white/5 shadow-2xl relative overflow-hidden max-md:flex-col gap-4">
-          <div className="relative z-10">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-black mb-2 whitespace-nowrap">
-              Available Balance
-            </p>
-            <h2 className="text-4xl font-black tracking-tighter italic">
-              €{walletBalance?.toFixed(2)}
-            </h2>
-          </div>
-          <button
-            onClick={() => setShowTopUpModal(true)}
-            className="relative z-10 bg-orange-500 hover:bg-orange-600 px-6 py-3.5 rounded-lg flex items-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest active:scale-95 whitespace-nowrap justify-center cursor-pointer"
-          >
-            <FiPlus size={18} /> Add Money
-          </button>
-          <div className="absolute -right-10 -bottom-10 opacity-10">
-            <FiCreditCard size={200} />
-          </div>
-        </div>
+        <CreatorWallet walletBalance={walletBalance} pathname={pathname} />
+
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 flex flex-col justify-center">
           <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-black">
             Managed Assets
@@ -184,7 +168,7 @@ export default function PromotionsPage() {
                       <div className="flex items-center gap-5">
                         <img
                           src={getImageUrl(item.image)}
-                          className="w-14 h-14 rounded-lg object-cover border border-zinc-200 dark:border-zinc-800"
+                          className="w-14 h-14 rounded-lg object-cover border border-zinc-200 dark:border-zinc-800 shadow-sm"
                           alt=""
                         />
                         <div>
@@ -192,9 +176,7 @@ export default function PromotionsPage() {
                             {item.title}
                           </p>
                           <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest italic">
-                            {typeof item.category === 'object'
-                              ? item.category.title
-                              : item.category || 'Standard'}
+                            {item.category?.title || 'Standard Asset'}
                           </p>
                         </div>
                       </div>
@@ -244,7 +226,7 @@ export default function PromotionsPage() {
                           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
                             isFullyPromoted
                               ? 'bg-zinc-50 dark:bg-zinc-900 text-zinc-300 dark:text-zinc-600 border border-zinc-100 dark:border-zinc-800 cursor-not-allowed opacity-50'
-                              : 'bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-orange-600 dark:hover:text-white shadow-md'
+                              : 'bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-orange-600 shadow-md'
                           }`}
                         >
                           <FiZap size={14} />
@@ -258,105 +240,102 @@ export default function PromotionsPage() {
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* --- Top-up Modal with Currency Toggle --- */}
-      {showTopUpModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-lg shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-            <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
-              <h3 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-3 dark:text-white">
-                <FiCreditCard className="text-orange-500" size={18} /> Deposit Funds
-              </h3>
+        {/* --- Enhanced Pagination UI --- */}
+        {totalPages > 1 && (
+          <div className="px-8 py-6 bg-zinc-50 dark:bg-zinc-900/50 flex flex-col sm:flex-row items-center justify-between border-t border-zinc-100 dark:border-zinc-800 gap-4">
+            {/* Info Text */}
+            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest order-2 sm:order-1">
+              Showing <span className="text-zinc-900 dark:text-white">{indexOfFirstItem + 1}</span>{' '}
+              to{' '}
+              <span className="text-zinc-900 dark:text-white">
+                {Math.min(indexOfLastItem, listings.length)}
+              </span>{' '}
+              of <span className="text-orange-500">{listings.length}</span> Assets
+            </p>
+
+            {/* Controls */}
+            <div className="flex items-center gap-2 order-1 sm:order-2">
+              {/* Prev Button */}
               <button
-                onClick={() => setShowTopUpModal(false)}
-                className="text-zinc-400 hover:text-red-500 transition-colors"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+                className="p-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-[10px] font-black uppercase disabled:opacity-20 dark:text-white hover:border-orange-500/50 transition-all active:scale-95"
               >
-                <FiX size={20} />
+                Prev
               </button>
-            </div>
 
-            <div className="p-8 space-y-6">
-              {/* Currency Toggle */}
-              <div className="space-y-3">
-                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
-                  Select Currency
-                </label>
-                <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
-                  <button
-                    onClick={() => setTopUpCurrency('EUR')}
-                    className={`flex-1 py-3 rounded-lg text-[10px] font-black transition-all ${topUpCurrency === 'EUR' ? 'bg-white dark:bg-zinc-700 text-orange-600 shadow-sm' : 'text-zinc-500'}`}
-                  >
-                    EUR (€)
-                  </button>
-                  <button
-                    onClick={() => setTopUpCurrency('USD')}
-                    className={`flex-1 py-3 rounded-lg text-[10px] font-black transition-all ${topUpCurrency === 'USD' ? 'bg-white dark:bg-zinc-700 text-orange-600 shadow-sm' : 'text-zinc-500'}`}
-                  >
-                    USD ($)
-                  </button>
-                </div>
+              {/* Numbered Buttons */}
+              <div className="flex items-center gap-1.5 px-2">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNum = index + 1;
+                  // Logic to show only a few numbers if totalPages is huge (Optional)
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`w-9 h-9 rounded-lg text-[10px] font-black transition-all border ${
+                        currentPage === pageNum
+                          ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20'
+                          : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Amount Input */}
-              <div className="space-y-2">
-                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
-                  Credits Amount
-                </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">
-                    {topUpCurrency === 'EUR' ? '€' : '$'}
-                  </div>
-                  <input
-                    type="number"
-                    value={topUpAmount}
-                    onChange={(e) => setTopUpAmount(e.target.value)}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 pl-10 pr-4 py-4 rounded-xl text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
-                  />
-                </div>
-                <p className="text-[8px] text-zinc-500 font-bold italic ml-1">
-                  * Minimum 5 {topUpCurrency} required.
-                </p>
-              </div>
-
+              {/* Next Button */}
               <button
-                onClick={handleTopUpSubmit}
-                disabled={actionLoading}
-                className="w-full py-4 bg-orange-600 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-orange-700 transition-all active:scale-[0.98] disabled:opacity-50"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+                className="p-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-[10px] font-black uppercase disabled:opacity-20 dark:text-white hover:border-orange-500/50 transition-all active:scale-95"
               >
-                {actionLoading ? 'Initializing...' : 'Checkout Securely'}
+                Next
               </button>
+
+              {/* Jump to Last */}
+              {totalPages > 2 && currentPage !== totalPages && (
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="ml-1 p-2.5 text-[10px] font-black uppercase text-zinc-400 hover:text-orange-500 transition-colors"
+                  title="Go to Last Page"
+                >
+                  Last ({totalPages})
+                </button>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Promotion Config Modal */}
+      {/* Promotion Config Modal (Boost/PPC) */}
       {selectedListing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-lg overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800">
-            <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
-              <h3 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-3 dark:text-white">
-                <FiZap className="text-orange-500" size={18} /> Configure Strategy
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-lg">
+          <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800">
+            <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
+              <h3 className="font-black text-[11px] uppercase tracking-widest flex items-center gap-3 dark:text-white">
+                <FiZap className="text-orange-500" size={18} /> Growth Protocol
               </h3>
               <button
                 onClick={() => setSelectedListing(null)}
                 className="text-zinc-400 hover:text-red-500"
               >
-                <FiX size={20} />
+                <FiX size={22} />
               </button>
             </div>
             <div className="p-8 space-y-8">
-              <div className="flex p-1.5 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg">
+              <div className="flex p-1.5 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl">
                 <button
                   onClick={() => setPromoType('boost')}
-                  className={`flex-1 py-3 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${promoType === 'boost' ? 'bg-white dark:bg-zinc-700 shadow-sm text-orange-600' : 'text-zinc-500'}`}
+                  className={`flex-1 py-3.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'boost' ? 'bg-white dark:bg-zinc-700 shadow-sm text-orange-600' : 'text-zinc-500'}`}
                 >
                   Viral Boost
                 </button>
                 <button
                   onClick={() => setPromoType('ppc')}
-                  className={`flex-1 py-3 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${promoType === 'ppc' ? 'bg-white dark:bg-zinc-700 shadow-sm text-orange-600' : 'text-zinc-500'}`}
+                  className={`flex-1 py-3.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'ppc' ? 'bg-white dark:bg-zinc-700 shadow-sm text-orange-600' : 'text-zinc-500'}`}
                 >
                   PPC Flow
                 </button>
@@ -372,7 +351,7 @@ export default function PromotionsPage() {
                       type="number"
                       value={boostDays}
                       onChange={(e) => setBoostDays(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
+                      className="w-full bg-zinc-100 dark:bg-zinc-800 border-none p-4 rounded-xl text-sm font-black outline-none dark:text-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -383,7 +362,7 @@ export default function PromotionsPage() {
                       type="number"
                       value={boostBudget}
                       onChange={(e) => setBoostBudget(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
+                      className="w-full bg-zinc-100 dark:bg-zinc-800 border-none p-4 rounded-xl text-sm font-black outline-none dark:text-white"
                     />
                   </div>
                 </div>
@@ -397,28 +376,28 @@ export default function PromotionsPage() {
                       type="number"
                       value={ppcAmount}
                       onChange={(e) => setPpcAmount(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
+                      className="w-full bg-zinc-100 dark:bg-zinc-800 border-none p-4 rounded-xl text-sm font-black outline-none dark:text-white"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">
-                      Est. Clicks
+                      Clicks Est.
                     </label>
                     <input
                       type="number"
                       value={targetClicks}
                       onChange={(e) => setTargetClicks(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-4 rounded-lg text-sm font-black outline-none focus:ring-2 ring-orange-500/20 dark:text-white"
+                      className="w-full bg-zinc-100 dark:bg-zinc-800 border-none p-4 rounded-xl text-sm font-black outline-none dark:text-white"
                     />
                   </div>
                 </div>
               )}
 
-              <div className="p-5 bg-orange-500/5 rounded-lg border border-orange-500/10 flex justify-between items-center">
+              <div className="p-6 bg-orange-500/5 rounded-2xl border border-orange-500/10 flex justify-between items-center">
                 <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                  Total Investment
+                  Investment
                 </span>
-                <span className="text-2xl font-black text-orange-600 italic tracking-tighter">
+                <span className="text-3xl font-black text-orange-600 italic tracking-tighter">
                   €{currentCost.toFixed(2)}
                 </span>
               </div>
@@ -426,9 +405,9 @@ export default function PromotionsPage() {
               <button
                 onClick={handlePurchase}
                 disabled={actionLoading || walletBalance < currentCost}
-                className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-lg font-black uppercase text-[10px] tracking-[0.3em] transition-all hover:bg-orange-600 active:scale-[0.98] shadow-xl disabled:opacity-20"
+                className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl font-black uppercase text-[11px] tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20"
               >
-                {actionLoading ? 'Activating...' : 'Execute Promotion'}
+                {actionLoading ? 'Initializing...' : 'Launch Campaign'}
               </button>
             </div>
           </div>

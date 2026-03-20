@@ -19,6 +19,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiRefreshCw,
+  FiShieldOff,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import toast, { Toaster } from 'react-hot-toast';
@@ -29,7 +30,21 @@ const api = axios.create({
 });
 
 const LISTINGS_CACHE_KEY = 'drakilo_admin_listings_cache';
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
+
+// Mandatory Rejection/Block Reasons
+const REASON_CODES = [
+  'ILLEGAL_CONTENT',
+  'HATE_OR_EXTREMISM',
+  'CULTURAL_MISREPRESENTATION',
+  'COPYRIGHT_ISSUE',
+  'COUNTERFEIT_OR_FRAUD',
+  'QUALITY_ISSUE',
+  'MISLEADING_LINK',
+  'SPAM',
+  'ADMIN_DECISION',
+  'NOT_RELEVANT_TO_OUR_BUSINESS_MODEL',
+];
 
 export default function AdminListings() {
   const [listings, setListings] = useState([]);
@@ -37,16 +52,18 @@ export default function AdminListings() {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('all');
   const [viewItem, setViewItem] = useState(null);
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [rejectionReason, setrejectionReason] = useState('');
+
+  // Restriction States
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
+  const [restrictionType, setRestrictionType] = useState('rejected'); // 'rejected' or 'blocked'
+  const [reasonCode, setReasonCode] = useState('');
+  const [additionalNotes, setAdditionalNotes] = useState('');
+
   const [actionLoading, setActionLoading] = useState(false);
   const [lastSynced, setLastSynced] = useState(null);
-
-  // --- Pagination State ---
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // --- Fetch Logic with Cache ---
   const fetchListings = useCallback(async (isForce = false) => {
     try {
       if (!isForce) {
@@ -61,26 +78,17 @@ export default function AdminListings() {
           }
         }
       }
-
       if (isForce) setRefreshing(true);
       else setLoading(true);
-
       const res = await api.get('/api/admin/listings');
       if (res.data) {
         setListings(res.data);
         const timestamp = Date.now();
         setLastSynced(timestamp);
-        localStorage.setItem(
-          LISTINGS_CACHE_KEY,
-          JSON.stringify({
-            data: res.data,
-            timestamp: timestamp,
-          })
-        );
+        localStorage.setItem(LISTINGS_CACHE_KEY, JSON.stringify({ data: res.data, timestamp }));
         if (isForce) toast.success('Listings Synchronized');
       }
     } catch (err) {
-      console.error('Error fetching admin listings:', err);
       toast.error('Failed to sync listings');
     } finally {
       setLoading(false);
@@ -92,35 +100,32 @@ export default function AdminListings() {
     fetchListings();
   }, [fetchListings]);
 
-  const handleStatusUpdate = async (id, newStatus, reason = '') => {
+  const handleStatusUpdate = async (id, newStatus, code, notes) => {
     setActionLoading(true);
     try {
       await api.put(`/api/admin/update-status/${id}`, {
         status: newStatus,
-        rejectionReason: reason,
+        reasonCode: code,
+        additionalReason: notes,
       });
 
       const updated = listings.map((l) =>
-        l._id === id ? { ...l, status: newStatus, rejectionReason: reason } : l
+        l._id === id
+          ? { ...l, status: newStatus, rejectionReason: code, additionalReason: notes }
+          : l
       );
 
       setListings(updated);
-      // আপডেট হওয়ার পর ক্যাশও আপডেট করে দেওয়া ভালো
       localStorage.setItem(
         LISTINGS_CACHE_KEY,
-        JSON.stringify({
-          data: updated,
-          timestamp: Date.now(),
-        })
+        JSON.stringify({ data: updated, timestamp: Date.now() })
       );
-
-      if (viewItem?._id === id) {
-        setViewItem({ ...viewItem, status: newStatus, rejectionReason: reason });
-      }
+      if (viewItem?._id === id) setViewItem({ ...viewItem, status: newStatus });
 
       toast.success(`Asset ${newStatus} successfully`);
-      setShowRejectModal(false);
-      setrejectionReason('');
+      setShowRestrictionModal(false);
+      setReasonCode('');
+      setAdditionalNotes('');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed');
     } finally {
@@ -133,19 +138,16 @@ export default function AdminListings() {
     pending: listings.filter((l) => l.status === 'pending').length,
     approved: listings.filter((l) => l.status === 'approved').length,
     rejected: listings.filter((l) => l.status === 'rejected').length,
+    blocked: listings.filter((l) => l.status === 'blocked').length,
   };
 
   const filteredListings =
     filter === 'all' ? listings : listings.filter((l) => l.status === filter);
-
   const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredListings.slice(indexOfFirstItem, indexOfLastItem);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filter]);
+  const currentItems = filteredListings.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   if (loading && !refreshing)
     return (
@@ -159,7 +161,7 @@ export default function AdminListings() {
       <Toaster position="top-right" />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
         {[
           {
             label: 'Total Assets',
@@ -183,26 +185,35 @@ export default function AdminListings() {
             bg: 'bg-green-500/5',
           },
           {
+            label: 'Blocked',
+            value: stats.blocked,
+            icon: FiShieldOff, // ব্লকড এর জন্য আলাদা আইকন
+            color: 'text-red-600',
+            bg: 'bg-red-600/10',
+          },
+          {
             label: 'Rejected',
             value: stats.rejected,
-            icon: FiShield,
-            color: 'text-red-500',
-            bg: 'bg-red-500/5',
+            icon: FiX, // রিজেক্টেড এর জন্য X আইকন
+            color: 'text-pink-500',
+            bg: 'bg-pink-500/5',
           },
         ].map((stat, i) => (
           <div
             key={i}
-            className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 p-6 rounded-2xl shadow-sm"
+            className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 p-5 rounded-lg shadow-sm transition-all hover:border-orange-500/30"
           >
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">
+                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">
                   {stat.label}
                 </p>
-                <h4 className="text-3xl font-black italic dark:text-white">{stat.value}</h4>
+                <h4 className="text-2xl font-black italic dark:text-white leading-none">
+                  {stat.value}
+                </h4>
               </div>
-              <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
-                <stat.icon size={20} />
+              <div className={`p-2.5 rounded-lg ${stat.bg} ${stat.color}`}>
+                <stat.icon size={18} />
               </div>
             </div>
           </div>
@@ -210,7 +221,7 @@ export default function AdminListings() {
       </div>
 
       {/* Filter & Table Wrapper */}
-      <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm">
         <div className="p-6 border-b border-gray-50 dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-black uppercase italic dark:text-white">
@@ -219,14 +230,14 @@ export default function AdminListings() {
             <button
               onClick={() => fetchListings(true)}
               disabled={refreshing}
-              className={`p-2 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 transition-all ${refreshing ? 'animate-spin' : 'hover:bg-orange-500 hover:text-white'}`}
+              className={`p-2 rounded-lg bg-gray-100 dark:bg-white/10 text-gray-500 transition-all ${refreshing ? 'animate-spin' : 'hover:bg-orange-500 hover:text-white'}`}
             >
               <FiRefreshCw size={14} />
             </button>
           </div>
 
-          <div className="flex gap-2 bg-gray-100 dark:bg-white/5 p-1 rounded-xl">
-            {['all', 'pending', 'approved', 'rejected'].map((f) => (
+          <div className="flex gap-2 bg-gray-100 dark:bg-white/5 p-1 rounded-lg">
+            {['all', 'pending', 'approved', 'rejected', 'blocked'].map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
@@ -271,7 +282,7 @@ export default function AdminListings() {
                     </p>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-[11px] font-black dark:text-white uppercase truncate max-w-[150px]">
+                    <p className="text-[11px] font-black dark:text-white uppercase truncate max-w-37.5">
                       {item.title}
                     </p>
                     <p className="text-[9px] text-orange-500 font-bold uppercase">
@@ -288,7 +299,7 @@ export default function AdminListings() {
                   <td className="px-8 py-4 text-right">
                     <button
                       onClick={() => setViewItem(item)}
-                      className="p-2.5 bg-gray-100 dark:bg-white/5 rounded-xl hover:bg-orange-500 hover:text-white transition-all text-gray-500"
+                      className="p-2.5 bg-gray-100 dark:bg-white/5 rounded-lg hover:bg-orange-500 hover:text-white transition-all text-gray-500"
                     >
                       <FiEye size={16} />
                     </button>
@@ -375,7 +386,7 @@ export default function AdminListings() {
             <div className="lg:w-1/2 p-8 lg:p-12 overflow-y-auto scrollbar-hide bg-white dark:bg-[#0a0a0a]">
               <div className="flex justify-between mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-orange-500/10 rounded-xl text-orange-500">
+                  <div className="p-3 bg-orange-500/10 rounded-lg text-orange-500">
                     <FiActivity size={24} />
                   </div>
                   <div>
@@ -395,13 +406,13 @@ export default function AdminListings() {
 
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gray-50 dark:bg-white/2 rounded-2xl border dark:border-white/10">
+                  <div className="p-4 bg-gray-50 dark:bg-white/2 rounded-lg border dark:border-white/10">
                     <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Tradition</p>
                     <p className="text-[11px] font-black dark:text-white uppercase italic">
                       <FiAward className="inline mr-1 text-orange-500" /> {viewItem.tradition}
                     </p>
                   </div>
-                  <div className="p-4 bg-gray-50 dark:bg-white/2 rounded-2xl border dark:border-white/10">
+                  <div className="p-4 bg-gray-50 dark:bg-white/2 rounded-lg border dark:border-white/10">
                     <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Origin</p>
                     <p className="text-[11px] font-black dark:text-white uppercase italic">
                       <FiGlobe className="inline mr-1 text-orange-500" /> {viewItem.country}
@@ -413,7 +424,7 @@ export default function AdminListings() {
                   <h4 className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-2">
                     <FiFileText className="text-orange-500" /> Description
                   </h4>
-                  <div className="p-4 bg-gray-50 dark:bg-white/2 rounded-2xl border dark:border-white/10">
+                  <div className="p-4 bg-gray-50 dark:bg-white/2 rounded-lg border dark:border-white/10">
                     <p className="text-xs font-medium dark:text-gray-300 leading-relaxed italic">
                       "{viewItem.description}"
                     </p>
@@ -428,7 +439,7 @@ export default function AdminListings() {
                     {viewItem.culturalTags?.map((tag, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-orange-500/5 border border-orange-500/20 rounded-xl"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-orange-500/5 border border-orange-500/20 rounded-lg"
                       >
                         {tag.image && (
                           <img
@@ -453,12 +464,12 @@ export default function AdminListings() {
                       <a
                         href={viewItem.websiteLink}
                         target="_blank"
-                        className="flex items-center justify-between p-3 bg-black dark:bg-white text-white dark:text-black rounded-xl text-[9px] font-black uppercase tracking-widest transition-opacity hover:opacity-80"
+                        className="flex items-center justify-between p-3 bg-black dark:bg-white text-white dark:text-black rounded-lg text-[9px] font-black uppercase tracking-widest transition-opacity hover:opacity-80"
                       >
                         <FiLink /> Website
                       </a>
                     ) : (
-                      <p className="text-[9px] text-gray-500 uppercase p-3 border border-dashed dark:border-white/10 rounded-xl text-center">
+                      <p className="text-[9px] text-gray-500 uppercase p-3 border border-dashed dark:border-white/10 rounded-lg text-center">
                         No Link
                       </p>
                     )}
@@ -473,7 +484,7 @@ export default function AdminListings() {
                           key={i}
                           href={url}
                           target="_blank"
-                          className="p-3 bg-gray-100 dark:bg-white/5 rounded-xl text-orange-500 hover:bg-orange-500 hover:text-white transition-all"
+                          className="p-3 bg-gray-100 dark:bg-white/5 rounded-lg text-orange-500 hover:bg-orange-500 hover:text-white transition-all"
                         >
                           <FiExternalLink size={14} />
                         </a>
@@ -483,20 +494,49 @@ export default function AdminListings() {
                 </div>
 
                 {/* Actions */}
-                <div className="pt-6 border-t dark:border-white/10 grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-3">
+                  {/* APPROVE BUTTON */}
                   <button
                     onClick={() => handleStatusUpdate(viewItem._id, 'approved')}
-                    disabled={viewItem.status === 'approved' || actionLoading}
-                    className="h-14 bg-green-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-green-700 transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+                    disabled={
+                      viewItem.status === 'approved' ||
+                      viewItem.status === 'blocked' ||
+                      actionLoading
+                    }
+                    className="h-14 bg-green-600 text-white rounded-lg cursor-pointer font-black text-[10px] uppercase tracking-widest hover:bg-green-700 transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    <FiCheck size={18} /> Approve Asset
+                    <FiCheck size={18} />
+                    {viewItem.status === 'approved' ? 'Approved' : 'Approve'}
                   </button>
+
+                  {/* REJECT BUTTON */}
                   <button
-                    onClick={() => setShowRejectModal(true)}
-                    disabled={viewItem.status === 'rejected' || actionLoading}
-                    className="h-14 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+                    onClick={() => {
+                      setRestrictionType('rejected');
+                      setShowRestrictionModal(true);
+                    }}
+                    disabled={
+                      viewItem.status === 'rejected' ||
+                      viewItem.status === 'blocked' ||
+                      actionLoading
+                    }
+                    className="h-14 bg-orange-600 text-white rounded-lg cursor-pointer font-black text-[10px] uppercase tracking-widest hover:bg-orange-700 transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    <FiX size={18} /> Reject Asset
+                    <FiX size={18} />
+                    {viewItem.status === 'rejected' ? 'Rejected' : 'Reject'}
+                  </button>
+
+                  {/* BLOCK BUTTON */}
+                  <button
+                    onClick={() => {
+                      setRestrictionType('blocked');
+                      setShowRestrictionModal(true);
+                    }}
+                    disabled={viewItem.status === 'blocked' || actionLoading}
+                    className="h-14 bg-red-600 text-white rounded-lg cursor-pointer font-black text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <FiShieldOff size={18} />
+                    {viewItem.status === 'blocked' ? 'Blocked' : 'Block'}
                   </button>
                 </div>
               </div>
@@ -505,34 +545,57 @@ export default function AdminListings() {
         </div>
       )}
 
-      {/* Rejection Modal */}
-      {showRejectModal && (
-        <div className="fixed inset-0 z-110 flex items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-200">
+      {/* Rejection/Block Modal */}
+      {showRestrictionModal && (
+        <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-md"
-            onClick={() => setShowRejectModal(false)}
+            onClick={() => setShowRestrictionModal(false)}
           />
-          <div className="relative w-full max-w-md bg-white dark:bg-[#0f0f0f] rounded-3xl border dark:border-white/10 p-8 shadow-2xl">
-            <h3 className="text-lg font-black uppercase italic dark:text-white mb-4">
-              Rejection <span className="text-red-500">Note</span>
+          <div className="relative w-full max-w-md bg-white dark:bg-[#0f0f0f] rounded-3xl dark:text-white border dark:border-white/10 p-8 shadow-2xl">
+            <h3 className="text-lg font-black uppercase italic dark:text-white mb-6">
+              {restrictionType} <span className="text-red-500">Protocol</span>
             </h3>
+
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
+              Mandatory Reason Code
+            </label>
+            <select
+              value={reasonCode}
+              onChange={(e) => setReasonCode(e.target.value)}
+              className="w-full bg-gray-50 dark:bg-[#0f0f0f] border dark:border-white/10 rounded-lg p-4 text-[10px] font-black dark:text-white mb-4 outline-none focus:border-orange-500 uppercase appearance-none"
+            >
+              <option value="">-- Select Reason Code --</option>
+              {REASON_CODES.map((c) => (
+                <option key={c} value={c}>
+                  {c.replace(/_/g, ' ')}
+                </option>
+              ))}
+            </select>
+
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
+              Additional Notes (Optional)
+            </label>
             <textarea
-              value={rejectionReason}
-              onChange={(e) => setrejectionReason(e.target.value)}
+              value={additionalNotes}
+              onChange={(e) => setAdditionalNotes(e.target.value)}
               placeholder="Reason for non-compliance..."
-              className="w-full h-32 bg-gray-50 dark:bg-white/5 border dark:border-white/10 rounded-2xl p-4 text-xs font-bold dark:text-white outline-none focus:border-red-500 transition-all mb-6 resize-none"
+              className="w-full h-32 bg-gray-50 dark:bg-white/5 border dark:border-white/10 rounded-lg p-4 text-xs font-bold dark:text-white outline-none focus:border-red-500 transition-all mb-6 resize-none"
             />
+
             <div className="flex gap-3">
               <button
-                onClick={() => setShowRejectModal(false)}
-                className="flex-1 h-12 rounded-xl text-[10px] font-black uppercase dark:text-gray-400 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 transition-colors"
+                onClick={() => setShowRestrictionModal(false)}
+                className="flex-1 h-12 rounded-lg text-[10px] font-black uppercase dark:text-gray-400 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
-                onClick={() => handleStatusUpdate(viewItem._id, 'rejected', rejectionReason)}
-                disabled={!rejectionReason.trim() || actionLoading}
-                className="flex-1 h-12 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-red-700 transition-colors"
+                onClick={() =>
+                  handleStatusUpdate(viewItem._id, restrictionType, reasonCode, additionalNotes)
+                }
+                disabled={!reasonCode || actionLoading}
+                className={`flex-1 h-12 ${restrictionType === 'blocked' ? 'bg-red-600' : 'bg-orange-600'} text-white rounded-lg text-[10px] font-black uppercase flex items-center justify-center gap-2 disabled:opacity-50 transition-colors`}
               >
                 <FiSend /> {actionLoading ? 'Processing...' : 'Submit'}
               </button>
