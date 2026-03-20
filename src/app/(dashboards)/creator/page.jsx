@@ -12,6 +12,7 @@ import {
   FiRefreshCw, // রিফ্রেশ আইকন
   FiAlertCircle,
   FiLayers,
+  FiInfo,
 } from 'react-icons/fi';
 
 import {
@@ -148,12 +149,13 @@ export default function CreatorDashboard() {
       {/* 🔹 Metric Intelligence Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard
-          label="Operational Wallet"
+          label="My Wallet"
           value={`€${walletBalance}`}
           icon={Wallet}
           trend="Current Balance"
           color="border-emerald-500/20 text-emerald-500"
           bg="bg-emerald-500/5"
+          description="Operational Liquidity: Total funds available in your vault for instant deployment into promotions."
         />
         <MetricCard
           label="Total Reach"
@@ -162,6 +164,7 @@ export default function CreatorDashboard() {
           trend="Lifetime Views"
           color="border-blue-500/20 text-blue-500"
           bg="bg-blue-500/5"
+          description="Global Exposure: The total number of unique impressions your assets have generated across the network."
         />
         <MetricCard
           label="Promotion Spend"
@@ -170,6 +173,7 @@ export default function CreatorDashboard() {
           trend="This Month"
           color="border-orange-500/20 text-orange-500"
           bg="bg-orange-500/5"
+          description="Resource Allocation: Total capital successfully utilized for Viral Boost and PPC campaigns this month."
         />
         <MetricCard
           label="Active Campaign"
@@ -179,6 +183,7 @@ export default function CreatorDashboard() {
           color="border-purple-500/20 text-purple-500"
           bg="bg-purple-500/5"
           isPrimary
+          description="Live Nodes: The count of your assets currently running on high-priority discovery channels."
         />
         <MetricCard
           label="Engagement"
@@ -187,6 +192,7 @@ export default function CreatorDashboard() {
           trend="PPC Clicks"
           color="border-pink-500/20 text-pink-500"
           bg="bg-pink-500/5"
+          description="Interaction Pulse: Total direct actions and clicks received through your Pay-Per-Click configurations."
         />
       </div>
 
@@ -374,12 +380,39 @@ export default function CreatorDashboard() {
 }
 
 // 🔹 Atomic UI Components
-const MetricCard = ({ label, value, icon: Icon, trend, color, bg, isPrimary }) => (
+const MetricCard = ({ label, value, icon: Icon, trend, color, bg, isPrimary, description }) => (
   <div
-    className={`p-6 rounded-xl border border-gray-100 dark:border-white/5 relative overflow-hidden group transition-all hover:-translate-y-1 bg-white dark:bg-[#0c0c0c] ${bg}`}
+    className={`p-6 rounded-xl border border-gray-100 dark:border-white/5 relative group transition-all hover:-translate-y-1 bg-white dark:bg-[#0c0c0c] ${bg}`}
   >
+    <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
+      <Icon
+        className={`absolute -right-4 -bottom-4 opacity-[0.03] dark:opacity-[0.05] group-hover:opacity-[0.15] group-hover:scale-110 transition-all duration-700 ${color}`}
+        size={100}
+      />
+    </div>
+
     <div className="relative z-10">
-      <p className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em]">{label}</p>
+      <div className="flex items-center gap-2">
+        <p className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em]">{label}</p>
+
+        {description && (
+          <div className="relative group/info">
+            <FiInfo
+              size={10}
+              className="text-gray-600 hover:text-orange-500 cursor-help transition-colors"
+            />
+            <div className="absolute bottom-full left-0 mb-3 w-52 p-3 bg-zinc-900 text-[10px] text-zinc-300 rounded-xl opacity-0 group-hover/info:opacity-100 transition-all pointer-events-none shadow-2xl border border-white/10 z-100 leading-relaxed font-medium transform -translate-x-2">
+              <span className="text-orange-500 font-bold block mb-1 text-[8px] tracking-widest uppercase">
+                Reserve Policy
+              </span>
+              {description}
+              {/* Tooltip Arrow */}
+              <div className="absolute top-full left-4 border-8 border-transparent border-t-zinc-900"></div>
+            </div>
+          </div>
+        )}
+      </div>
+
       <h3
         className={`text-2xl font-black mt-2 italic tracking-tighter ${isPrimary ? 'text-orange-500 underline decoration-orange-500/20 underline-offset-4' : 'dark:text-white'}`}
       >
@@ -389,10 +422,6 @@ const MetricCard = ({ label, value, icon: Icon, trend, color, bg, isPrimary }) =
         {trend}
       </p>
     </div>
-    <Icon
-      className={`absolute -right-4 -bottom-4 opacity-[0.03] dark:opacity-[0.05] group-hover:opacity-[0.15] group-hover:scale-110 transition-all duration-700 ${color}`}
-      size={100}
-    />
   </div>
 );
 
