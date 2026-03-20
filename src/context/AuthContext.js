@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.post('/api/users/logout');
       setUser(null);
-      window.location.href = '/auth/login';
     } catch (err) {
       console.error('Logout failed:', err);
     }

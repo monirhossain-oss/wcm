@@ -11,7 +11,7 @@ const Footer = () => {
   
 
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState(""); // loading, success, error
+  const [status, setStatus] = useState("");
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
