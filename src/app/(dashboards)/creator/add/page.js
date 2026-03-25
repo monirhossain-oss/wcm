@@ -14,7 +14,6 @@ import {
   FiChevronDown,
   FiCheck,
   FiMapPin,
-  FiGlobe,
   FiLink,
   FiPlus,
 } from 'react-icons/fi';
@@ -37,8 +36,10 @@ export default function AddListing() {
     culturalTags: [],
   });
 
-  const [metaData, setMetaData] = useState({ categories: [], tags: [] });
+  const [categories, setCategories] = useState([]);
+  const [categoryTags, setCategoryTags] = useState([]);
   const [metaLoading, setMetaLoading] = useState(true);
+  const [tagsLoading, setTagsLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -50,21 +51,44 @@ export default function AddListing() {
 
   const router = useRouter();
 
+  // ১. শুরুতে শুধু ক্যাটাগরি লোড করা
   useEffect(() => {
-    const fetchMeta = async () => {
+    const fetchCategories = async () => {
       try {
-        const res = await api.get('/api/listings/meta-data');
-        setMetaData(res.data);
+        const res = await api.get('/api/admin/categories'); // আপনার ক্যাটাগরি এন্ডপয়েন্ট
+        setCategories(res.data);
       } catch (err) {
-        console.error('Meta-data load failed');
+        console.error('Categories load failed');
       } finally {
         setMetaLoading(false);
       }
     };
-    fetchMeta();
+    fetchCategories();
   }, []);
 
-  // 🔹 Dynamic URL Handlers
+  // ২. ক্যাটাগরি সিলেক্ট হলে ওই ক্যাটাগরির ট্যাগ লোড করা
+  useEffect(() => {
+    if (!formData.category) {
+      setCategoryTags([]);
+      return;
+    }
+
+    const fetchTagsByCategory = async () => {
+      setTagsLoading(true);
+      try {
+        const res = await api.get(`/api/listings/tags/by-category/${formData.category}`);
+        setCategoryTags(res.data);
+        // ক্যাটাগরি চেঞ্জ হলে আগের সিলেক্ট করা ট্যাগ রিসেট করে দেওয়া ভালো
+        setFormData((prev) => ({ ...prev, culturalTags: [] }));
+      } catch (err) {
+        console.error('Tags load failed');
+      } finally {
+        setTagsLoading(false);
+      }
+    };
+    fetchTagsByCategory();
+  }, [formData.category]);
+
   const handleUrlChange = (index, value) => {
     const newUrls = [...formData.externalUrls];
     newUrls[index] = value;
@@ -80,10 +104,10 @@ export default function AddListing() {
     setFormData({ ...formData, externalUrls: newUrls });
   };
 
-  const filteredCats = metaData.categories.filter((c) =>
+  const filteredCats = categories.filter((c) =>
     c.title.toLowerCase().includes(catSearch.toLowerCase())
   );
-  const filteredTags = metaData.tags.filter((t) =>
+  const filteredTags = categoryTags.filter((t) =>
     t.title.toLowerCase().includes(tagSearch.toLowerCase())
   );
 
@@ -92,42 +116,50 @@ export default function AddListing() {
       const isSelected = prev.culturalTags.includes(tagId);
       if (isSelected)
         return { ...prev, culturalTags: prev.culturalTags.filter((id) => id !== tagId) };
-      if (prev.culturalTags.length >= 5) {
-        alert('Maximum 5 tags allowed');
+      if (prev.culturalTags.length >= 10) {
+        // Max 10 Tags
+        alert('Maximum 10 tags allowed');
         return prev;
       }
       return { ...prev, culturalTags: [...prev.culturalTags, tagId] };
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!image || !formData.category) return alert('Image and Category are required');
-    setLoading(true);
-    try {
-      const data = new FormData();
-      Object.keys(formData).forEach((key) => {
-        if (key === 'culturalTags') {
-          formData[key].forEach((tag) => data.append('culturalTags', tag));
-        } else if (key === 'externalUrls') {
-          // 🔹 Sending multiple URLs
-          formData[key].forEach((url) => {
-            if (url.trim()) data.append('externalUrls', url);
-          });
-        } else {
-          data.append(key, formData[key]);
-        }
-      });
-      data.append('image', image);
-      console.log(formData)
-      await api.post('/api/listings/add', data);
-      router.push('/creator/listings');
-    } catch (err) {
-      alert(err.response?.data?.message || 'Error creating listing');
-    } finally {
-      setLoading(false);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!image || !formData.category) return alert('Image and Category are required');
+
+  setLoading(true);
+  try {
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => {
+      if (key === 'culturalTags') {
+        formData[key].forEach((tag) => data.append('culturalTags', tag));
+      } else if (key === 'externalUrls') {
+        formData[key].forEach((url) => {
+          if (url.trim()) data.append('externalUrls', url);
+        });
+      } else {
+        data.append(key, formData[key]);
+      }
+    });
+    data.append('image', image);
+
+    const response = await api.post('/api/listings/add', data);
+
+    if (response.data.success || response.status === 201 || response.status === 200) {
+      setTimeout(() => {
+        router.push('/creator/listings');
+        router.refresh(); 
+      }, 100);
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.message || 'Error creating listing');
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (metaLoading)
     return (
@@ -137,8 +169,7 @@ export default function AddListing() {
     );
 
   return (
-    <div className="max-w-6xl mx-auto py-4 pb-20">
-      {/* Header */}
+    <div className="max-w-6xl mx-auto py-4 pb-20 font-sans">
       <div className="mb-8 border-b border-gray-100 dark:border-white/10 pb-6">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
           Add <span className="text-orange-500">Listing</span>
@@ -223,6 +254,7 @@ export default function AddListing() {
               />
             </div>
 
+            {/* Category Select */}
             <div className="space-y-2 relative">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
                 <FiGrid size={10} /> Category
@@ -232,7 +264,7 @@ export default function AddListing() {
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold dark:text-white flex justify-between items-center cursor-pointer hover:border-orange-500/50"
               >
                 {formData.category
-                  ? metaData.categories.find((c) => c._id === formData.category)?.title
+                  ? categories.find((c) => c._id === formData.category)?.title
                   : 'Select Category'}
                 <FiChevronDown
                   className={`${showCatDrop ? 'rotate-180' : ''} transition-transform`}
@@ -266,6 +298,7 @@ export default function AddListing() {
                 </div>
               )}
             </div>
+
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
                 <FiMapPin size={10} /> Region
@@ -273,14 +306,18 @@ export default function AddListing() {
               <select
                 required
                 value={formData.region}
-                onChange={(e) => setFormData({ ...formData, region: e.target.value,country: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, region: e.target.value, country: e.target.value })
+                }
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
               >
                 <option value="">Select Country</option>
                 {Country.getAllCountries().map((c) => (
                   <option
                     className="bg-white dark:bg-[#1f1f1f] text-black dark:text-white"
-                    key={c.isoCode} value={c.name}>
+                    key={c.isoCode}
+                    value={c.name}
+                  >
                     {c.name}
                   </option>
                 ))}
@@ -302,41 +339,42 @@ export default function AddListing() {
           </div>
         </div>
 
-        {/* Bottom Section: Tradition, Tags, and URL */}
+        {/* Dynamic Tags Based on Category */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-lg">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
               Tradition
             </label>
-            <div className="flex flex-col gap-2">
-              <input
-                type="text"
-                required
-                value={formData.tradition}
-                onChange={(e) => setFormData({ ...formData, tradition: e.target.value })}
-                className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500"
-                placeholder="Tradition (e.g. Jamdani)"
-              />
-            </div>
+            <input
+              type="text"
+              required
+              value={formData.tradition}
+              onChange={(e) => setFormData({ ...formData, tradition: e.target.value })}
+              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500"
+              placeholder="e.g. Jamdani"
+            />
           </div>
 
           <div className="space-y-2 relative">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
-              <FiTag size={10} /> Select Tags
+              <FiTag size={10} />{' '}
+              {formData.category
+                ? `Tags for ${categories.find((c) => c._id === formData.category)?.title}`
+                : 'Select Category first'}
             </label>
             <div
-              onClick={() => setShowTagDrop(!showTagDrop)}
-              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-[10px] font-bold dark:text-white flex flex-wrap gap-1 min-h-auto cursor-pointer align-top"
+              onClick={() => formData.category && setShowTagDrop(!showTagDrop)}
+              className={`w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-[10px] font-bold dark:text-white flex flex-wrap gap-1 min-h-[44px] cursor-pointer ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
             >
               {formData.culturalTags.length === 0 && (
-                <span className="text-gray-400">Add up to 5 tags...</span>
+                <span className="text-gray-400">Select up to 10 tags...</span>
               )}
               {formData.culturalTags.map((tId) => (
                 <span
                   key={tId}
                   className="bg-orange-500 text-white px-2 py-1 h-fit rounded-lg flex items-center gap-1 animate-in zoom-in-95"
                 >
-                  {metaData.tags.find((t) => t._id === tId)?.title}
+                  {categoryTags.find((t) => t._id === tId)?.title}
                   <FiX
                     size={10}
                     onClick={(e) => {
@@ -346,6 +384,7 @@ export default function AddListing() {
                   />
                 </span>
               ))}
+              {tagsLoading && <FiLoader className="animate-spin ml-auto" />}
             </div>
             {showTagDrop && (
               <div className="absolute bottom-full mb-2 z-50 w-full bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in slide-in-from-bottom-2">
@@ -359,15 +398,21 @@ export default function AddListing() {
                   />
                 </div>
                 <div className="max-h-40 overflow-y-auto grid grid-cols-1 p-1 gap-1">
-                  {filteredTags.map((tag) => (
-                    <div
-                      key={tag._id}
-                      onClick={() => handleTagToggle(tag._id)}
-                      className={`p-2 rounded-lg text-[9px] font-black uppercase cursor-pointer flex justify-between items-center ${formData.culturalTags.includes(tag._id) ? 'bg-orange-500 text-white' : 'dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
-                    >
-                      {tag.title} {formData.culturalTags.includes(tag._id) && <FiCheck />}
+                  {filteredTags.length === 0 ? (
+                    <div className="p-3 text-[9px] text-center text-gray-500 uppercase">
+                      No tags found
                     </div>
-                  ))}
+                  ) : (
+                    filteredTags.map((tag) => (
+                      <div
+                        key={tag._id}
+                        onClick={() => handleTagToggle(tag._id)}
+                        className={`p-2 rounded-lg text-[9px] font-black uppercase cursor-pointer flex justify-between items-center ${formData.culturalTags.includes(tag._id) ? 'bg-orange-500 text-white' : 'dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                      >
+                        {tag.title} {formData.culturalTags.includes(tag._id) && <FiCheck />}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}
@@ -381,7 +426,7 @@ export default function AddListing() {
               <button
                 type="button"
                 onClick={addUrlField}
-                className="text-orange-500 hover:text-orange-600 transition-colors"
+                className="text-orange-500 hover:text-orange-600"
               >
                 <FiPlus size={14} />
               </button>

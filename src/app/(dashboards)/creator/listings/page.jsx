@@ -198,15 +198,15 @@ export default function MyListings() {
     );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700 font-sans pb-20 px-4 md:px-0">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700 font-sans pb-20">
       <Toaster position="top-right" />
 
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between lg:items-center border-b border-gray-100 dark:border-white/10 pb-8 gap-6">
         <div>
           <h2 className="text-3xl font-black uppercase tracking-tighter dark:text-white flex items-center gap-3 italic">
-            <FiActivity className="text-orange-500" /> Digital{' '}
-            <span className="text-orange-500">Inventory</span>
+            <FiActivity className="text-orange-500" /> My{' '}
+            <span className="text-orange-500">Listings</span>
           </h2>
           <div className="flex items-center gap-2 mt-2">
             <FiClock size={10} className="text-orange-500" />
