@@ -37,7 +37,7 @@ export default function AddListing() {
   });
 
   const [categories, setCategories] = useState([]);
-  const [categoryTags, setCategoryTags] = useState([]); // Selected category-র ট্যাগগুলো এখানে থাকবে
+  const [categoryTags, setCategoryTags] = useState([]);
   const [metaLoading, setMetaLoading] = useState(true);
   const [tagsLoading, setTagsLoading] = useState(false);
   const [image, setImage] = useState(null);
@@ -125,32 +125,41 @@ export default function AddListing() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!image || !formData.category) return alert('Image and Category are required');
-    setLoading(true);
-    try {
-      const data = new FormData();
-      Object.keys(formData).forEach((key) => {
-        if (key === 'culturalTags') {
-          formData[key].forEach((tag) => data.append('culturalTags', tag));
-        } else if (key === 'externalUrls') {
-          formData[key].forEach((url) => {
-            if (url.trim()) data.append('externalUrls', url);
-          });
-        } else {
-          data.append(key, formData[key]);
-        }
-      });
-      data.append('image', image);
-      await api.post('/api/listings/add', data);
-      router.push('/creator/listings');
-    } catch (err) {
-      alert(err.response?.data?.message || 'Error creating listing');
-    } finally {
-      setLoading(false);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!image || !formData.category) return alert('Image and Category are required');
+
+  setLoading(true);
+  try {
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => {
+      if (key === 'culturalTags') {
+        formData[key].forEach((tag) => data.append('culturalTags', tag));
+      } else if (key === 'externalUrls') {
+        formData[key].forEach((url) => {
+          if (url.trim()) data.append('externalUrls', url);
+        });
+      } else {
+        data.append(key, formData[key]);
+      }
+    });
+    data.append('image', image);
+
+    const response = await api.post('/api/listings/add', data);
+
+    if (response.data.success || response.status === 201 || response.status === 200) {
+      setTimeout(() => {
+        router.push('/creator/listings');
+        router.refresh(); 
+      }, 100);
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.message || 'Error creating listing');
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (metaLoading)
     return (
