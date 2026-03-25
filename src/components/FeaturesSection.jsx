@@ -8,13 +8,13 @@ export default function FeaturedCultures() {
       <div className="flex justify-between items-end mb-6">
         <div>
           <h2 className="text-2xl font-bold text-[#1F1F1F] dark:text-[#ededed] tracking-tight">
-            Explore Traditions
+            Explore Cultures
           </h2>
           <p className="text-sm text-[#555555] dark:text-[#cccccc] opacity-80">
             Craftsmanship & heritage rituals.
           </p>
         </div>
-        <a href="/explore" className="text-[#F57C00] hover:underline font-semibold text-sm">
+        <a href="/discover" className="text-[#F57C00] hover:underline font-semibold text-sm">
           View all &rarr;
         </a>
       </div>

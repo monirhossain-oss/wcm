@@ -15,7 +15,7 @@ export default function HeroActions() {
             {/* Explore Button */}
             <Link href="/discover">
                 <button className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-[#F57C00] text-white font-bold whitespace-nowrap">
-                    Explore Products
+                    Discover Creations
                 </button>
             </Link>
 
