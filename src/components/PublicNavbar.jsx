@@ -1,17 +1,23 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { FiMenu, FiX, FiUser, FiLogOut } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegistationModal';
+import Link from 'next/link';
+import axios from 'axios';
 
 const PublicNavbar = () => {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+
+  // ক্যাটাগরি স্টেট
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
   // Modal States
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -21,14 +27,32 @@ const PublicNavbar = () => {
   const pathname = usePathname();
 
   const menuItems = [
-    { name: 'Discover', href: '/discover' },
-    { name: 'Cultures', href: '/cultures' },
-    { name: 'Categories', href: '/categories' },
-    { name: 'Regions', href: '/regions' },
+    { name: 'Explore', href: '/discover' },
+    { name: 'Categories', href: '/categories' }, // এটি ড্রপডাউন হিসেবে কাজ করবে
     { name: 'Creators', href: '/creators' },
     { name: 'About Us', href: '/aboutUs' },
     { name: 'Blogs', href: '/blogs' },
   ];
+
+  // API থেকে ক্যাটাগরি ফেচ করা
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const response = await axios.get(`${baseUrl}/api/admin/categories`);
+
+        // API response structure অনুযায়ী ডাটা সেট করা
+        const fetchedData = Array.isArray(response.data) ? response.data : response.data.data;
+        setCategories(fetchedData || []);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const getDashboardLink = () => {
     if (user?.role === 'admin') return '/admin';
@@ -36,7 +60,6 @@ const PublicNavbar = () => {
     return '/profile';
   };
 
-  // Modal Switching Logic
   const openLogin = () => {
     setIsRegisterOpen(false);
     setIsLoginOpen(true);
@@ -77,15 +100,70 @@ const PublicNavbar = () => {
             <div className="hidden md:flex space-x-6">
               {menuItems.map((item) => {
                 const isActive = pathname === item.href;
+
+                // Categories মেনুর জন্য বিশেষ লজিক
+                if (item.name === 'Categories') {
+                  return (
+                    <div
+                      key={item.name}
+                      className="relative"
+                      onMouseEnter={() => setIsCategoryDropdownOpen(true)}
+                      onMouseLeave={() => setIsCategoryDropdownOpen(false)}
+                    >
+                      {/* Link এর বদলে button ব্যবহার করা হয়েছে যাতে ক্লিক করলে কোথাও না যায় */}
+                      <button
+                        type="button"
+                        className={`text-sm font-medium transition-all duration-200 pb-1 border-b-2 flex items-center gap-1 cursor-default outline-none
+                        ${isActive ? 'text-[#F57C00] border-[#F57C00]' : 'border-transparent hover:text-[#F57C00]'}`}
+                      >
+                        {item.name}
+                        <svg className={`w-3 h-3 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                      </button>
+
+                      {/* Dropdown Menu */}
+                      {isCategoryDropdownOpen && (
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-52 bg-white dark:bg-[#121212] shadow-2xl border border-gray-100 dark:border-gray-800 rounded-xl py-2 z-[100] mt-0 animate-in fade-in slide-in-from-top-2 duration-200">
+                          {/* Bridge for hover stability */}
+                          <div className="absolute -top-2 left-0 w-full h-2 bg-transparent"></div>
+
+                          {isLoadingCategories ? (
+                            <div className="px-4 py-2 text-xs text-gray-500 italic">Loading...</div>
+                          ) : categories.length > 0 ? (
+                            categories.slice(0, 15).map((cat) => (
+                              <Link
+                                key={cat._id || cat.id}
+                                href={`/discover?category=${encodeURIComponent(cat.title || cat.name)}`}
+                                className="block px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-[#F57C00] transition-colors"
+                                onClick={() => setIsCategoryDropdownOpen(false)}
+                              >
+                                {cat.title || cat.name}
+                              </Link>
+                            ))
+                          ) : (
+                            <div className="px-4 py-2 text-xs text-gray-500">No categories found</div>
+                          )}
+
+                          <div className="border-t border-gray-100 dark:border-gray-800 my-1"></div>
+                          <Link
+                            href="/categories"
+                            className="block px-4 py-2 text-xs font-bold text-[#F57C00] hover:bg-gray-50 dark:hover:bg-white/5 text-center"
+                            onClick={() => setIsCategoryDropdownOpen(false)}
+                          >
+                            Browse All
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                // সাধারণ মেনু আইটেম
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
                     className={`text-sm font-medium transition-all duration-200 pb-1 border-b-2
-                    ${isActive
-                        ? 'text-[#F57C00] border-[#F57C00]'
-                        : 'border-transparent hover:text-[#F57C00]'
-                      }`}
+                    ${isActive ? 'text-[#F57C00] border-[#F57C00]' : 'border-transparent hover:text-[#F57C00]'}`}
                   >
                     {item.name}
                   </Link>
@@ -94,7 +172,7 @@ const PublicNavbar = () => {
             </div>
           </div>
 
-          {/* Right Side */}
+          {/* Right Side - Auth & Profile */}
           <div className="flex items-center space-x-3">
             {user ? (
               <div className="relative flex items-center space-x-2">
@@ -130,7 +208,7 @@ const PublicNavbar = () => {
                         {user?.role === 'admin' ? 'Admin Dashboard' : user?.role === 'creator' ? 'Creator Dashboard' : 'Profile'}
                       </Link>
                       <button
-                        onClick={logoutUser}
+                        onClick={() => { logoutUser(); setIsProfileOpen(false); }}
                         className="w-full text-left flex items-center space-x-2 px-4 py-2 text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                       >
                         <FiLogOut />
@@ -166,8 +244,7 @@ const PublicNavbar = () => {
 
         {/* Mobile Drawer */}
         <div
-          className={`fixed top-0 right-0 h-full w-2/3 bg-white dark:bg-[#0a0a0a] shadow-2xl transform transition-transform duration-300 md:hidden z-[100] ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'
-            }`}
+          className={`fixed top-0 right-0 h-full w-2/3 bg-white dark:bg-[#0a0a0a] shadow-2xl transform transition-transform duration-300 md:hidden z-[100] ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
           <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-800">
             <span className="font-bold text-[#F57C00] uppercase tracking-widest text-sm">Menu</span>
@@ -200,7 +277,7 @@ const PublicNavbar = () => {
                 >
                   Dashboard
                 </Link>
-                <button onClick={logoutUser} className="text-left text-red-500 font-bold">Logout</button>
+                <button onClick={() => { logoutUser(); setIsMobileDrawerOpen(false); }} className="text-left text-red-500 font-bold">Logout</button>
               </div>
             ) : (
               <div className="flex flex-col space-y-4 pt-4">
@@ -233,7 +310,6 @@ const PublicNavbar = () => {
         )}
       </nav>
 
-      {/* Auth Modals */}
       <LoginModal
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
