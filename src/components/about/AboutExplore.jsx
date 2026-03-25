@@ -1,67 +1,83 @@
+"use client";
 import React from 'react';
-import { Palette, Users, ExternalLink } from 'lucide-react';
+import { Palette, Users, ExternalLink, Globe2, Sparkles, ShoppingBag } from 'lucide-react';
 
 const AboutExplore = () => {
     const steps = [
         {
             id: '01',
-            title: 'Discover curated works',
-            description: 'Browse a meticulously curated selection of cultural works, filtered by heritage, technique, and region.',
-            icon: <Palette className="w-10 h-10 text-[#E65100]" />,
+            title: 'Discover Cultural Treasures',
+            description: 'Explore a curated marketplace of handmade crafts, traditional textiles, and cultural art from every corner of the globe.',
+            icon: <Globe2 className="w-10 h-10 text-[#E65100]" />,
         },
         {
             id: '02',
-            title: 'Explore creator stories',
-            description: 'Every object has a lineage. Go beyond the surface to understand the history and the hands behind the craft.',
-            icon: <Users className="w-10 h-10 text-[#E65100]" />,
+            title: 'Understand the Story',
+            description: 'Go beyond the product. Learn about the traditions, the heritage, and the artisans who preserve these ancient crafts.',
+            icon: <Sparkles className="w-10 h-10 text-[#E65100]" />,
         },
         {
             id: '03',
-            title: "Visit the creator's site",
-            description: "We connect, we don't capture. Visit the creator's own platform to complete your journey and support them directly.",
-            icon: <ExternalLink className="w-10 h-10 text-[#E65100]" />,
+            title: "Support Creators Directly",
+            description: "We act as a gateway. Follow the path to the creator's own platform to complete your purchase and support them directly.",
+            icon: <ShoppingBag className="w-10 h-10 text-[#E65100]" />,
         }
     ];
 
     return (
-        <section className="bg-white dark:bg-[#0a0a0a] py-16 px-6">
+        <section className="bg-white dark:bg-[#0a0a0a] py-20 px-6 transition-colors duration-500">
             <div className="max-w-7xl mx-auto">
+                
                 {/* Section Header */}
-                <div className="text-center mb-10">
-                    <h3 className="text-2xl md:text-3xl font-light text-gray-700 dark:text-white mb-4">
-                        The Explorer's Journey
-                    </h3>
-                    <div className="w-20 h-1 bg-[#E65100] mx-auto rounded-full"></div>
+                <div className="text-center mb-16 space-y-4">
+                    <span className="text-[#E65100] font-bold text-xs uppercase tracking-[0.3em]">How WCM Works</span>
+                    <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white leading-tight">
+                        The <span className="text-[#E65100]">Explorer's</span> Journey
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-base">
+                        A transparent and respectful way to discover authentic cultural craftsmanship.
+                    </p>
+                    <div className="w-24 h-1.5 bg-[#E65100] mx-auto rounded-full"></div>
                 </div>
 
                 {/* Steps Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
                     {steps.map((step) => (
-                        <div key={step.id} className="space-y-6 group p-6 bg-gray-50 dark:bg-[#121212] rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
-
-                            {/* Step Number */}
-                            <div className="flex items-center gap-4">
-                                <span className="text-[#E65100] font-bold text-sm tracking-widest">{step.id}</span>
-                                <div className="h-[1px] flex-grow bg-gray-200 dark:bg-zinc-800"></div>
+                        <div key={step.id} className="group relative p-8 bg-gray-50 dark:bg-[#121212] rounded-[2rem] border border-transparent hover:border-[#E65100]/20 hover:bg-white dark:hover:bg-zinc-900 shadow-xl shadow-gray-200/50 dark:shadow-none transition-all duration-500">
+                            
+                            {/* Decorative Step Number */}
+                            <div className="absolute top-6 right-8 text-6xl font-black text-gray-200/50 dark:text-zinc-800/50 group-hover:text-[#E65100]/10 transition-colors">
+                                {step.id}
                             </div>
 
-                            {/* Icon */}
-                            <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
+                            {/* Icon with Ring */}
+                            <div className="relative mb-8 w-20 h-20 flex items-center justify-center rounded-2xl bg-white dark:bg-zinc-800 shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
                                 {step.icon}
                             </div>
 
                             {/* Content */}
-                            <div className="space-y-2">
-                                <h3 className="text-lg md:text-xl font-semibold text-gray-700 dark:text-white">
+                            <div className="space-y-4 relative z-10">
+                                <h3 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white group-hover:text-[#E65100] transition-colors italic">
                                     {step.title}
                                 </h3>
                                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm md:text-base">
                                     {step.description}
                                 </p>
                             </div>
+
+                            {/* Bottom Accent */}
+                            <div className="mt-8 h-1 w-0 group-hover:w-full bg-[#E65100] transition-all duration-700 rounded-full"></div>
                         </div>
                     ))}
                 </div>
+
+                {/* Bottom Callout */}
+                <div className="mt-16 text-center">
+                    <p className="text-gray-400 dark:text-zinc-500 text-sm font-medium">
+                        WCM bridges the gap between heritage and a global audience.
+                    </p>
+                </div>
+
             </div>
         </section>
     );

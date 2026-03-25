@@ -9,7 +9,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5
 
 export default function ListingCard({ item }) {
   if (!item) return null;
-  // console.log(item)
+  // console.log(item.leangth);
 
   const postImageSrc = item.image?.startsWith('http') ? item.image : `${API_BASE_URL}${item.image?.startsWith('/') ? '' : '/'}${item.image}`;
 

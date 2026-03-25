@@ -1,86 +1,89 @@
+"use client";
 import React from 'react';
 import Image from 'next/image';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Globe, Heart, ShieldCheck } from 'lucide-react';
 
 const AboutCulture = () => {
     const features = [
         {
+            title: "Supporting Cultural Visibility",
+            description: "We honor the people and traditions behind creative expression by providing a global stage for their work.",
+            icon: <Globe className="w-6 h-6 text-orange-600 mt-1 flex-shrink-0" />
+        },
+        {
+            title: "Inclusive Cultural Economy",
+            description: "Our platform contributes to a respectful economy that values authenticity and fair representation for all creators.",
+            icon: <ShieldCheck className="w-6 h-6 text-orange-600 mt-1 flex-shrink-0" />
+        },
+        {
+            title: "Bridge Between Cultures",
+            description: "We digitally connect diverse communities, ensuring that heritage is not only observed but celebrated.",
+            icon: <Heart className="w-6 h-6 text-orange-600 mt-1 flex-shrink-0" />
+        },
+        {
             title: "Total Ownership",
-            description: "You maintain 100% control over your brand, pricing, and inventory."
-        },
-        {
-            title: "Premium Presentation",
-            description: "High-end editorial layouts designed to showcase craftsmanship as art."
-        },
-        {
-            title: "Smart Visibility",
-            description: "Transparent boost options and PPC placement to reach targeted collectors."
-        },
-        {
-            title: "Fair Representation",
-            description: "No hidden fees or aggressive algorithms—just fair visibility for all."
+            description: "Creators maintain 100% control over their brand, stories, and the cultural heritage they represent.",
+            icon: <CheckCircle2 className="w-6 h-6 text-orange-600 mt-1 flex-shrink-0" />
         }
     ];
 
     return (
-        <section className="bg-[#fafafa] dark:bg-[#0d0d0d] py-8 px-6">
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        <section className="bg-[#fafafa] dark:bg-[#0d0d0d] py-20 px-6 transition-colors duration-500">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
                 {/* Featured Creator Card */}
-                <div className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-zinc-800 hover:shadow-2xl transition-shadow duration-300">
-                    <div className="relative aspect-square w-full bg-[#f3f3f3]">
-                        <span className="absolute top-4 left-4 bg-[#7A1F1F] text-white text-[10px] font-bold px-3 py-1 uppercase tracking-wider z-10">
-                            Featured Creator
+                <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-gray-100 dark:border-zinc-800 group transition-all duration-500 hover:-translate-y-2">
+                    <div className="relative aspect-[4/5] w-full bg-[#f9f9f9] dark:bg-zinc-800">
+                        <span className="absolute top-6 left-6 bg-orange-600 text-white text-[10px] font-bold px-4 py-1.5 uppercase tracking-[0.2em] z-10 rounded-full shadow-lg">
+                            Preserving Heritage
                         </span>
                         <Image
-                            src="https://i.postimg.cc/8CSpwq08/image-(18).jpg"
-                            alt="Ancient Cedar Totem"
+                            src="https://i.postimg.cc/8CSpwq08/image-(18).jpg" // আপনার প্রোভাইড করা ইমেজ
+                            alt="Cultural Craft"
                             fill
-                            className="object-contain p-12"
+                            className="object-contain p-8 transition-transform duration-700 group-hover:scale-105"
                             unoptimized
                         />
                     </div>
-                    <div className="p-6 md:p-8 space-y-4">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Ancient Cedar Totem</h3>
-                                <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">Coast Salish Tradition</p>
-                            </div>
-                            <span className="text-[10px] font-bold text-orange-600 border border-orange-200 px-2 py-1 uppercase rounded">
-                                Limited Edition
-                            </span>
+                    <div className="p-8 md:p-10 space-y-6">
+                        <div className="space-y-2">
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Honoring Traditions</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed italic">
+                                "Culture is not only something to observe, but something to understand and celebrate."
+                            </p>
                         </div>
-                        <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex justify-between items-center">
+                        <div className="pt-6 border-t border-gray-100 dark:border-zinc-800 flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
-                                    <img src="https://i.pravatar.cc/100?u=elias" alt="Elias" className="object-cover w-full h-full" />
+                                <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                                    <Globe className="w-5 h-5 text-orange-600" />
                                 </div>
-                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">By Elias Thorne</span>
+                                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 tracking-wide uppercase">WCM Global Network</span>
                             </div>
-                            <button className="text-xs font-bold flex items-center gap-1 text-orange-600 hover:underline transition-colors">
-                                View Studio <span>→</span>
-                            </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Features Section */}
-                <div className="space-y-10">
-                    <div className="space-y-4">
-                        <span className="bg-orange-100 text-orange-700 text-[10px] font-bold px-3 py-1 uppercase tracking-widest rounded-sm">
-                            Creators First
+                {/* Content Section */}
+                <div className="space-y-12">
+                    <div className="space-y-6">
+                        <span className="bg-orange-100 dark:bg-orange-600/20 text-orange-700 dark:text-orange-400 text-[10px] font-bold px-4 py-2 uppercase tracking-[0.3em] rounded-full">
+                            Our Vision & Impact
                         </span>
-                        <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-gray-800 dark:text-white leading-tight">
-                            Empowering the <br /> Guardians of Culture.
+                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white leading-[1.1]">
+                            Empowering the <br /> 
+                            <span className="text-orange-600">Guardians of Culture.</span>
                         </h2>
+                        <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
+                            What began as an idea to bridge cultures digitally is evolving into a growing network of creators, communities, and audiences who value authenticity over mass production.
+                        </p>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-8">
                         {features.map((item, index) => (
-                            <div key={index} className="flex gap-4 group hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl p-4 transition-colors duration-300">
-                                <CheckCircle2 className="w-6 h-6 text-orange-600 mt-1 flex-shrink-0" />
-                                <div className="space-y-1">
-                                    <h4 className="text-lg font-semibold text-gray-800 dark:text-white group-hover:text-orange-600 transition-colors">
+                            <div key={index} className="flex gap-5 group p-2">
+                                {item.icon}
+                                <div className="space-y-2">
+                                    <h4 className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-orange-600 transition-colors">
                                         {item.title}
                                     </h4>
                                     <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base leading-relaxed">
@@ -90,6 +93,7 @@ const AboutCulture = () => {
                             </div>
                         ))}
                     </div>
+
                 </div>
 
             </div>

@@ -14,8 +14,14 @@ const AboutContent = () => {
                     </h2>
 
                     <div className="space-y-6 text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-xl leading-relaxed">
-                        <p>WCM was created to highlight the people behind cultural expressio — the artists, craftsmen, and communities who preserve traditions through their work. </p>
-                        <p> From textiles and clothing to decorative arts, handmade objects, and cultural storytelling, the platform connects audiences with creators and the heritage they represent</p>
+                        <p>Unlike traditional marketplaces, WCM focuses on
+visibility, cultural context, and
+storytelling
+. The platform acts as a gateway between creators and global audiences, allowing
+visitors to explore cultural wor
+ks while respecting the identity and history behind them.</p>
+                        <p> Our goal is to contribute to the preservation and appreciation of cultural heritage by
+supporting creators and helping their stories reach a wider world.</p>
                         <p className="text-gray-900 dark:text-gray-200 font-medium border-l-4 border-rose-900 pl-4">
                             Our platform does not own the craft; we amplify it.
                         </p>

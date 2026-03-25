@@ -19,10 +19,14 @@ const AboutContent = () => {
                     <p className="text-base sm:text-lg md:text-xl 
                                   text-gray-600 dark:text-gray-300 
                                   max-w-md leading-relaxed">
-                        World Culture Marketplace (WCM)
-                is a global platform dedicated to showcasing cultural
-                creators, artisans, and storytellers from around the world. Our mission is to provide a space
-                where culture can be discovered, appreciated, and shared with respect and authenticity.
+                        WCM was created to
+highlight the people behind cultural expression
+—
+the artists, craftsmen,
+and communities who preserve traditions through their work.From textiles and clothing to
+decorative arts, handmade objects, and cultural storytelling, the platform connects audience
+s
+with creators and the heritage they represent.
                     </p>
 
                     <div className="flex items-center gap-5 pt-6">

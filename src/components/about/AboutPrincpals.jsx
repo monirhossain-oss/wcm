@@ -1,41 +1,40 @@
-'use client'; // যেহেতু আমরা স্টেট ব্যবহার করছি
+'use client'; 
 import React, { useState } from 'react';
-import { ArrowRight } from 'lucide-react';
 
 const AboutPrincpals = () => {
-    // ক্লিক করা কার্ড ট্র্যাক করার জন্য স্টেট
     const [activeIndex, setActiveIndex] = useState(null);
 
     const principles = [
         {
-            title: "Discovery over transactions",
-            description: "We prioritize the thrill of finding something unique over the speed of checking out."
+            title: "Visibility with Fairness",
+            description: "We focus on highlight the people behind cultural expression—the artists and communities who preserve traditions through their work."
         },
         {
-            title: "Authenticity over mass production",
-            description: "We only represent creators who use traditional techniques or culturally rooted methods."
+            title: "Context over Commodity",
+            description: "At WCM, culture is not treated as a commodity—it is presented as a living heritage carried by people and creative expression."
         },
         {
-            title: "Visibility with fairness",
-            description: "Our algorithms reward quality and heritage, ensuring small creators aren't buried by giants."
+            title: "Authenticity & Respect",
+            description: "We provide a gateway between creators and global audiences, allowing visitors to explore while respecting identity and history."
         },
         {
-            title: "Editorial curation",
-            description: "Every creator on our platform is hand-selected to ensure we maintain our cultural standards."
+            title: "Curation & Stewardship",
+            description: "Every creator and storyteller is hand-selected to ensure culture is shared with the highest respect and digital authenticity."
         }
     ];
 
     return (
-        <section className="bg-white dark:bg-[#0a0a0a] py-8 px-4">
+        <section className="bg-white dark:bg-[#0a0a0a] py-20 px-4 transition-colors duration-500">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
                     <div className="space-y-4">
-                        <h2 className="text-4xl md:text-5xl font-light text-gray-900 dark:text-white">
-                            Our Principles
+                        <span className="text-[#F57C00] font-bold text-xs uppercase tracking-[0.3em]">Our Foundation</span>
+                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white leading-tight">
+                            Our <span className="text-[#F57C00]">Principles.</span>
                         </h2>
-                        <p className="text-gray-500 dark:text-gray-400 text-lg max-w-xl">
-                            The core values that guide our curation and community growth.
+                        <p className="text-gray-500 dark:text-gray-400 text-lg max-w-xl font-medium">
+                            The core values that guide our global community and ensure cultural integrity in the digital world.
                         </p>
                     </div>
                 </div>
@@ -46,18 +45,23 @@ const AboutPrincpals = () => {
                         <div 
                             key={index} 
                             onClick={() => setActiveIndex(index)} 
-                            className={`cursor-pointer p-10 rounded-sm border transition-all duration-500 transform ${
+                            className={`cursor-pointer p-10 rounded-[2rem] border transition-all duration-500 transform ${
                                 activeIndex === index 
-                                ? 'bg-white dark:bg-zinc-900 border-orange-500 shadow-xl shadow-orange-500/10 scale-[1.02]' 
-                                : 'bg-[#FAFAFA] dark:bg-zinc-900/40 border-transparent hover:border-orange-500/30'
+                                ? 'bg-white dark:bg-zinc-900 border-[#F57C00] shadow-2xl shadow-orange-500/10 scale-[1.05]' 
+                                : 'bg-[#FAFAFA] dark:bg-zinc-900/40 border-gray-100 dark:border-white/5 hover:border-[#F57C00]/30'
                             }`}
                         >
-                            <h3 className={`text-xl md:text-2xl font-medium mb-8 leading-tight transition-colors ${
+                            {/* Decorative Line */}
+                            <div className={`w-12 h-1 mb-8 rounded-full transition-all duration-500 ${
+                                activeIndex === index ? 'bg-[#F57C00] w-20' : 'bg-gray-200 dark:bg-zinc-700'
+                            }`}></div>
+
+                            <h3 className={`text-xl md:text-2xl font-black mb-6 leading-tight transition-colors italic ${
                                 activeIndex === index ? 'text-[#F57C00]' : 'text-gray-900 dark:text-white'
                             }`}>
                                 {item.title}
                             </h3>
-                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm md:text-base">
+                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm md:text-base font-medium">
                                 {item.description}
                             </p>
                         </div>

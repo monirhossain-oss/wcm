@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
+import { useSearchParams } from 'next/navigation'; 
 import { useListings } from '@/context/ListingsContext';
 import ListingCard from '@/components/ListingCard';
 import { Search, ChevronLeft, ChevronRight, Loader2, MapPin, Zap } from 'lucide-react';
@@ -10,17 +11,32 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// ১. মহাদেশের দেশের লিস্ট (আপনার দেওয়া ডাটা অনুযায়ী)
+const continentMapping = {
+  "Asia": ["Afghanistan", "Armenia", "Azerbaijan", "Bangladesh", "Bhutan", "Brunei", "Cambodia", "China", "Georgia", "India", "Indonesia", "Japan", "Kazakhstan", "Kyrgyzstan", "Laos", "Malaysia", "Maldives", "Mongolia", "Myanmar", "Nepal", "North Korea", "Philippines", "Singapore", "South Korea", "Sri Lanka", "Taiwan", "Tajikistan", "Thailand", "Timor-Leste", "Turkmenistan", "Uzbekistan", "Vietnam"],
+  "Middle East": ["Bahrain", "Cyprus", "Iran", "Iraq", "Israel", "Jordan", "Kuwait", "Lebanon", "Oman", "Palestine", "Qatar", "Saudi Arabia", "Syria", "Turkey", "United Arab Emirates", "Yemen"],
+  "Europe": ["Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Kosovo", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", "Malta", "Moldova", "Monaco", "Montenegro", "Netherlands", "North Macedonia", "Norway", "Poland", "Portugal", "Romania", "Russia", "San Marino", "Serbia", "Slovakia", "Slovenia", "Spain", "Sweden", "Switzerland", "Ukraine", "United Kingdom", "Vatican City"],
+  "Africa": ["Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon", "Cape Verde", "Central African Republic", "Chad", "Comoros", "Congo", "DR Congo", "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe"],
+  "Latin America": ["Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominican Republic", "Ecuador", "El Salvador", "Guatemala", "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Puerto Rico", "Uruguay", "Venezuela"]
+};
+
 const DiscoverPage = () => {
   const { cachedListings } = useListings();
+  const searchParams = useSearchParams();
+  const urlContinent = searchParams.get('continent');
+  const urlCategory = searchParams.get('category'); // এটি যোগ করো যাতে ক্যাটাগরি ইউআরএল থেকে পড়া যায়
 
   const [listings, setListings] = useState([]);
   const [categories, setCategories] = useState(['All']);
   const [regions, setRegions] = useState(['All Regions']);
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeCategory, setActiveCategory] = useState(urlCategory || 'All');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortBy, setSortBy] = useState('Popularity');
-  const [selectedRegion, setSelectedRegion] = useState('All Regions');
+
+  // এখানে লজিক: স্লাইডার থেকে মহাদেশ আসলে সেটা সেট হবে, নাহলে All Regions
+  const [selectedRegion, setSelectedRegion] = useState(urlContinent || 'All Regions');
+  const [open, setOpen] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -31,34 +47,30 @@ const DiscoverPage = () => {
   const observer = useRef();
   const scrollRef = useRef(null);
 
-  // মেটা ডাটা ফেচিং এবং ক্যাশিং লজিক (টাইমস্ট্যাম্পসহ)
   useEffect(() => {
     const fetchMeta = async () => {
       const CACHE_KEY = 'meta_data_cache';
-      const CACHE_DURATION = 3600000; // ১ ঘণ্টা (মিলিসেকেন্ডে)
+      const CACHE_DURATION = 30;
 
       try {
         const cachedMeta = sessionStorage.getItem(CACHE_KEY);
-
-        // ক্যাশ চেক ও ভ্যালিডেশন
         if (cachedMeta) {
           const { data, timestamp } = JSON.parse(cachedMeta);
           if (Date.now() - timestamp < CACHE_DURATION) {
             setCategories(['All', ...data.categories.map((c) => c.title)]);
-            setRegions(['All Regions', ...(data.regions || [])]);
+            // এখানে পরিবর্তন: মহাদেশের নামগুলো ড্রপডাউনে যুক্ত করা হয়েছে
+            setRegions(['All Regions', ...Object.keys(continentMapping)]);
             return;
           }
         }
 
-        // ক্যাশ না থাকলে বা এক্সপায়ারড হলে এপিআই কল
         const res = await api.get('/api/listings/meta-data');
         const catTitles = res.data.categories.map((c) => c.title);
-        const regionData = res.data.regions || [];
 
         setCategories(['All', ...catTitles]);
-        setRegions(['All Regions', ...regionData]);
+        // ড্রপডাউনে মহাদেশের নাম দেখা যাবে
+        setRegions(['All Regions', ...Object.keys(continentMapping)]);
 
-        // নতুন ডাটা ও টাইমস্ট্যাম্প সেভ করি
         sessionStorage.setItem(CACHE_KEY, JSON.stringify({
           data: res.data,
           timestamp: Date.now()
@@ -67,43 +79,62 @@ const DiscoverPage = () => {
     };
     fetchMeta();
   }, []);
-
-  // ক্যাশ চেক ও প্রাথমিক লোড
   useEffect(() => {
-    if (cachedListings && cachedListings.length > 0) {
+    if (urlCategory) {
+      setActiveCategory(urlCategory);
+    }
+  }, [urlCategory]);
+
+  useEffect(() => {
+    // যদি ক্যাশ থাকে এবং ইউআরএল-এ মহাদেশ বা ক্যাটাগরি না থাকে, তবেই ক্যাশ দেখাবে
+    if (cachedListings && cachedListings.length > 0 && !urlContinent && !urlCategory) {
       setListings(cachedListings);
       setLoading(false);
     } else {
       fetchListings(true);
     }
-  }, []);
+  }, [urlContinent, urlCategory]); // এখানে urlCategory যোগ করে দিন
 
-  // সার্চ ডিবাউন্স
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // মেইন ফেচ ফাংশন
   const fetchListings = useCallback(
     async (isInitial = false) => {
       if (isInitial) setLoading(true);
       else setLoadingMore(true);
 
       try {
-        let url = `/api/listings/public?limit=${limit}&offset=${isInitial ? 0 : offset}`;
-        if (activeCategory !== 'All') url += `&category=${activeCategory}`;
+        // ১. যদি কোনো মহাদেশ সিলেক্ট থাকে, তবে বড় লিমিট (২৫০) ব্যবহার করব সব ডাটা পাওয়ার জন্য
+        const fetchLimit = selectedRegion !== 'All Regions' ? 250 : limit;
+
+        let url = `/api/listings/public?limit=${fetchLimit}&offset=${isInitial ? 0 : offset}`;
+        if (activeCategory !== 'All') url += `&category=${encodeURIComponent(activeCategory)}`;
         if (debouncedSearch) url += `&search=${debouncedSearch}`;
         if (sortBy === 'Newest') url += `&filter=Today`;
-        if (selectedRegion !== 'All Regions') url += `&region=${selectedRegion}`;
+
+        // নোট: এখানে আমরা &region= যোগ করছি না যাতে ইউআরএল আপনার সফল ইউআরএলটির মতো থাকে
 
         const res = await api.get(url);
-        const { listings: newListings, hasMore: more } = res.data;
+        let fetchedListings = res.data.listings || [];
 
-        setListings((prev) => (isInitial ? newListings : [...prev, ...newListings]));
+        // ২. ফ্রন্টএন্ড ফিল্টারিং: যদি মহাদেশ সিলেক্ট করা থাকে, তবে জাভাস্ক্রিপ্ট দিয়ে ফিল্টার করব
+        if (selectedRegion !== 'All Regions') {
+          const targetCountries = continentMapping[selectedRegion] || [];
+
+          fetchedListings = fetchedListings.filter(item => {
+            const itemRegion = (item.country || item.region || "").toLowerCase();
+            return targetCountries.some(c => c.toLowerCase() === itemRegion);
+          });
+        }
+
+        const { hasMore: more } = res.data;
+        setListings((prev) => (isInitial ? fetchedListings : [...prev, ...fetchedListings]));
         setHasMore(more);
-      } catch (err) { console.error(err); }
-      finally {
+      } catch (err) {
+        console.error(err);
+      } finally {
         setLoading(false);
         setLoadingMore(false);
       }
@@ -111,14 +142,12 @@ const DiscoverPage = () => {
     [activeCategory, debouncedSearch, sortBy, selectedRegion, offset]
   );
 
-  // ফিল্টার পরিবর্তন হলে রিফ্রেশ
   useEffect(() => {
     setOffset(0);
     setHasMore(true);
     fetchListings(true);
   }, [activeCategory, debouncedSearch, sortBy, selectedRegion]);
 
-  // ইনফিনিট স্ক্রল ট্রিগার
   useEffect(() => {
     if (offset > 0) fetchListings(false);
   }, [offset]);
@@ -154,7 +183,6 @@ const DiscoverPage = () => {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {/* Sticky Header */}
       <div className="sticky top-20 z-40 bg-white/95 dark:bg-[#0a0a0a] border-b border-zinc-100 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-6 py-4 space-y-4">
 
@@ -170,15 +198,12 @@ const DiscoverPage = () => {
             />
           </div>
 
-          {/* Filters Area */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-
             {/* Categories */}
             <div className="relative w-full flex items-center overflow-hidden md:flex-1 md:order-2">
               <button onClick={() => slide('left')} className="p-1 hover:text-orange-500 shrink-0">
                 <ChevronLeft size={18} />
               </button>
-
               <div
                 ref={scrollRef}
                 className="flex items-center gap-2 overflow-x-auto no-scrollbar px-2 scroll-smooth"
@@ -196,7 +221,6 @@ const DiscoverPage = () => {
                   </button>
                 ))}
               </div>
-
               <button onClick={() => slide('right')} className="p-1 hover:text-orange-500 shrink-0">
                 <ChevronRight size={18} />
               </button>
@@ -204,8 +228,6 @@ const DiscoverPage = () => {
 
             {/* Popularity + Region */}
             <div className="flex items-center justify-between gap-4 md:gap-6 md:order-1">
-
-              {/* Popularity */}
               <div className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 px-3 py-2 rounded-xl shrink-0">
                 <Zap size={14} className="text-orange-500" />
                 <select
@@ -218,38 +240,95 @@ const DiscoverPage = () => {
                 </select>
               </div>
 
-
-              {/* Region */}
-              <div className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 px-3 py-2 rounded-xl shrink-0">
-                <MapPin size={14} className="text-blue-500" />
-                <select
-                  value={selectedRegion}
-                  onChange={(e) => setSelectedRegion(e.target.value)}
-                  className="bg-transparent text-xs font-semibold uppercase outline-none cursor-pointer text-zinc-700 dark:text-zinc-200"
+              {/* Region Select (এখানে এখন মহাদেশের নামগুলো আসবে) */}
+              <div className="relative shrink-0">
+                {/* Trigger */}
+                <div
+                  onClick={() => setOpen(!open)}
+                  className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 px-3 py-2 rounded-xl cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/10 transition-all"
                 >
-                  {regions.map((r) => (
-                    <option key={r} value={r} className="bg-white text-zinc-700">
-                      {r}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <MapPin size={14} className="text-blue-500" />
+                  <span className="text-xs font-semibold uppercase text-zinc-700 dark:text-zinc-200">
+                    {selectedRegion}
+                  </span>
 
+                  {/* Arrow */}
+                  <svg
+                    className={`w-3 h-3 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+
+                {/* Dropdown */}
+                {open && (
+                  <div className="absolute mt-2 w-full bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-xl shadow-lg z-50 overflow-hidden">
+                    {regions.map((r) => (
+                      <div
+                        key={r}
+                        onClick={() => {
+                          setSelectedRegion(r);
+                          setOpen(false);
+                        }}
+                        className={`px-3 py-2 text-xs font-semibold uppercase cursor-pointer transition-all
+                ${selectedRegion === r
+                            ? "bg-blue-500 text-white"
+                            : "text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/10"
+                          }`}
+                      >
+                        {r}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Grid Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
-          {listings.map((item, index) => (
-            <div key={item._id} ref={index === listings.length - 1 ? lastElementRef : null}>
-              <ListingCard item={item} />
+      <div className="max-w-7xl mx-auto px-6 py-2">
+        {/* যদি লোডিং না হয় এবং লিস্টিং খালি থাকে */}
+        {!loading && listings.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="bg-zinc-100 dark:bg-white/5 p-6 rounded-full mb-4">
+              <Search size={40} className="text-zinc-400" />
             </div>
-          ))}
-          {loadingMore && [...Array(4)].map((_, i) => <SkeletonCard key={`more-${i}`} />)}
-        </div>
+            <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
+              No listings found
+            </h3>
+            <p className="text-zinc-500 max-w-xs mt-2">
+              Try changing your filters or search query.
+            </p>
+
+            {/* একটি রিসেট বাটন যোগ করতে পারেন (অপশনাল) */}
+            <button
+              onClick={() => {
+                setActiveCategory('All');
+                setSelectedRegion('All Regions');
+                setSearchQuery('');
+              }}
+              className="mt-6 px-6 py-2 bg-orange-500 text-white rounded-full text-sm font-bold uppercase hover:bg-orange-600 transition-all"
+            >
+              Clear All Filters
+            </button>
+          </div>
+        ) : (
+          /* যদি লিস্টিং থাকে তবে ম্যাপ হবে */
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+            {listings.map((item, index) => (
+              <div key={item._id} ref={index === listings.length - 1 ? lastElementRef : null}>
+                <ListingCard item={item} />
+              </div>
+            ))}
+            {(loading || loadingMore) && [...Array(4)].map((_, i) => <SkeletonCard key={`more-${i}`} />)}
+          </div>
+        )}
       </div>
     </div>
   );

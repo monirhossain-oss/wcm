@@ -214,7 +214,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {user.creatorRequest?.status === 'rejected' && (
+            {user?.creatorRequest?.status === 'rejected' && (
               <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-md">
                 <p className="text-[9px] font-black text-red-500 uppercase flex items-center gap-2 tracking-widest">
                   <FiAlertCircle /> REJECTION NOTICE
