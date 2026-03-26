@@ -140,10 +140,10 @@ import React from 'react';
 const page = () => {
   return (
     <div>
-      <BlogBanner/>
+      {/* <BlogBanner/> */}
       <BlogCard/>
-      <BlogBannerCard/>
-      <BlogGude/>
+      {/* <BlogBannerCard/> */}
+      {/* <BlogGude/> */}
     </div>
   );
 };
