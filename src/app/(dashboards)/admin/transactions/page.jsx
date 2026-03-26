@@ -22,7 +22,7 @@ const api = axios.create({
   timeout: 30000,
 });
 
-const CACHE_KEY = 'drakilo_tx_cache';
+const CACHE_KEY = 'wcm_tx_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
 
 export default function TransactionsPage() {
@@ -114,10 +114,7 @@ export default function TransactionsPage() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute(
-        'download',
-        `Drakilo_Report_${new Date().toISOString().split('T')[0]}.xlsx`
-      );
+      link.setAttribute('download', `WCM_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

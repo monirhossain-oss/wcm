@@ -18,7 +18,7 @@ import {
   FiTag,
   FiLayers,
   FiDollarSign,
-  FiTrendingUp
+  FiTrendingUp,
 } from 'react-icons/fi';
 import Image from 'next/image';
 import { FaCreativeCommonsSampling, FaTag } from 'react-icons/fa';
@@ -53,7 +53,7 @@ export default function AdminLayout({ children }) {
 
   const handleLogout = async () => {
     await logoutUser();
-    router.push('/auth/login');
+    router.push('/');
   };
 
   if (loading) {
@@ -66,23 +66,23 @@ export default function AdminLayout({ children }) {
 
   if (!user || user.role !== 'admin') return null;
 
-const menuItems = [
-  { name: 'Overview', path: '/admin', icon: FiGrid },
-  { name: 'User Management', path: '/admin/users', icon: FiUsers },
-  { name: 'Creator Requests', path: '/admin/requests', icon: FiCheckCircle },
+  const menuItems = [
+    { name: 'Overview', path: '/admin', icon: FiGrid },
+    { name: 'User Management', path: '/admin/users', icon: FiUsers },
+    { name: 'Creator Requests', path: '/admin/requests', icon: FiCheckCircle },
 
-  // Content & Moderation
-  { name: 'Global Listings', path: '/admin/listings', icon: FiLayout },
-  { name: 'Promoted Assets', path: '/admin/listings/promoted', icon: FiTrendingUp },
+    // Content & Moderation
+    { name: 'Global Listings', path: '/admin/listings', icon: FiLayout },
+    { name: 'Promoted Assets', path: '/admin/listings/promoted', icon: FiTrendingUp },
 
-  // Financials
-  { name: 'All Transactions', path: '/admin/transactions', icon: FiDollarSign }, 
+    // Financials
+    { name: 'All Transactions', path: '/admin/transactions', icon: FiDollarSign },
 
-  // System & Structure
-  { name: 'Audit Logs', path: '/admin/logs', icon: FiShield },
-  { name: 'System Tags', path: '/admin/tags', icon: FiTag }, 
-  { name: 'Categories', path: '/admin/categories', icon: FiLayers },
-];
+    // System & Structure
+    { name: 'Audit Logs', path: '/admin/logs', icon: FiShield },
+    { name: 'System Tags', path: '/admin/tags', icon: FiTag },
+    { name: 'Categories', path: '/admin/categories', icon: FiLayers },
+  ];
 
   const profileImage = user?.profile?.profileImage
     ? getImageUrl(user.profile.profileImage, 'avatar')
@@ -92,8 +92,20 @@ const menuItems = [
     <>
       <div className="h-20 flex items-center px-8 border-b border-gray-100 dark:border-white/5">
         <Link href="/" className="flex items-center gap-3">
-          <Image src="/wc,-web-logo.png" alt="Logo" width={90} height={90} className="dark:hidden h-auto w-auto" />
-          <Image src="/wc,-web-white.png" alt="Logo" width={90} height={90} className="hidden dark:block h-auto w-auto" />
+          <Image
+            src="/wc,-web-logo.png"
+            alt="Logo"
+            width={90}
+            height={90}
+            className="dark:hidden h-auto w-auto"
+          />
+          <Image
+            src="/wc,-web-white.png"
+            alt="Logo"
+            width={90}
+            height={90}
+            className="hidden dark:block h-auto w-auto"
+          />
         </Link>
       </div>
 
@@ -116,7 +128,10 @@ const menuItems = [
                       : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-black dark:hover:text-white'
                   }`}
                 >
-                  <Icon size={14} className={isActive ? 'text-white' : 'group-hover:text-orange-500'} />
+                  <Icon
+                    size={14}
+                    className={isActive ? 'text-white' : 'group-hover:text-orange-500'}
+                  />
                   {item.name}
                 </Link>
               );
@@ -140,7 +155,9 @@ const menuItems = [
       <div className="p-4 bg-gray-50 dark:bg-black/20 border-t border-gray-100 dark:border-white/5">
         <div className="flex items-center gap-3 px-2 py-2">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-          <span className="text-[8px] font-black uppercase tracking-tighter text-gray-400">Node Status: Online</span>
+          <span className="text-[8px] font-black uppercase tracking-tighter text-gray-400">
+            Node Status: Online
+          </span>
         </div>
       </div>
     </>
@@ -156,17 +173,24 @@ const menuItems = [
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
         {/* 🔹 Header */}
         <header className="h-20 bg-white/80 dark:bg-[#0c0c0c]/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-6 md:px-10 z-40">
-          <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 text-gray-600 dark:text-gray-300">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="lg:hidden p-2 text-gray-600 dark:text-gray-300"
+          >
             <FiMenu size={20} />
           </button>
 
           <div className="flex items-center gap-6 ml-auto" ref={dropdownRef}>
             <div className="hidden md:flex items-center gap-3 pr-6 border-r border-gray-100 dark:border-white/10">
-               <FiShield className="text-orange-500" size={16} />
-               <div className="flex flex-col">
-                  <span className="text-[9px] font-black uppercase tracking-widest leading-none text-gray-400">Auth Level</span>
-                  <span className="text-[10px] font-black uppercase text-black dark:text-white mt-1">Super Admin</span>
-               </div>
+              <FiShield className="text-orange-500" size={16} />
+              <div className="flex flex-col">
+                <span className="text-[9px] font-black uppercase tracking-widest leading-none text-gray-400">
+                  Auth Level
+                </span>
+                <span className="text-[10px] font-black uppercase text-black dark:text-white mt-1">
+                  Super Admin
+                </span>
+              </div>
             </div>
 
             <div className="relative">
@@ -175,15 +199,23 @@ const menuItems = [
                 className="flex items-center gap-3 group"
               >
                 <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-white/5 p-0.5 border border-gray-200 dark:border-white/10 group-hover:border-orange-500 transition-all overflow-hidden">
-                  <img src={profileImage} alt="admin" className="w-full h-full object-cover rounded-full" />
+                  <img
+                    src={profileImage}
+                    alt="admin"
+                    className="w-full h-full object-cover rounded-full"
+                  />
                 </div>
               </button>
 
               {isDropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-sm shadow-2xl p-1 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="p-4 border-b border-gray-50 dark:border-white/5 mb-1">
-                    <p className="text-[10px] font-black uppercase text-black dark:text-white truncate">{user?.email}</p>
-                    <p className="text-[8px] font-bold text-orange-500 uppercase mt-1 tracking-widest">Active Session</p>
+                    <p className="text-[10px] font-black uppercase text-black dark:text-white truncate">
+                      {user?.email}
+                    </p>
+                    <p className="text-[8px] font-bold text-orange-500 uppercase mt-1 tracking-widest">
+                      Active Session
+                    </p>
                   </div>
                   <Link
                     href="/profile"
@@ -206,20 +238,23 @@ const menuItems = [
 
         {/* 🔹 Main Area */}
         <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[#080808] p-6 md:p-8 scrollbar-hide">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
 
       {/* 🔹 Mobile Sidebar */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-100 lg:hidden">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+          />
           <aside className="absolute left-0 top-0 h-full w-72 bg-white dark:bg-[#0c0c0c] flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 border-r border-white/10">
-             <div className="flex justify-end p-4">
-                <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400"><FiX size={24} /></button>
-             </div>
+            <div className="flex justify-end p-4">
+              <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400">
+                <FiX size={24} />
+              </button>
+            </div>
             <SidebarContent />
           </aside>
         </div>

@@ -20,6 +20,8 @@ import {
   FiCalendar,
   FiFilter,
   FiClock,
+  FiGrid,
+  FiType,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import toast, { Toaster } from 'react-hot-toast';
@@ -88,10 +90,18 @@ export default function CreatorRequestsPage() {
     if (!confirm('Are you sure you want to approve this creator?')) return;
     try {
       setProcessingId(userId);
-      await api.put(`/api/admin/approve-creator/${userId}`);
-      toast.success('Creator Approved Successfully');
-      fetchRequests(); // লিস্ট রিফ্রেশ করা
-      setSelectedUser(null);
+      const res = await api.put(`/api/admin/approve-creator/${userId}`);
+
+      if (res.status === 200) {
+        toast.success('Creator Approved Successfully');
+
+        setRequests((prev) =>
+          prev.map((req) => (req._id === userId ? { ...req, role: 'creator' } : req))
+        );
+
+        fetchRequests();
+        setSelectedUser(null);
+      }
     } catch (error) {
       toast.error('Approval failed');
     } finally {
@@ -189,7 +199,7 @@ export default function CreatorRequestsPage() {
                 <th className="px-8 py-5">Applicant Protocol</th>
                 <th className="px-8 py-5">Origin / Details</th>
                 <th className="px-8 py-5">Entry Type</th>
-                <th className="px-8 py-5 text-right">Access Control</th>
+                <th className="px-8 py-5 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-white/5">
@@ -202,6 +212,7 @@ export default function CreatorRequestsPage() {
               ) : requests.length > 0 ? (
                 requests.map((request) => (
                   <tr
+                    onDoubleClick={() => setSelectedUser(request)}
                     key={request._id}
                     className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-all group"
                   >
@@ -248,19 +259,33 @@ export default function CreatorRequestsPage() {
                         >
                           <FiEye size={16} />
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => handleApprove(request._id)}
-                          disabled={processingId === request._id}
-                          className="px-4 py-2 bg-green-500/10 text-green-600 text-[9px] font-black uppercase rounded-xl border border-green-500/20 hover:bg-green-600 hover:text-white transition-all shadow-sm"
+                          // যদি ইউজার অলরেডি ক্রিয়েটর হয় অথবা প্রসেসিং চলে, তবে ডিজেবল হবে
+                          disabled={processingId === request._id || request.role === 'creator'}
+                          className={`px-4 py-2 text-[9px] font-black uppercase rounded-xl border transition-all shadow-sm 
+    ${
+      request.role === 'creator'
+        ? 'bg-gray-100 dark:bg-white/5 text-gray-400 border-gray-200 dark:border-white/10 cursor-not-allowed opacity-50'
+        : 'bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-600 hover:text-white'
+    }`}
                         >
-                          Approve
+                          {request.role === 'creator' ? (
+                            <span className="flex items-center gap-1">
+                              <FiCheck /> Approved
+                            </span>
+                          ) : (
+                            'Approve'
+                          )}
                         </button>
-                        <button
-                          onClick={() => setRejectingUser(request)}
-                          className="px-4 py-2 bg-red-500/10 text-red-500 text-[9px] font-black uppercase rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all shadow-sm"
-                        >
-                          Reject
-                        </button>
+                        {request.role !== 'creator' && (
+                          <button
+                            onClick={() => setRejectingUser(request)}
+                            className="px-4 py-2 bg-red-500/10 text-red-500 text-[9px] font-black uppercase rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                          >
+                            Reject
+                          </button>
+                        )} */}
                       </div>
                     </td>
                   </tr>
@@ -321,85 +346,129 @@ export default function CreatorRequestsPage() {
         )}
       </div>
 
-      {/* 🔹 Modal: View Details (Unchanged Logic, Adjusted UI) */}
       {selectedUser && !rejectingUser && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-4">
           <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-300"
+            className="absolute inset-0 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={() => setSelectedUser(null)}
           />
-          <div className="relative w-full max-w-2xl bg-white dark:bg-[#0a0a0a] rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="h-40 w-full bg-gray-100 dark:bg-white/5 relative">
+          <div className="relative w-full max-w-3xl bg-white dark:bg-[#0a0a0a] rounded-md border border-gray-100 dark:border-white/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto scrollbar-hide">
+            {/* Cover Section - Height reduced for mobile */}
+            <div className="h-32 md:h-44 w-full bg-gray-100 dark:bg-white/5 relative">
               <img
                 src={
                   getImageUrl(selectedUser.profile?.coverImage) ||
                   'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'
                 }
-                className="w-full h-full object-cover opacity-60"
-                alt=""
+                className="w-full h-full object-cover opacity-70"
+                alt="cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-60"></div>
               <button
                 onClick={() => setSelectedUser(null)}
-                className="absolute top-4 right-4 p-2.5 bg-black/20 hover:bg-black/40 text-white rounded-xl transition-all"
+                className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-red-500 text-white rounded-md transition-all backdrop-blur-md"
               >
                 <FiX size={18} />
               </button>
             </div>
-            <div className="p-8 -mt-16 relative">
-              <div className="flex items-end gap-6 mb-8">
+
+            <div className="px-5 md:px-10 pb-8 -mt-12 md:-mt-16 relative">
+              {/* Profile Header - Responsive alignment */}
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 mb-8 text-center md:text-left">
                 <img
                   src={getImageUrl(selectedUser.profile?.profileImage, 'avatar')}
-                  className="h-28 w-28 rounded-2xl border-4 border-white dark:border-[#0a0a0a] bg-white object-cover shadow-2xl"
-                  alt=""
+                  className="h-24 w-24 md:h-32 md:w-32 rounded-lg border-4 border-white dark:border-[#0a0a0a] bg-white object-cover shadow-2xl"
+                  alt="avatar"
                 />
-                <div className="pb-2">
-                  <h3 className="text-3xl font-black uppercase tracking-tighter dark:text-white leading-none mb-1">
+                <div className="pb-2 w-full">
+                  <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter dark:text-white leading-none mb-2">
                     {selectedUser.firstName} {selectedUser.lastName}
                   </h3>
-                  <p className="text-orange-500 text-[11px] font-black uppercase tracking-[0.2em]">
-                    PROTOCOL @{selectedUser.username}
-                  </p>
+                  <div className="flex flex-wrap justify-center md:justify-start items-center gap-2 md:gap-3">
+                    <p className="text-orange-500 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em]">
+                      @{selectedUser.username}
+                    </p>
+                    <span className="hidden md:block h-1 w-1 rounded-full bg-gray-500"></span>
+                    <p className="text-gray-400 text-[10px] md:text-[11px] font-bold uppercase truncate max-w-[200px]">
+                      {selectedUser.email}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="space-y-4">
+              {/* Professional Specs Grid - Responsive 1 col on mobile, 2 col on md */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
+                <div className="space-y-4 md:space-y-5">
                   <DetailItem
-                    icon={FiMapPin}
-                    label="GEOGRAPHIC ORIGIN"
-                    value={`${selectedUser.profile?.city || 'UNKNOWN'}, ${selectedUser.profile?.country}`}
+                    icon={FiGlobe}
+                    label="Business Name"
+                    value={selectedUser.profile?.businessName || 'NOT REGISTERED'}
+                  />
+                  <DetailItem
+                    icon={FiGrid}
+                    label="Expertise Category"
+                    value={selectedUser.profile?.category?.title || 'GENERAL CREATOR'}
+                  />
+                    <DetailItem
+                      icon={FiMapPin}
+                      label="Location"
+                      value={`${selectedUser.profile?.city || 'N/A'}, ${selectedUser.profile?.country}`}
+                    />
+                    <DetailItem
+                      icon={FiType}
+                      label="Language"
+                      value={selectedUser.profile?.language || 'EN'}
+                    />
+                </div>
+
+                <div className="space-y-4 md:space-y-5">
+                  <DetailItem
+                    icon={FiLink}
+                    label="Website / Portfolio"
+                    value={selectedUser.profile?.websiteLink || 'NO LINK'}
+                    isLink={!!selectedUser.profile?.websiteLink}
                   />
                   <DetailItem
                     icon={FiInstagram}
-                    label="SOCIAL IDENTITY"
-                    value={selectedUser.profile?.socialLink || 'NOT LINKED'}
+                    label="Social Presence"
+                    value={selectedUser.profile?.socialLink || 'NO LINK'}
                     isLink={!!selectedUser.profile?.socialLink}
                   />
-                </div>
-                <div className="p-5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10">
-                  <p className="text-[9px] font-black text-gray-400 uppercase mb-3 flex items-center gap-2">
-                    <FiInfo size={14} className="text-orange-500" /> APPLICANT STATEMENT
-                  </p>
-                  <p className="text-[11px] font-medium leading-relaxed dark:text-gray-300 italic tracking-tight">
-                    "{selectedUser.profile?.bio || 'THE APPLICANT DID NOT PROVIDE A BIO STATEMENT.'}
-                    "
-                  </p>
+                  {/* Bio section - Less rounded */}
+                  <div className="p-4 md:p-5 bg-gray-50 dark:bg-white/5 rounded-md border border-gray-100 dark:border-white/10">
+                    <p className="text-[8px] md:text-[9px] font-black text-orange-500 uppercase mb-2 tracking-widest flex items-center gap-2">
+                      <FiInfo size={12} /> Bio Statement
+                    </p>
+                    <p className="text-[10px] md:text-[11px] font-medium leading-relaxed dark:text-gray-400 italic">
+                      "{selectedUser.profile?.bio || 'No bio provided.'}"
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-4 pt-6 border-t dark:border-white/10">
+              {/* Action Controls - Stacked on mobile */}
+              <div className="flex flex-col md:flex-row gap-3 md:gap-4 pt-6 border-t dark:border-white/5">
                 <button
                   onClick={() => handleApprove(selectedUser._id)}
-                  disabled={processingId === selectedUser._id}
-                  className="flex-[2] py-4 bg-green-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-600/20"
+                  disabled={processingId === selectedUser._id || selectedUser.role === 'creator'}
+                  className={`order-1 md:order-1 flex-[2] py-4 md:py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-md transition-all shadow-xl 
+              ${
+                selectedUser.role === 'creator'
+                  ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed border border-gray-200 dark:border-white/10'
+                  : 'bg-green-600 text-white hover:bg-green-700 shadow-green-600/20'
+              }`}
                 >
-                  GRANT CREATOR ACCESS
+                  {selectedUser.role === 'creator'
+                    ? 'Approved'
+                    : 'Approve'}
                 </button>
+
                 <button
                   onClick={() => setRejectingUser(selectedUser)}
-                  className="flex-1 py-4 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all"
+                  disabled={selectedUser.role === 'creator'}
+                  className="order-2 md:order-2 flex-1 py-4 md:py-5 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-md border border-red-500/20 hover:bg-red-500 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  DENY ACCESS
+                  Reject
                 </button>
               </div>
             </div>
@@ -485,7 +554,7 @@ export default function CreatorRequestsPage() {
 
 const DetailItem = ({ icon: Icon, label, value, isLink }) => (
   <div className="flex items-center gap-4">
-    <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-xl text-orange-500 border border-gray-100 dark:border-white/10 shadow-sm">
+    <div className="p-2 bg-gray-50 dark:bg-white/5 rounded-md text-orange-500 border border-gray-100 dark:border-white/10 shadow-sm">
       <Icon size={18} />
     </div>
     <div className="leading-tight">

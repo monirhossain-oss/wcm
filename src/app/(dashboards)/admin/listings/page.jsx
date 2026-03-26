@@ -29,7 +29,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-const LISTINGS_CACHE_KEY = 'drakilo_admin_listings_cache';
+const LISTINGS_CACHE_KEY = 'wcm_admin_listings_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
 
 // Mandatory Rejection/Block Reasons
