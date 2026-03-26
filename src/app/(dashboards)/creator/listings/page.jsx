@@ -26,7 +26,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-const LISTINGS_CACHE_KEY = 'drakilo_listings_cache';
+const LISTINGS_CACHE_KEY = 'wcm_listings_cache';
 const CACHE_TIME = 24 * 60 * 60 * 1000;
 
 export default function MyListings() {

@@ -28,7 +28,7 @@ export default function HeroActions() {
                     {isAdmin ? "Admin Access Active" : "Creator Mode Active"}
                 </button>
             ) : (
-                <Link href={user ? `/become-creator` : `/auth/login`}>
+                <Link href={user ? `/become-creator` : `/`}>
                     <button className="
                         px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg font-medium whitespace-nowrap
                         border border-[#F57C00] text-[#F57C00] bg-transparent

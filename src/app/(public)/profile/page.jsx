@@ -23,20 +23,26 @@ export default function ProfilePage() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [previews, setPreviews] = useState({ profile: null, cover: null });
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/'); 
+    }
+  }, [user, loading, router]);
+
   const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
 
   useEffect(() => {
     if (user) {
       reset({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        displayName: user.profile?.displayName || '',
-        bio: user.profile?.bio || '',
-        country: user.profile?.country || '',
-        city: user.profile?.city || '',
-        language: user.profile?.language || '',
-        websiteLink: user.profile?.websiteLink || '',
-        socialLink: user.profile?.socialLink || '',
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        displayName: user?.profile?.displayName || '',
+        bio: user?.profile?.bio || '',
+        country: user?.profile?.country || '',
+        city: user?.profile?.city || '',
+        language: user?.profile?.language || '',
+        websiteLink: user?.profile?.websiteLink || '',
+        socialLink: user?.profile?.socialLink || '',
       });
     }
   }, [user, reset, isEditing]);
@@ -140,7 +146,7 @@ export default function ProfilePage() {
                 <img
                   src={
                     previews.cover ||
-                    getImageUrl(user.profile?.coverImage) ||
+                    getImageUrl(user?.profile?.coverImage) ||
                     'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'
                   }
                   className="w-full h-full object-cover grayscale-[0.5]"
@@ -164,7 +170,7 @@ export default function ProfilePage() {
                 <div className="relative group">
                   <div className="h-28 w-28 rounded-full border-4 border-white dark:border-[#0c0c0c] bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-xl">
                     <img
-                      src={previews.profile || getImageUrl(user.profile?.profileImage, 'avatar')}
+                      src={previews?.profile || getImageUrl(user?.profile?.profileImage, 'avatar')}
                       className="w-full h-full object-cover"
                       alt="avatar"
                     />
@@ -185,12 +191,12 @@ export default function ProfilePage() {
 
                 <div className="mt-4">
                   <h2 className="text-sm font-black dark:text-white uppercase tracking-tight">
-                    {user.profile?.displayName || `${user.firstName} ${user.lastName}`}
+                    {user?.profile?.displayName || `${user?.firstName} ${user?.lastName}`}
                   </h2>
                   <div className="inline-flex items-center gap-2 mt-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                     <p className="text-orange-500 text-[9px] font-black tracking-widest uppercase italic">
-                      @{user.username}
+                      @{user?.username}
                     </p>
                   </div>
                 </div>
@@ -201,7 +207,7 @@ export default function ProfilePage() {
                       Auth Role
                     </p>
                     <p className="text-[10px] font-black text-black dark:text-white uppercase mt-1">
-                      {user.role}
+                      {user?.role}
                     </p>
                   </div>
                   <div className="text-left bg-gray-50 dark:bg-white/5 p-3 rounded-md">
@@ -243,18 +249,18 @@ export default function ProfilePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                       <InfoRow
                         label="Access Name"
-                        value={`${user.firstName} ${user.lastName}`}
+                        value={`${user?.firstName} ${user?.lastName}`}
                         icon={FiUser}
                       />
                       <InfoRow
                         label="Network Node"
-                        value={user.profile?.displayName}
+                        value={user?.profile?.displayName}
                         icon={FiType}
                       />
-                      <InfoRow label="Geo Region" value={user.profile?.country} icon={FiMapPin} />
-                      <InfoRow label="Station" value={user.profile?.city} icon={FiMapPin} />
-                      <InfoRow label="Protocol" value={user.profile?.language} icon={FiGlobe} />
-                      <InfoRow label="Direct Link" value={user.profile?.socialLink} icon={FiLink} />
+                      <InfoRow label="Geo Region" value={user?.profile?.country} icon={FiMapPin} />
+                      <InfoRow label="Station" value={user?.profile?.city} icon={FiMapPin} />
+                      <InfoRow label="Protocol" value={user?.profile?.language} icon={FiGlobe} />
+                      <InfoRow label="Direct Link" value={user?.profile?.socialLink} icon={FiLink} />
                     </div>
 
                     <div className="bg-gray-50 dark:bg-black/20 p-6 border border-gray-100 dark:border-white/5 rounded-md">
@@ -262,7 +268,7 @@ export default function ProfilePage() {
                         <FiInfo /> Professional Brief
                       </p>
                       <p className="text-[11px] font-bold leading-relaxed dark:text-gray-400 italic">
-                        {user.profile?.bio || 'No system brief initialized...'}
+                        {user?.profile?.bio || 'No system brief initialized...'}
                       </p>
                     </div>
 
