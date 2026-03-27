@@ -21,7 +21,9 @@ const CreatorsPage = () => {
         setLoading(true);
         const res = await api.get('/api/users/top-creators-dropdown');
         if (res.data.success) {
+          
           setTop30(res.data.data.top30 || []);
+          console.log(res.data.data)
         }
       } catch (err) {
         console.error('Fetch error:', err);
