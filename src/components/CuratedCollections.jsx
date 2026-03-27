@@ -39,11 +39,6 @@ const curatedData = [
         key: 'beauty',
         image: '/huipil.jpg',
     },
-    {
-        title: 'Festivals & Celebration',
-        key: 'festival',
-        image: '/japaneseCrafts.png',
-    },
 ];
 
 export default function CuratedCollections() {
