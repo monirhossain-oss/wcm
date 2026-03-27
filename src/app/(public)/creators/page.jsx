@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Loader2, Users, Sparkles, Globe, ChevronDown, ChevronRight } from 'lucide-react';
+import { Loader2, Users, Search, ChevronDown, Globe, MapPin } from 'lucide-react';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000",
@@ -13,7 +13,6 @@ const api = axios.create({
 
 const CreatorsPage = () => {
   const [top30, setTop30] = useState([]);
-  const [allCreators, setAllCreators] = useState([]); 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,10 +21,7 @@ const CreatorsPage = () => {
         setLoading(true);
         const res = await api.get('/api/users/top-creators-dropdown');
         if (res.data.success) {
-          const t30 = res.data.data.top30 || [];
-          const dList = res.data.data.dropdownList || [];
-          setTop30(t30);
-          setAllCreators([...t30, ...dList]);
+          setTop30(res.data.data.top30 || []);
         }
       } catch (err) {
         console.error('Fetch error:', err);
@@ -36,18 +32,11 @@ const CreatorsPage = () => {
     fetchCreators();
   }, []);
 
-  const handleSelectCreator = (e) => {
-    const userId = e.target.value;
-    if (userId) {
-      window.location.href = `/profile/${userId}`;
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <Loader2 className="animate-spin text-orange-500" size={40} />
-        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Loading Network...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Syncing Creators...</p>
       </div>
     );
   }
@@ -55,77 +44,110 @@ const CreatorsPage = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a] transition-colors pb-20">
       
-      {/* --- Sticky Header --- */}
-      <div className="sticky top-20 z-[100] bg-white/90 dark:bg-[#0a0a0a]/90 border-b border-zinc-100 dark:border-white/5 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-5">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="relative w-full md:w-80 group">
-              <Users size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-500 z-10 pointer-events-none" />
-              <select
-                onChange={handleSelectCreator}
-                className="w-full pl-12 pr-10 py-3 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-[11px] font-bold uppercase outline-none cursor-pointer text-zinc-700 dark:text-zinc-200 appearance-none transition-all"
-                defaultValue=""
-              >
-                <option value="" disabled>Search Artisan Node...</option>
-                {allCreators.map((c) => (
-                  <option key={c._id} value={c._id} className="dark:bg-[#0a0a0a]">
-                    {c.fullName || `${c.firstName} ${c.lastName}`}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
-            </div>
+      {/* SECTION 1 — HEADER (Editorial Style) */}
+      <div className="pt-20 pb-12 text-center px-6">
+        <h1 className="text-4xl md:text-6xl font-serif font-black text-zinc-900 dark:text-white mb-4 tracking-tight">
+          Discover Creators Around the World
+        </h1>
+        <p className="text-zinc-500 dark:text-zinc-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed font-medium">
+          Explore creators inspired by cultures and traditions worldwide. <br className="hidden md:block" /> Connect with the hands that shape our heritage.
+        </p>
+      </div>
+
+      {/* SECTION 2 — SEARCH + FILTER */}
+      <div className="max-w-7xl mx-auto px-6 mb-16">
+        <div className="flex flex-col md:flex-row items-center gap-4 bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-3xl border border-zinc-100 dark:border-white/5 shadow-sm">
+          {/* Search Box */}
+          <div className="relative flex-1 w-full group">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input 
+              type="text" 
+              placeholder="Search creators..." 
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-zinc-800 border-none rounded-2xl text-sm focus:ring-2 focus:ring-orange-500/20 outline-none transition-all"
+            />
+          </div>
+          
+          {/* Filters */}
+          <div className="flex gap-3 w-full md:w-auto">
+            <select className="flex-1 md:w-40 px-4 py-3 bg-white dark:bg-zinc-800 rounded-2xl text-sm outline-none border-none cursor-pointer">
+              <option>Culture</option>
+              <option>African</option>
+              <option>Asian</option>
+              <option>Bengali</option>
+            </select>
+            <select className="flex-1 md:w-40 px-4 py-3 bg-white dark:bg-zinc-800 rounded-2xl text-sm outline-none border-none cursor-pointer">
+              <option>Category</option>
+              <option>Textile</option>
+              <option>Pottery</option>
+              <option>Handmade</option>
+            </select>
           </div>
         </div>
       </div>
 
-      {/* --- Main Content --- */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="mb-12 space-y-2">
-          <div className="flex items-center gap-2 text-orange-500">
-            <Sparkles size={16} />
-            <span className="text-[10px] font-black uppercase tracking-widest">Premium Node</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Our Top 30 Creators</h1>
-        </div>
-
-        {/* --- Creators Grid (Updated Card Design) --- */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {top30.map((creator) => (
-            <div key={creator._id} className="bg-white dark:bg-[#111] border border-zinc-100 dark:border-white/5 rounded-3xl p-6 flex flex-col items-center shadow-sm hover:shadow-md transition-shadow">
+      {/* SECTION 3 — CREATORS GRID (4 Columns) */}
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {top30.map((creator, idx) => (
+            <div key={creator._id} className="group relative flex flex-col bg-white dark:bg-[#111] rounded-[32px] overflow-hidden border border-zinc-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/5 hover:-translate-y-1">
               
-              {/* Profile Image - Circle inside Box */}
-              <div className="relative w-28 h-28 mb-6">
-                <div className="w-full h-full rounded-full overflow-hidden border-2 border-zinc-50 dark:border-white/5">
-                   <Image
+              {/* Card Banner Background */}
+              <div className="h-24 w-full bg-zinc-100 dark:bg-zinc-800 relative">
+                {/* Featured Label (Static logic for now) */}
+                {idx < 4 && (
+                   <span className="absolute top-4 right-4 z-10 bg-orange-500 text-white text-[8px] font-black uppercase px-2 py-1 rounded-full shadow-lg">
+                    Featured Creator
+                  </span>
+                )}
+              </div>
+
+              {/* Profile Image (Overlapping Banner) */}
+              <div className="px-6 -mt-10 relative z-10 flex flex-col items-center">
+                <div className="w-20 h-20 rounded-2xl overflow-hidden border-4 border-white dark:border-[#111] shadow-xl">
+                  <Image
                     src={creator.profile?.profileImage || "/default-avatar.png"}
                     alt={creator.username}
-                    fill
-                    className="object-cover rounded-full"
+                    width={80}
+                    height={80}
+                    className="object-cover w-full h-full"
                   />
                 </div>
-              </div>
 
-              {/* Creator Info */}
-              <div className="text-center space-y-1 mb-6">
-                <h3 className="font-bold text-xl text-zinc-900 dark:text-white">
-                  {creator.firstName} {creator.lastName}
-                </h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {creator.profile?.city || "Unknown City"}, {creator.profile?.country || "Global"}
-                </p>
-                <p className="text-zinc-400 text-sm font-medium">
-                  {creator.approvedListingsCount || 0} Listings
-                </p>
-              </div>
+                {/* Creator Details */}
+                <div className="text-center mt-4 w-full">
+                  <h3 className="font-serif font-black text-xl text-zinc-900 dark:text-white leading-tight">
+                    {creator.firstName} {creator.lastName}
+                  </h3>
+                  <p className="flex items-center justify-center gap-1 text-xs text-zinc-400 mt-1 uppercase tracking-widest font-bold">
+                    <MapPin size={12} className="text-orange-500" />
+                    {creator.profile?.country || "Global"}
+                  </p>
+                  
+                  <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-4 line-clamp-2 leading-relaxed">
+                    Crafting stories through traditional {creator.profile?.category || "artistry"} and heritage techniques.
+                  </p>
 
-              {/* View Profile Button */}
-              <Link 
-                href={`/profile/${creator._id}`}
-                className="w-full bg-[#FF8A00] hover:bg-[#e67c00] text-white font-bold py-3 px-6 rounded-2xl text-sm transition-colors flex items-center justify-center gap-2"
-              >
-                View Profile
-              </Link>
+                  {/* Tags Section */}
+                  <div className="flex flex-wrap justify-center gap-2 mt-4">
+                    <span className="text-[9px] font-bold px-2 py-1 bg-zinc-50 dark:bg-white/5 text-zinc-400 rounded-md border border-zinc-100 dark:border-white/5">
+                      Textile
+                    </span>
+                    <span className="text-[9px] font-bold px-2 py-1 bg-zinc-50 dark:bg-white/5 text-zinc-400 rounded-md border border-zinc-100 dark:border-white/5">
+                      Handmade
+                    </span>
+                  </div>
+                </div>
+
+                {/* Button Section */}
+                <div className="w-full mt-6 pb-6">
+                   <Link 
+                    href={`/profile/${creator._id}`}
+                    className="w-full bg-[#f27b13] hover:bg-[#d96a0d] text-white text-xs font-black uppercase tracking-widest py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group-hover:shadow-lg shadow-orange-500/20"
+                  >
+                    View Creator
+                  </Link>
+                </div>
+              </div>
             </div>
           ))}
         </div>
