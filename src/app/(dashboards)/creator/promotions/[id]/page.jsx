@@ -301,7 +301,7 @@ export default function PromotionInsightsPage() {
                 onClick={() => handleTogglePause('boost')}
                 loading={actionLoading === 'boost_pause'}
               />
-              <ControlBtn icon={FiEdit3} label="Extend" onClick={() => setEditMode('boost')} />
+              {/* <ControlBtn icon={FiEdit3} label="Extend" onClick={() => setEditMode('boost')} /> */}
               <ControlBtn
                 icon={FiXCircle}
                 label="Refund"

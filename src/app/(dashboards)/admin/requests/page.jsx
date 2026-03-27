@@ -22,6 +22,8 @@ import {
   FiClock,
   FiGrid,
   FiType,
+  FiAlertCircle,
+  FiBriefcase,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import toast, { Toaster } from 'react-hot-toast';
@@ -349,21 +351,21 @@ export default function CreatorRequestsPage() {
       {selectedUser && !rejectingUser && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-4">
           <div
-            className="absolute inset-0 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300"
+            className="absolute inset-0 bg-black/95 backdrop-blur-md animate-in fade-in duration-300"
             onClick={() => setSelectedUser(null)}
           />
           <div className="relative w-full max-w-3xl bg-white dark:bg-[#0a0a0a] rounded-md border border-gray-100 dark:border-white/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto scrollbar-hide">
-            {/* Cover Section - Height reduced for mobile */}
+            {/* Cover Section */}
             <div className="h-32 md:h-44 w-full bg-gray-100 dark:bg-white/5 relative">
               <img
                 src={
                   getImageUrl(selectedUser.profile?.coverImage) ||
                   'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'
                 }
-                className="w-full h-full object-cover opacity-70"
+                className="w-full h-full object-cover opacity-60"
                 alt="cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-60"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent"></div>
               <button
                 onClick={() => setSelectedUser(null)}
                 className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-red-500 text-white rounded-md transition-all backdrop-blur-md"
@@ -373,71 +375,128 @@ export default function CreatorRequestsPage() {
             </div>
 
             <div className="px-5 md:px-10 pb-8 -mt-12 md:-mt-16 relative">
-              {/* Profile Header - Responsive alignment */}
+              {/* Profile Header */}
               <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 mb-8 text-center md:text-left">
                 <img
                   src={getImageUrl(selectedUser.profile?.profileImage, 'avatar')}
-                  className="h-24 w-24 md:h-32 md:w-32 rounded-lg border-4 border-white dark:border-[#0a0a0a] bg-white object-cover shadow-2xl"
+                  className="h-24 w-24 md:h-32 md:w-32 rounded-md border-4 border-white dark:border-[#0a0a0a] bg-white object-cover shadow-2xl"
                   alt="avatar"
                 />
                 <div className="pb-2 w-full">
-                  <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter dark:text-white leading-none mb-2">
-                    {selectedUser.firstName} {selectedUser.lastName}
-                  </h3>
+                  <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
+                    <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter dark:text-white leading-none">
+                      {selectedUser.profile?.displayName ||
+                        `${selectedUser.firstName} ${selectedUser.lastName}`}
+                    </h3>
+                    {/* Account Type Badge */}
+                    <span
+                      className={`inline-block px-3 py-1 text-[8px] font-black uppercase tracking-widest rounded-md w-fit mx-auto md:mx-0 
+                ${selectedUser.profile?.customerType === 'business' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'}`}
+                    >
+                      {selectedUser.profile?.customerType || 'Individual'}
+                    </span>
+                  </div>
+
                   <div className="flex flex-wrap justify-center md:justify-start items-center gap-2 md:gap-3">
-                    <p className="text-orange-500 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em]">
+                    <p className="text-gray-400 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em]">
                       @{selectedUser.username}
                     </p>
                     <span className="hidden md:block h-1 w-1 rounded-full bg-gray-500"></span>
-                    <p className="text-gray-400 text-[10px] md:text-[11px] font-bold uppercase truncate max-w-[200px]">
+                    <p className="text-gray-500 text-[10px] md:text-[11px] font-bold uppercase truncate max-w-[200px]">
                       {selectedUser.email}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Professional Specs Grid - Responsive 1 col on mobile, 2 col on md */}
+              {/* VAT & Compliance Alert Section (Only for Business) */}
+              {selectedUser.profile?.customerType === 'business' && (
+                <div className="mb-8 p-4 bg-orange-500/5 border border-orange-500/10 rounded-md flex items-center justify-between">
+                  <div>
+                    <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest mb-1">
+                      VAT Information
+                    </p>
+                    <p className="text-xs font-bold dark:text-white uppercase tracking-tighter">
+                      ID: {selectedUser.profile?.vatNumber || 'NOT PROVIDED'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest 
+                ${selectedUser.profile?.isVatValid ? 'text-green-500' : 'text-red-500'}`}
+                    >
+                      {selectedUser.profile?.isVatValid ? (
+                        <>
+                          <FiCheckCircle /> Verified
+                        </>
+                      ) : (
+                        <>
+                          <FiAlertCircle /> Unverified
+                        </>
+                      )}
+                    </span>
+                    <p className="text-[8px] text-gray-500 font-bold uppercase">
+                      Checked:{' '}
+                      {selectedUser.profile?.vatLastChecked
+                        ? new Date(selectedUser.profile.vatLastChecked).toLocaleDateString()
+                        : 'Never'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Info Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
                 <div className="space-y-4 md:space-y-5">
                   <DetailItem
-                    icon={FiGlobe}
-                    label="Business Name"
-                    value={selectedUser.profile?.businessName || 'NOT REGISTERED'}
+                    icon={FiBriefcase}
+                    label={
+                      selectedUser.profile?.customerType === 'business'
+                        ? 'Agency Name'
+                        : 'Legal Name'
+                    }
+                    value={selectedUser.profile?.businessName || 'N/A'}
                   />
                   <DetailItem
                     icon={FiGrid}
-                    label="Expertise Category"
-                    value={selectedUser.profile?.category?.title || 'GENERAL CREATOR'}
+                    label="Expertise"
+                    value={selectedUser.profile?.category?.title || 'GENERAL'}
                   />
-                    <DetailItem
-                      icon={FiMapPin}
-                      label="Location"
-                      value={`${selectedUser.profile?.city || 'N/A'}, ${selectedUser.profile?.country}`}
-                    />
-                    <DetailItem
-                      icon={FiType}
-                      label="Language"
-                      value={selectedUser.profile?.language || 'EN'}
-                    />
+                  <DetailItem
+                    icon={FiGlobe}
+                    label="Region"
+                    value={`${selectedUser.profile?.country} (${selectedUser.profile?.countryCode})`}
+                  />
+                  <DetailItem
+                    icon={FiMapPin}
+                    label="City"
+                    value={selectedUser.profile?.city || 'N/A'}
+                  />
                 </div>
 
                 <div className="space-y-4 md:space-y-5">
                   <DetailItem
+                    icon={FiType}
+                    label="Communication"
+                    value={selectedUser.profile?.language || 'EN'}
+                  />
+                  <DetailItem
                     icon={FiLink}
-                    label="Website / Portfolio"
+                    label="Portfolio"
                     value={selectedUser.profile?.websiteLink || 'NO LINK'}
                     isLink={!!selectedUser.profile?.websiteLink}
                   />
                   <DetailItem
                     icon={FiInstagram}
-                    label="Social Presence"
+                    label="Social"
                     value={selectedUser.profile?.socialLink || 'NO LINK'}
                     isLink={!!selectedUser.profile?.socialLink}
                   />
-                  {/* Bio section - Less rounded */}
+
+                  {/* Bio Box */}
                   <div className="p-4 md:p-5 bg-gray-50 dark:bg-white/5 rounded-md border border-gray-100 dark:border-white/10">
-                    <p className="text-[8px] md:text-[9px] font-black text-orange-500 uppercase mb-2 tracking-widest flex items-center gap-2">
-                      <FiInfo size={12} /> Bio Statement
+                    <p className="text-[8px] font-black text-orange-500 uppercase mb-2 tracking-widest flex items-center gap-2">
+                      <FiInfo size={12} /> Statement
                     </p>
                     <p className="text-[10px] md:text-[11px] font-medium leading-relaxed dark:text-gray-400 italic">
                       "{selectedUser.profile?.bio || 'No bio provided.'}"
@@ -446,29 +505,27 @@ export default function CreatorRequestsPage() {
                 </div>
               </div>
 
-              {/* Action Controls - Stacked on mobile */}
+              {/* Action Controls */}
               <div className="flex flex-col md:flex-row gap-3 md:gap-4 pt-6 border-t dark:border-white/5">
                 <button
                   onClick={() => handleApprove(selectedUser._id)}
                   disabled={processingId === selectedUser._id || selectedUser.role === 'creator'}
-                  className={`order-1 md:order-1 flex-[2] py-4 md:py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-md transition-all shadow-xl 
-              ${
-                selectedUser.role === 'creator'
-                  ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed border border-gray-200 dark:border-white/10'
-                  : 'bg-green-600 text-white hover:bg-green-700 shadow-green-600/20'
-              }`}
+                  className={`flex-[2] py-4 md:py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-md transition-all shadow-xl 
+            ${
+              selectedUser.role === 'creator'
+                ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed border border-gray-200 dark:border-white/10'
+                : 'bg-green-600 text-white hover:bg-green-700 shadow-green-600/20'
+            }`}
                 >
-                  {selectedUser.role === 'creator'
-                    ? 'Approved'
-                    : 'Approve'}
+                  {selectedUser.role === 'creator' ? 'Already a Creator' : 'Confirm & Approve'}
                 </button>
 
                 <button
                   onClick={() => setRejectingUser(selectedUser)}
                   disabled={selectedUser.role === 'creator'}
-                  className="order-2 md:order-2 flex-1 py-4 md:py-5 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-md border border-red-500/20 hover:bg-red-500 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex-1 py-4 md:py-5 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-md border border-red-500/20 hover:bg-red-500 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  Reject
+                  Reject Application
                 </button>
               </div>
             </div>

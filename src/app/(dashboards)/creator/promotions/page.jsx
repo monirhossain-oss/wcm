@@ -23,6 +23,30 @@ const api = axios.create({
   withCredentials: true,
 });
 
+const BOOST_PACKAGES = [
+  {
+    id: 'starter',
+    name: 'Starter Boost',
+    price: 12,
+    days: 7,
+    desc: 'Boosted Search + Category Pages',
+  },
+  {
+    id: 'standard',
+    name: 'Standard Boost',
+    price: 29,
+    days: 14,
+    desc: 'Search + Category + Discovery',
+  },
+  {
+    id: 'premium',
+    name: 'Premium Boost',
+    price: 79,
+    days: 30,
+    desc: 'Homepage + Search + Featured',
+  },
+];
+
 // EU Countries for VAT dropdown
 const EU_COUNTRIES = [
   { code: 'FR', name: 'France' },
@@ -82,6 +106,13 @@ export default function PromotionsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (promoType === 'boost') {
+      setBoostBudget(BOOST_PACKAGES[0].price);
+      setBoostDays(BOOST_PACKAGES[0].days);
+    }
+  }, [promoType]);
 
   const handlePurchase = async () => {
     if (walletBalance < currentCost) return toast.error('Insufficient credits.');
@@ -311,7 +342,7 @@ export default function PromotionsPage() {
       </div>
 
       {/* Promotion Config Modal (Boost/PPC) */}
-      {selectedListing && (
+      {/* {selectedListing && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-lg">
           <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800">
             <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
@@ -406,6 +437,120 @@ export default function PromotionsPage() {
                 onClick={handlePurchase}
                 disabled={actionLoading || walletBalance < currentCost}
                 className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl font-black uppercase text-[11px] tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20"
+              >
+                {actionLoading ? 'Initializing...' : 'Launch Campaign'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )} */}
+
+      {selectedListing && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+          <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-md overflow-hidden shadow-2xl border border-zinc-200 dark:border-white/10">
+            <div className="p-6 border-b border-zinc-100 dark:border-white/5 flex justify-between items-center bg-zinc-50/50 dark:bg-white/5">
+              <h3 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-3 dark:text-white">
+                <FiZap className="text-orange-500" size={18} /> Growth Protocol
+              </h3>
+              <button
+                onClick={() => setSelectedListing(null)}
+                className="text-zinc-400 hover:text-red-500"
+              >
+                <FiX size={22} />
+              </button>
+            </div>
+
+            <div className="p-8 space-y-8">
+              {/* Type Switcher */}
+              <div className="flex p-1 bg-zinc-100 dark:bg-white/5 rounded-md">
+                <button
+                  onClick={() => setPromoType('boost')}
+                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'boost' ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600' : 'text-zinc-500'}`}
+                >
+                  Viral Boost
+                </button>
+                <button
+                  onClick={() => setPromoType('ppc')}
+                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'ppc' ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600' : 'text-zinc-500'}`}
+                >
+                  PPC Flow
+                </button>
+              </div>
+
+              {/* Conditional Content */}
+              {promoType === 'boost' ? (
+                <div className="space-y-3">
+                  <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
+                    Select Package
+                  </label>
+                  <div className="grid grid-cols-1 gap-3">
+                    {BOOST_PACKAGES.map((pkg) => (
+                      <button
+                        key={pkg.id}
+                        onClick={() => {
+                          setBoostBudget(pkg.price);
+                          setBoostDays(pkg.days);
+                        }}
+                        className={`p-4 rounded-md border text-left transition-all ${
+                          boostBudget === pkg.price
+                            ? 'border-orange-500 bg-orange-500/5 ring-1 ring-orange-500'
+                            : 'border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/5 hover:border-zinc-400'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest dark:text-white">
+                            {pkg.name}
+                          </span>
+                          <span className="text-sm font-black text-orange-600">€{pkg.price}</span>
+                        </div>
+                        <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-tighter leading-tight">
+                          {pkg.days} Days • {pkg.desc}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
+                      Budget (€)
+                    </label>
+                    <input
+                      type="number"
+                      value={ppcAmount}
+                      onChange={(e) => setPpcAmount(e.target.value)}
+                      className="w-full bg-zinc-100 dark:bg-white/5 border-none p-4 rounded-md text-sm font-black outline-none dark:text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
+                      Clicks Est.
+                    </label>
+                    <input
+                      type="number"
+                      value={targetClicks}
+                      onChange={(e) => setTargetClicks(e.target.value)}
+                      className="w-full bg-zinc-100 dark:bg-white/5 border-none p-4 rounded-md text-sm font-black outline-none dark:text-white"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Investment Summary */}
+              <div className="p-6 bg-orange-500/5 rounded-md border border-orange-500/10 flex justify-between items-center">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                  Investment
+                </span>
+                <span className="text-3xl font-black text-orange-600 italic tracking-tighter">
+                  €{currentCost.toFixed(2)}
+                </span>
+              </div>
+
+              <button
+                onClick={handlePurchase}
+                disabled={actionLoading || walletBalance < currentCost}
+                className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-md font-black uppercase text-[10px] tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20"
               >
                 {actionLoading ? 'Initializing...' : 'Launch Campaign'}
               </button>
