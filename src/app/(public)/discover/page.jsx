@@ -1,7 +1,7 @@
 'use client';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import axios from 'axios';
-import { useSearchParams } from 'next/navigation'; 
+import { useSearchParams } from 'next/navigation';
 import { useListings } from '@/context/ListingsContext';
 import ListingCard from '@/components/ListingCard';
 import { Search, ChevronLeft, ChevronRight, Loader2, MapPin, Zap } from 'lucide-react';
@@ -20,11 +20,11 @@ const continentMapping = {
   "Latin America": ["Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominican Republic", "Ecuador", "El Salvador", "Guatemala", "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Puerto Rico", "Uruguay", "Venezuela"]
 };
 
-const DiscoverPage = () => {
+const DiscoverContent = () => {
   const { cachedListings } = useListings();
   const searchParams = useSearchParams();
   const urlContinent = searchParams.get('continent');
-  const urlCategory = searchParams.get('category'); // এটি যোগ করো যাতে ক্যাটাগরি ইউআরএল থেকে পড়া যায়
+  const urlCategory = searchParams.get('category'); // এটি যোগ করো যাতে ক্যাটাগরি ইউআরএল থেকে পড়া যায়
 
   const [listings, setListings] = useState([]);
   const [categories, setCategories] = useState(['All']);
@@ -333,5 +333,18 @@ const DiscoverPage = () => {
     </div>
   );
 };
-
-export default DiscoverPage;
+export default function DiscoverPage() {
+  return (
+    // এখানে Suspense ব্যবহার করা হয়েছে যাতে build error না আসে
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0a0a0a]">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="animate-spin text-orange-500" size={40} />
+          <p className="text-sm text-zinc-500 font-medium">Loading Discover...</p>
+        </div>
+      </div>
+    }>
+      <DiscoverContent />
+    </Suspense>
+  );
+}
