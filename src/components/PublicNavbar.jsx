@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { FiMenu, FiX, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiX, FiUser, FiLogOut, FiHeart } from 'react-icons/fi'; // FiHeart যোগ করা হয়েছে
 import { useAuth } from '@/context/AuthContext';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegistationModal';
@@ -14,6 +14,9 @@ const PublicNavbar = () => {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+
+  // উইশলিস্ট কাউন্ট স্টেট (এটি পরে আপনার Context থেকে আসবে)
+  const [wishlistCount, setWishlistCount] = useState(0);
 
   // ক্যাটাগরি স্টেট
   const [categories, setCategories] = useState([]);
@@ -28,7 +31,7 @@ const PublicNavbar = () => {
 
   const menuItems = [
     { name: 'Explore', href: '/discover' },
-    { name: 'Categories', href: '/categories' }, // এটি ড্রপডাউন হিসেবে কাজ করবে
+    { name: 'Categories', href: '/categories' },
     { name: 'Creators', href: '/creators' },
     { name: 'About Us', href: '/aboutUs' },
     { name: 'Blogs', href: '/blogs' },
@@ -40,8 +43,6 @@ const PublicNavbar = () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         const response = await axios.get(`${baseUrl}/api/admin/categories`);
-
-        // API response structure অনুযায়ী ডাটা সেট করা
         const fetchedData = Array.isArray(response.data) ? response.data : response.data.data;
         setCategories(fetchedData || []);
       } catch (error) {
@@ -50,7 +51,6 @@ const PublicNavbar = () => {
         setIsLoadingCategories(false);
       }
     };
-
     fetchCategories();
   }, []);
 
@@ -101,7 +101,6 @@ const PublicNavbar = () => {
               {menuItems.map((item) => {
                 const isActive = pathname === item.href;
 
-                // Categories মেনুর জন্য বিশেষ লজিক
                 if (item.name === 'Categories') {
                   return (
                     <div
@@ -110,7 +109,6 @@ const PublicNavbar = () => {
                       onMouseEnter={() => setIsCategoryDropdownOpen(true)}
                       onMouseLeave={() => setIsCategoryDropdownOpen(false)}
                     >
-                      {/* Link এর বদলে button ব্যবহার করা হয়েছে যাতে ক্লিক করলে কোথাও না যায় */}
                       <button
                         type="button"
                         className={`text-sm font-medium transition-all duration-200 pb-1 border-b-2 flex items-center gap-1 cursor-default outline-none
@@ -120,10 +118,8 @@ const PublicNavbar = () => {
                         <svg className={`w-3 h-3 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                       </button>
 
-                      {/* Dropdown Menu */}
                       {isCategoryDropdownOpen && (
                         <div className="absolute top-full left-1/2 -translate-x-1/2 w-52 bg-white dark:bg-[#121212] shadow-2xl border border-gray-100 dark:border-gray-800 rounded-xl py-2 z-[100] mt-0 animate-in fade-in slide-in-from-top-2 duration-200">
-                          {/* Bridge for hover stability */}
                           <div className="absolute -top-2 left-0 w-full h-2 bg-transparent"></div>
 
                           {isLoadingCategories ? (
@@ -157,7 +153,6 @@ const PublicNavbar = () => {
                   );
                 }
 
-                // সাধারণ মেনু আইটেম
                 return (
                   <Link
                     key={item.name}
@@ -172,14 +167,31 @@ const PublicNavbar = () => {
             </div>
           </div>
 
-          {/* Right Side - Auth & Profile */}
-          <div className="flex items-center space-x-3">
+          {/* Right Side - Heart Icon, Auth & Profile */}
+          <div className="flex items-center space-x-4">
+
+            {/* 1. Heart (Wishlist) Icon - Only for Logged in Users */}
+            {user && (
+              <Link
+                href="/favorites"
+                className="relative p-2 group transition-all duration-200"
+                title="My Wishlist"
+              >
+                <FiHeart className={`h-6 w-6 transition-colors ${pathname === '/favorites' ? 'text-red-500 fill-red-500' : 'text-gray-600 dark:text-gray-300 group-hover:text-red-500'}`} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white dark:border-[#0a0a0a] animate-in zoom-in">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
             {user ? (
-              <div className="relative flex items-center space-x-2">
+              <div className="relative flex items-center space-x-3">
                 {user.role === 'user' && (
                   <Link
                     href="/become-creator"
-                    className="hidden md:block px-4 py-2 rounded-lg bg-[#F57C00] text-white text-xs font-bold"
+                    className="hidden md:block px-4 py-2 rounded-lg bg-[#F57C00] text-white text-xs font-bold shadow-md hover:bg-[#e67600] transition-all"
                   >
                     Become a Creator
                   </Link>
@@ -266,6 +278,17 @@ const PublicNavbar = () => {
               </Link>
             ))}
 
+            {/* Mobile Wishlist Link */}
+            {user && (
+              <Link
+                href="/wishlist"
+                onClick={() => setIsMobileDrawerOpen(false)}
+                className={`flex items-center gap-2 text-lg font-medium ${pathname === '/wishlist' ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'}`}
+              >
+                <FiHeart /> Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+              </Link>
+            )}
+
             <hr className="border-gray-100 dark:border-gray-800" />
 
             {user ? (
@@ -298,7 +321,7 @@ const PublicNavbar = () => {
           </div>
         </div>
 
-        {/* Backdrop for Profile & Mobile Menu */}
+        {/* Backdrop */}
         {(isProfileOpen || isMobileDrawerOpen) && (
           <div
             className="fixed inset-0 z-[40] bg-black/10 md:bg-transparent"
