@@ -24,6 +24,7 @@ import {
   FiType,
   FiAlertCircle,
   FiBriefcase,
+  FiCheckCircle,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import toast, { Toaster } from 'react-hot-toast';
@@ -39,7 +40,15 @@ export default function CreatorRequestsPage() {
   const [processingId, setProcessingId] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [rejectingUser, setRejectingUser] = useState(null);
-  const [rejectData, setRejectData] = useState({ reason: '', statusType: 'rejected' });
+
+  // Updated State: adding reasonCode
+  const [rejectData, setRejectData] = useState({
+    reason: '',
+    reasonCode: '',
+  });
+
+  // Dynamic Reasons from Backend
+  const [reasonCodes, setReasonCodes] = useState([]);
 
   // --- Filter & Pagination State ---
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,6 +57,21 @@ export default function CreatorRequestsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRequests, setTotalRequests] = useState(0);
   const itemsPerPage = 10;
+
+  // Fetch Reason Codes from Backend
+  useEffect(() => {
+    const fetchCodes = async () => {
+      try {
+        const res = await api.get('/api/users/moderation-reasons');
+        if (res.data.success) {
+          setReasonCodes(res.data.reasons);
+        }
+      } catch (err) {
+        console.error('Failed to load reason codes', err);
+      }
+    };
+    fetchCodes();
+  }, []);
 
   const fetchRequests = useCallback(
     async (isForce = false) => {
@@ -82,7 +106,6 @@ export default function CreatorRequestsPage() {
     fetchRequests();
   }, [fetchRequests]);
 
-  // ফিল্টার চেঞ্জ হলে প্রথম পেজে ফেরত যাওয়া
   const handleFilterChange = (value) => {
     setTimeFilter(value);
     setCurrentPage(1);
@@ -96,11 +119,9 @@ export default function CreatorRequestsPage() {
 
       if (res.status === 200) {
         toast.success('Creator Approved Successfully');
-
         setRequests((prev) =>
           prev.map((req) => (req._id === userId ? { ...req, role: 'creator' } : req))
         );
-
         fetchRequests();
         setSelectedUser(null);
       }
@@ -112,18 +133,20 @@ export default function CreatorRequestsPage() {
   };
 
   const handleRejectSubmit = async () => {
-    if (!rejectData.reason) return toast.error('Please provide feedback reason');
+    if (!rejectData.reasonCode) return toast.error('Please select a protocol reason code');
+    if (!rejectData.reason) return toast.error('Please provide detailed feedback');
+
     try {
       setProcessingId(rejectingUser._id);
       await api.put(`/api/admin/reject-creator/${rejectingUser._id}`, {
+        reasonCode: rejectData.reasonCode,
         reason: rejectData.reason,
-        statusType: rejectData.statusType,
       });
+
       toast.success('Application Rejected');
       fetchRequests();
       setRejectingUser(null);
       setSelectedUser(null);
-      setRejectData({ reason: '', statusType: 'rejected' });
     } catch (error) {
       toast.error('Rejection failed');
     } finally {
@@ -150,7 +173,6 @@ export default function CreatorRequestsPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* Search Applicant */}
           <div className="relative group">
             <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
             <input
@@ -165,7 +187,6 @@ export default function CreatorRequestsPage() {
             />
           </div>
 
-          {/* Time Filter */}
           <div className="flex items-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-3 group">
             <FiFilter
               className="text-gray-400 group-hover:text-orange-500 transition-colors"
@@ -216,7 +237,7 @@ export default function CreatorRequestsPage() {
                   <tr
                     onDoubleClick={() => setSelectedUser(request)}
                     key={request._id}
-                    className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-all group"
+                    className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-all group cursor-pointer"
                   >
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-4">
@@ -254,41 +275,12 @@ export default function CreatorRequestsPage() {
                       </span>
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => setSelectedUser(request)}
-                          className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-orange-500 rounded-xl transition-all shadow-sm"
-                        >
-                          <FiEye size={16} />
-                        </button>
-                        {/* <button
-                          onClick={() => handleApprove(request._id)}
-                          // যদি ইউজার অলরেডি ক্রিয়েটর হয় অথবা প্রসেসিং চলে, তবে ডিজেবল হবে
-                          disabled={processingId === request._id || request.role === 'creator'}
-                          className={`px-4 py-2 text-[9px] font-black uppercase rounded-xl border transition-all shadow-sm 
-    ${
-      request.role === 'creator'
-        ? 'bg-gray-100 dark:bg-white/5 text-gray-400 border-gray-200 dark:border-white/10 cursor-not-allowed opacity-50'
-        : 'bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-600 hover:text-white'
-    }`}
-                        >
-                          {request.role === 'creator' ? (
-                            <span className="flex items-center gap-1">
-                              <FiCheck /> Approved
-                            </span>
-                          ) : (
-                            'Approve'
-                          )}
-                        </button>
-                        {request.role !== 'creator' && (
-                          <button
-                            onClick={() => setRejectingUser(request)}
-                            className="px-4 py-2 bg-red-500/10 text-red-500 text-[9px] font-black uppercase rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all shadow-sm"
-                          >
-                            Reject
-                          </button>
-                        )} */}
-                      </div>
+                      <button
+                        onClick={() => setSelectedUser(request)}
+                        className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-orange-500 rounded-xl transition-all shadow-sm"
+                      >
+                        <FiEye size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -323,7 +315,6 @@ export default function CreatorRequestsPage() {
               >
                 <FiChevronLeft className="dark:text-white" />
               </button>
-
               <div className="flex gap-1.5">
                 {[...Array(totalPages)].map((_, i) => (
                   <button
@@ -335,7 +326,6 @@ export default function CreatorRequestsPage() {
                   </button>
                 ))}
               </div>
-
               <button
                 onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
@@ -348,6 +338,7 @@ export default function CreatorRequestsPage() {
         )}
       </div>
 
+      {/* 🔹 Modal: User Details */}
       {selectedUser && !rejectingUser && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-4">
           <div
@@ -355,7 +346,6 @@ export default function CreatorRequestsPage() {
             onClick={() => setSelectedUser(null)}
           />
           <div className="relative w-full max-w-3xl bg-white dark:bg-[#0a0a0a] rounded-md border border-gray-100 dark:border-white/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto scrollbar-hide">
-            {/* Cover Section */}
             <div className="h-32 md:h-44 w-full bg-gray-100 dark:bg-white/5 relative">
               <img
                 src={
@@ -375,7 +365,6 @@ export default function CreatorRequestsPage() {
             </div>
 
             <div className="px-5 md:px-10 pb-8 -mt-12 md:-mt-16 relative">
-              {/* Profile Header */}
               <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 mb-8 text-center md:text-left">
                 <img
                   src={getImageUrl(selectedUser.profile?.profileImage, 'avatar')}
@@ -388,15 +377,12 @@ export default function CreatorRequestsPage() {
                       {selectedUser.profile?.displayName ||
                         `${selectedUser.firstName} ${selectedUser.lastName}`}
                     </h3>
-                    {/* Account Type Badge */}
                     <span
-                      className={`inline-block px-3 py-1 text-[8px] font-black uppercase tracking-widest rounded-md w-fit mx-auto md:mx-0 
-                ${selectedUser.profile?.customerType === 'business' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'}`}
+                      className={`inline-block px-3 py-1 text-[8px] font-black uppercase tracking-widest rounded-md w-fit mx-auto md:mx-0 ${selectedUser.profile?.customerType === 'business' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'}`}
                     >
                       {selectedUser.profile?.customerType || 'Individual'}
                     </span>
                   </div>
-
                   <div className="flex flex-wrap justify-center md:justify-start items-center gap-2 md:gap-3">
                     <p className="text-gray-400 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em]">
                       @{selectedUser.username}
@@ -409,7 +395,6 @@ export default function CreatorRequestsPage() {
                 </div>
               </div>
 
-              {/* VAT & Compliance Alert Section (Only for Business) */}
               {selectedUser.profile?.customerType === 'business' && (
                 <div className="mb-8 p-4 bg-orange-500/5 border border-orange-500/10 rounded-md flex items-center justify-between">
                   <div>
@@ -422,18 +407,10 @@ export default function CreatorRequestsPage() {
                   </div>
                   <div className="text-right">
                     <span
-                      className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest 
-                ${selectedUser.profile?.isVatValid ? 'text-green-500' : 'text-red-500'}`}
+                      className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest ${selectedUser.profile?.isVatValid ? 'text-green-500' : 'text-red-500'}`}
                     >
-                      {selectedUser.profile?.isVatValid ? (
-                        <>
-                          <FiCheckCircle /> Verified
-                        </>
-                      ) : (
-                        <>
-                          <FiAlertCircle /> Unverified
-                        </>
-                      )}
+                      {selectedUser.profile?.isVatValid ? <FiCheckCircle /> : <FiAlertCircle />}{' '}
+                      {selectedUser.profile?.isVatValid ? 'Verified' : 'Unverified'}
                     </span>
                     <p className="text-[8px] text-gray-500 font-bold uppercase">
                       Checked:{' '}
@@ -445,7 +422,6 @@ export default function CreatorRequestsPage() {
                 </div>
               )}
 
-              {/* Info Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
                 <div className="space-y-4 md:space-y-5">
                   <DetailItem
@@ -473,7 +449,6 @@ export default function CreatorRequestsPage() {
                     value={selectedUser.profile?.city || 'N/A'}
                   />
                 </div>
-
                 <div className="space-y-4 md:space-y-5">
                   <DetailItem
                     icon={FiType}
@@ -492,8 +467,6 @@ export default function CreatorRequestsPage() {
                     value={selectedUser.profile?.socialLink || 'NO LINK'}
                     isLink={!!selectedUser.profile?.socialLink}
                   />
-
-                  {/* Bio Box */}
                   <div className="p-4 md:p-5 bg-gray-50 dark:bg-white/5 rounded-md border border-gray-100 dark:border-white/10">
                     <p className="text-[8px] font-black text-orange-500 uppercase mb-2 tracking-widest flex items-center gap-2">
                       <FiInfo size={12} /> Statement
@@ -505,21 +478,14 @@ export default function CreatorRequestsPage() {
                 </div>
               </div>
 
-              {/* Action Controls */}
               <div className="flex flex-col md:flex-row gap-3 md:gap-4 pt-6 border-t dark:border-white/5">
                 <button
                   onClick={() => handleApprove(selectedUser._id)}
                   disabled={processingId === selectedUser._id || selectedUser.role === 'creator'}
-                  className={`flex-[2] py-4 md:py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-md transition-all shadow-xl 
-            ${
-              selectedUser.role === 'creator'
-                ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed border border-gray-200 dark:border-white/10'
-                : 'bg-green-600 text-white hover:bg-green-700 shadow-green-600/20'
-            }`}
+                  className={`flex-[2] py-4 md:py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-md transition-all shadow-xl ${selectedUser.role === 'creator' ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed border border-gray-200 dark:border-white/10' : 'bg-green-600 text-white hover:bg-green-700 shadow-green-600/20'}`}
                 >
                   {selectedUser.role === 'creator' ? 'Already a Creator' : 'Confirm & Approve'}
                 </button>
-
                 <button
                   onClick={() => setRejectingUser(selectedUser)}
                   disabled={selectedUser.role === 'creator'}
@@ -552,23 +518,29 @@ export default function CreatorRequestsPage() {
                 PROTOCOL REJECTION: @{rejectingUser.username}
               </p>
             </div>
+
             <div className="space-y-5">
+              {/* REASON CODE SELECTOR */}
               <div>
                 <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
-                  RESOLUTION TYPE
+                  PROTOCOL REASON CODE <span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-2 gap-3 mt-2">
-                  {['rejected', 'needs_review'].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setRejectData({ ...rejectData, statusType: type })}
-                      className={`py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${rejectData.statusType === type ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-gray-100 dark:bg-white/5 border-transparent text-gray-400 hover:border-gray-300 dark:hover:border-white/20'}`}
-                    >
-                      {type.replace('_', ' ')}
-                    </button>
+                <select
+                  value={rejectData.reasonCode}
+                  onChange={(e) => setRejectData({ ...rejectData, reasonCode: e.target.value })}
+                  className="w-full mt-2 bg-gray-50 dark:bg-white/20 border border-gray-100 dark:border-white/10 rounded-xl px-5 py-3.5 text-[10px] font-black uppercase tracking-widest outline-none focus:border-orange-500 dark:text-white cursor-pointer"
+                >
+                  <option value="" className="dark:bg-[#0f0f0f]">
+                    -- SELECT REASON --
+                  </option>
+                  {reasonCodes.map((code) => (
+                    <option key={code} value={code} className="dark:bg-[#0f0f0f]">
+                      {code.replace(/_/g, ' ')}
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
+
               <div>
                 <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
                   FEEDBACK LOG
@@ -577,10 +549,11 @@ export default function CreatorRequestsPage() {
                   value={rejectData.reason}
                   onChange={(e) => setRejectData({ ...rejectData, reason: e.target.value })}
                   placeholder="PROVIDE DETAILED REASON FOR PROTOCOL DENIAL..."
-                  className="w-full mt-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-5 py-4 text-[11px] font-bold outline-none focus:border-orange-500 dark:text-white h-32 resize-none placeholder:text-gray-300 dark:placeholder:text-white/10"
+                  className="w-full mt-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-5 py-4 text-[11px] font-bold outline-none focus:border-orange-500 dark:text-white h-28 resize-none placeholder:text-gray-300 dark:placeholder:text-white/10"
                 />
               </div>
             </div>
+
             <div className="flex gap-4 mt-8">
               <button
                 onClick={() => setRejectingUser(null)}
@@ -591,7 +564,7 @@ export default function CreatorRequestsPage() {
               <button
                 onClick={handleRejectSubmit}
                 disabled={processingId === rejectingUser._id}
-                className="flex-[2] py-4 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+                className="flex-[2] py-4 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-xl shadow-black/10 dark:shadow-white/5"
               >
                 {processingId === rejectingUser._id ? (
                   'SYNCING...'

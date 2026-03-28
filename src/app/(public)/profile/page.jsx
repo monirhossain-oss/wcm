@@ -6,8 +6,19 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import {
-  FiUser, FiEdit3, FiX, FiCheck, FiCamera, FiGlobe, FiMapPin, 
-  FiType, FiInfo, FiLink, FiAlertCircle, FiShield, FiArrowLeft
+  FiUser,
+  FiEdit3,
+  FiX,
+  FiCheck,
+  FiCamera,
+  FiGlobe,
+  FiMapPin,
+  FiType,
+  FiInfo,
+  FiLink,
+  FiAlertCircle,
+  FiShield,
+  FiArrowLeft,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 
@@ -25,11 +36,16 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace('/'); 
+      router.replace('/');
     }
   }, [user, loading, router]);
 
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = useForm();
 
   useEffect(() => {
     if (user) {
@@ -70,7 +86,17 @@ export default function ProfilePage() {
     try {
       setMessage({ type: '', text: '' });
       const formData = new FormData();
-      const fields = ['firstName', 'lastName', 'displayName', 'bio', 'country', 'city', 'language', 'websiteLink', 'socialLink'];
+      const fields = [
+        'firstName',
+        'lastName',
+        'displayName',
+        'bio',
+        'country',
+        'city',
+        'language',
+        'websiteLink',
+        'socialLink',
+      ];
       fields.forEach((field) => formData.append(field, data[field] || ''));
 
       const profileFile = document.querySelector('input[name="profileImageCustom"]')?.files[0];
@@ -93,11 +119,12 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#050505]">
-      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#050505]">
+        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-[#080808] pt-12 pb-20 px-4 md:px-8 font-sans">
@@ -228,6 +255,9 @@ export default function ProfilePage() {
                 <p className="text-[10px] mt-2 text-gray-400 italic font-medium leading-relaxed">
                   "{user.creatorRequest.rejectionReason}"
                 </p>
+                <p className="text-[10px] mt-2 text-gray-400 italic font-medium leading-relaxed">
+                  <span className='font-bold'>Additional Details:</span> {" "} "{user.creatorRequest.additionalReason}"
+                </p>
               </div>
             )}
           </div>
@@ -260,7 +290,11 @@ export default function ProfilePage() {
                       <InfoRow label="Geo Region" value={user?.profile?.country} icon={FiMapPin} />
                       <InfoRow label="Station" value={user?.profile?.city} icon={FiMapPin} />
                       <InfoRow label="Protocol" value={user?.profile?.language} icon={FiGlobe} />
-                      <InfoRow label="Direct Link" value={user?.profile?.socialLink} icon={FiLink} />
+                      <InfoRow
+                        label="Direct Link"
+                        value={user?.profile?.socialLink}
+                        icon={FiLink}
+                      />
                     </div>
 
                     <div className="bg-gray-50 dark:bg-black/20 p-6 border border-gray-100 dark:border-white/5 rounded-md">
@@ -379,15 +413,23 @@ const InfoRow = ({ label, value, icon: Icon }) => (
   <div className="group border-b border-gray-100 dark:border-white/5 pb-4 last:border-0">
     <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">{label}</p>
     <div className="flex items-center gap-3">
-        <Icon size={12} className="text-orange-500" />
-        <p className="text-[11px] font-black text-black dark:text-gray-200 uppercase truncate">{value || 'UNSET'}</p>
+      <Icon size={12} className="text-orange-500" />
+      <p className="text-[11px] font-black text-black dark:text-gray-200 uppercase truncate">
+        {value || 'UNSET'}
+      </p>
     </div>
   </div>
 );
 
 const InputField = ({ label, name, register, placeholder }) => (
   <div className="space-y-2">
-    <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest ml-1">{label}</label>
-    <input {...register(name)} placeholder={placeholder} className="w-full rounded-md px-4 py-3 border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-[11px] font-bold focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600" />
+    <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest ml-1">
+      {label}
+    </label>
+    <input
+      {...register(name)}
+      placeholder={placeholder}
+      className="w-full rounded-md px-4 py-3 border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-[11px] font-bold focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
+    />
   </div>
 );
