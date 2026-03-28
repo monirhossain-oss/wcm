@@ -293,6 +293,18 @@ export default function MyListings() {
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
                   Protocol Status
                 </th>
+                {currentItems.length > 0 &&
+                  currentItems.map(
+                    (item) =>
+                      (item.status === 'rejected' || item.status === 'blocked') && (
+                        <th
+                          key={item._id}
+                          className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center"
+                        >
+                          Violation / Reason
+                        </th>
+                      )
+                  )}
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-right">
                   Operations
                 </th>
@@ -340,6 +352,27 @@ export default function MyListings() {
                         {item.status}
                       </span>
                     </td>
+                    {(item.status === 'rejected' || item.status === 'blocked') && (
+                      <td className="px-6 py-4">
+                        {item.status === 'rejected' || item.status === 'blocked' ? (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] font-black text-red-500 uppercase tracking-wider bg-red-500/5 border border-red-500/10 px-2 py-0.5 rounded w-fit">
+                              {item.rejectionReason?.replace(/_/g, ' ') || 'GENERAL_VIOLATION'}
+                            </span>
+                            {item.additionalReason && (
+                              <p className="text-[8px] text-gray-400 italic truncate max-w-[150px]">
+                                "{item.additionalReason}"
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-[9px] text-gray-300 font-bold uppercase tracking-widest opacity-30">
+                            ---
+                          </span>
+                        )}
+                      </td>
+                    )}
+
                     <td className="px-8 py-5 text-right">
                       <div className="flex items-center justify-end gap-2.5">
                         <ActionButton
@@ -349,9 +382,14 @@ export default function MyListings() {
                           label="View"
                         />
                         <ActionButton
+                          disabled={item.status === 'blocked'}
                           icon={FiEdit2}
                           onClick={() => openEditModal(item)}
-                          color="hover:bg-orange-600"
+                          color={
+                            item.status === 'blocked'
+                              ? 'opacity-20'
+                              : 'hover:bg-orange-600'
+                          }
                           label="Edit"
                         />
                         <ActionButton
@@ -582,15 +620,19 @@ export default function MyListings() {
   );
 }
 
-const ActionButton = ({ icon: Icon, onClick, color, isDelete, label }) => (
+const ActionButton = ({ icon: Icon, onClick, color, isDelete, label, disabled }) => (
   <button
-    onClick={onClick}
+    disabled={disabled}
+    onClick={!disabled ? onClick : undefined}
     title={label}
-    className={`p-3 bg-gray-50 dark:bg-white/5 rounded-xl transition-all flex items-center justify-center group/btn ${color} hover:text-white hover:shadow-lg active:scale-90 border dark:border-white/10 shadow-sm`}
+    className={`p-3 bg-gray-50 dark:bg-white/5 rounded-xl transition-all flex items-center justify-center group/btn ${color} 
+      ${!disabled ? 'hover:text-white hover:shadow-lg active:scale-90 shadow-sm' : 'cursor-not-allowed'} 
+      border dark:border-white/10`}
   >
     <Icon
       size={15}
-      className={`transition-colors ${isDelete ? 'text-red-500 group-hover/btn:text-white' : 'text-gray-400 group-hover/btn:text-white'}`}
+      className={`transition-colors ${isDelete ? 'text-red-500 group-hover/btn:text-white' : 'text-gray-400 group-hover/btn:text-white'} 
+      ${disabled ? 'opacity-20' : ''}`}
     />
   </button>
 );
