@@ -47,11 +47,17 @@ export default function CultureSlider({ tags, API_BASE_URL }) {
                             className="relative h-48 md:h-56 w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500"
                         >
                             <Image
-                                src={tag.image.startsWith('http') ? tag.image : `${API_BASE_URL}/${tag.image}`}
-                                alt={tag.title}
-                                fill
-                                className="object-cover transition-transform duration-700 group-hover/card:scale-110"
-                                sizes="(max-width: 768px) 100vw, 300px"
+                            // image আছে কি না তা চেক করে তারপর startsWith কল করা হচ্ছে
+                            src={tag?.image?.startsWith('http') 
+                            ? tag.image 
+                            : tag?.image 
+                            ? `${API_BASE_URL}/${tag.image}` 
+                            : '/placeholder.png' // যদি ইমেজ না থাকে তবে এই ডিফল্ট ইমেজটি দেখাবে
+                            }
+                            alt={tag?.title || "Culture Image"}
+                            fill
+                            className="object-cover transition-transform duration-700 group-hover/card:scale-110"
+                            sizes="(max-width: 768px) 100vw, 300px"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent group-hover/card:from-black/100 transition-opacity" />
                             <div className="absolute bottom-0 left-0 p-5 w-full transform transition-transform duration-300 group-hover/card:-translate-y-1">

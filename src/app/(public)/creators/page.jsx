@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Loader2, Users, Search, ChevronDown, Globe, MapPin } from 'lucide-react';
+import { Loader2, Search, MapPin } from 'lucide-react';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000",
@@ -12,8 +12,13 @@ const api = axios.create({
 });
 
 const CreatorsPage = () => {
-  const [top30, setTop30] = useState([]);
+  const [allCreators, setAllCreators] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // ফিল্টারিং স্টেট
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCulture, setSelectedCulture] = useState(""); // কালচার স্টেট
+  const [selectedCategory, setSelectedCategory] = useState(""); // ক্যাটাগরি স্টেট
 
   useEffect(() => {
     const fetchCreators = async () => {
@@ -21,9 +26,7 @@ const CreatorsPage = () => {
         setLoading(true);
         const res = await api.get('/api/users/top-creators-dropdown');
         if (res.data.success) {
-          
-          setTop30(res.data.data.top30 || []);
-          console.log(res.data.data)
+          setAllCreators(res.data.data.top30 || []);
         }
       } catch (err) {
         console.error('Fetch error:', err);
@@ -33,6 +36,25 @@ const CreatorsPage = () => {
     };
     fetchCreators();
   }, []);
+
+  // মূল ফিল্টারিং লজিক (useMemo ব্যবহার করা হয়েছে পারফরম্যান্সের জন্য)
+  const filteredCreators = useMemo(() => {
+    return allCreators.filter((creator) => {
+      const matchesSearch = (creator.firstName + " " + creator.lastName)
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      
+      const matchesCulture = selectedCulture === "" || creator.profile?.country === selectedCulture;
+      
+      const matchesCategory = selectedCategory === "" || creator.profile?.category === selectedCategory;
+
+      return matchesSearch && matchesCulture && matchesCategory;
+    });
+  }, [allCreators, searchQuery, selectedCulture, selectedCategory]);
+
+  // ডাইনামিক ফিল্টার অপশন তৈরি (যাতে ডাটাবেসে যা আছে শুধু তাই দেখায়)
+  const cultures = Array.from(new Set(allCreators.map(c => c.profile?.country).filter(Boolean)));
+  const categories = Array.from(new Set(allCreators.map(c => c.profile?.category).filter(Boolean)));
 
   if (loading) {
     return (
@@ -46,113 +68,94 @@ const CreatorsPage = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a] transition-colors pb-20">
       
-      {/* SECTION 1 — HEADER (Editorial Style) */}
+      {/* SECTION 1 — HEADER */}
       <div className="pt-20 pb-12 text-center px-6">
         <h1 className="text-4xl md:text-6xl font-serif font-black text-zinc-900 dark:text-white mb-4 tracking-tight">
-          Discover Creators Around the World
+          Discover Creators
         </h1>
-        <p className="text-zinc-500 dark:text-zinc-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed font-medium">
-          Explore creators inspired by cultures and traditions worldwide. <br className="hidden md:block" /> Connect with the hands that shape our heritage.
-        </p>
       </div>
 
       {/* SECTION 2 — SEARCH + FILTER */}
       <div className="max-w-7xl mx-auto px-6 mb-16">
-        <div className="flex flex-col md:flex-row items-center gap-4 bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-3xl border border-zinc-100 dark:border-white/5 shadow-sm">
-          {/* Search Box */}
-          <div className="relative flex-1 w-full group">
+        <div className="flex flex-col md:flex-row items-center gap-4 bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-3xl border border-zinc-100 dark:border-white/5">
+          
+          {/* Search Bar */}
+          <div className="relative flex-1 w-full">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input 
               type="text" 
               placeholder="Search creators..." 
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-zinc-800 border-none rounded-2xl text-sm focus:ring-2 focus:ring-orange-500/20 outline-none transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-zinc-800 border-none rounded-2xl text-sm outline-none focus:ring-2 focus:ring-orange-500/20"
             />
           </div>
           
           {/* Filters */}
           <div className="flex gap-3 w-full md:w-auto">
-            <select className="flex-1 md:w-40 px-4 py-3 bg-white dark:bg-zinc-800 rounded-2xl text-sm outline-none border-none cursor-pointer">
-              <option>Culture</option>
-              <option>African</option>
-              <option>Asian</option>
-              <option>Bengali</option>
+            {/* Culture Filter */}
+            <select 
+              value={selectedCulture}
+              onChange={(e) => setSelectedCulture(e.target.value)}
+              className="flex-1 md:w-40 px-4 py-3 bg-white dark:bg-zinc-800 rounded-2xl text-sm outline-none cursor-pointer"
+            >
+              <option value="">All Cultures</option>
+              {cultures.map(country => (
+                <option key={country} value={country}>{country}</option>
+              ))}
             </select>
-            <select className="flex-1 md:w-40 px-4 py-3 bg-white dark:bg-zinc-800 rounded-2xl text-sm outline-none border-none cursor-pointer">
-              <option>Category</option>
-              <option>Textile</option>
-              <option>Pottery</option>
-              <option>Handmade</option>
+
+            {/* Category Filter */}
+            <select 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="flex-1 md:w-40 px-4 py-3 bg-white dark:bg-zinc-800 rounded-2xl text-sm outline-none cursor-pointer"
+            >
+              <option value="">All Categories</option>
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
             </select>
           </div>
         </div>
       </div>
 
-      {/* SECTION 3 — CREATORS GRID (4 Columns) */}
+      {/* SECTION 3 — CREATORS GRID */}
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {top30.map((creator, idx) => (
-            <div key={creator._id} className="group relative flex flex-col bg-white dark:bg-[#111] rounded-[32px] overflow-hidden border border-zinc-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/5 hover:-translate-y-1">
-              
-              {/* Card Banner Background */}
-              <div className="h-24 w-full bg-zinc-100 dark:bg-zinc-800 relative">
-                {/* Featured Label (Static logic for now) */}
-                {idx < 4 && (
-                   <span className="absolute top-4 right-4 z-10 bg-orange-500 text-white text-[8px] font-black uppercase px-2 py-1 rounded-full shadow-lg">
-                    Featured Creator
-                  </span>
-                )}
-              </div>
-
-              {/* Profile Image (Overlapping Banner) */}
-              <div className="px-6 -mt-10 relative z-10 flex flex-col items-center">
-                <div className="w-20 h-20 rounded-2xl overflow-hidden border-4 border-white dark:border-[#111] shadow-xl">
-                  <Image
-                    src={creator.profile?.profileImage || "/default-avatar.png"}
-                    alt={creator.username}
-                    width={80}
-                    height={80}
-                    className="object-cover w-full h-full"
-                  />
+        {filteredCreators.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {filteredCreators.map((creator, idx) => (
+              <div key={creator._id} className="group relative flex flex-col bg-white dark:bg-[#111] rounded-[32px] overflow-hidden border border-zinc-100 dark:border-white/5 transition-all hover:shadow-2xl">
+                {/* কার্ডের বাকি অংশ আপনার আগের কোডের মতোই থাকবে */}
+                <div className="h-24 w-full bg-zinc-100 dark:bg-zinc-800 relative">
+                  {idx < 4 && <span className="absolute top-4 right-4 z-10 bg-orange-500 text-white text-[8px] font-black uppercase px-2 py-1 rounded-full">Featured</span>}
                 </div>
-
-                {/* Creator Details */}
-                <div className="text-center mt-4 w-full">
-                  <h3 className="font-serif font-black text-xl text-zinc-900 dark:text-white leading-tight">
-                    {creator.firstName} {creator.lastName}
-                  </h3>
-                  <p className="flex items-center justify-center gap-1 text-xs text-zinc-400 mt-1 uppercase tracking-widest font-bold">
-                    <MapPin size={12} className="text-orange-500" />
-                    {creator.profile?.country || "Global"}
-                  </p>
-                  
-                  <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-4 line-clamp-2 leading-relaxed">
-                    Crafting stories through traditional {creator.profile?.category || "artistry"} and heritage techniques.
-                  </p>
-
-                  {/* Tags Section */}
-                  <div className="flex flex-wrap justify-center gap-2 mt-4">
-                    <span className="text-[9px] font-bold px-2 py-1 bg-zinc-50 dark:bg-white/5 text-zinc-400 rounded-md border border-zinc-100 dark:border-white/5">
-                      Textile
-                    </span>
-                    <span className="text-[9px] font-bold px-2 py-1 bg-zinc-50 dark:bg-white/5 text-zinc-400 rounded-md border border-zinc-100 dark:border-white/5">
-                      Handmade
-                    </span>
-                  </div>
-                </div>
-
-                {/* Button Section */}
-                <div className="w-full mt-6 pb-6">
-                   <Link 
-                    href={`/profile/${creator._id}`}
-                    className="w-full bg-[#f27b13] hover:bg-[#d96a0d] text-white text-xs font-black uppercase tracking-widest py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group-hover:shadow-lg shadow-orange-500/20"
-                  >
-                    View Creator
-                  </Link>
+                <div className="px-6 -mt-10 relative z-10 flex flex-col items-center pb-6">
+                   <div className="w-20 h-20 rounded-2xl overflow-hidden border-4 border-white dark:border-[#111] shadow-xl">
+                      <Image 
+                        src={creator.profile?.profileImage || "/default-avatar.png"} 
+                        alt="profile" width={80} height={80} className="object-cover w-full h-full" 
+                      />
+                   </div>
+                   <h3 className="font-serif font-black text-xl text-zinc-900 dark:text-white mt-4">
+                     {creator.firstName} {creator.lastName}
+                   </h3>
+                   <p className="text-xs text-zinc-400 flex items-center gap-1 mt-1">
+                     <MapPin size={12} className="text-orange-500" />
+                     {creator.profile?.country || "Global"}
+                   </p>
+                   <Link href={`/profile/${creator._id}`} className="w-full bg-[#f27b13] text-white text-[10px] font-black uppercase py-4 rounded-2xl mt-6 text-center">
+                      View Creator
+                   </Link>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
+            <p className="text-zinc-400 font-serif italic text-lg">No creators found matching your criteria.</p>
+          </div>
+        )}
       </div>
     </div>
   );
