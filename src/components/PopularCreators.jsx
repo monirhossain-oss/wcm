@@ -5,7 +5,7 @@ import CreatorDataWrapper from "./creator/CreatorDataWrapper";
 
 export default function PopularCreators() {
     return (
-        <section className="py-10 bg-white dark:bg-zinc-950">
+        <section className="py-6 bg-white dark:bg-zinc-950">
             <div className="max-w-7xl mx-auto px-6 relative">
                 <div className="mb-8 flex items-center justify-between border-b border-gray-50 dark:border-zinc-900 pb-4">
                     <div className="max-w-[70%]">

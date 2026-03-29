@@ -285,22 +285,22 @@ export default function MyListings() {
             <thead>
               <tr className="bg-gray-50/50 dark:bg-white/2 border-b border-gray-100 dark:border-white/10">
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  Node Asset
+                  Listing Asset
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
                   Identity Details
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
-                  Protocol Status
+                  Listing Status
                 </th>
                 <th
-                  key={item._id}
+                  // key={item._id}
                   className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center"
                 >
-                  Violation / Reason
+                  Reason
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-right">
-                  Operations
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -597,7 +597,7 @@ export default function MyListings() {
                   {updateLoading ? (
                     <FiRefreshCw className="animate-spin" />
                   ) : (
-                    'Synchronize Node Updates'
+                    'Updates Listing'
                   )}
                 </button>
               </div>

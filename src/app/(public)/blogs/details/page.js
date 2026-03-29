@@ -5,7 +5,6 @@ import { HiOutlineArrowNarrowLeft } from 'react-icons/hi';
 
 const DetailsPage = () => {
     return (
-        // bg-[#FCFBF9] (Light) | dark:bg-slate-950 (Dark)
         <div className="min-h-screen bg-[#FCFBF9] dark:bg-slate-950 py-10 md:py-20 px-6 transition-colors duration-300">
             <div className="max-w-7xl mx-auto">
                 

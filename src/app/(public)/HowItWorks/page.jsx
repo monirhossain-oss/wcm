@@ -66,15 +66,7 @@ const howItWorksPage = () => {
         </div>
 
 
-        {/* Action Button */}
-        <div className="flex justify-center">
-          <Link 
-            href="/become-creator" 
-            className="px-10 py-4 bg-[#F57C00] hover:bg-[#E65100] text-white rounded-xl font-bold text-lg transition-all shadow-lg shadow-orange-500/20 active:scale-95"
-          >
-            Get Started
-          </Link>
-        </div>
+        
 
       </div>
     </div>

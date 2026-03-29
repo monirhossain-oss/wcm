@@ -201,7 +201,7 @@ added to the marketplace.`},
     const currentFaqs = faqData[activeCategory] || [];
 
     return (
-        <section className="bg-white dark:bg-[#0a0a0a] py-24 px-6">
+        <section className="bg-white dark:bg-[#0a0a0a] py-6 px-6">
             <div className="max-w-5xl mx-auto">
                 
                 {/* Header */}
@@ -251,7 +251,7 @@ added to the marketplace.`},
                                 className="w-full flex justify-between items-center py-6 text-left group"
                             >
                                 <span className={`text-lg font-medium transition-colors ${
-                                    openIndex === index ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900'
+                                    openIndex === index ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'
                                 }`}>
                                     {faq.question}
                                 </span>

@@ -7,7 +7,7 @@ const BlogBannerCard = () => {
     banner: {
       title: "15 Adorable Heritage Gifts for Global Fans",
       description: "Discover creative, personalised, and joyous cultural gifts to celebrate your football passion!",
-      image: "https://i.postimg.cc/nVTqnc23/il-794x-N-7578412135-4lf2.webp", 
+      image: "https://i.postimg.cc/xCfMXHsb/image-(25).jpg", 
       category: "Marketplace Picks"
     },
     cards: [
@@ -16,14 +16,14 @@ const BlogBannerCard = () => {
         category: "Shopping Guides",
         title: "12 Heritage picks for a memorable match day",
         desc: "From classic kits to personalised stadium signs – get ready for a truly special year.",
-        img: "https://images.unsplash.com/photo-1519311965067-36d3e5f33d39?auto=format&fit=crop&q=80&w=600"
+        img: "https://i.postimg.cc/W4jJygc7/image-(24).jpg"
       },
       {
         id: 2,
         category: "Inspiration",
         title: "11 Crafts that make WCM shopping special",
         desc: "Get to know the artistry behind captivating handmade creations, from woodwork to ceramics.",
-        img: "https://i.postimg.cc/4dbY3BTL/inspiration-quote-ins-002-design-template-660ac822e7f4cf56bd76cff1c031c1b9-screen.jpg"
+        
       },
       {
         id: 3,
