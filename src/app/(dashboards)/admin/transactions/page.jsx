@@ -15,6 +15,7 @@ import {
   FiClock,
 } from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
+import { Download } from 'lucide-react';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -106,8 +107,19 @@ export default function TransactionsPage() {
   }, [fetchTransactions]);
 
   const handleFullExport = async () => {
-    const isConfirmed = window.confirm('This is resource-intensive. Proceed?');
-    if (!isConfirmed) return;
+    const confirmMessage = `
+⚠️ CRITICAL RESOURCE WARNING:
+----------------------------------------------
+Are you sure you want to EXPORT the full transactions database?
+
+IMPACT ANALYSIS:
+1. High CPU & RAM usage: This will strain the server resources.
+2. Latency: Ongoing transaction sessions may experience slow response times.
+3. Heavy Payload: Large data transfers can affect network bandwidth.
+
+Do you want to proceed with this protocol?
+`.trim();
+    if (!window.confirm(confirmMessage)) return;
     try {
       setExporting(true);
       const response = await api.get('/api/admin/export-transactions', { responseType: 'blob' });
@@ -221,9 +233,9 @@ export default function TransactionsPage() {
                 <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400 text-right">
                   Yield
                 </th>
-                <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
-                  Audit
-                </th>
+                {/* <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
+                  Action
+                </th> */}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
@@ -272,14 +284,13 @@ export default function TransactionsPage() {
                         Net: €{(tx.amountInEUR || 0).toFixed(2)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    {/* <td className="px-6 py-4 text-center">
                       <button
-                        onClick={() => setSelectedTx(tx)}
                         className="p-2 bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-orange-500 rounded-lg transition-all"
                       >
-                        <FiEye size={16} />
+                        <Download size={16} />
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               )}
@@ -321,65 +332,6 @@ export default function TransactionsPage() {
           </div>
         </div>
       </div>
-
-      {/* Detail Modal */}
-      {selectedTx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-md rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-            <div className="p-6 text-center bg-gray-50/50 dark:bg-white/2 relative">
-              <button
-                onClick={() => setSelectedTx(null)}
-                className="absolute right-4 top-4 text-gray-500 hover:text-red-500 transition-colors"
-              >
-                <FiX size={20} />
-              </button>
-              <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                <FiCheckCircle className="text-green-500" size={32} />
-              </div>
-              <h3 className="text-xs font-black uppercase tracking-widest dark:text-white italic">
-                Internal Receipt
-              </h3>
-              <p className="text-[9px] font-mono text-gray-500 mt-1 uppercase">
-                {selectedTx.invoiceNumber}
-              </p>
-            </div>
-
-            <div className="p-8 space-y-6">
-              <div className="border-y border-dashed border-gray-200 dark:border-white/10 py-5 space-y-3">
-                <div className="flex justify-between text-[11px]">
-                  <span className="font-bold text-gray-500 uppercase">Gross Amount</span>
-                  <span className="font-black dark:text-white">
-                    {(selectedTx.amount || 0).toFixed(2)} {selectedTx.currency}
-                  </span>
-                </div>
-                <div className="flex justify-between text-[11px]">
-                  <span className="font-bold text-gray-500 uppercase">VAT (19%)</span>
-                  <span className="font-black text-red-500">
-                    - €{(selectedTx.vatAmount || 0).toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-white/5">
-                  <span className="text-[10px] font-black uppercase text-orange-500 tracking-tighter">
-                    Net System Profit
-                  </span>
-                  <span className="text-xl font-black text-green-500">
-                    €{(selectedTx.amountInEUR || 0).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-4 bg-zinc-950 rounded-xl space-y-2 border border-white/5">
-                <p className="text-[8px] font-black text-gray-500 uppercase flex items-center gap-1">
-                  <FiActivity className="text-orange-500" /> Stripe Trace
-                </p>
-                <p className="text-[9px] font-mono text-gray-400 break-all">
-                  {selectedTx.stripeId}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
