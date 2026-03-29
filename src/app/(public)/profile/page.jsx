@@ -256,7 +256,8 @@ export default function ProfilePage() {
                   "{user.creatorRequest.rejectionReason}"
                 </p>
                 <p className="text-[10px] mt-2 text-gray-400 italic font-medium leading-relaxed">
-                  <span className='font-bold'>Additional Details:</span> {" "} "{user.creatorRequest.additionalReason}"
+                  <span className="font-bold">Additional Details:</span> "
+                  {user.creatorRequest.additionalReason}"
                 </p>
               </div>
             )}
@@ -361,8 +362,8 @@ export default function ProfilePage() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <InputField
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* <InputField
                         label="Country"
                         name="country"
                         register={register}
@@ -373,27 +374,26 @@ export default function ProfilePage() {
                         name="city"
                         register={register}
                         placeholder="Node City"
-                      />
+                      /> */}
                       <InputField
                         label="Language"
                         name="language"
                         register={register}
                         placeholder="Primary Language"
                       />
+                      <InputField
+                        label="External Social Link"
+                        name="socialLink"
+                        register={register}
+                        placeholder="https://..."
+                      />
                     </div>
-
-                    <InputField
-                      label="External Social Link"
-                      name="socialLink"
-                      register={register}
-                      placeholder="https://..."
-                    />
 
                     <div className="pt-4">
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full md:w-auto px-12 py-4 bg-orange-500 text-white font-black text-[10px] tracking-[0.3em] hover:bg-orange-600 transition-all disabled:bg-gray-700 uppercase shadow-lg shadow-orange-500/20 rounded-md"
+                        className="w-full cursor-pointer px-12 py-4 bg-orange-500 text-white font-black text-[10px] tracking-[0.3em] hover:bg-orange-600 transition-all disabled:bg-gray-700 uppercase shadow-lg shadow-orange-500/20 rounded-md"
                       >
                         {isSubmitting ? 'Synchronizing...' : 'PUSH UPDATES'}
                       </button>
