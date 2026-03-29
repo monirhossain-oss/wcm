@@ -274,7 +274,7 @@ export default function PromotionInsightsPage() {
             <div className="flex items-center pt-6 border-t border-black/5 dark:border-white/5">
               <ControlBtn
                 icon={ppc.isPaused ? FiPlayCircle : FiPauseCircle}
-                label={ppc.isPaused ? 'Resume' : 'Pause'}
+                label={ppc.isPaused ? 'Resume' : 'Already Paused'}
                 onClick={() => handleTogglePause('ppc')}
                 loading={actionLoading === 'ppc_pause'}
               />
@@ -334,7 +334,7 @@ export default function PromotionInsightsPage() {
             <div className="flex items-center pt-6 border-t border-black/5 dark:border-white/5">
               <ControlBtn
                 icon={boost.isPaused ? FiPlayCircle : FiPauseCircle}
-                label={boost.isPaused ? 'Resume' : 'Pause'}
+                label={boost.isPaused ? 'Resume' : 'Already Paused'}
                 onClick={() => handleTogglePause('boost')}
                 loading={actionLoading === 'boost_pause'}
               />
