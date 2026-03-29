@@ -112,7 +112,7 @@ const BlogCard = () => {
                 alt={blog.title} 
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-contain p-2 transition-transform duration-700 group-hover:scale-105 rounded-md"
+                className="object-cover transition-transform duration-700 group-hover:scale-105 rounded-md"
               />
               <div className="absolute top-4 left-4 bg-white/95 dark:bg-orange-600 px-3 py-1 rounded-full shadow-sm">
                 <span className="text-[9px] font-bold text-orange-600 dark:text-white uppercase tracking-wider">

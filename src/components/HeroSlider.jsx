@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 
 const images = [
-    "https://i.ibb.co.com/6RXQcNcM/15-4-11zon-min-2048x1365-1-1170x550.webp",
-    "https://i.ibb.co.com/ycFMBh0N/photo-1589463349208-95817c91f971.avif",
-    "https://i.ibb.co.com/JRMkRJqG/abstract-silhouettes-front-view-geometric-260nw-2496928155.webp",
+    "/artisan-weaving-textile-loom.jpeg",
+    "/artisan jewelry.jpeg",
+    "/Art & Sculptures.jpeg",
 ];
 
 export default function HeroSlider() {
@@ -19,7 +19,7 @@ export default function HeroSlider() {
     }, []);
 
     return (
-        <div className="absolute rounded-2xl mt-10 inset-0 w-full  overflow-hidden bg-black">
+        <div className="absolute rounded-2xl mt-10 inset-0 w-full overflow-hidden bg-black">
             {images.map((img, index) => (
                 <div
                     key={index}
@@ -31,7 +31,8 @@ export default function HeroSlider() {
                         alt={`Slide ${index}`}
                         fill
                         priority={index === 0}
-                        className={`object-cover transition-transform duration-[4000ms] ${index === current ? "scale-110" : "scale-100"}`}
+                        className={`object-cover transition-transform duration-[4000ms] ${index === current ? "scale-110" : "scale-100"
+                            }`}
                         sizes="100vw"
                         quality={75}
                     />

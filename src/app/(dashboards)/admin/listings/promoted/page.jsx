@@ -29,7 +29,7 @@ const REASON_CODES = [
 ];
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-const PROMOTED_CACHE_KEY = 'drakilo_promoted_cache';
+const PROMOTED_CACHE_KEY = 'wcm_promoted_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
 
 export default function ListingPromotedPage() {
@@ -151,7 +151,7 @@ export default function ListingPromotedPage() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Drakilo_INV_${invoiceNo || 'DOC'}.pdf`);
+      link.setAttribute('download', `WCM_INV_${invoiceNo || 'DOC'}.pdf`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -447,7 +447,7 @@ export default function ListingPromotedPage() {
         {/* --- Pagination --- */}
         <div className="p-6 border-t border-gray-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-50/30 dark:bg-white/1">
           <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest italic">
-            Displaying Page {page} of {totalPages} — Drakilo Promotion Network
+            Displaying Page {page} of {totalPages} — WCM Promotion Network
           </p>
           <div className="flex items-center gap-2">
             <button
