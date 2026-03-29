@@ -80,33 +80,53 @@ export default function PromotionInsightsPage() {
     let estimatedRefund = 0;
     const now = new Date();
 
-    // ডাইনামিক রিফান্ড এস্টিমেশন (শুধুমাত্র এলার্ট দেখানোর জন্য)
-    if (packageType === 'boost' && boost.isActive) {
-      const expiry = new Date(boost.expiresAt);
-      const remainingDays = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
-      const dailyRate = (boost.amountPaid || 0) / (boost.durationDays || 1);
-      estimatedRefund = Math.max(0, remainingDays * dailyRate).toFixed(2);
-    } else if (packageType === 'ppc' && ppc.isActive) {
-      estimatedRefund = Number(ppc.balance).toFixed(2);
+    // ডাটা থেকে বুস্ট এবং পিপিসি আলাদা করে নেওয়া (যাতে কোড ক্লিন থাকে)
+    const currentBoost = data?.boost;
+    console.log(currentBoost)
+    const currentPpc = data?.ppc;
+
+    if (packageType === 'boost' && currentBoost?.isActive && currentBoost?.expiresAt) {
+      const expiry = new Date(currentBoost.expiresAt);
+
+      if (expiry > now) {
+        // ব্যাকএন্ড লজিক অনুযায়ী রিফান্ড ক্যালকুলেশন
+        // durationDays যদি না থাকে তবে ১ ধরে নেওয়া হচ্ছে যাতে ভাগ করলে এরর না আসে
+        const totalDurationMs = (currentBoost.durationDays || 1) * 24 * 60 * 60 * 1000;
+        const remainingMs = expiry.getTime() - now.getTime();
+
+        // রিফান্ড রেশিও (কত শতাংশ সময় বাকি আছে)
+        const refundRatio = Math.min(1, remainingMs / totalDurationMs);
+        estimatedRefund = Math.max(0, (currentBoost.amountPaid || 0) * refundRatio).toFixed(2);
+      } else {
+        estimatedRefund = '0.00';
+      }
+    } else if (packageType === 'ppc' && currentPpc?.isActive) {
+      // আপনার ডাটা অবজেক্টে ফিল্ডের নাম 'balance', তাই সেটিই ব্যবহার করা হয়েছে
+      estimatedRefund = Number(currentPpc.balance || 0).toFixed(2);
     }
 
-    if (
-      !window.confirm(
-        `Stop this ${packageType.toUpperCase()}? Approx €${estimatedRefund} will be refunded to your wallet.`
-      )
-    ) {
-      return;
-    }
+    // কনফার্মেশন মেসেজ
+    const confirmMessage =
+      `STOP ${packageType.toUpperCase()} PROMOTION?\n\n` +
+      `Estimated Refund: €${estimatedRefund}\n` +
+      `The amount will be credited to your wallet immediately.`;
+
+    if (!window.confirm(confirmMessage)) return;
 
     setActionLoading(`${packageType}_cancel`);
     try {
-      const res = await api.post('/api/payments/cancel-promotion', { listingId: id, packageType });
+      const res = await api.post('/api/payments/cancel-promotion', {
+        listingId: id,
+        packageType,
+      });
+
       if (res.data.success) {
-        toast.success(`Success! €${res.data.refundAmount} credited to wallet.`);
-        fetchStats();
+        toast.success(`Refund Successful! €${res.data.refundAmount} added to wallet.`);
+        fetchStats(); // ডাটা রিফ্রেশ
       }
     } catch (err) {
-      toast.error('Cancellation failed');
+      console.error('Cancel Error:', err);
+      toast.error(err.response?.data?.message || 'Cancellation failed');
     } finally {
       setActionLoading(null);
     }
