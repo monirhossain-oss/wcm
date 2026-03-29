@@ -176,7 +176,7 @@ export default function PromotionsPage() {
       <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden shadow-sm">
         <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30">
           <h3 className="font-black text-[10px] uppercase tracking-[0.3em] text-zinc-500 flex items-center gap-3">
-            <FiActivity className="text-orange-500" size={16} /> Asset Deployment
+            <FiActivity className="text-orange-500" size={16} /> Asset List
           </h3>
         </div>
         <div className="overflow-x-auto">
