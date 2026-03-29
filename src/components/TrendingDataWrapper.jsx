@@ -6,7 +6,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5
 export default async function TrendingDataWrapper() {
     try {
         const res = await fetch(`${API_BASE_URL}/api/listings/public?limit=8&page=1`, {
-            next: { revalidate: 3600 }
+            next: { revalidate: 30 }
         });
 
         if (!res.ok) throw new Error('Failed to fetch');

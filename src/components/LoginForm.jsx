@@ -7,10 +7,11 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import Swal from 'sweetalert2'; // SweetAlert2 ইমপোর্ট করা হয়েছে
 
 export default function LoginForm({ onClose, onSwitchToRegister }) {
   const router = useRouter();
-  const { loginUser } = useAuth(); // আপনার AuthContext অনুযায়ী ফাংশন নাম চেক করে নিবেন
+  const { loginUser } = useAuth();
   const [serverError, setServerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -25,8 +26,22 @@ export default function LoginForm({ onClose, onSwitchToRegister }) {
     try {
       const result = await loginUser(data);
       if (result.success) {
-        onClose();
-        router.push('/');
+        // ১. সাকসেস সুইট অ্যালার্ট দেখানো
+        Swal.fire({
+          title: 'Login Successful!',
+          text: 'Welcome back to World Culture Marketplace',
+          icon: 'success',
+          timer: 1500, // ১.৫ সেকেন্ড দেখাবে
+          showConfirmButton: false,
+          position: 'center',
+          iconColor: '#F57C00',
+          background: '#fff',
+        }).then(() => {
+          onClose();
+
+          window.location.href = '/';
+        });
+
       } else {
         setServerError(result.message || 'Login failed. Please try again.');
       }
@@ -58,8 +73,8 @@ export default function LoginForm({ onClose, onSwitchToRegister }) {
       </div>
 
       <div className="text-center mb-6 sm:mb-8">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 font-serif">Sign In</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">Welcome back to World Culture</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 font-serif uppercase tracking-tight">Connecting Cultures</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">Enter your credentials to access your account</p>
       </div>
 
       {/* Error Message */}
@@ -121,8 +136,12 @@ export default function LoginForm({ onClose, onSwitchToRegister }) {
 
       {/* Divider */}
       <div className="relative my-6 sm:my-8">
-        <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-200 dark:border-gray-800"></span></div>
-        <div className="relative flex justify-center text-[10px] uppercase"><span className="bg-white dark:bg-[#0a0a0a] px-2 text-gray-400 font-bold">OR</span></div>
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-gray-200 dark:border-gray-800"></span>
+        </div>
+        <div className="relative flex justify-center text-[10px] uppercase">
+          <span className="bg-white dark:bg-[#0a0a0a] px-2 text-gray-400 font-bold">OR</span>
+        </div>
       </div>
 
       {/* Footer Section */}

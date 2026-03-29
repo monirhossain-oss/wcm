@@ -608,7 +608,7 @@ export default function MyListings() {
                   {updateLoading ? (
                     <FiRefreshCw className="animate-spin" />
                   ) : (
-                    'Synchronize Node Updates'
+                    'Updates Listing'
                   )}
                 </button>
               </div>

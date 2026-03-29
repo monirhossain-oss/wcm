@@ -6,17 +6,17 @@ const WhyWorldCulture = () => {
         {
             id: 1,
             title: "Discover authentic cultural creations",
-            images: ["/Africa.jpg", "/apple-icon.png"],
+            images: ["/African-attire.jpeg", "/artisan-hand-made-pottery.jpeg"],
         },
         {
             id: 2,
             title: "Support global creators",
-            images: ["/Africa.jpg", "/apple-icon.png"],
+            images: ["/artisan-weaving-textile-loom.jpeg", "/asian-kimono-silk-garment.jpeg"],
         },
         {
             id: 3,
             title: "Explore traditions from around the world",
-            images: ["/Africa.jpg", "/apple-icon.png"],
+            images: ["/Artisan-jewelry.jpeg", "/megenda69artgallary.jpeg"],
         },
     ];
 
