@@ -77,15 +77,32 @@ export default function PromotionInsightsPage() {
   };
 
   const handleCancel = async (packageType) => {
+    let estimatedRefund = 0;
+    const now = new Date();
+
+    // ডাইনামিক রিফান্ড এস্টিমেশন (শুধুমাত্র এলার্ট দেখানোর জন্য)
+    if (packageType === 'boost' && boost.isActive) {
+      const expiry = new Date(boost.expiresAt);
+      const remainingDays = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
+      const dailyRate = (boost.amountPaid || 0) / (boost.durationDays || 1);
+      estimatedRefund = Math.max(0, remainingDays * dailyRate).toFixed(2);
+    } else if (packageType === 'ppc' && ppc.isActive) {
+      estimatedRefund = Number(ppc.balance).toFixed(2);
+    }
+
     if (
-      !window.confirm(`Stop this ${packageType.toUpperCase()}? Credits will be refunded to wallet.`)
-    )
+      !window.confirm(
+        `Stop this ${packageType.toUpperCase()}? Approx €${estimatedRefund} will be refunded to your wallet.`
+      )
+    ) {
       return;
+    }
+
     setActionLoading(`${packageType}_cancel`);
     try {
       const res = await api.post('/api/payments/cancel-promotion', { listingId: id, packageType });
       if (res.data.success) {
-        toast.success(`Cancelled! €${res.data.refundAmount} refunded.`);
+        toast.success(`Success! €${res.data.refundAmount} credited to wallet.`);
         fetchStats();
       }
     } catch (err) {
@@ -404,45 +421,74 @@ const MetricBox = ({ label, value, sub }) => (
   </div>
 );
 
-const EditPanel = ({ type, values, setValues, onClose, onSubmit, loading }) => (
-  <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-    <div className="flex justify-between items-center mb-6">
-      <h3 className="text-[10px] font-black uppercase tracking-widest text-orange-500">
-        Update Campaign
-      </h3>
-      <button onClick={onClose} className="text-zinc-400 hover:text-red-500">
-        <FiX size={18} />
-      </button>
-    </div>
-    <div className="grid grid-cols-2 gap-4 mb-6">
-      {type === 'boost' ? (
+const PPC_RATE = 0.3;
+
+const EditPanel = ({ type, values, setValues, onClose, onSubmit, loading }) => {
+  const extraClicks = type === 'ppc' ? Math.floor(Number(values.budget || 0) / PPC_RATE) : 0;
+
+  return (
+    <div className="animate-in fade-in slide-in-from-top-4 duration-300 bg-zinc-50 dark:bg-white/5 p-5 rounded-2xl border border-orange-500/10 mb-6">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-2">
+          <FiEdit3 /> {type === 'boost' ? 'Extend Duration' : 'Inject Budget'}
+        </h3>
+        <button onClick={onClose} className="text-zinc-400 hover:text-red-500">
+          <FiX size={18} />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {type === 'boost' ? (
+          <InputBox
+            label="Add Days"
+            value={values.days}
+            onChange={(v) => setValues({ ...values, days: v })}
+            placeholder="e.g. 7"
+          />
+        ) : (
+          <div className="bg-white dark:bg-[#0c0c0c] p-4 rounded-xl border border-black/5 dark:border-white/5">
+            <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">
+              Estimated Growth
+            </p>
+            <p className="text-xl font-black text-blue-500 tracking-tighter">
+              +{extraClicks} Clicks
+            </p>
+          </div>
+        )}
+
         <InputBox
-          label="Add Days"
-          value={values.days}
-          onChange={(v) => setValues({ ...values, days: v })}
+          label="Add Budget (€)"
+          value={values.budget}
+          onChange={(v) => {
+            setValues({
+              ...values,
+              budget: v,
+              clicks: type === 'ppc' ? Math.floor(Number(v) / PPC_RATE) : values.clicks,
+            });
+          }}
+          placeholder="Min €5"
         />
-      ) : (
-        <InputBox
-          label="Add Clicks"
-          value={values.clicks}
-          onChange={(v) => setValues({ ...values, clicks: v })}
-        />
-      )}
-      <InputBox
-        label="Extra Budget (€)"
-        value={values.budget}
-        onChange={(v) => setValues({ ...values, budget: v })}
-      />
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          onClick={onClose}
+          className="flex-1 py-4 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-300 transition-all"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onSubmit}
+          disabled={loading || Number(values.budget) < 1}
+          className="flex-[2] py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-600 dark:hover:bg-orange-600 dark:hover:text-white transition-all shadow-lg disabled:opacity-30"
+        >
+          {loading ? <FiRefreshCcw className="animate-spin" /> : <FiSave />}
+          Confirm & Pay €{Number(values.budget).toFixed(2)}
+        </button>
+      </div>
     </div>
-    <button
-      onClick={onSubmit}
-      disabled={loading}
-      className="w-full py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-600 dark:hover:bg-orange-600 dark:hover:text-white transition-all shadow-lg"
-    >
-      {loading ? <FiRefreshCcw className="animate-spin" /> : <FiSave />} Add & Proceed
-    </button>
-  </div>
-);
+  );
+};
 
 const InputBox = ({ label, value, onChange }) => (
   <div className="space-y-1.5">
