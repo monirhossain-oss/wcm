@@ -361,7 +361,7 @@ export default function ProfilePage() {
                         disabled={isSubmitting}
                         className="w-full md:w-auto px-12 py-4 bg-orange-500 text-white font-black text-[10px] tracking-[0.3em] hover:bg-orange-600 transition-all disabled:bg-gray-700 uppercase shadow-lg shadow-orange-500/20 rounded-md"
                       >
-                        {isSubmitting ? 'Synchronizing...' : 'PUSH UPDATES'}
+                        {isSubmitting ? 'Updating...' : 'Update Profile'}
                       </button>
                     </div>
                   </form>

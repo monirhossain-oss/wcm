@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaInstagram, FaPinterestP, FaLinkedinIn, FaFacebook } from 'react-icons/fa';
-import { useState } from 'react'; 
-import emailjs from '@emailjs/browser'; 
+import { useState } from 'react';
+import emailjs from '@emailjs/browser';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  
+
 
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
@@ -25,14 +25,14 @@ const Footer = () => {
     const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC;
 
     const templateParams = {
-      user_email: email, 
+      user_email: email,
       message: "New Newsletter Subscription",
     };
 
     try {
       await emailjs.send(serviceId, templateId, templateParams, publicKey);
       setStatus("success");
-      setEmail(""); 
+      setEmail("");
       alert("Subscription Successful!");
     } catch (error) {
       console.error("EmailJS Error:", error);
@@ -65,10 +65,9 @@ const Footer = () => {
           <div>
             <h4 className="text-black dark:text-white text-sm font-semibold uppercase tracking-wider mb-6">Platform</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/discover" className="hover:text-black dark:hover:text-white transition-colors">Discover</Link></li>
-              <li><Link href="/regions" className="hover:text-black dark:hover:text-white transition-colors">Regions</Link></li>
-              <li><Link href="/creators" className="hover:text-black dark:hover:text-white transition-colors">Creators</Link></li>
               <li><Link href="/aboutUs" className="hover:text-black dark:hover:text-white transition-colors">About Us</Link></li>
+              <li><Link href="/HowItWorks" className="hover:text-black dark:hover:text-white transition-colors">How It Works</Link></li>
+              <li><Link href="/faqUs" className="hover:text-black dark:hover:text-white transition-colors">FAQ</Link></li>
             </ul>
           </div>
 
@@ -76,8 +75,6 @@ const Footer = () => {
             <h4 className="text-black dark:text-white text-sm font-semibold uppercase tracking-wider mb-6">Resources</h4>
             <ul className="space-y-3 text-sm">
               <li><Link href="/blogs" className="hover:text-black dark:hover:text-white transition-colors">Blogs</Link></li>
-              <li><Link href="/HowItWorks" className="hover:text-black dark:hover:text-white transition-colors">How It Works</Link></li>
-              <li><Link href="/faqUs" className="hover:text-black dark:hover:text-white transition-colors">FAQ</Link></li>
               <li><Link href="/contact" className="hover:text-black dark:hover:text-white transition-colors">Contact</Link></li>
             </ul>
           </div>
@@ -96,7 +93,7 @@ const Footer = () => {
                 placeholder="Your email address"
                 className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-3 text-sm text-black dark:text-white placeholder-gray-500 focus:outline-none focus:border-black dark:focus:border-white transition-colors"
               />
-              <button 
+              <button
                 type="submit"
                 disabled={status === "loading"}
                 className="w-full bg-black dark:bg-white text-white dark:text-black py-3 text-sm font-medium hover:opacity-90 transition-all disabled:opacity-50"
@@ -109,7 +106,9 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-300 dark:border-gray-600 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center text-sm">
-          <p className="mb-4 md:mb-0">© {currentYear} World Culture Marketplace. All rights reserved.</p>
+          <p className="mb-4 md:mb-0">
+            © {currentYear} World Culture Marketplace<sup className="text-[10px] ml-0.5">&reg;</sup>. All rights reserved.
+          </p>
           <div className="flex space-x-6">
             <Link href="/privacy-policy" className="hover:text-black dark:hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms-&-conditions" className="hover:text-black dark:hover:text-white transition-colors">Terms & Conditions</Link>

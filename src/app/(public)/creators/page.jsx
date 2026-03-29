@@ -23,7 +23,6 @@ const CreatorsPage = () => {
         if (res.data.success) {
           
           setTop30(res.data.data.top30 || []);
-          console.log(res.data.data.top30)
         }
       } catch (err) {
         console.error('Fetch error:', err);

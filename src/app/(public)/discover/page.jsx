@@ -112,7 +112,6 @@ const DiscoverContent = () => {
         let url = `/api/listings/public?limit=${fetchLimit}&offset=${isInitial ? 0 : offset}`;
         if (activeCategory !== 'All') url += `&category=${encodeURIComponent(activeCategory)}`;
         if (debouncedSearch) url += `&search=${debouncedSearch}`;
-        if (sortBy === 'Newest') url += `&filter=Today`;
 
         // নোট: এখানে আমরা &region= যোগ করছি না যাতে ইউআরএল আপনার সফল ইউআরএলটির মতো থাকে
 
@@ -228,17 +227,6 @@ const DiscoverContent = () => {
 
             {/* Popularity + Region */}
             <div className="flex items-center justify-between gap-4 md:gap-6 md:order-1">
-              <div className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 px-3 py-2 rounded-xl shrink-0">
-                <Zap size={14} className="text-orange-500" />
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-transparent text-xs font-semibold uppercase outline-none cursor-pointer text-zinc-700 dark:text-zinc-200"
-                >
-                  <option className="bg-white text-zinc-700">Popularity</option>
-                  <option className="bg-white text-zinc-700">Newest</option>
-                </select>
-              </div>
 
               {/* Region Select (এখানে এখন মহাদেশের নামগুলো আসবে) */}
               <div className="relative shrink-0">
