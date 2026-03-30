@@ -9,14 +9,14 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5
 
 export default function ListingCard({ item }) {
   if (!item) return null;
-  // console.log(item);
+  // console.log(item.leangth);
 
   const postImageSrc = item.image?.startsWith('http') ? item.image : `${API_BASE_URL}${item.image?.startsWith('/') ? '' : '/'}${item.image}`;
 
   return (
     <div className="group relative flex flex-col w-full transition-all duration-300">
       {/* IMAGE SECTION */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-zinc-900">
+      <div className="relative aspect-[4/5] overflow-hidden bg-gray-100 dark:bg-zinc-900">
         <Link href={`/listings/${item._id}`} className="block w-full h-full relative">
           <Image
             src={postImageSrc || 'https://placehold.co/600x400?text=No+Image'}
