@@ -23,7 +23,7 @@ const api = axios.create({
 });
 
 const CACHE_KEY = 'wcm_tx_cache';
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // ২৪ ঘণ্টা
+const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes for testing, change to 24 * 60 * 60 * 1000 for production
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);

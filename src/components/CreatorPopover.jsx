@@ -6,8 +6,9 @@ import Image from 'next/image';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
 
 const CreatorPopover = ({ creator, item, creatorLocation }) => {
+  console.log(item)
   const creatorName = creator?.username || 'Anonymous';
-  const listingCount = creator?.listingsCount || 0;
+  const listingCount = item?.creatorStats.totalApprovedListings || 0;
 
   const avatarSrc = creator?.profile?.profileImage || '/default-avatar.png';
   const coverSrc = creator?.profile?.coverImage || 'https://placehold.co/600x200/27272a/white?text=No+Cover';
