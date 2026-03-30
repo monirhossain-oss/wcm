@@ -54,10 +54,41 @@ const Footer = () => {
             </Link>
             <p className="text-sm leading-relaxed mb-6">Connecting the world through authentic culture, one story at a time.</p>
             <div className="flex space-x-4 text-lg">
-              <FaInstagram className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
-              <FaPinterestP className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
-              <FaLinkedinIn className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
-              <FaFacebook className='hover:text-black dark:hover:text-white cursor-pointer transition-colors' />
+              {/* Instagram */}
+              <a
+                href="https://www.instagram.com/wordculturemarketplace"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaInstagram className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
+              </a>
+
+              {/* Pinterest */}
+              <a
+                href="https://www.pinterest.com/wordculturemarketplace"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaPinterestP className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
+              </a>
+
+              {/* LinkedIn */}
+              <a
+                href="https://www.linkedin.com/wordculturemarketplace"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaLinkedinIn className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
+              </a>
+
+              {/* Facebook */}
+              <a
+                href="https://www.facebook.com/wordculturemarketplace"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaFacebook className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
+              </a>
             </div>
           </div>
 
