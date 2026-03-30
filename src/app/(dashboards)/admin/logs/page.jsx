@@ -22,7 +22,7 @@ const api = axios.create({
 });
 
 const CACHE_KEY = 'admin_audit_logs_cache';
-const CACHE_TIME = 5 * 60 * 1000; // 5 minutes for testing, change to 10 * 60 * 1000 for production
+const CACHE_TIME = 1 * 60 * 1000; // 1 minute for testing, change to 10 * 60 * 1000 for production
 
 export default function AdminAuditLogsTable() {
   const [logs, setLogs] = useState([]);

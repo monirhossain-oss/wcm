@@ -27,7 +27,7 @@ const api = axios.create({
 });
 
 const LISTINGS_CACHE_KEY = 'wcm_listings_cache';
-const CACHE_TIME = 2 * 60 * 1000;
+const CACHE_TIME = 1 * 60 * 1000;
 
 export default function MyListings() {
   const [listings, setListings] = useState([]);

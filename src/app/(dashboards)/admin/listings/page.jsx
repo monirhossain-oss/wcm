@@ -30,7 +30,7 @@ const api = axios.create({
 });
 
 const LISTINGS_CACHE_KEY = 'wcm_admin_listings_cache';
-const CACHE_EXPIRY = 5 * 60 * 1000;
+const CACHE_EXPIRY = 1 * 60 * 1000;
 
 // Mandatory Rejection/Block Reasons
 const REASON_CODES = [

@@ -68,7 +68,7 @@ export default function CreatorDashboard() {
     const interval = setInterval(() => {
       console.log("Auto-syncing dashboard stats...");
       fetchDashboardData(true);
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 1 * 60 * 1000); // 1 minute for testing, change to 5 * 60 * 1000 for production
     return () => clearInterval(interval);
   }, []);
 
