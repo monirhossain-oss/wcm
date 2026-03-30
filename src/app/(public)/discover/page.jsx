@@ -11,7 +11,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// ১. মহাদেশের দেশের লিস্ট (আপনার দেওয়া ডাটা অনুযায়ী)
+
 const continentMapping = {
   "Asia": ["Afghanistan", "Armenia", "Azerbaijan", "Bangladesh", "Bhutan", "Brunei", "Cambodia", "China", "Georgia", "India", "Indonesia", "Japan", "Kazakhstan", "Kyrgyzstan", "Laos", "Malaysia", "Maldives", "Mongolia", "Myanmar", "Nepal", "North Korea", "Philippines", "Singapore", "South Korea", "Sri Lanka", "Taiwan", "Tajikistan", "Thailand", "Timor-Leste", "Turkmenistan", "Uzbekistan", "Vietnam"],
   "Middle East": ["Bahrain", "Cyprus", "Iran", "Iraq", "Israel", "Jordan", "Kuwait", "Lebanon", "Oman", "Palestine", "Qatar", "Saudi Arabia", "Syria", "Turkey", "United Arab Emirates", "Yemen"],
@@ -24,8 +24,7 @@ const DiscoverContent = () => {
   const { cachedListings } = useListings();
   const searchParams = useSearchParams();
   const urlContinent = searchParams.get('continent');
-  const urlCategory = searchParams.get('category'); // এটি যোগ করো যাতে ক্যাটাগরি ইউআরএল থেকে পড়া যায়
-
+  const urlCategory = searchParams.get('category'); 
   const [listings, setListings] = useState([]);
   const [categories, setCategories] = useState(['All']);
   const [regions, setRegions] = useState(['All Regions']);
@@ -33,11 +32,8 @@ const DiscoverContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortBy, setSortBy] = useState('Popularity');
-
-  // এখানে লজিক: স্লাইডার থেকে মহাদেশ আসলে সেটা সেট হবে, নাহলে All Regions
   const [selectedRegion, setSelectedRegion] = useState(urlContinent || 'All Regions');
   const [open, setOpen] = useState(false);
-
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);

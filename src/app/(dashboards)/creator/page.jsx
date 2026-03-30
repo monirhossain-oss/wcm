@@ -9,7 +9,7 @@ import {
   FiActivity,
   FiArrowUpRight,
   FiFileText,
-  FiRefreshCw, // রিফ্রেশ আইকন
+  FiRefreshCw,
   FiAlertCircle,
   FiLayers,
   FiInfo,
@@ -48,7 +48,6 @@ export default function CreatorDashboard() {
       const [statsRes, transRes] = await Promise.all([
         api.get(statsUrl),
         api.get('/api/creator/my-transactions'),
-        ,
       ]);
 
       setStats(statsRes.data);
@@ -66,6 +65,11 @@ export default function CreatorDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+    const interval = setInterval(() => {
+      console.log("Auto-syncing dashboard stats...");
+      fetchDashboardData(true);
+    }, 5 * 60 * 1000); // 5 minutes
+    return () => clearInterval(interval);
   }, []);
 
   const downloadInvoice = async (transactionId) => {
