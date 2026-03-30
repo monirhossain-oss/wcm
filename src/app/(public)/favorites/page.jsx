@@ -48,7 +48,7 @@ export default function FavoritesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-[#0a0a0a] px-6 py-12 pt-24">
+        <div className="min-h-screen bg-white dark:bg-[#0a0a0a] px-6 py-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-10">
@@ -72,7 +72,7 @@ export default function FavoritesPage() {
                     </div>
                 ) : (
                     /* Grid Layout - সরাসরি কার্ডের ডিজাইন এখানে */
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                         {favorites.map((item) => {
                             // console.log(item)
                             // ইমেজ পাথ লজিক (আপনার লিস্টিং কার্ড থেকে নেওয়া)
