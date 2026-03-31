@@ -402,7 +402,7 @@ export default function TransactionsPage() {
   );
 }
 
-// Helper Components for Cleaner Sidebar
+// Helper Components
 const DetailItem = ({ label, value, icon, isMono }) => (
   <div>
     <p className="text-[8px] text-gray-400 font-black uppercase mb-1">{label}</p>
