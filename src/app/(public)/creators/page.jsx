@@ -108,23 +108,22 @@ const CreatorsPage = () => {
     <select 
       value={selectedCulture} 
       onChange={(e) => setSelectedCulture(e.target.value)} 
-      className="w-full px-5 py-4 bg-white dark:bg-[#1a1a1a] text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm outline-none cursor-pointer focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none shadow-sm"
+      className="w-full px-5 py-4 bg-white dark:bg-black text-black dark:text-white border border-black/10 dark:border-white/20 rounded-2xl text-sm outline-none cursor-pointer focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none shadow-sm"
     >
-      <option value="" className="bg-white dark:bg-[#1a1a1a] text-zinc-900 dark:text-zinc-100">
+      <option value="" className="bg-white dark:bg-black text-black dark:text-white">
         All Cultures
       </option>
       {cultures.map((c) => (
         <option 
           key={c} 
           value={c} 
-          className="bg-white dark:bg-[#1a1a1a] text-zinc-900 dark:text-zinc-100"
+          className="bg-white dark:bg-black text-black dark:text-white"
         >
           {c}
         </option>
       ))}
     </select>
-    {/* কাস্টম অ্যারো আইকন যাতে দেখতে সুন্দর লাগে */}
-    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black/40 dark:text-white/40">
       <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
         <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
       </svg>
@@ -133,32 +132,30 @@ const CreatorsPage = () => {
 
   {/* Category Dropdown */}
   <div className="relative flex-1 md:w-44">
-  <select 
-    value={selectedCategory} 
-    onChange={(e) => setSelectedCategory(e.target.value)} 
-    className="w-full px-5 py-4 bg-white dark:bg-black text-black dark:text-white border border-black/10 dark:border-white/20 rounded-2xl text-sm outline-none cursor-pointer focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none shadow-sm"
-  >
-    <option value="" className="bg-white dark:bg-black text-black dark:text-white">
-      All Categories
-    </option>
-    {categories.map((cat) => (
-      <option 
-        key={cat._id} 
-        value={cat._id} 
-        className="bg-white dark:bg-black text-black dark:text-white"
-      >
-        {cat.name}
+    <select 
+      value={selectedCategory} 
+      onChange={(e) => setSelectedCategory(e.target.value)} 
+      className="w-full px-5 py-4 bg-white dark:bg-black text-black dark:text-white border border-black/10 dark:border-white/20 rounded-2xl text-sm outline-none cursor-pointer focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none shadow-sm"
+    >
+      <option value="" className="bg-white dark:bg-black text-black dark:text-white">
+        All Categories
       </option>
-    ))}
-  </select>
-  
-  {/* Custom Arrow Icon */}
-  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black/40 dark:text-white/40">
-    <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-    </svg>
+      {categories.map((cat) => (
+        <option 
+          key={cat._id} 
+          value={cat._id} 
+          className="bg-white dark:bg-black text-black dark:text-white"
+        >
+          {cat.name}
+        </option>
+      ))}
+    </select>
+    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black/40 dark:text-white/40">
+      <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+      </svg>
+    </div>
   </div>
-</div>
 
 </div>
         </div>
@@ -198,7 +195,7 @@ const CreatorsPage = () => {
                     {creator.profile?.country || "World"}
                   </p>
 
-                  {/* Bio Text - এখানে dark:text-zinc-400 যোগ করা হয়েছে যাতে ডার্ক মোডেও দেখা যায় */}
+                  {/* Bio Text - এখানে dark:text-zinc-400  */}
                   <p className="text-zinc-600 dark:text-zinc-400 text-xs text-center mt-3 line-clamp-2 leading-relaxed h-8">
                     {creator.profile?.bio || "Crafting stories through traditional artistry and heritage techniques."}
                   </p>
