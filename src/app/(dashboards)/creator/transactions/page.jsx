@@ -98,9 +98,6 @@ export default function TransactionsPage() {
           <h1 className="text-3xl font-black dark:text-white uppercase tracking-tighter italic">
             Financial <span className="text-orange-500">Ledger</span>
           </h1>
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-1">
-            Node: {process.env.NEXT_PUBLIC_API_BASE_URL}
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
@@ -161,7 +158,7 @@ export default function TransactionsPage() {
         </div>
         <div className="bg-white dark:bg-[#0c0c0c] p-4 rounded-xl border border-gray-100 dark:border-white/5">
           <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">
-            Active Node
+            User Activity
           </p>
           <p className="text-xl font-black text-emerald-500 italic">ONLINE</p>
         </div>

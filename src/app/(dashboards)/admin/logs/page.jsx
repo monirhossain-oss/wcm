@@ -219,10 +219,10 @@ export default function AdminAuditLogsTable() {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50 dark:bg-white/2 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-100 dark:border-white/5">
-                <th className="px-8 py-5">Timestamp / Node IP</th>
+                <th className="px-8 py-5">Timestamp / Listing IP</th>
                 <th className="px-8 py-5">Identity Protocol</th>
                 <th className="px-8 py-5">Operation</th>
-                <th className="px-8 py-5 text-right">Data Hub</th>
+                <th className="px-8 py-5 text-right">View</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">

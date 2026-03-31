@@ -321,7 +321,7 @@ export default function ListingPromotedPage() {
                   Priority Level
                 </th>
                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-right text-gray-400">
-                  Operations
+                  Action
                 </th>
               </tr>
             </thead>

@@ -256,7 +256,7 @@ export default function AdminListings() {
                 <th className="px-8 py-4">Preview</th>
                 <th className="px-6 py-4">Creator</th>
                 <th className="px-6 py-4">Classification</th>
-                <th className="px-6 py-4">Protocol Status</th>
+                <th className="px-6 py-4">Listing Status</th>
                 <th className="px-8 py-4 text-right">Actions</th>
               </tr>
             </thead>

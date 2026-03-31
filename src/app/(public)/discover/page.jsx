@@ -1,7 +1,7 @@
 'use client';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import axios from 'axios';
-import { useSearchParams } from 'next/navigation'; 
+import { useSearchParams } from 'next/navigation';
 import { useListings } from '@/context/ListingsContext';
 import ListingCard from '@/components/ListingCard';
 import { Search, ChevronLeft, ChevronRight, Loader2, MapPin, Zap } from 'lucide-react';
@@ -20,11 +20,11 @@ const continentMapping = {
   "Latin America": ["Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominican Republic", "Ecuador", "El Salvador", "Guatemala", "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Puerto Rico", "Uruguay", "Venezuela"]
 };
 
-const DiscoverPage = () => {
+const DiscoverContent = () => {
   const { cachedListings } = useListings();
   const searchParams = useSearchParams();
   const urlContinent = searchParams.get('continent');
-  const urlCategory = searchParams.get('category'); // এটি যোগ করো যাতে ক্যাটাগরি ইউআরএল থেকে পড়া যায়
+  const urlCategory = searchParams.get('category'); // এটি যোগ করো যাতে ক্যাটাগরি ইউআরএল থেকে পড়া যায়
 
   const [listings, setListings] = useState([]);
   const [categories, setCategories] = useState(['All']);
@@ -112,7 +112,6 @@ const DiscoverPage = () => {
         let url = `/api/listings/public?limit=${fetchLimit}&offset=${isInitial ? 0 : offset}`;
         if (activeCategory !== 'All') url += `&category=${encodeURIComponent(activeCategory)}`;
         if (debouncedSearch) url += `&search=${debouncedSearch}`;
-        if (sortBy === 'Newest') url += `&filter=Today`;
 
         // নোট: এখানে আমরা &region= যোগ করছি না যাতে ইউআরএল আপনার সফল ইউআরএলটির মতো থাকে
 
@@ -228,17 +227,6 @@ const DiscoverPage = () => {
 
             {/* Popularity + Region */}
             <div className="flex items-center justify-between gap-4 md:gap-6 md:order-1">
-              <div className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 px-3 py-2 rounded-xl shrink-0">
-                <Zap size={14} className="text-orange-500" />
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-transparent text-xs font-semibold uppercase outline-none cursor-pointer text-zinc-700 dark:text-zinc-200"
-                >
-                  <option className="bg-white text-zinc-700">Popularity</option>
-                  <option className="bg-white text-zinc-700">Newest</option>
-                </select>
-              </div>
 
               {/* Region Select (এখানে এখন মহাদেশের নামগুলো আসবে) */}
               <div className="relative shrink-0">
@@ -333,5 +321,18 @@ const DiscoverPage = () => {
     </div>
   );
 };
-
-export default DiscoverPage;
+export default function DiscoverPage() {
+  return (
+    // এখানে Suspense ব্যবহার করা হয়েছে যাতে build error না আসে
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0a0a0a]">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="animate-spin text-orange-500" size={40} />
+          <p className="text-sm text-zinc-500 font-medium">Loading Discover...</p>
+        </div>
+      </div>
+    }>
+      <DiscoverContent />
+    </Suspense>
+  );
+}

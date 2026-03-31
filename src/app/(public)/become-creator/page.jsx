@@ -241,7 +241,7 @@ export default function UserProfileForm() {
               {customerType === 'business' && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                   <label className={labelStyle}>
-                    <FiCheckCircle size={10} /> VAT Number (Optional)
+                    <FiCheckCircle size={10} />Business Number (Optional)
                   </label>
                   <input
                     {...register('vatNumber')}
