@@ -48,10 +48,10 @@ export default function ListingCard({ item }) {
           <CreatorName creator={item.creatorId} item={item} region={item.region} API_BASE_URL={API_BASE_URL} />
 
           <div className="flex gap-2">
-            <div className="font-bold text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded">
+            <div className="hidden md:flex font-bold text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded">
               {item.tradition || 'Heritage'}
             </div>
-            <div className="hidden md:flex items-center text-[10px] gap-1 font-medium text-zinc-500 dark:text-zinc-400">
+            <div className="flex items-center text-[10px] gap-1 font-medium text-zinc-500 dark:text-zinc-400">
               <HiOutlineLocationMarker size={12} /> {item.region || 'Global'}
             </div>
           </div>
