@@ -11,21 +11,58 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// ১. মহাদেশের দেশের লিস্ট (আপনার দেওয়া ডাটা অনুযায়ী)
+
 const continentMapping = {
-  "Asia": ["Afghanistan", "Armenia", "Azerbaijan", "Bangladesh", "Bhutan", "Brunei", "Cambodia", "China", "Georgia", "India", "Indonesia", "Japan", "Kazakhstan", "Kyrgyzstan", "Laos", "Malaysia", "Maldives", "Mongolia", "Myanmar", "Nepal", "North Korea", "Philippines", "Singapore", "South Korea", "Sri Lanka", "Taiwan", "Tajikistan", "Thailand", "Timor-Leste", "Turkmenistan", "Uzbekistan", "Vietnam"],
-  "Middle East": ["Bahrain", "Cyprus", "Iran", "Iraq", "Israel", "Jordan", "Kuwait", "Lebanon", "Oman", "Palestine", "Qatar", "Saudi Arabia", "Syria", "Turkey", "United Arab Emirates", "Yemen"],
-  "Europe": ["Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Kosovo", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", "Malta", "Moldova", "Monaco", "Montenegro", "Netherlands", "North Macedonia", "Norway", "Poland", "Portugal", "Romania", "Russia", "San Marino", "Serbia", "Slovakia", "Slovenia", "Spain", "Sweden", "Switzerland", "Ukraine", "United Kingdom", "Vatican City"],
-  "Africa": ["Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon", "Cape Verde", "Central African Republic", "Chad", "Comoros", "Congo", "DR Congo", "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe"],
-  "Latin America": ["Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominican Republic", "Ecuador", "El Salvador", "Guatemala", "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Puerto Rico", "Uruguay", "Venezuela"]
+  "Asia": [
+    "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh", "Bhutan", "Brunei", "Cambodia", "China",
+    "Georgia", "India", "Indonesia", "Japan", "Kazakhstan", "Kyrgyzstan", "Laos", "Malaysia",
+    "Maldives", "Mongolia", "Myanmar", "Nepal", "North Korea", "Pakistan", "Philippines",
+    "Singapore", "South Korea", "Sri Lanka", "Taiwan", "Tajikistan", "Thailand", "Timor-Leste",
+    "Turkmenistan", "Uzbekistan", "Vietnam"
+  ],
+  "Middle East": [
+    "Bahrain", "Cyprus", "Iran", "Iraq", "Israel", "Jordan", "Kuwait", "Lebanon", "Oman",
+    "Palestine", "Qatar", "Saudi Arabia", "Syria", "Turkey", "United Arab Emirates", "Yemen"
+  ],
+  "Europe": [
+    "Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina", "Bulgaria",
+    "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece",
+    "Hungary", "Iceland", "Ireland", "Italy", "Kosovo", "Latvia", "Liechtenstein", "Lithuania",
+    "Luxembourg", "Malta", "Moldova", "Monaco", "Montenegro", "Netherlands", "North Macedonia",
+    "Norway", "Poland", "Portugal", "Romania", "Russia", "San Marino", "Serbia", "Slovakia",
+    "Slovenia", "Spain", "Sweden", "Switzerland", "Ukraine", "United Kingdom", "Vatican City"
+  ],
+  "Africa": [
+    "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon", "Cape Verde",
+    "Central African Republic", "Chad", "Comoros", "Congo", "DR Congo", "Djibouti", "Egypt",
+    "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea",
+    "Guinea-Bissau", "Ivory Coast", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi",
+    "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", "Niger", "Nigeria",
+    "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles", "Sierra Leone", "Somalia",
+    "South Africa", "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe"
+  ],
+  "North America": [
+    "Canada", "United States", "Greenland", "Bermuda"
+  ],
+  "Latin America": [
+    "Antigua and Barbuda", "Argentina", "Bahamas", "Barbados", "Belize", "Bolivia", "Brazil",
+    "Chile", "Colombia", "Costa Rica", "Cuba", "Dominica", "Dominican Republic", "Ecuador",
+    "El Salvador", "Grenada", "Guatemala", "Guyana", "Haiti", "Honduras", "Jamaica", "Mexico",
+    "Nicaragua", "Panama", "Paraguay", "Peru", "Puerto Rico", "Saint Kitts and Nevis",
+    "Saint Lucia", "Saint Vincent and the Grenadines", "Suriname", "Trinidad and Tobago",
+    "Uruguay", "Venezuela"
+  ],
+  "Oceania": [
+    "Australia", "Fiji", "Kiribati", "Marshall Islands", "Micronesia", "Nauru", "New Zealand",
+    "Palau", "Papua New Guinea", "Samoa", "Solomon Islands", "Tonga", "Tuvalu", "Vanuatu"
+  ]
 };
 
 const DiscoverContent = () => {
   const { cachedListings } = useListings();
   const searchParams = useSearchParams();
   const urlContinent = searchParams.get('continent');
-  const urlCategory = searchParams.get('category'); // এটি যোগ করো যাতে ক্যাটাগরি ইউআরএল থেকে পড়া যায়
-
+  const urlCategory = searchParams.get('category');
   const [listings, setListings] = useState([]);
   const [categories, setCategories] = useState(['All']);
   const [regions, setRegions] = useState(['All Regions']);
@@ -33,11 +70,8 @@ const DiscoverContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortBy, setSortBy] = useState('Popularity');
-
-  // এখানে লজিক: স্লাইডার থেকে মহাদেশ আসলে সেটা সেট হবে, নাহলে All Regions
   const [selectedRegion, setSelectedRegion] = useState(urlContinent || 'All Regions');
   const [open, setOpen] = useState(false);
-
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -184,17 +218,75 @@ const DiscoverContent = () => {
 
       <div className="sticky top-20 z-40 bg-white/95 dark:bg-[#0a0a0a] border-b border-zinc-100 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-6 py-4 space-y-4">
+          {/* Search Container Wrapper */}
+          <div className="relative flex items-center w-full bg-zinc-100 dark:bg-white/5 rounded-full p-1.5 transition-all focus-within:ring-2 focus-within:ring-blue-500/50">
 
-          {/* Search Bar */}
-          <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-            <input
-              type="text"
-              placeholder="Search culture, art, nodes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-zinc-100 dark:bg-white/5 border-none rounded-full text-sm outline-none transition-all dark:text-white"
-            />
+            {/* Left Side: Search Icon + Input */}
+            <div className="flex items-center flex-1 pl-3">
+              <Search className="text-zinc-400 shrink-0" size={18} />
+              <input
+                type="text"
+                placeholder="Search culture, art, traditions..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent border-none px-3 py-2 text-sm outline-none dark:text-white placeholder:text-zinc-500"
+              />
+            </div>
+
+            {/* Vertical Separator (Behance Style) */}
+            <div className="w-[1px] h-6 bg-zinc-300 dark:bg-zinc-700 mx-2" />
+
+            {/* Right Side: Region Dropdown Container */}
+            <div className="relative" > {/* useRef ব্যবহার করা ভালো যাতে বাইরে ক্লিক করলে বন্ধ হয় */}
+              <div
+                onClick={() => setOpen(!open)}
+                className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/10 rounded-full transition-all min-w-[120px] justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin size={14} className="text-blue-500" />
+                  <span className="text-[11px] font-bold uppercase tracking-tight text-zinc-700 dark:text-zinc-200 truncate max-w-[80px]">
+                    {selectedRegion}
+                  </span>
+                </div>
+                <svg
+                  className={`w-3 h-3 text-zinc-500 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+
+              {/* Dropdown Menu */}
+              {open && (
+                <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#121212] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 animate-in fade-in zoom-in duration-200">
+                  <div className="px-4 py-2 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                    Filter by Region
+                  </div>
+                  <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                    {regions.map((r) => (
+                      <div
+                        key={r}
+                        onClick={() => {
+                          setSelectedRegion(r);
+                          setOpen(false);
+                        }}
+                        className={`px-4 py-2.5 text-xs font-bold uppercase cursor-pointer transition-all flex items-center justify-between
+                ${selectedRegion === r
+                            ? "bg-blue-500 text-white"
+                            : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5"
+                          }`}
+                      >
+                        {r}
+                        {selectedRegion === r && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -225,56 +317,7 @@ const DiscoverContent = () => {
               </button>
             </div>
 
-            {/* Popularity + Region */}
-            <div className="flex items-center justify-between gap-4 md:gap-6 md:order-1">
 
-              {/* Region Select (এখানে এখন মহাদেশের নামগুলো আসবে) */}
-              <div className="relative shrink-0">
-                {/* Trigger */}
-                <div
-                  onClick={() => setOpen(!open)}
-                  className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 px-3 py-2 rounded-xl cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/10 transition-all"
-                >
-                  <MapPin size={14} className="text-blue-500" />
-                  <span className="text-xs font-semibold uppercase text-zinc-700 dark:text-zinc-200">
-                    {selectedRegion}
-                  </span>
-
-                  {/* Arrow */}
-                  <svg
-                    className={`w-3 h-3 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-
-                {/* Dropdown */}
-                {open && (
-                  <div className="absolute mt-2 w-full bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-xl shadow-lg z-50 overflow-hidden">
-                    {regions.map((r) => (
-                      <div
-                        key={r}
-                        onClick={() => {
-                          setSelectedRegion(r);
-                          setOpen(false);
-                        }}
-                        className={`px-3 py-2 text-xs font-semibold uppercase cursor-pointer transition-all
-                ${selectedRegion === r
-                            ? "bg-blue-500 text-white"
-                            : "text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/10"
-                          }`}
-                      >
-                        {r}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </div>

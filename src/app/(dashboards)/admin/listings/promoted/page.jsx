@@ -30,7 +30,7 @@ const REASON_CODES = [
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 const PROMOTED_CACHE_KEY = 'wcm_promoted_cache';
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
+const CACHE_EXPIRY = 1 * 60 * 1000; // 1 minute for testing, change to 24 * 60 * 60 * 1000 for production
 
 export default function ListingPromotedPage() {
   const [listings, setListings] = useState([]);

@@ -34,7 +34,7 @@ const CreatorSlider = ({ creators }) => {
             >
                 {creators.map((creator) => (
                     <SwiperSlide key={creator._id} className="h-auto">
-                        <div className="bg-gray-50 dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 p-4 md:p-6 text-center hover:shadow-lg transition-all duration-300 group h-full flex flex-col items-center">
+                        <div className="bg-gray-100 dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 p-4 md:p-6 text-center hover:shadow-lg transition-all duration-300 group h-full flex flex-col items-center">
 
                             {/* Profile Image */}
                             <div className="relative w-20 h-20 md:w-24 md:h-24 mb-3 md:mb-4">
