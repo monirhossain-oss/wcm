@@ -196,9 +196,6 @@ export default function TransactionsPage() {
                 <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
                   Audit
                 </th>
-                <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
-                  Action
-                </th>
               </tr>
             </thead>
             <tbody className="divide-y dark:divide-white/5">
