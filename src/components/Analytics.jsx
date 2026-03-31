@@ -20,7 +20,7 @@ export default function Analytics() {
         page_path: window.location.pathname,
       });
 
-      console.log('Privacy Protocol: Analytics services initialized.');
+      // console.log('Privacy Protocol: Analytics services initialized.');
     }
   };
 
