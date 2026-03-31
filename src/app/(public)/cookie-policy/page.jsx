@@ -47,7 +47,7 @@ const CookiePolicy = () => {
                         <a href="https://worldculturemarketplace.com" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors underline underline-offset-4 ml-1">
                             https://worldculturemarketplace.com
                         </a>.
-                        By using the Platform, you agree to the storage and use of cookies as described in this Policy.
+                        By using the , you agree to the storage and use of cookies as described in this Policy.
                     </p>
                 </section>
 

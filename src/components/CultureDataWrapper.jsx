@@ -11,12 +11,11 @@ export const continentsData = [
             "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh", "Bhutan", "Brunei",
             "Cambodia", "China", "Georgia", "India", "Indonesia", "Japan", "Kazakhstan",
             "Kyrgyzstan", "Laos", "Malaysia", "Maldives", "Mongolia", "Myanmar", "Nepal",
-            "North Korea", "Philippines", "Singapore", "South Korea", "Sri Lanka",
-            "Taiwan", "Tajikistan", "Thailand", "Timor-Leste", "Turkmenistan",
-            "Uzbekistan", "Vietnam"
+            "North Korea", "Pakistan", "Philippines", "Singapore", "South Korea",
+            "Sri Lanka", "Taiwan", "Tajikistan", "Thailand", "Timor-Leste",
+            "Turkmenistan", "Uzbekistan", "Vietnam"
         ]
     },
-
     {
         title: "Middle East",
         image: "/Middle East.jpg",
@@ -26,7 +25,6 @@ export const continentsData = [
             "United Arab Emirates", "Yemen"
         ]
     },
-
     {
         title: "Europe",
         image: "/europe.jpg",
@@ -41,7 +39,6 @@ export const continentsData = [
             "Vatican City"
         ]
     },
-
     {
         title: "Africa",
         image: "/Africa.jpg",
@@ -57,15 +54,33 @@ export const continentsData = [
             "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe"
         ]
     },
-
+    {
+        title: "North America",
+        image: "/North America.jpg",
+        countries: [
+            "Canada", "United States", "Greenland", "Bermuda"
+        ]
+    },
     {
         title: "Latin America",
         image: "/Latin America.jpg",
         countries: [
-            "Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Costa Rica", "Cuba",
-            "Dominican Republic", "Ecuador", "El Salvador", "Guatemala", "Haiti",
-            "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru",
-            "Puerto Rico", "Uruguay", "Venezuela"
+            "Antigua and Barbuda", "Argentina", "Bahamas", "Barbados", "Belize", "Bolivia",
+            "Brazil", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominica",
+            "Dominican Republic", "Ecuador", "El Salvador", "Grenada", "Guatemala",
+            "Guyana", "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama",
+            "Paraguay", "Peru", "Puerto Rico", "Saint Kitts and Nevis", "Saint Lucia",
+            "Saint Vincent and the Grenadines", "Suriname", "Trinidad and Tobago",
+            "Uruguay", "Venezuela"
+        ]
+    },
+    {
+        title: "Oceania",
+        image: "/Oceania.jpg",
+        countries: [
+            "Australia", "Fiji", "Kiribati", "Marshall Islands", "Micronesia", "Nauru",
+            "New Zealand", "Palau", "Papua New Guinea", "Samoa", "Solomon Islands",
+            "Tonga", "Tuvalu", "Vanuatu"
         ]
     }
 ];

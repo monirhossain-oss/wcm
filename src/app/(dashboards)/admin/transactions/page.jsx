@@ -192,7 +192,9 @@ export default function TransactionsPage() {
                   Package
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400 text-right">
-                  Yield
+                  Amount</th>
+                <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
+                  Audit
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
                   Action

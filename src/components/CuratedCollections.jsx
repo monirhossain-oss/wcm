@@ -59,7 +59,7 @@ export default function CuratedCollections() {
                     Curated Collections
                 </h2>
                 <p className="text-sm text-zinc-500 mt-2">
-                    Handpicked categories to explore cultural treasures
+                    Handpicked categories to explore culture treasures
                 </p>
             </div>
 
