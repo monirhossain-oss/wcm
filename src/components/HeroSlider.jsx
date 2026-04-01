@@ -45,11 +45,11 @@ export default function HeroSlider() {
     if (sliders.length === 0) return null; // অথবা কোনো ডিফল্ট ইমেজ দেখাতে পারেন
 
     return (
-        <div className="absolute rounded-2xl mt-10 inset-0 w-full overflow-hidden bg-black">
+        <div className="absolute rounded-2xl mt-10 inset-0 w-full overflow-hidden ">
             {sliders.map((slide, index) => (
                 <div
                     key={slide._id}
-                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === current ? "opacity-100 z-0" : "opacity-0 -z-10"
+                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === current ? "opacity-120 z-10" : "opacity-0 z-0"
                         }`}
                 >
                     <Image
@@ -60,11 +60,9 @@ export default function HeroSlider() {
                         className={`object-cover transition-transform duration-[6000ms] ease-out ${index === current ? "scale-110" : "scale-100"
                             }`}
                         sizes="100vw"
-                        quality={100}
+                        // quality={100}
                     />
-
-                    {/* গ্রাডিয়েন্ট ওভারলে এবং টেক্সট (অ্যাডমিন থেকে আসা টাইটেল দেখানোর জন্য) */}
-                    <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-10 md:px-20 text-white">
+                    <div className="absolute inset-0 flex flex-col justify-center px-10 md:px-20 text-white">
                         {index === current && (
                             <div className="max-w-2xl animate-fade-in-up">
                                 <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
