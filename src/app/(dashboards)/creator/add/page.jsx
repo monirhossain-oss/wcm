@@ -1,8 +1,10 @@
 'use client';
 import { Country } from 'country-state-city';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import Cropper from 'react-easy-crop'; // New
+import { getCroppedImg } from '@/lib/cropImage'; // New
 import {
   FiUploadCloud,
   FiX,
@@ -16,6 +18,7 @@ import {
   FiMapPin,
   FiLink,
   FiPlus,
+  FiScissors
 } from 'react-icons/fi';
 
 const api = axios.create({
@@ -40,10 +43,17 @@ export default function AddListing() {
   const [categoryTags, setCategoryTags] = useState([]);
   const [metaLoading, setMetaLoading] = useState(true);
   const [tagsLoading, setTagsLoading] = useState(false);
-  const [image, setImage] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  // Dropdown States
+  // --- Image & Crop States ---
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [finalCroppedImage, setFinalCroppedImage] = useState(null);
+  const [showCropper, setShowCropper] = useState(false);
+  // ---------------------------
+
+  const [loading, setLoading] = useState(false);
   const [showCatDrop, setShowCatDrop] = useState(false);
   const [catSearch, setCatSearch] = useState('');
   const [showTagDrop, setShowTagDrop] = useState(false);
@@ -51,11 +61,37 @@ export default function AddListing() {
 
   const router = useRouter();
 
-  // ১. শুরুতে শুধু ক্যাটাগরি লোড করা
+  // ইমেজ সিলেক্ট হ্যান্ডলার
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        setPreviewUrl(reader.result);
+        setShowCropper(true); // ফাইল সিলেক্ট করলেই ক্রপার ওপেন হবে
+      });
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
+
+  const onCropComplete = useCallback((trimmedArea, trimmedAreaPixels) => {
+    setCroppedAreaPixels(trimmedAreaPixels);
+  }, []);
+
+  // ক্রপ কনফার্ম হ্যান্ডলার
+  const handleConfirmCrop = async () => {
+    try {
+      const croppedBlob = await getCroppedImg(previewUrl, croppedAreaPixels);
+      setFinalCroppedImage(croppedBlob);
+      setShowCropper(false);
+    } catch (e) {
+      console.error("Crop error:", e);
+    }
+  };
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await api.get('/api/admin/categories'); // আপনার ক্যাটাগরি এন্ডপয়েন্ট
+        const res = await api.get('/api/admin/categories');
         setCategories(res.data);
       } catch (err) {
         console.error('Categories load failed');
@@ -66,7 +102,6 @@ export default function AddListing() {
     fetchCategories();
   }, []);
 
-  // ২. ক্যাটাগরি সিলেক্ট হলে ওই ক্যাটাগরির ট্যাগ লোড করা
   useEffect(() => {
     if (!formData.category) {
       setCategoryTags([]);
@@ -78,7 +113,6 @@ export default function AddListing() {
       try {
         const res = await api.get(`/api/listings/tags/by-category/${formData.category}`);
         setCategoryTags(res.data);
-        // ক্যাটাগরি চেঞ্জ হলে আগের সিলেক্ট করা ট্যাগ রিসেট করে দেওয়া ভালো
         setFormData((prev) => ({ ...prev, culturalTags: [] }));
       } catch (err) {
         console.error('Tags load failed');
@@ -117,7 +151,6 @@ export default function AddListing() {
       if (isSelected)
         return { ...prev, culturalTags: prev.culturalTags.filter((id) => id !== tagId) };
       if (prev.culturalTags.length >= 10) {
-        // Max 10 Tags
         alert('Maximum 10 tags allowed');
         return prev;
       }
@@ -125,41 +158,42 @@ export default function AddListing() {
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!image || !formData.category) return alert('Image and Category are required');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!finalCroppedImage || !formData.category) return alert('Please upload/crop image and select category');
 
-  setLoading(true);
-  try {
-    const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (key === 'culturalTags') {
-        formData[key].forEach((tag) => data.append('culturalTags', tag));
-      } else if (key === 'externalUrls') {
-        formData[key].forEach((url) => {
-          if (url.trim()) data.append('externalUrls', url);
-        });
-      } else {
-        data.append(key, formData[key]);
+    setLoading(true);
+    try {
+      const data = new FormData();
+      Object.keys(formData).forEach((key) => {
+        if (key === 'culturalTags') {
+          formData[key].forEach((tag) => data.append('culturalTags', tag));
+        } else if (key === 'externalUrls') {
+          formData[key].forEach((url) => {
+            if (url.trim()) data.append('externalUrls', url);
+          });
+        } else {
+          data.append(key, formData[key]);
+        }
+      });
+      // ক্রপ করা ইমেজ ফাইল যুক্ত করা
+      data.append('image', finalCroppedImage, 'listing-image.jpg');
+
+      const response = await api.post('/api/listings/add', data);
+
+      if (response.data.success || response.status === 201 || response.status === 200) {
+        setTimeout(() => {
+          router.push('/creator/listings');
+          router.refresh();
+        }, 100);
       }
-    });
-    data.append('image', image);
-
-    const response = await api.post('/api/listings/add', data);
-
-    if (response.data.success || response.status === 201 || response.status === 200) {
-      setTimeout(() => {
-        router.push('/creator/listings');
-        router.refresh(); 
-      }, 100);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Error creating listing');
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.message || 'Error creating listing');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   if (metaLoading)
     return (
@@ -169,7 +203,7 @@ const handleSubmit = async (e) => {
     );
 
   return (
-    <div className="max-w-6xl mx-auto py-4 pb-20 font-sans">
+    <div className="max-w-6xl mx-auto py-4 pb-20 font-sans px-4 md:px-0">
       <div className="mb-8 border-b border-gray-100 dark:border-white/10 pb-6">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
           Add <span className="text-orange-500">Listing</span>
@@ -181,47 +215,96 @@ const handleSubmit = async (e) => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left: Image Upload */}
+
+          {/* Left: Image Upload & Crop Section */}
           <div className="lg:col-span-4">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block ml-1">
-              Media
+              Cover Media (Aspect 4:5)
             </label>
-            <div className="relative md:h-86 w-full max-md:aspect-video bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-lg flex flex-col items-center justify-center overflow-hidden shadow-sm group">
-              {image ? (
-                <div className="absolute inset-0 w-full h-full p-2">
-                  <div className="relative w-full h-full rounded-lg overflow-hidden">
-                    <img
-                      src={URL.createObjectURL(image)}
-                      alt="preview"
-                      className="w-full h-full object-cover"
-                    />
+
+            <div className="relative aspect-[4/5] w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center overflow-hidden shadow-sm group">
+
+              {showCropper ? (
+                /* ১. ক্রপার ইন্টারফেস */
+                <div className="absolute inset-0 z-40 bg-black">
+                  {/* ক্রপার ইন্টারফেস অংশে পরিবর্তন */}
+                  <Cropper
+                    image={previewUrl}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={4 / 4} // ৪:৫ রেশিও সেট করা হলো
+                    onCropChange={setCrop}
+                    onCropComplete={onCropComplete}
+                    onZoomChange={setZoom}
+                  />
+                  <div className="absolute bottom-6 left-0 w-full flex justify-center gap-3 z-50 px-4">
                     <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setImage(null);
+                      type="button"
+                      onClick={handleConfirmCrop}
+                      className="bg-orange-500 text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 shadow-2xl active:scale-95 transition-transform"
+                    >
+                      <FiCheck size={14} /> Set Area
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowCropper(false); setPreviewUrl(null) }}
+                      className="bg-zinc-800 text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase active:scale-95 transition-transform"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : finalCroppedImage ? (
+                /* ২. ক্রপ করার পর ফাইনাল প্রিভিউ */
+                <div className="relative w-full h-full p-2">
+                  <img
+                    src={URL.createObjectURL(finalCroppedImage)}
+                    className="w-full h-full object-cover rounded-xl"
+                    alt="final-crop"
+                  />
+                  <div className="absolute top-4 right-4 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowCropper(true)}
+                      className="p-2 bg-orange-500 text-white rounded-lg shadow-lg hover:bg-orange-600 transition-colors"
+                      title="Re-crop"
+                    >
+                      <FiScissors size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFinalCroppedImage(null);
+                        setPreviewUrl(null);
                       }}
-                      className="absolute top-2 right-2 p-2 bg-black/60 text-white rounded-lg hover:bg-red-500 z-20"
+                      className="p-2 bg-black/60 text-white rounded-lg hover:bg-red-500 backdrop-blur-md transition-colors"
                     >
                       <FiX size={14} />
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="text-center p-6">
-                  <FiUploadCloud size={24} className="text-orange-500 mx-auto mb-2" />
-                  <p className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-300">
-                    Upload Image
-                  </p>
+                /* ৩. আপলোড করার শুরুর অবস্থা */
+                <div className="text-center p-6 space-y-2 relative w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                  <FiUploadCloud size={32} className="text-orange-500 mx-auto" />
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-300">
+                      Click to Upload
+                    </p>
+                    <p className="text-[8px] font-medium text-gray-400 uppercase tracking-tighter">
+                      Image will be cropped to 4:5 ratio
+                    </p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                  />
                 </div>
               )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files[0])}
-                className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                required={!image}
-              />
             </div>
+            <p className="text-[9px] text-gray-400 mt-2 ml-1 italic font-medium">* Focus on the most important part of your image.</p>
           </div>
 
           {/* Right: Primary Details */}
@@ -254,7 +337,6 @@ const handleSubmit = async (e) => {
               />
             </div>
 
-            {/* Category Select */}
             <div className="space-y-2 relative">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
                 <FiGrid size={10} /> Category
@@ -332,14 +414,14 @@ const handleSubmit = async (e) => {
                 required
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 h-39 resize-none dark:text-white placeholder:text-gray-400"
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 h-32 resize-none dark:text-white placeholder:text-gray-400"
                 placeholder="Tell the cultural story..."
               />
             </div>
           </div>
         </div>
 
-        {/* Dynamic Tags Based on Category */}
+        {/* Dynamic Tags */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-lg">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
