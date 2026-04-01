@@ -30,6 +30,7 @@ import {
 import { TbLayoutBottombar } from 'react-icons/tb';
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/imageHelper';
+import { Sliders } from 'lucide-react';
 
 // ── Submenu item definition
 const customizerSubItems = [
@@ -118,6 +119,7 @@ export default function AdminLayout({ children }) {
     { name: 'Audit Logs', path: '/admin/logs', icon: FiShield },
     { name: 'System Tags', path: '/admin/tags', icon: FiTag },
     { name: 'Categories', path: '/admin/categories', icon: FiLayers },
+    { name: 'Manage Slider', path: '/admin/slider', icon: Sliders },
   ];
 
   const profileImage = user?.profile?.profileImage
