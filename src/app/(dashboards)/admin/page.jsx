@@ -64,7 +64,7 @@ export default function AdminDashboard() {
         setData(response);
         localStorage.setItem(CACHE_KEY, JSON.stringify(response));
         localStorage.setItem(CACHE_TIME_KEY, now.toString());
-        console.log(response);
+        // console.log(response);
         setError(null);
       } else {
         setError('Failed to fetch stats');
