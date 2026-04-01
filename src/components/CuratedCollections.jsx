@@ -42,7 +42,7 @@ const curatedData = [
     {
         title: 'Festivals & Cultural Celebrations',
         key: 'festivals',
-        image: '/Festivals & Cultural Celebration.jpeg',
+        image: '/fastivals & cultural Celebration.png',
     },
 ];
 export default function CuratedCollections() {

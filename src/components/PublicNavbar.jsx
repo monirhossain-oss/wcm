@@ -141,7 +141,7 @@ const PublicNavbar = () => {
 
                           <div className="border-t border-gray-100 dark:border-gray-800 my-1"></div>
                           <Link
-                            href="/categories"
+                            href="/discover"
                             className="block px-4 py-2 text-xs font-bold text-[#F57C00] hover:bg-gray-50 dark:hover:bg-white/5 text-center"
                             onClick={() => setIsCategoryDropdownOpen(false)}
                           >
