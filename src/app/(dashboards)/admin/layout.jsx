@@ -119,7 +119,7 @@ export default function AdminLayout({ children }) {
     { name: 'Audit Logs', path: '/admin/logs', icon: FiShield },
     { name: 'System Tags', path: '/admin/tags', icon: FiTag },
     { name: 'Categories', path: '/admin/categories', icon: FiLayers },
-    { name: 'Manage Slider', path: '/admin/slider', icon: Sliders },
+    { name: 'Manage Slider', path: '/admin/manage-slider', icon: Sliders },
   ];
 
   const profileImage = user?.profile?.profileImage
