@@ -33,7 +33,8 @@ export default async function HeroSection() {
       </div>
 
       {/* Right Side: Slider */}
-      <div className="relative w-full hidden md:flex md:w-1/2 md:h-[450px] flex-shrink-0 mt-10 md:mt-0">
+      {/* Right Side: Slider */}
+      <div className="relative w-full h-[300px] sm:h-[350px] md:h-[450px] flex md:w-1/2 flex-shrink-0 mt-10 md:mt-0">
         <HeroSlider initialSliders={initialSliders} />
       </div>
     </section>
