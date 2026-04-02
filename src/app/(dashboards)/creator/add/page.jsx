@@ -219,7 +219,7 @@ export default function AddListing() {
           {/* Left: Image Upload & Crop Section */}
           <div className="lg:col-span-4">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block ml-1">
-              Cover Media (Aspect 4:4 or Square)
+              Cover Media (Aspect 4:5 Ratio)
             </label>
 
             <div className="relative aspect-[4/5] w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center overflow-hidden shadow-sm group">
@@ -232,7 +232,7 @@ export default function AddListing() {
                     image={previewUrl}
                     crop={crop}
                     zoom={zoom}
-                    aspect={4 / 4} // ৪:৫ রেশিও সেট করা হলো
+                    aspect={4 / 5} // ৪:৫ রেশিও সেট করা হলো
                     onCropChange={setCrop}
                     onCropComplete={onCropComplete}
                     onZoomChange={setZoom}
