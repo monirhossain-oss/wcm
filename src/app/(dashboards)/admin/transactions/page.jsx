@@ -9,10 +9,12 @@ import {
   FiChevronRight,
   FiEye,
   FiX,
-  FiCheckCircle,
-  FiActivity,
   FiRefreshCw,
   FiClock,
+  FiFilter,
+  FiUser,
+  FiCheckCircle,
+  FiAlertCircle,
 } from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -22,9 +24,6 @@ const api = axios.create({
   timeout: 30000,
 });
 
-const CACHE_KEY = 'wcm_tx_cache';
-const CACHE_EXPIRY = 1 * 60 * 1000; // 5 minutes for testing, change to 24 * 60 * 60 * 1000 for production
-
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,31 +32,20 @@ export default function TransactionsPage() {
   const [selectedTx, setSelectedTx] = useState(null);
   const [lastSynced, setLastSynced] = useState(null);
 
-  // Pagination & Filter States
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const [timeFilter, setTimeFilter] = useState('all'); // all, today, month, year
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [userIdFilter, setUserIdFilter] = useState('');
+
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+
   const limit = 10;
 
   const fetchTransactions = useCallback(
     async (isForce = false) => {
       try {
-        // ১. ক্যাশ চেক (যদি ফোর্স রিফ্রেশ না হয় এবং ডিফল্ট স্টেটে থাকে)
-        if (!isForce && currentPage === 1 && searchTerm === '' && timeFilter === 'all') {
-          const cached = localStorage.getItem(CACHE_KEY);
-          if (cached) {
-            const { data, pages, timestamp } = JSON.parse(cached);
-            if (Date.now() - timestamp < CACHE_EXPIRY) {
-              setTransactions(data);
-              setTotalPages(pages);
-              setLastSynced(timestamp);
-              setLoading(false);
-              return;
-            }
-          }
-        }
-
         if (isForce) setRefreshing(true);
         else setLoading(true);
 
@@ -67,59 +55,46 @@ export default function TransactionsPage() {
             limit,
             search: searchTerm,
             filter: timeFilter,
+            userId: userIdFilter,
           },
         });
 
         if (data.success) {
           setTransactions(data.transactions);
-          setTotalPages(data.totalPages);
+          setTotalPages(data.pagination.totalPages || 1);
           setLastSynced(Date.now());
-
-          // ২. লোকাল স্টোরেজ আপডেট (শুধুমাত্র জেনারেল ডাটার জন্য)
-          if (currentPage === 1 && searchTerm === '' && timeFilter === 'all') {
-            localStorage.setItem(
-              CACHE_KEY,
-              JSON.stringify({
-                data: data.transactions,
-                pages: data.totalPages,
-                timestamp: Date.now(),
-              })
-            );
-          }
-          if (isForce) toast.success('Data Synchronized');
+          if (isForce) toast.success('Sync Complete');
         }
       } catch (err) {
-        toast.error('Sync failed');
+        toast.error(err.response?.data?.message || 'Connection Error');
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [currentPage, searchTerm, timeFilter]
+    [currentPage, searchTerm, timeFilter, userIdFilter]
   );
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      fetchTransactions();
-    }, 400);
+    const delayDebounce = setTimeout(() => fetchTransactions(), 400);
     return () => clearTimeout(delayDebounce);
   }, [fetchTransactions]);
 
-  const handleFullExport = async () => {
-    const isConfirmed = window.confirm('This is resource-intensive. Proceed?');
-    if (!isConfirmed) return;
+  const handleRangeExport = async () => {
+    if (!dateRange.start || !dateRange.end) return toast.error('Select Range');
     try {
       setExporting(true);
-      const response = await api.get('/api/admin/export-transactions', { responseType: 'blob' });
+      const response = await api.get('/api/admin/export-transactions-range', {
+        params: { startDate: dateRange.start, endDate: dateRange.end, userId: userIdFilter },
+        responseType: 'blob',
+      });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `WCM_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
-      document.body.appendChild(link);
+      link.setAttribute('download', `Report_${dateRange.start}_to_${dateRange.end}.xlsx`);
       link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      toast.success('Report Downloaded');
+      setShowExportModal(false);
+      toast.success('Excel Generated');
     } catch (err) {
       toast.error('Export failed');
     } finally {
@@ -131,22 +106,19 @@ export default function TransactionsPage() {
     <div className="space-y-6 animate-in fade-in duration-700 pb-10">
       <Toaster />
 
-      {/* Header */}
+      {/* --- Header --- */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
           <h2 className="text-3xl font-black uppercase tracking-tighter italic dark:text-white">
             Revenue <span className="text-orange-500">Ledger</span>
           </h2>
-          <div className="flex items-center gap-2 mt-1">
-            <FiClock className="text-orange-500" size={10} />
-            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">
-              Last Sync: {lastSynced ? new Date(lastSynced).toLocaleTimeString() : 'Never'}
-            </p>
-          </div>
+          <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1 flex items-center gap-1">
+            <FiClock className="text-orange-500" /> Last Sync:{' '}
+            {lastSynced ? new Date(lastSynced).toLocaleTimeString() : '---'}
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-          {/* Search */}
           <div className="relative flex-1 md:w-64">
             <FiSearch
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -154,8 +126,8 @@ export default function TransactionsPage() {
             />
             <input
               type="text"
-              placeholder="Search Invoice/Creator..."
-              className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-[10px] font-bold focus:outline-none focus:border-orange-500 transition-all dark:text-white"
+              placeholder="Search Invoice/User/Email..."
+              className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-[10px] font-bold dark:text-white focus:outline-none focus:border-orange-500"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -163,59 +135,61 @@ export default function TransactionsPage() {
               }}
             />
           </div>
-
-          {/* Time Filter Tabs */}
-          <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-xl border border-gray-200 dark:border-white/10">
-            {['all', 'today', 'month', 'year'].map((f) => (
-              <button
-                key={f}
-                onClick={() => {
-                  setTimeFilter(f);
-                  setCurrentPage(1);
-                }}
-                className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${timeFilter === f
-                    ? 'bg-orange-600 text-white shadow-lg'
-                    : 'text-gray-500 hover:text-orange-500'
-                  }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-
-          {/* Force Refresh */}
+          <button
+            onClick={() => setShowExportModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all"
+          >
+            <FiCalendar size={14} /> Range Export
+          </button>
           <button
             onClick={() => fetchTransactions(true)}
-            disabled={refreshing}
-            className="p-2.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl hover:bg-orange-600 transition-all disabled:opacity-50"
+            className="p-2.5 bg-white dark:bg-white/5 border dark:border-white/10 rounded-xl hover:text-orange-500"
           >
-            <FiRefreshCw className={refreshing ? 'animate-spin' : ''} size={16} />
-          </button>
-
-          <button
-            onClick={handleFullExport}
-            disabled={exporting}
-            className="flex items-center gap-2 px-5 py-2.5 bg-orange-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-900 transition-all shadow-lg shadow-orange-600/20"
-          >
-            {exporting ? '...' : <FiDownload size={16} />}
+            <FiRefreshCw className={refreshing ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/10 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto min-h-[300px]">
-          <table className="w-full text-left">
+      {/* --- Filter Tabs --- */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-xl border dark:border-white/10">
+          {['all', 'today', 'month', 'year'].map((f) => (
+            <button
+              key={f}
+              onClick={() => {
+                setTimeFilter(f);
+                setCurrentPage(1);
+              }}
+              className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${timeFilter === f ? 'bg-orange-600 text-white shadow-lg' : 'text-gray-400 hover:text-orange-500'}`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+        {userIdFilter && (
+          <button
+            onClick={() => setUserIdFilter('')}
+            className="flex items-center gap-2 px-3 py-1.5 bg-orange-500/10 text-orange-500 border border-orange-500/20 rounded-lg text-[9px] font-black uppercase"
+          >
+            <FiUser size={12} /> Filtered User <FiX />
+          </button>
+        )}
+      </div>
+
+      {/* --- Table --- */}
+      <div className="bg-white dark:bg-[#0c0c0c] border dark:border-white/10 rounded-2xl overflow-hidden shadow-xl">
+        <div className="overflow-x-auto min-h-[400px]">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 dark:bg-white/2 border-b border-gray-100 dark:border-white/10">
+              <tr className="bg-gray-50/50 dark:bg-white/2 border-b dark:border-white/10">
                 <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400">
                   Invoice/Date
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  Creator
+                  Creator Details
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  Type
+                  Package
                 </th>
                 <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400 text-right">
                   Amount</th>
@@ -224,14 +198,23 @@ export default function TransactionsPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+            <tbody className="divide-y dark:divide-white/5">
               {loading && !refreshing ? (
                 <tr>
                   <td
                     colSpan="5"
-                    className="p-20 text-center text-[10px] font-black text-gray-500 animate-pulse uppercase tracking-[0.3em]"
+                    className="p-20 text-center text-[10px] font-black text-gray-500 animate-pulse uppercase tracking-[0.2em]"
                   >
-                    Syncing Core...
+                    Processing Request...
+                  </td>
+                </tr>
+              ) : transactions.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="p-20 text-center text-[10px] font-black text-gray-400 uppercase"
+                  >
+                    No Protocol Data Found
                   </td>
                 </tr>
               ) : (
@@ -241,39 +224,43 @@ export default function TransactionsPage() {
                     className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-all group"
                   >
                     <td className="px-6 py-4">
-                      <div className="text-[10px] font-black dark:text-white mb-0.5 uppercase tracking-tighter italic">
-                        {tx.invoiceNumber}
+                      <div className="text-[10px] font-black dark:text-white uppercase italic">
+                        {tx.invoiceNumber || 'N/A'}
                       </div>
-                      <div className="text-[9px] text-gray-500 font-bold flex items-center gap-1">
+                      <div className="text-[9px] text-gray-500 font-bold flex items-center gap-1 mt-0.5">
                         <FiCalendar size={10} className="text-orange-500" />{' '}
                         {new Date(tx.createdAt).toLocaleDateString()}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-[11px] font-black dark:text-white uppercase">
-                        {tx.creatorName}
+                      <div className="text-[11px] font-black dark:text-white uppercase flex items-center gap-2">
+                        {tx.creator?.firstName} {tx.creator?.lastName}
+                        <button
+                          onClick={() => setUserIdFilter(tx.creator?._id)}
+                          className="opacity-0 group-hover:opacity-100 p-1 bg-orange-500/10 text-orange-500 rounded transition-all"
+                        >
+                          <FiFilter size={10} />
+                        </button>
                       </div>
-                      <div className="text-[9px] text-gray-400 font-bold lowercase">
-                        {tx.creatorEmail}
-                      </div>
+                      <div className="text-[9px] text-gray-400 font-bold">{tx.creator?.email}</div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-0.5 bg-orange-500/5 text-orange-500 border border-orange-500/10 rounded text-[8px] font-black uppercase italic">
-                        {tx.type}
+                        {tx.packageType}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="text-[11px] font-black dark:text-white tracking-tighter">
-                        {tx.currency} {(tx.amount || 0).toFixed(2)}
+                      <div className="text-[11px] font-black dark:text-white">
+                        {(tx.currency || 'EUR').toUpperCase()} {tx.amountPaid}
                       </div>
                       <div className="text-[9px] font-bold text-green-500 italic">
-                        Net: €{(tx.amountInEUR || 0).toFixed(2)}
+                        Net: €{tx.amountInEUR}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button
                         onClick={() => setSelectedTx(tx)}
-                        className="p-2 bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-orange-500 rounded-lg transition-all"
+                        className="p-2 bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-orange-500 rounded-lg"
                       >
                         <FiEye size={16} />
                       </button>
@@ -285,33 +272,22 @@ export default function TransactionsPage() {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-100 dark:border-white/10 flex justify-between items-center bg-gray-50/30 dark:bg-white/1">
-          <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest italic">
-            Page {currentPage} / {totalPages}
-          </span>
-          <div className="flex items-center gap-2">
+        {/* --- Pagination --- */}
+        <div className="px-6 py-4 border-t dark:border-white/10 flex justify-between items-center bg-gray-50/30 dark:bg-white/1">
+          <p className="text-[9px] font-black text-gray-500 uppercase italic">
+            Page {currentPage} of {totalPages}
+          </p>
+          <div className="flex gap-2">
             <button
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              onClick={() => setCurrentPage((p) => p - 1)}
               className="p-2 border dark:border-white/10 rounded-lg disabled:opacity-20"
             >
               <FiChevronLeft />
             </button>
-            <div className="flex gap-1">
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${currentPage === i + 1 ? 'bg-orange-600 text-white' : 'text-gray-500 hover:text-orange-500'}`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
             <button
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => setCurrentPage((p) => p + 1)}
               className="p-2 border dark:border-white/10 rounded-lg disabled:opacity-20"
             >
               <FiChevronRight />
@@ -320,60 +296,103 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      {/* Detail Modal */}
+      {/* --- Detail Sidebar (All Dynamic) --- */}
       {selectedTx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-md rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-            <div className="p-6 text-center bg-gray-50/50 dark:bg-white/2 relative">
+        <div className="fixed inset-0 z-[100] flex items-center justify-end bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-md bg-white dark:bg-[#0c0c0c] h-full rounded-3xl shadow-2xl overflow-hidden border border-white/10 flex flex-col animate-in slide-in-from-right duration-500">
+            <div className="p-6 bg-orange-600 flex justify-between items-center">
+              <h3 className="text-white font-black uppercase italic tracking-tighter">
+                Transaction Details
+              </h3>
               <button
                 onClick={() => setSelectedTx(null)}
-                className="absolute right-4 top-4 text-gray-500 hover:text-red-500 transition-colors"
+                className="text-white hover:rotate-90 transition-all"
               >
                 <FiX size={20} />
               </button>
-              <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                <FiCheckCircle className="text-green-500" size={32} />
-              </div>
-              <h3 className="text-xs font-black uppercase tracking-widest dark:text-white italic">
-                Internal Receipt
-              </h3>
-              <p className="text-[9px] font-mono text-gray-500 mt-1 uppercase">
-                {selectedTx.invoiceNumber}
-              </p>
             </div>
 
-            <div className="p-8 space-y-6">
-              <div className="border-y border-dashed border-gray-200 dark:border-white/10 py-5 space-y-3">
-                <div className="flex justify-between text-[11px]">
-                  <span className="font-bold text-gray-500 uppercase">Gross Amount</span>
-                  <span className="font-black dark:text-white">
-                    {(selectedTx.amount || 0).toFixed(2)} {selectedTx.currency}
-                  </span>
-                </div>
-                <div className="flex justify-between text-[11px]">
-                  <span className="font-bold text-gray-500 uppercase">VAT (19%)</span>
-                  <span className="font-black text-red-500">
-                    - €{(selectedTx.vatAmount || 0).toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-white/5">
-                  <span className="text-[10px] font-black uppercase text-orange-500 tracking-tighter">
-                    Net System Profit
-                  </span>
-                  <span className="text-xl font-black text-green-500">
-                    €{(selectedTx.amountInEUR || 0).toFixed(2)}
-                  </span>
+            <div className="p-8 space-y-8 flex-1 overflow-y-auto">
+              <div className="text-center">
+                <p className="text-[9px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">
+                  Total Paid
+                </p>
+                <h1 className="text-4xl font-black dark:text-white tracking-tighter italic">
+                  {(selectedTx.currency || 'EUR').toUpperCase()} {selectedTx.amountPaid}
+                </h1>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6 pt-6 border-t dark:border-white/5">
+                <DetailItem
+                  label="Status"
+                  value={selectedTx.status}
+                  icon={
+                    selectedTx.status === 'completed' ? (
+                      <FiCheckCircle className="text-green-500" />
+                    ) : (
+                      <FiAlertCircle className="text-orange-500" />
+                    )
+                  }
+                />
+                <DetailItem label="Invoice No" value={selectedTx.invoiceNumber || 'N/A'} />
+                <div className="col-span-2">
+                  <DetailItem
+                    label="Stripe ID"
+                    value={selectedTx.stripeSessionId || 'Manual/N/A'}
+                    isMono
+                  />
                 </div>
               </div>
 
-              <div className="p-4 bg-zinc-950 rounded-xl space-y-2 border border-white/5">
-                <p className="text-[8px] font-black text-gray-500 uppercase flex items-center gap-1">
-                  <FiActivity className="text-orange-500" /> Stripe Trace
-                </p>
-                <p className="text-[9px] font-mono text-gray-400 break-all">
-                  {selectedTx.stripeId}
-                </p>
+              <div className="space-y-4 pt-6 border-t dark:border-white/5">
+                <SummaryRow label="VAT Amount" value={`€${selectedTx.vatAmount || 0}`} />
+                <SummaryRow
+                  label="Exchange Rate"
+                  value={`1 ${selectedTx.currency} = ${selectedTx.fxRate} EUR`}
+                />
+                <div className="pt-4 border-t border-dashed dark:border-white/10 flex justify-between items-center">
+                  <p className="text-[10px] font-black text-orange-500 uppercase">Revenue (EUR)</p>
+                  <p className="text-2xl font-black dark:text-white italic">
+                    €{selectedTx.amountInEUR}
+                  </p>
+                </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- Range Export Modal --- */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-sm bg-white dark:bg-[#0c0c0c] rounded-3xl p-8 border border-white/10 animate-in zoom-in duration-300">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-black uppercase italic dark:text-white">
+                Date <span className="text-orange-500">Range</span>
+              </h3>
+              <button onClick={() => setShowExportModal(false)} className="dark:text-white">
+                <FiX size={20} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <input
+                type="date"
+                className="w-full bg-gray-100 dark:bg-white/5 p-3 rounded-xl dark:text-white font-bold"
+                onChange={(e) => setDateRange((p) => ({ ...p, start: e.target.value }))}
+              />
+              <input
+                type="date"
+                className="w-full bg-gray-100 dark:bg-white/5 p-3 rounded-xl dark:text-white font-bold"
+                onChange={(e) => setDateRange((p) => ({ ...p, end: e.target.value }))}
+              />
+              <button
+                onClick={handleRangeExport}
+                disabled={exporting}
+                className="w-full bg-orange-600 text-white font-black uppercase py-4 rounded-xl hover:bg-zinc-900 transition-all flex justify-center items-center gap-2"
+              >
+                {exporting ? <FiRefreshCw className="animate-spin" /> : <FiDownload />}
+                {exporting ? 'Generating...' : 'Download Report'}
+              </button>
             </div>
           </div>
         </div>
@@ -381,3 +400,22 @@ export default function TransactionsPage() {
     </div>
   );
 }
+
+// Helper Components
+const DetailItem = ({ label, value, icon, isMono }) => (
+  <div>
+    <p className="text-[8px] text-gray-400 font-black uppercase mb-1">{label}</p>
+    <div
+      className={`text-[11px] font-bold dark:text-white flex items-center gap-1 ${isMono ? 'font-mono break-all opacity-70' : ''}`}
+    >
+      {icon} {value}
+    </div>
+  </div>
+);
+
+const SummaryRow = ({ label, value }) => (
+  <div className="flex justify-between items-center">
+    <p className="text-[10px] font-black text-gray-500 uppercase">{label}</p>
+    <p className="text-[11px] font-bold dark:text-white">{value}</p>
+  </div>
+);
