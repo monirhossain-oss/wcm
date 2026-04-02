@@ -1,74 +1,96 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import axios from "axios";
 import { getImageUrl } from "@/lib/imageHelper";
 
-export default function HeroSlider() {
-    const [sliders, setSliders] = useState([]);
+
+const DEFAULT_IMAGE = "/hero (2).png";
+
+// ১. Skeleton Component
+const SliderSkeleton = () => (
+    <div className="absolute inset-0 w-full h-full bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded-2xl flex flex-col justify-end p-10 md:p-16">
+        <div className="h-8 md:h-12 w-3/4 bg-zinc-300 dark:bg-zinc-700 rounded-lg mb-4" />
+        <div className="h-4 md:h-6 w-1/2 bg-zinc-300 dark:bg-zinc-700 rounded-lg mb-2" />
+        <div className="h-4 md:h-6 w-1/3 bg-zinc-300 dark:bg-zinc-700 rounded-lg" />
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+            {[1, 2, 3].map((i) => (
+                <div key={i} className="h-1.5 w-4 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+            ))}
+        </div>
+    </div>
+);
+
+export default function HeroSlider({ initialSliders = [] }) {
     const [current, setCurrent] = useState(0);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-
-    // ১. ডাটাবেজ থেকে স্লাইডার ডাটা নিয়ে আসা
+    // ডাটা চেক করার জন্য ইফেক্ট
     useEffect(() => {
-        const fetchSliders = async () => {
-            try {
-                const res = await axios.get(`${API_BASE}/api/sliders`);
-                // যদি ডাটাবেজে কোনো স্লাইডার না থাকে, তবে একটি ফলব্যাক হিসেবে পুরনো স্ট্যাটিক ইমেজ সেট করতে পারেন
-                if (res.data && res.data.length > 0) {
-                    setSliders(res.data);
-                }
-            } catch (error) {
-                console.error("Error fetching sliders:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchSliders();
-    }, [API_BASE]);
+        if (initialSliders) {
+            // সামান্য ডিলে দেওয়া হয়েছে যাতে হুট করে চলে না আসে (Smooth Transition)
+            const timer = setTimeout(() => setIsLoading(false), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [initialSliders]);
 
-    // ২. অটো প্লে টাইমার
+    // অটো প্লে টাইমার
     useEffect(() => {
-        if (sliders.length === 0) return;
+        if (initialSliders.length <= 1) return;
 
         const timer = setInterval(() => {
-            setCurrent((prev) => (prev + 1) % sliders.length);
-        }, 4000); // ৩ সেকেন্ড থেকে বাড়িয়ে ৪ সেকেন্ড করা হয়েছে স্মুথনেসের জন্য
+            setCurrent((prev) => (prev + 1) % initialSliders.length);
+        }, 5000);
 
         return () => clearInterval(timer);
-    }, [sliders.length]);
+    }, [initialSliders.length]);
 
-    // ৩. লোডিং অবস্থায় বা ডাটা না থাকলে কি দেখাবে
-    if (loading) return <div className="absolute inset-0 bg-gray-900 animate-pulse rounded-2xl mt-10" />;
-    if (sliders.length === 0) return null; // অথবা কোনো ডিফল্ট ইমেজ দেখাতে পারেন
+    // ২. লোডিং অবস্থায় স্কেলিটন দেখাবে
+    if (isLoading) {
+        return <SliderSkeleton />;
+    }
+
+    // ৩. যদি ডাটাবেজে কোনো ডাটা না থাকে (Fallback)
+    if (initialSliders.length === 0) {
+        return (
+            <div className="absolute rounded-2xl inset-0 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-2xl">
+                <Image
+                    src={DEFAULT_IMAGE}
+                    alt="Welcome to WCM"
+                    fill
+                    className="object-cover"
+                    priority
+                />
+                <div className="absolute inset-0 bg-black/30" />
+            </div>
+        );
+    }
 
     return (
-        <div className="absolute rounded-2xl mt-10 inset-0 w-full overflow-hidden ">
-            {sliders.map((slide, index) => (
+        <div className="absolute rounded-2xl inset-0 w-full overflow-hidden bg-black shadow-2xl border border-white/5">
+            {initialSliders.map((slide, index) => (
                 <div
-                    key={slide._id}
-                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === current ? "opacity-120 z-10" : "opacity-0 z-0"
+                    key={slide._id || index}
+                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === current ? "opacity-100 z-10" : "opacity-0 z-0"
                         }`}
                 >
                     <Image
-                        src={getImageUrl(slide.imageUrl)} // আপনার হেল্পার ব্যবহার করা হয়েছে
-                        alt={slide.title || `Slide ${index}`}
+                        src={getImageUrl(slide.imageUrl)}
+                        alt={slide.title || "Hero Slide"}
                         fill
                         priority={index === 0}
-                        className={`object-cover transition-transform duration-[6000ms] ease-out ${index === current ? "scale-110" : "scale-100"
+                        className={`object-cover transition-transform duration-[7000ms] ease-out ${index === current ? "scale-110" : "scale-100"
                             }`}
-                        sizes="100vw"
-                        // quality={100}
+                        sizes="(max-width: 768px) 100vw, 50vw"
                     />
-                    <div className="absolute inset-0 flex flex-col justify-center px-10 md:px-20 text-white">
+
+                    {/* Overlay Gradient: ইমেজ ক্লিয়ার রাখার জন্য হালকা গ্রাডিয়েন্ট */}
+                    <div className="absolute inset-0 flex flex-col justify-end pb-12 px-10 md:px-20 text-white">
                         {index === current && (
                             <div className="max-w-2xl animate-fade-in-up">
-                                <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
+                                <h1 className="text-3xl md:text-5xl font-bold mb-3 drop-shadow-2xl">
                                     {slide.title}
                                 </h1>
-                                <p className="text-lg md:text-xl opacity-90 drop-shadow-md">
+                                <p className="text-base md:text-lg opacity-90 font-medium drop-shadow-lg line-clamp-2">
                                     {slide.subTitle}
                                 </p>
                             </div>
@@ -77,15 +99,18 @@ export default function HeroSlider() {
                 </div>
             ))}
 
-            {/* ডটস নেভিগেশন (ঐচ্ছিক) */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-                {sliders.map((_, i) => (
-                    <div
-                        key={i}
-                        className={`h-2 w-2 rounded-full transition-all ${i === current ? "bg-white w-6" : "bg-white/50"}`}
-                    />
-                ))}
-            </div>
+            {/* Navigation Dots */}
+            {initialSliders.length > 1 && (
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                    {initialSliders.map((_, i) => (
+                        <div
+                            key={i}
+                            className={`h-1.5 rounded-full transition-all duration-500 ${i === current ? "bg-white w-8" : "bg-white/30 w-3"
+                                }`}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

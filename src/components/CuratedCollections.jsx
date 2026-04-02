@@ -12,7 +12,7 @@ const curatedData = [
     {
         title: 'Artisan Jewelry',
         key: 'jewelry',
-        image: '/Artisan-Jewelry.png',
+        image: '/Artisan-jewelry.png',
     },
     {
         title: 'Home & Cultural Decor',
