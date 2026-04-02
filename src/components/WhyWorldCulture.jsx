@@ -16,7 +16,7 @@ const WhyWorldCulture = () => {
         {
             id: 3,
             title: "Explore traditions from around the world",
-            images: ["/Artisan-jewelry.jpeg", "/megenda69artgallary.jpeg"],
+            images: ["/Artisan-jewelry.png", "/megenda69artgallary.jpeg"],
         },
     ];
 
