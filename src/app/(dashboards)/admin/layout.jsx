@@ -119,6 +119,7 @@ export default function AdminLayout({ children }) {
     { name: 'Audit Logs', path: '/admin/logs', icon: FiShield },
     { name: 'System Tags', path: '/admin/tags', icon: FiTag },
     { name: 'Categories', path: '/admin/categories', icon: FiLayers },
+    { name: 'Manage Slider', path: '/admin/manage-slider', icon: Sliders },
     { name: 'Manage Blog', path: '/admin/blogs', icon: FiSettings },
     { name: 'Create Blog', path: '/admin/create-blog', icon: FiSettings },
   ];
