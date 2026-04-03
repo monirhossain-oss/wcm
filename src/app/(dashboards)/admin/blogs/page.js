@@ -30,13 +30,13 @@ export default function BlogListPage() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this journal?')) return;
+    if (!window.confirm('Are you sure you want to delete this Blog?')) return;
     try {
       await api.delete(`/api/blogs/${id}`);
-      toast.success('Journal deleted');
+      toast.success('Blog deleted');
       setBlogs(blogs.filter((b) => b._id !== id));
     } catch (err) {
-      toast.error('Delete failed');
+      toast.error('Blog delete failed');
     }
   };
 
@@ -52,7 +52,7 @@ export default function BlogListPage() {
       <Toaster />
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-3xl font-black italic uppercase tracking-tighter">
-          Manage <span className="text-orange-500">Journals</span>
+          Manage <span className="text-orange-500">Blogs</span>
         </h1>
         <Link
           href="/admin/create-blog"
