@@ -7,42 +7,42 @@ const curatedData = [
     {
         title: 'Cultural Textiles',
         key: 'textiles',
-        image: '/cultural textile.jpeg',
+        image: '/Cultural-textile.png',
     },
     {
         title: 'Artisan Jewelry',
         key: 'jewelry',
-        image: '/artisan jewelry.jpeg',
+        image: '/Artisan-jewelry.png',
     },
     {
         title: 'Home & Cultural Decor',
         key: 'decor',
-        image: '/home and decor.jpeg',
+        image: '/Home&Cultural-decor.png',
     },
     {
         title: 'Traditional Clothing',
         key: 'clothing',
-        image: '/traditional clothing.jpeg',
+        image: '/hero (2).png',
     },
     {
         title: 'Cultural Art & Sculptures',
         key: 'art',
-        image: '/Art & Sculptures.jpeg',
+        image: '/Cultural-art-and-sculptures.png',
     },
     {
         title: 'Handmade Crafts',
         key: 'crafts',
-        image: '/Handmade Crafts.jpeg',
+        image: '/Hand-made-crafts (2).png',
     },
     {
         title: 'Beauty & Personal Care',
         key: 'beauty',
-        image: '/Beauty & Personal Care.jpeg',
+        image: '/Beauty-and-personal-care.png',
     },
     {
         title: 'Festivals & Cultural Celebrations',
         key: 'festivals',
-        image: '/Festivals & Cultural Celebration.jpeg',
+        image: '/fastivals & cultural Celebration.png',
     },
 ];
 export default function CuratedCollections() {
@@ -72,23 +72,27 @@ export default function CuratedCollections() {
                         tabIndex={0}
                         onClick={() => handleClick(item.title)}
                         onKeyDown={(e) => e.key === 'Enter' && handleClick(item.title)}
-                        className="group relative h-44 md:h-56 overflow-hidden cursor-pointer focus:outline-none shadow-sm hover:shadow-xl transition-all duration-300"
+                        // পরিবর্তন: 'h-48 md:h-56' এর পরিবর্তে 'h-auto aspect-square' ব্যবহার করা হয়েছে।
+                        // শ্যাডো ইফেক্টও কিছুটা বাড়ানো হয়েছে 'shadow-md hover:shadow-2xl'।
+                        className="group relative h-auto aspect-square overflow-hidden cursor-pointer focus:outline-none shadow-md hover:shadow-2xl transition-all duration-300"
                     >
                         {/* Background Image */}
                         <Image
                             src={item.image}
                             alt={item.title}
                             fill
+                            // Image will fill the entire square aspect ratio of its parent container.
                             className="object-cover transition-all duration-700 ease-out group-hover:scale-110"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
 
                         {/* Title (Bottom Left) */}
-                        <div className="absolute inset-x-0 bottom-0 p-4 transform translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
-                            <h3 className="text-white text-xs md:text-sm font-black uppercase tracking-wider">
+                        {/* টেক্সট সাইজ কিছুটা বাড়িয়েছি কার্ড বড় হওয়ার কারণে (md:text-base)। */}
+                        <div className="absolute inset-x-0 bottom-0 p-5 transform translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
+                            <h3 className="text-white text-sm md:text-base font-black uppercase tracking-wider">
                                 {item.title}
                             </h3>
-                            <div className="h-0.5 w-0 bg-orange-500 group-hover:w-12 transition-all duration-500 mt-1" />
+                            <div className="h-0.5 w-0 bg-orange-500 group-hover:w-16 transition-all duration-500 mt-1" />
                         </div>
                     </div>
                 ))}

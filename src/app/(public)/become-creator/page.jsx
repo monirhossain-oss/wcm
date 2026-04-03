@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import { Country, City } from 'country-state-city';
+import { ChevronDown, Grid, Loader2 } from 'lucide-react';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
@@ -257,26 +258,37 @@ export default function UserProfileForm() {
               {/* Category */}
               <div>
                 <label className={labelStyle}>
-                  <FiGrid size={10} /> Expertise Category
+                  <Grid size={14} className="inline mr-2" /> Expertise Category
                 </label>
                 <div className="relative">
                   <select
                     {...register('category', { required: true })}
-                    className={inputStyle}
+                    className={`${inputStyle} appearance-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-white border-gray-200 dark:border-zinc-700 focus:ring-orange-500 pr-10`}
                     disabled={catLoading}
                   >
-                    <option value="">
+                    <option value="" className="bg-white dark:bg-zinc-900 text-gray-500">
                       {catLoading ? 'Loading Categories...' : 'Select your primary field'}
                     </option>
+
                     {categories.map((cat) => (
-                      <option className="dark:bg-gray-900 text-white" key={cat._id} value={cat._id}>
+                      <option
+                        key={cat._id}
+                        value={cat._id}
+                        className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100"
+                      >
                         {cat.title}
                       </option>
                     ))}
                   </select>
-                  {catLoading && (
-                    <FiLoader className="absolute right-4 top-3 animate-spin text-orange-500" />
-                  )}
+
+                  {/* লোডার অথবা লুসিড অ্যারো আইকন */}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center">
+                    {catLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-gray-400 dark:text-zinc-500" />
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -417,7 +429,7 @@ export default function UserProfileForm() {
             </form>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

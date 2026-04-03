@@ -237,7 +237,7 @@ const DiscoverContent = () => {
             <div className="w-[1px] h-6 bg-zinc-300 dark:bg-zinc-700 mx-2" />
 
             {/* Right Side: Region Dropdown Container */}
-            <div className="relative" > {/* useRef ব্যবহার করা ভালো যাতে বাইরে ক্লিক করলে বন্ধ হয় */}
+            <div className="relative" >
               <div
                 onClick={() => setOpen(!open)}
                 className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/10 rounded-full transition-all min-w-[120px] justify-between"

@@ -1,11 +1,116 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Loader2, Search, MapPin, Globe, X, ChevronDown, Star } from 'lucide-react';
+import { Loader2, Search, MapPin, Globe, X, ChevronDown, Star, LayoutGrid, Check } from 'lucide-react';
 import { getImageUrl } from '@/lib/imageHelper';
+
+// ── Reusable Custom Dropdown ──
+function CustomDropdown({ icon: Icon, placeholder, value, onChange, options }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  // close on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // close on Escape
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
+
+  const selectedLabel = options.find((o) => o.value === value)?.label || placeholder;
+  const isActive = value !== '';
+
+  return (
+    <div ref={ref} className="relative md:w-52">
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className={`
+          w-full flex items-center gap-2.5 pl-4 pr-3 py-3.5
+          border rounded-2xl text-sm transition-all outline-none
+          ${isActive
+            ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-400/50 dark:border-orange-500/40 text-orange-600 dark:text-orange-400'
+            : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400'}
+          ${open ? 'ring-2 ring-orange-500/30 border-orange-500/50' : ''}
+        `}
+      >
+        {Icon && (
+          <Icon
+            size={14}
+            className={isActive ? 'text-orange-500' : 'text-zinc-400'}
+          />
+        )}
+        <span className={`flex-1 text-left truncate text-[13px] font-semibold ${isActive ? 'text-orange-600 dark:text-orange-400' : 'text-zinc-600 dark:text-zinc-300'}`}>
+          {selectedLabel}
+        </span>
+        <ChevronDown
+          size={14}
+          className={`flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180 text-orange-500' : 'text-zinc-400'}`}
+        />
+      </button>
+
+      {/* Dropdown panel */}
+      {open && (
+        <div className="
+          absolute top-[calc(100%+8px)] left-0 z-50 w-full min-w-[200px]
+          bg-white dark:bg-[#1a1a1a]
+          border border-zinc-200 dark:border-white/10
+          rounded-2xl shadow-xl overflow-hidden
+          animate-in fade-in zoom-in-95 duration-150
+        ">
+          {/* All / reset option */}
+          <button
+            type="button"
+            onClick={() => { onChange(''); setOpen(false); }}
+            className={`
+              w-full flex items-center justify-between px-4 py-3 text-[12px] font-bold uppercase tracking-wide transition-colors
+              ${value === ''
+                ? 'bg-orange-500 text-white'
+                : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'}
+            `}
+          >
+            {placeholder}
+            {value === '' && <Check size={12} className="text-white" />}
+          </button>
+
+          <div className="h-px bg-zinc-100 dark:bg-white/8" />
+
+          {/* Options list */}
+          <div className="max-h-56 overflow-y-auto">
+            {options.filter(o => o.value !== '').map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+                className={`
+                  w-full flex items-center justify-between px-4 py-2.5 text-[12px] font-semibold transition-colors
+                  ${value === opt.value
+                    ? 'bg-orange-500 text-white'
+                    : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5'}
+                `}
+              >
+                <span className="truncate">{opt.label}</span>
+                {value === opt.value && <Check size={12} className="text-white flex-shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000",
@@ -20,6 +125,7 @@ const CreatorsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCulture, setSelectedCulture] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  console.log(allCreators)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,6 +136,7 @@ const CreatorsPage = () => {
 
         if (creatorRes.data.success) {
           setAllCreators(creatorRes.data.data.top30 || []);
+          // console.log(creatorRes.data.top30)
         }
         if (metaRes.data.categories) {
           setCategories(metaRes.data.categories);
@@ -54,6 +161,7 @@ const CreatorsPage = () => {
         fullName.includes(searchTerm) ||
         country.includes(searchTerm) ||
         bio.includes(searchTerm);
+
       const matchesCulture =
         selectedCulture === "" || creator.profile?.country === selectedCulture;
 
@@ -171,43 +279,34 @@ const CreatorsPage = () => {
               </button>
             )}
           </div>
-          {/* region + category filter section */}
-          <div className='flex items-center justify-between gap-4'>
-            {/* Culture select */}
-            <div className="relative md:w-52">
-              <select
-                value={selectedCulture}
-                onChange={(e) => setSelectedCulture(e.target.value)}
-                className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-white rounded-2xl text-sm outline-none cursor-pointer focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500/50 transition-all appearance-none"
-              >
-                <option value="">All Cultures</option>
-                {cultures.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-              <ChevronDown
-                size={14}
-                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400"
-              />
-            </div>
 
-            {/* Category select */}
-            <div className="relative md:w-52">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-white rounded-2xl text-sm outline-none cursor-pointer focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500/50 transition-all appearance-none"
-              >
-                <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>{cat.name}</option>
-                ))}
-              </select>
-              <ChevronDown
-                size={14}
-                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400"
-              />
-            </div>
+          {/* Culture + Category filters */}
+          <div className="flex items-center justify-between gap-3">
+
+            {/* Culture dropdown */}
+            <CustomDropdown
+              icon={Globe}
+              placeholder="All Cultures"
+              value={selectedCulture}
+              onChange={setSelectedCulture}
+              options={[
+                { value: '', label: 'All Cultures' },
+                ...cultures.map((c) => ({ value: c, label: c })),
+              ]}
+            />
+
+            {/* Category dropdown */}
+            <CustomDropdown
+              icon={LayoutGrid}
+              placeholder="All Categories"
+              value={selectedCategory}
+              onChange={setSelectedCategory}
+              options={[
+                { value: '', label: 'All Categories' },
+                ...categories.map((cat) => ({ value: cat._id, label: cat.name })),
+              ]}
+            />
+
           </div>
 
           {/* Clear filters button */}
@@ -264,20 +363,20 @@ export default CreatorsPage;
 
 function CreatorCard({ creator, index }) {
   const isFeatured = creator.campaign?.role === 'premium';
- 
+
   const categoryName =
     typeof creator.profile?.category === 'object'
       ? creator.profile?.category?.name
       : null;
- 
+
   const displayName =
     creator.profile?.displayName ||
     `${creator.firstName || ''} ${creator.lastName || ''}`.trim();
- 
+
   const location = creator.profile?.city
     ? `${creator.profile.city}, ${creator.profile.country || ''}`
     : creator.profile?.country || 'World';
- 
+
   return (
     <div
       className={`
@@ -291,16 +390,14 @@ function CreatorCard({ creator, index }) {
       `}
       style={{ animationDelay: `${index * 40}ms` }}
     >
- 
+
       {/* ── Banner ── */}
       <div
-        className={`relative h-20 overflow-hidden ${
-          isFeatured
-            ? 'bg-gradient-to-br from-[#7c2d12] to-[#c2410c]'
-            : 'bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] dark:from-[#0a0a0a] dark:to-[#1a1a1a]'
-        }`}
+        className={`relative h-20 overflow-hidden ${isFeatured
+          ? 'bg-gradient-to-br from-[#7c2d12] to-[#c2410c]'
+          : 'bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] dark:from-[#0a0a0a] dark:to-[#1a1a1a]'
+          }`}
       >
-        {/* Diagonal stripe pattern */}
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -309,13 +406,11 @@ function CreatorCard({ creator, index }) {
             backgroundSize: '12px 12px',
           }}
         />
- 
-        {/* Glow effect for featured */}
+
         {isFeatured && (
           <div className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 w-28 h-10 bg-orange-500/25 rounded-full blur-2xl" />
         )}
- 
-        {/* Featured badge */}
+
         {isFeatured && (
           <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-[8px] font-black uppercase tracking-[0.1em] px-2.5 py-1.5 rounded-full">
             <Star size={8} fill="#fbbf24" className="text-amber-400" />
@@ -323,10 +418,10 @@ function CreatorCard({ creator, index }) {
           </div>
         )}
       </div>
- 
+
       {/* ── Body ── */}
       <div className="px-5 pb-5 flex flex-col items-center flex-1">
- 
+
         {/* Avatar */}
         <div className="relative -mt-7 z-10">
           <div
@@ -345,32 +440,31 @@ function CreatorCard({ creator, index }) {
               className="object-cover w-full h-full"
             />
           </div>
-          {/* Online indicator */}
           <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-green-400 border-[2.5px] border-white dark:border-[#141414]" />
         </div>
- 
+
         {/* Name */}
         <h3 className="mt-3.5 font-black text-[15px] tracking-tight leading-tight text-center text-zinc-900 dark:text-white line-clamp-1">
           {displayName}
         </h3>
- 
+
         {/* Username */}
         <p className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.12em] mt-0.5">
           @{creator.username || creator.firstName?.toLowerCase()}
         </p>
- 
+
         {/* Location */}
         <p className="flex items-center gap-1.5 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.08em] mt-1.5">
           <MapPin size={9} fill="currentColor" className="text-orange-500 flex-shrink-0" />
           {location}
         </p>
- 
+
         {/* Bio */}
         <p className="text-[11px] text-zinc-500 dark:text-zinc-400 text-center leading-relaxed mt-3 line-clamp-2">
           {creator.profile?.bio ||
             'Crafting stories through traditional artistry and heritage techniques.'}
         </p>
- 
+
         {/* Tags */}
         <div className="flex flex-wrap justify-center gap-1.5 mt-3.5">
           {categoryName && (
@@ -387,17 +481,17 @@ function CreatorCard({ creator, index }) {
             </span>
           )}
         </div>
- 
+
         {/* Divider */}
         <div className="w-full h-px bg-black/6 dark:bg-white/6 my-4" />
- 
+
         {/* Listing count */}
         {creator.listingCount !== undefined && (
           <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.08em] mb-3">
             {creator.listingCount} {creator.listingCount === 1 ? 'Listing' : 'Listings'}
           </p>
         )}
- 
+
         {/* CTA Buttons */}
         <div className="w-full flex flex-col gap-2">
           <Link
@@ -412,7 +506,7 @@ function CreatorCard({ creator, index }) {
           >
             View Creator
           </Link>
- 
+
           {creator.profile?.website && (
             <a
               href={
