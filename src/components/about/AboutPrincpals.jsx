@@ -7,19 +7,19 @@ const AboutPrincpals = () => {
     const principles = [
         {
             title: "Visibility with Fairness",
-            description: "We focus on highlight the people behind cultural expression—the artists and communities who preserve traditions through their work."
+            description: "We focus on bringing forward the people behind cultural expression—the creators and communities who preserve traditions through their work."
         },
         {
-            title: "Context over Commodity",
-            description: "At WCM, culture is not treated as a commodity—it is presented as a living heritage carried by people and creative expression."
+            title: "Culture over Commodity",
+            description: "At WCM, culture is not treated as a commodity. It is presented as a living heritage, carried through people and expressed through creativity"
         },
         {
             title: "Authenticity & Respect",
-            description: "We provide a gateway between creators and global audiences, allowing visitors to explore while respecting identity and history."
+            description: "We create a gateway between creators and global audiences, enabling discovery while honoring identity, history, and cultural integrity."
         },
         {
             title: "Curation & Stewardship",
-            description: "Every creator and storyteller is hand-selected to ensure culture is shared with the highest respect and digital authenticity."
+            description: "Every creator and storyteller is carefully selected to ensure culture is shared with respect, responsibility, and digital authenticity."
         }
     ];
 
