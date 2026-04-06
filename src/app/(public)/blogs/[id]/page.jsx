@@ -16,11 +16,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// ── Natural-size masonry image ──────────────────────────────
-// img tag ব্যবহার করা হয়েছে কারণ Next Image এর fill/fixed
-// height ছাড়া natural height পাওয়া যায় না।
-// unoptimized={true} দিয়ে Next Image দিয়েও করা যায়,
-// কিন্তু <img> সবচেয়ে সহজ ও নির্ভরযোগ্য।
 const MasonryImage = ({ src }) => (
   <div className="w-full rounded-3xl overflow-hidden shadow-lg group bg-zinc-50 dark:bg-zinc-900 mb-0">
     {/* eslint-disable-next-line @next/next/no-img-element */}

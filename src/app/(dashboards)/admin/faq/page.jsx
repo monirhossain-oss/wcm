@@ -76,20 +76,39 @@ const AdminFaqPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            if (isEditing) {
-                await updateFaq(isEditing, formData);
-                toast.success("FAQ Updated Successfully!");
-            } else {
-                await createFaq(formData);
-                toast.success("New FAQ Added!");
+
+        // অ্যাড বা আপডেট করার আগে কনফার্মেশন অ্যালার্ট
+        Swal.fire({
+            title: isEditing ? 'Update FAQ?' : 'Add New FAQ?',
+            text: isEditing ? "Do you want to save the changes?" : "Do you want to publish this FAQ?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#ea580c', // Orange theme
+            cancelButtonColor: '#3f3f46',
+            confirmButtonText: isEditing ? 'Yes, Update' : 'Yes, Save it!',
+            cancelButtonText: 'Cancel',
+            background: '#18181b',
+            color: '#fff'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    if (isEditing) {
+                        await updateFaq(isEditing, formData);
+                        toast.success("FAQ Updated Successfully!");
+                    } else {
+                        await createFaq(formData);
+                        toast.success("New FAQ Added!");
+                    }
+
+                    // সাকসেস হওয়ার পর ফর্ম রিসেট এবং ডাটা রিলোড
+                    setFormData({ question: '', answer: '', category: 'General' });
+                    setIsEditing(null);
+                    loadFaqs();
+                } catch (err) {
+                    toast.error(err.response?.data?.message || "Operation failed");
+                }
             }
-            setFormData({ question: '', answer: '', category: 'General' });
-            setIsEditing(null);
-            loadFaqs();
-        } catch (err) {
-            toast.error(err.response?.data?.message || "Operation failed");
-        }
+        });
     };
 
     const handleEdit = (faq) => {
