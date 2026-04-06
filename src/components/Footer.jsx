@@ -58,10 +58,45 @@ const Footer = () => {
               Connecting the world through authentic culture, one story at a time.
             </p>
             <div className="flex space-x-5 text-xl">
-              <a href="https://instagram.com/wordculturemarketplace" target="_blank" rel="noopener noreferrer" className="hover:text-[#F57C00] transition-colors"><FaInstagram /></a>
-              <a href="https://pinterest.com/wordculturemarketplace" target="_blank" rel="noopener noreferrer" className="hover:text-[#F57C00] transition-colors"><FaPinterestP /></a>
-              <a href="https://linkedin.com/wordculturemarketplace" target="_blank" rel="noopener noreferrer" className="hover:text-[#F57C00] transition-colors"><FaLinkedinIn /></a>
-              <a href="https://facebook.com/wordculturemarketplace" target="_blank" rel="noopener noreferrer" className="hover:text-[#F57C00] transition-colors"><FaFacebook /></a>
+              <a
+                href="https://instagram.com/wordculturemarketplace"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.preventDefault()}
+                className="hover:text-[#F57C00] transition-colors cursor-pointer" 
+              >
+                <FaInstagram />
+              </a>
+
+              <a
+                href="https://pinterest.com/wordculturemarketplace"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.preventDefault()}
+                className="hover:text-[#F57C00] transition-colors cursor-pointer"
+              >
+                <FaPinterestP />
+              </a>
+
+              <a
+                href="https://linkedin.com/wordculturemarketplace"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.preventDefault()}
+                className="hover:text-[#F57C00] transition-colors cursor-pointer"
+              >
+                <FaLinkedinIn />
+              </a>
+
+              <a
+                href="https://facebook.com/wordculturemarketplace"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.preventDefault()}
+                className="hover:text-[#F57C00] transition-colors cursor-pointer"
+              >
+                <FaFacebook />
+              </a>
             </div>
           </div>
 
@@ -91,7 +126,7 @@ const Footer = () => {
           {/* Column 4 - Newsletter */}
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
             <h4 className="text-black dark:text-white text-sm font-bold uppercase tracking-widest mb-6">Stay Connected</h4>
-            <p className="text-sm mb-4">Weekly cultural stories, delivered to your inbox.</p>
+            <p className="text-sm mb-4">Stay informed about cultural stories and discoveries. More to come.</p>
             <form onSubmit={handleSubscribe} className="w-full space-y-3">
               <input
                 type="email"

@@ -2,11 +2,11 @@ import CultureSlider from './CultureSlider';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
-// ১. ক্লায়েন্টের দেওয়া স্ট্যাটিক ইমেজ এবং মহাদেশের ম্যাপিং
+// ১. মহাদেশ এবং দেশের ম্যাপিং (স্ট্যাটিক ডাটা)
 export const continentsData = [
     {
         title: "Asia",
-        image: "/aisa.jpg",
+        image: "/asia.png",
         countries: [
             "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh", "Bhutan", "Brunei",
             "Cambodia", "China", "Georgia", "India", "Indonesia", "Japan", "Kazakhstan",
@@ -18,7 +18,7 @@ export const continentsData = [
     },
     {
         title: "Middle East",
-        image: "/Middle East.jpg",
+        image: "/Middle-East.png",
         countries: [
             "Bahrain", "Cyprus", "Iran", "Iraq", "Israel", "Jordan", "Kuwait", "Lebanon",
             "Oman", "Palestine", "Qatar", "Saudi Arabia", "Syria", "Turkey",
@@ -27,7 +27,7 @@ export const continentsData = [
     },
     {
         title: "Europe",
-        image: "/europe.jpg",
+        image: "/europe.png",
         countries: [
             "Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina",
             "Bulgaria", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland",
@@ -41,7 +41,7 @@ export const continentsData = [
     },
     {
         title: "Africa",
-        image: "/Africa.jpg",
+        image: "/africa.png",
         countries: [
             "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon",
             "Cape Verde", "Central African Republic", "Chad", "Comoros", "Congo",
@@ -56,14 +56,14 @@ export const continentsData = [
     },
     {
         title: "North America",
-        image: "/North America.jpg",
+        image: "/North America.png",
         countries: [
             "Canada", "United States", "Greenland", "Bermuda"
         ]
     },
     {
         title: "Latin America",
-        image: "/Latin America.jpg",
+        image: "/Latin America.png",
         countries: [
             "Antigua and Barbuda", "Argentina", "Bahamas", "Barbados", "Belize", "Bolivia",
             "Brazil", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominica",
@@ -76,7 +76,7 @@ export const continentsData = [
     },
     {
         title: "Oceania",
-        image: "/Oceania.jpg",
+        image: "/Oceania.png",
         countries: [
             "Australia", "Fiji", "Kiribati", "Marshall Islands", "Micronesia", "Nauru",
             "New Zealand", "Palau", "Papua New Guinea", "Samoa", "Solomon Islands",
@@ -87,7 +87,7 @@ export const continentsData = [
 
 export default async function CultureDataWrapper() {
     try {
-        // সব লিস্টিং নিয়ে আসছি (লিমিট বাড়িয়ে দিন যাতে সব দেশ কাভার হয়)
+        // ১. সব লিস্টিং ফেচ করা
         const res = await fetch(`${API_BASE_URL}/api/listings/public?limit=250`, {
             next: { revalidate: 30 }
         });
@@ -97,31 +97,36 @@ export default async function CultureDataWrapper() {
         const data = await res.json();
         const allListings = data.listings || [];
 
-        // ২. প্রতিটি মহাদেশের জন্য লিস্টিং কাউন্ট করা
+        // ২. প্রতিটি মহাদেশের জন্য ডাটা ম্যাপ করা
         const finalData = continentsData.map(continent => {
-            // এই মহাদেশের আন্ডারে কতগুলো লিস্টিং আছে তা বের করা
+            // লিস্টিং কাউন্ট বের করা
             const count = allListings.filter(listing =>
                 continent.countries.includes(listing.country)
             ).length;
 
             return {
-                _id: continent.title, // আইডি হিসেবে মহাদেশের নাম
+                _id: continent.title,
                 title: continent.title,
-                image: continent.image, // স্ট্যাটিক ইমেজ
-                listingCount: count
+                image: continent.image,
+                listingCount: count // ০ হলেও এখন এটি ডাটাতে থাকবে
             };
         });
 
-        // ৩. লিস্টিং নাই এমন মহাদেশ বাদ দিতে চাইলে নিচের লাইনটি রাখুন (ঐচ্ছিক)
-        const filteredContinents = finalData.filter(item => item.listingCount > 0);
+        // ৩. লিস্টিং সংখ্যা অনুযায়ী সর্ট করা (ঐচ্ছিক: বেশি লিস্টিংগুলো আগে দেখাবে)
+        finalData.sort((a, b) => b.listingCount - a.listingCount);
 
-        // ৪. লিস্টিং অনুযায়ী সর্ট করা (বেশি লিস্টিং আগে)
-        filteredContinents.sort((a, b) => b.listingCount - a.listingCount);
-
-        return <CultureSlider items={filteredContinents} API_BASE_URL={API_BASE_URL} />;
+        // সরাসরি finalData পাঠানো হচ্ছে, কোনো ফিল্টার ছাড়াই
+        return <CultureSlider items={finalData} API_BASE_URL={API_BASE_URL} />;
 
     } catch (error) {
         console.error("Culture Fetch Error:", error);
-        return <div className="text-xs text-gray-400">Failed to load continents.</div>;
+        // এরর হলে অন্তত স্ট্যাটিক ডাটা ০ কাউন্ট নিয়ে দেখানোর ব্যবস্থা
+        const fallbackData = continentsData.map(c => ({
+            _id: c.title,
+            title: c.title,
+            image: c.image,
+            listingCount: 0
+        }));
+        return <CultureSlider items={fallbackData} API_BASE_URL={API_BASE_URL} />;
     }
 }

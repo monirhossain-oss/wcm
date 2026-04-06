@@ -27,14 +27,12 @@ export default async function HeroSection() {
         <p className="text-base sm:text-lg md:text-xl mt-2 max-w-lg text-gray-700 dark:text-gray-300 mx-auto md:mx-0">
           WCM helps you gain visibility and connect with a global audience.
         </p>
-        <div className="md:mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
+        <div className="md:mt-8 z-[50] flex flex-wrap gap-4 justify-center md:justify-start">
           <HeroActions />
         </div>
       </div>
-
       {/* Right Side: Slider */}
-      {/* Right Side: Slider */}
-      <div className="relative w-full h-[300px] sm:h-[350px] md:h-[450px] flex md:w-1/2 flex-shrink-0 mt-10 md:mt-0">
+      <div className="relative w-full h-[300px] z-0 sm:h-[350px] md:h-[450px] flex md:w-1/2 flex-shrink-0 mt-10 md:mt-0">
         <HeroSlider initialSliders={initialSliders} />
       </div>
     </section>

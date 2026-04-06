@@ -56,13 +56,13 @@ export default function CultureSlider({ items, API_BASE_URL }) {
                 {items.map((item) => (
                     <SwiperSlide key={item._id}>
                         <div
-                            // এখানে কান্ট্রি অনুযায়ী ফিল্টার হচ্ছে
                             onClick={() => (window.location.href = `/discover?continent=${encodeURIComponent(item.title)}`)}
-                            className="relative h-48 md:h-56 w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500"
+                            // পরিবর্তন এখানে: h-48 md:h-62 সরিয়ে aspect-square যোগ করা হয়েছে
+                            className="relative aspect-square w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500 " 
                         >
                             {/* Image Handling */}
                             <Image
-                                src={item.image || '/placeholder.jpg'} // ইমেজ না থাকলে একটি প্লেসহোল্ডার
+                                src={item.image || '/placeholder.jpg'}
                                 alt={item.title}
                                 fill
                                 className="object-cover transition-transform duration-700 group-hover/card:scale-110"

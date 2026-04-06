@@ -6,8 +6,9 @@ import Image from 'next/image';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
 
 const CreatorPopover = ({ creator, item, creatorLocation }) => {
-  console.log(item)
-  const creatorName = creator?.username || 'Anonymous';
+  console.log(creator)
+  // console.log(item)
+  const creatorName = creator?.profile.displayName || 'Anonymous';
   const listingCount = item?.creatorStats.totalApprovedListings || 0;
 
   const avatarSrc = creator?.profile?.profileImage || '/default-avatar.png';

@@ -64,22 +64,10 @@ const PrivacyPolicyPage = () => {
 
             {/* ── HERO HEADER ── */}
             <div className="relative overflow-hidden border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0F0F0E]">
-                {/* Decorative grid */}
-                <div
-                    className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
-                    style={{
-                        backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)',
-                        backgroundSize: '40px 40px',
-                    }}
-                />
                 {/* Orange glow blob */}
                 <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-[#F57C00] opacity-[0.06] blur-[80px] rounded-full translate-x-1/4 -translate-y-1/4" />
 
                 <div className="relative max-w-4xl mx-auto px-6 pt-20 pb-14">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-8 h-[3px] bg-[#F57C00] rounded-full" />
-                        <Badge>Legal Document</Badge>
-                    </div>
 
                     <h1 className="text-[52px] leading-[1.05] font-black tracking-tight text-gray-900 dark:text-white mb-5">
                         Privacy<br />
