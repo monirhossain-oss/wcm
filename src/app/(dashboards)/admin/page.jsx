@@ -144,6 +144,15 @@ export default function AdminDashboard() {
         'Traffic Node: Cumulative interaction count across all PPC campaigns currently in the system.',
     },
     {
+      label: 'Site Traffic',
+      value: cards.totalSiteViews || 0,
+      icon: FiActivity,
+      sub: `${cards.uniqueVisitors || 0} Unique Souls`,
+      color: 'bg-zinc-800',
+      description:
+        'Custom Analytics: Total interactions recorded by your local tracking engine, including guest users.',
+    },
+    {
       label: 'Total Views',
       value: cards.totalViews,
       icon: FiEye,
@@ -238,11 +247,11 @@ export default function AdminDashboard() {
       </div>
 
       {/* --- 1. Top 4 Priority Cards --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {mainMetrics.map((card, i) => (
           <div
             key={i}
-            className={`${card.color} p-6 rounded-xl text-white shadow-xl shadow-black/5 relative group transition-all hover:-translate-y-1`}
+            className={`${card.color} p-3 rounded-xl text-white shadow-xl shadow-black/5 relative group transition-all hover:-translate-y-1`}
           >
             {/* Icon Mask to prevent tooltip cut-off */}
             <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
@@ -254,18 +263,18 @@ export default function AdminDashboard() {
 
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-1">
-                <p className="text-[10px] font-black uppercase tracking-widest opacity-70">
+                <p className="text-[9px] font-black uppercase tracking-widest opacity-70">
                   {card.label}
                 </p>
                 <div className="relative group/info">
                   <FiInfo size={10} className="opacity-50 hover:opacity-100 cursor-help" />
-                  <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-zinc-900 text-[9px] text-zinc-300 rounded-lg opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none shadow-2xl border border-white/10 z-[100] normal-case tracking-normal font-medium">
+                  <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-zinc-900 text-[9px] text-zinc-300 rounded-lg opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none shadow-2xl border border-white/10 z-100 normal-case tracking-normal font-medium">
                     {card.description}
                   </div>
                 </div>
               </div>
-              <h3 className="text-3xl font-black mt-1 italic tracking-tighter">{card.value}</h3>
-              <p className="text-[9px] mt-4 font-bold uppercase tracking-widest opacity-80">
+              <h3 className="text-xl font-black mt-1 italic tracking-tighter">{card.value}</h3>
+              <p className="text-[8px] mt-4 font-bold uppercase tracking-widest opacity-80">
                 {card.sub}
               </p>
             </div>
@@ -308,7 +317,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* --- 3. Charts Section --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div className="lg:col-span-8 bg-white dark:bg-[#0c0c0c] rounded-xl border border-gray-100 dark:border-white/5 py-6 pr-6 shadow-sm">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 pl-6">
             <h3 className="text-xl font-black italic uppercase tracking-tighter dark:text-white">
