@@ -15,10 +15,8 @@ import {
   FiGlobe,
   FiMapPin,
   FiType,
-  FiInfo,
   FiLink,
   FiAlertCircle,
-  FiShield,
   FiArrowLeft,
   FiCheckCircle,
   FiExternalLink,
@@ -32,6 +30,122 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// ─────────────────────────────────────────────
+// SIMPLE USER PROFILE (role === 'user')
+// ─────────────────────────────────────────────
+function UserProfileView({ user, router, onDelete }) {
+  const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+  const initials = `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || ''}`.toUpperCase();
+
+  return (
+    <div className="min-h-screen bg-[#f7f6f3] dark:bg-[#111] flex flex-col items-center justify-center px-4 py-6">
+
+      {/* Back */}
+      <div className="w-full mb-8">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+        >
+          <FiArrowLeft size={13} /> Back
+        </button>
+      </div>
+
+      {/* Card */}
+      <div className="w-full max-w-sm bg-white dark:bg-[#1a1a1a] rounded-[2.5rem] shadow-xl shadow-black/5 dark:shadow-black/40 overflow-hidden">
+
+        {/* Top accent bar */}
+        <div className="h-2 w-full bg-gradient-to-r from-orange-400 to-orange-600" />
+
+        <div className="px-10 py-12 flex flex-col items-center gap-6 text-center">
+
+          {/* Avatar — always shows initials, no image */}
+          <div className="relative">
+            <div className="w-28 h-28 rounded-full bg-orange-100 dark:bg-orange-900/20 border-4 border-white dark:border-[#1a1a1a] shadow-lg shadow-orange-200 dark:shadow-orange-900/30 flex items-center justify-center">
+              {initials ? (
+                <span className="text-3xl font-black text-orange-500 select-none">
+                  {initials}
+                </span>
+              ) : (
+                <FiUser size={36} className="text-orange-400" />
+              )}
+            </div>
+
+            {/* Role badge */}
+            <div className="absolute -bottom-1 -right-1 bg-gray-800 dark:bg-white text-white dark:text-black px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow">
+              User
+            </div>
+          </div>
+
+          {/* Name */}
+          <div className="space-y-1">
+            <h1 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">
+              {fullName || 'Anonymous'}
+            </h1>
+            <p className="text-[10px] font-bold text-orange-500 lowercase tracking-widest">
+              @{user?.username}
+            </p>
+          </div>
+
+          {/* Divider */}
+          <div className="w-12 h-px bg-gray-200 dark:bg-white/10" />
+
+          {/* Meta info */}
+          <div className="w-full space-y-3">
+            <MetaRow icon={FiUser} label="Full Name" value={fullName} />
+            {(user?.profile?.city || user?.profile?.country) && (
+              <MetaRow
+                icon={FiMapPin}
+                label="Location"
+                value={[user?.profile?.city, user?.profile?.country].filter(Boolean).join(', ')}
+              />
+            )}
+            {user?.profile?.language && (
+              <MetaRow icon={FiGlobe} label="Language" value={user.profile.language} />
+            )}
+          </div>
+
+          {/* Bottom note */}
+          <p className="text-[9px] text-gray-300 dark:text-white/20 uppercase tracking-widest font-bold mt-2">
+            Member Account
+          </p>
+
+          {/* Critical Actions */}
+          <div className="w-full pt-6 border-t border-gray-100 dark:border-white/10">
+            <p className="text-[8px] font-black text-red-400/60 uppercase tracking-[0.3em] mb-3 text-left">
+              Critical Actions
+            </p>
+            <div className="flex items-center justify-between px-4 py-3 bg-red-500/5 border border-red-500/10 rounded-xl">
+              <p className="text-[9px] font-bold text-gray-500 uppercase">Account Termination</p>
+              <button
+                onClick={onDelete}
+                className="text-[9px] font-black text-red-500 uppercase hover:underline"
+              >
+                Delete Account
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// small helper row for UserProfileView
+const MetaRow = ({ icon: Icon, label, value }) => (
+  <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-white/5 rounded-xl">
+    <Icon size={13} className="text-orange-500 shrink-0" />
+    <div className="text-left overflow-hidden">
+      <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{label}</p>
+      <p className="text-[11px] font-bold text-gray-800 dark:text-gray-200 truncate">{value || '—'}</p>
+    </div>
+  </div>
+);
+
+
+// ─────────────────────────────────────────────
+// MAIN EXPORT
+// ─────────────────────────────────────────────
 export default function ProfilePage() {
   const router = useRouter();
   const { user, setUser, loading } = useAuth();
@@ -47,7 +161,6 @@ export default function ProfilePage() {
     }
   }, [user, loading, router]);
 
-  // Fetch listings if user is a creator
   useEffect(() => {
     const fetchListings = async () => {
       if (!user?._id || user?.role !== 'creator') return;
@@ -111,21 +224,13 @@ export default function ProfilePage() {
       setMessage({ type: '', text: '' });
       const formData = new FormData();
       const fields = [
-        'firstName',
-        'lastName',
-        'displayName',
-        'bio',
-        'country',
-        'city',
-        'language',
-        'websiteLink',
-        'socialLink',
+        'firstName', 'lastName', 'displayName', 'bio',
+        'country', 'city', 'language', 'websiteLink', 'socialLink',
       ];
       fields.forEach((field) => formData.append(field, data[field] || ''));
 
       const profileFile = document.querySelector('input[name="profileImageCustom"]')?.files[0];
       const coverFile = document.querySelector('input[name="coverImageCustom"]')?.files[0];
-
       if (profileFile) formData.append('profileImage', profileFile);
       if (coverFile) formData.append('coverImage', coverFile);
 
@@ -143,6 +248,7 @@ export default function ProfilePage() {
     }
   };
 
+  // ── Loading ──
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0f0f0f]">
@@ -150,6 +256,12 @@ export default function ProfilePage() {
       </div>
     );
 
+  // ── ROLE: user → simple design ──
+  if (user?.role === 'user') {
+    return <UserProfileView user={user} router={router} onDelete={handleDelete} />;
+  }
+
+  // ── ROLE: creator / admin → original full design ──
   return (
     <div className="min-h-screen bg-white dark:bg-[#0f0f0f] text-[#222] dark:text-gray-200 font-sans selection:bg-orange-100 pb-20">
 
@@ -169,7 +281,6 @@ export default function ProfilePage() {
         />
         <div className="absolute inset-0 bg-black/30" />
 
-        {/* Back button */}
         <div className="absolute top-8 left-8">
           <button
             onClick={() => router.back()}
@@ -179,7 +290,6 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* Edit cover button (only in editing mode) */}
         {isEditing && (
           <label className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/40 backdrop-blur-sm transition-all hover:bg-black/50">
             <div className="flex flex-col items-center gap-2 text-white">
@@ -347,7 +457,6 @@ export default function ProfilePage() {
                   </p>
                 </div>
 
-                {/* Info Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mt-6">
                   <InfoRow label="Full Name" value={`${user?.firstName} ${user?.lastName}`} icon={FiUser} />
                   <InfoRow label="Display Name" value={user?.profile?.displayName} icon={FiType} />

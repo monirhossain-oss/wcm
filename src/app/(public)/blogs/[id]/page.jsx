@@ -9,11 +9,24 @@ import { FiAlertCircle, FiMessageSquare } from 'react-icons/fi';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import Masonry from 'react-masonry-css';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   withCredentials: true,
 });
+
+const MasonryImage = ({ src }) => (
+  <div className="w-full rounded-3xl overflow-hidden shadow-lg group bg-zinc-50 dark:bg-zinc-900 mb-0">
+    {/* eslint-disable-next-line @next/next/no-img-element */}
+    <img
+      src={src}
+      alt="Insight"
+      className="w-full h-auto object-cover transition-transform duration-1000 group-hover:scale-105 block"
+      loading="lazy"
+    />
+  </div>
+);
 
 const BlogDetails = () => {
   const { id } = useParams();
@@ -24,11 +37,10 @@ const BlogDetails = () => {
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Comment & Reply States
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
-  const [replyingTo, setReplyingTo] = useState(null); // কোন কমেন্টে রিপ্লাই দিচ্ছে
+  const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState('');
 
   const fetchData = async () => {
@@ -52,7 +64,6 @@ const BlogDetails = () => {
     if (id) fetchData();
   }, [id]);
 
-  // কমেন্ট সাবমিট
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!user) return toast.error('Please login to comment');
@@ -60,10 +71,7 @@ const BlogDetails = () => {
 
     setSubmittingComment(true);
     try {
-      await api.post(`/api/blogs/comments`, {
-        blogId: id,
-        text: commentText,
-      });
+      await api.post(`/api/blogs/comments`, { blogId: id, text: commentText });
       setCommentText('');
       const res = await api.get(`/api/blogs/${id}/comments`);
       setComments(res.data.comments);
@@ -75,7 +83,6 @@ const BlogDetails = () => {
     }
   };
 
-  // এডমিন রিপ্লাই সাবমিট
   const handleReplySubmit = async (commentId) => {
     if (!replyText.trim()) return;
     try {
@@ -149,14 +156,16 @@ const BlogDetails = () => {
           onClick={() => router.back()}
           className="inline-flex items-center gap-2 text-zinc-500 hover:text-orange-500 transition-colors mb-8 text-xs font-bold uppercase tracking-widest group"
         >
-          <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back
-          to Blogs
+          <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+          Back to Blogs
         </button>
+
         <div className="mb-4">
           <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em]">
             {blog.category}
           </span>
         </div>
+
         <h1 className="text-3xl md:text-5xl font-serif font-black text-zinc-900 dark:text-white leading-[1.1] mb-8 tracking-tighter italic">
           {blog.title}
         </h1>
@@ -197,9 +206,17 @@ const BlogDetails = () => {
 
       {/* MAIN IMAGE */}
       <div className="max-w-6xl mx-auto px-6 mb-16">
-        <div className="relative w-full overflow-hidden rounded-4xl shadow-2xl shadow-orange-500/5">
-          <div className="relative w-full aspect-16/9 md:aspect-21/9 bg-gray-50 dark:bg-zinc-900">
-            <Image src={blog.image} alt={blog.title} fill priority className="object-cover" />
+        <div className="relative w-full overflow-hidden rounded-xl shadow-2xl shadow-orange-500/5">
+          {/* এখানে আমরা max-w-4xl (প্রায় 1000px এর কাছাকাছি) এবং aspect-[1000/612] ব্যবহার করছি */}
+          <div className="relative w-full max-w-[1000px] mx-auto aspect-[1000/612] bg-gray-50 dark:bg-zinc-900">
+            <Image
+              src={blog.image}
+              alt={blog.title}
+              fill
+              priority
+              sizes="(max-w-screen-xl) 1000px, 100vw"
+              className="object-cover"
+            />
           </div>
         </div>
       </div>
@@ -232,29 +249,26 @@ const BlogDetails = () => {
             ))}
         </div>
 
+        {/* MASONRY IMAGE GRID */}
         {blog.content
           ?.filter((item) => item.type === 'image_grid')
           .map((grid, idx) => (
-            <div key={`grid-${idx}`} className="mt-20 mb-12">
-              <div className="grid grid-cols-2 gap-4 md:gap-6">
-                {grid.images?.slice(0, 4).map((img, i) => (
-                  <div
-                    key={i}
-                    className="relative w-full aspect-4/5 rounded-3xl overflow-hidden shadow-lg group bg-zinc-50 dark:bg-zinc-900"
-                  >
-                    <Image
-                      src={img}
-                      alt="Insight"
-                      fill
-                      className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                    />
+            <div key={`grid-${idx}`} className="mt-20 mb-12 px-4 md:px-0">
+              <Masonry
+                breakpointCols={{ default: 2, 768: 2, 640: 1 }} // ট্যাবলেট মোড ২ কলাম রাখা ভালো
+                className="flex gap-4 md:gap-6"
+                columnClassName="bg-clip-padding"
+              >
+                {grid.images?.map((img, i) => (
+                  <div key={i} className="mb-4 md:mb-6">
+                    <MasonryImage src={img} />
                   </div>
                 ))}
-              </div>
+              </Masonry>
             </div>
           ))}
 
-        {/* --- DISCUSSIONS --- */}
+        {/* DISCUSSIONS */}
         <div className="mt-32 pt-16 border-t border-zinc-100 dark:border-zinc-900">
           <div className="flex items-center gap-3 mb-10">
             <FiMessageSquare className="text-orange-500" size={24} />
@@ -337,7 +351,6 @@ const BlogDetails = () => {
                             <Reply size={14} />
                           </button>
                         )}
-                        {/* || user?._id === comment.user?._id */}
                         {isAdmin && (
                           <button
                             onClick={() => handleDeleteComment(comment._id)}
@@ -374,7 +387,7 @@ const BlogDetails = () => {
                       </div>
                     )}
 
-                    {/* Replies List */}
+                    {/* Replies */}
                     {comment.replies?.map((reply) => (
                       <div
                         key={reply._id}

@@ -286,11 +286,11 @@ const CreatorsPage = () => {
             {/* Culture dropdown */}
             <CustomDropdown
               icon={Globe}
-              placeholder="All Cultures"
+              placeholder="All Countries"
               value={selectedCulture}
               onChange={setSelectedCulture}
               options={[
-                { value: '', label: 'All Cultures' },
+                { value: '', label: 'All Countries' },
                 ...cultures.map((c) => ({ value: c, label: c })),
               ]}
             />

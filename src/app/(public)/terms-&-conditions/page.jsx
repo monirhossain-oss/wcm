@@ -79,22 +79,9 @@ const TermsAndConditions = () => {
 
       {/* ── HERO HEADER ── */}
       <div className="relative overflow-hidden border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0F0F0E]">
-        <div
-          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
-          style={{
-            backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
-        />
         <div className="absolute top-0 left-0 w-[500px] h-[300px] bg-[#F57C00] opacity-[0.05] blur-[80px] rounded-full -translate-x-1/4 -translate-y-1/4" />
 
         <div className="relative max-w-4xl mx-auto px-6 pt-20 pb-14">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-[3px] bg-[#F57C00] rounded-full" />
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black bg-orange-100 dark:bg-orange-500/15 text-[#F57C00] tracking-wide uppercase">
-              Legal Document
-            </span>
-          </div>
           <h1 className="text-[48px] md:text-[56px] leading-[1.0] font-black tracking-tight text-gray-900 dark:text-white mb-5">
             Terms &<br />
             <span className="text-[#F57C00]">Conditions</span>
