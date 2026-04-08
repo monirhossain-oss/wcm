@@ -165,6 +165,13 @@ export default function AdminDashboard() {
 
   const secondaryMetrics = [
     {
+      label: 'Site Visitors',
+      value: cards.totalSiteViews || 0,
+      icon: FiActivity,
+      trend: `${cards.uniqueVisitors || 0} Unique Users`,
+      isHighlight: true, // অরেঞ্জ কালার হাইলাইট করার জন্য
+    },
+    {
       label: 'Net Profit',
       value: `€${cards.netProfit || 0}`,
       icon: FiTrendingUp,
