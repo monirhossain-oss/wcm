@@ -274,7 +274,7 @@ export default function AdminLayout({ children }) {
 
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
         {/* Header */}
-        <header className="h-20 bg-white/80 dark:bg-[#0c0c0c]/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-6 md:px-10 z-40">
+        <header className="h-20 bg-white/80 dark:bg-[#0c0c0c]/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-4 md:px-8 z-40">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="lg:hidden p-2 text-gray-600 dark:text-gray-300"
@@ -342,7 +342,7 @@ export default function AdminLayout({ children }) {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[#080808] p-6 md:p-8 scrollbar-hide">
+        <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[#080808] p-4 md:p-8 scrollbar-hide">
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
