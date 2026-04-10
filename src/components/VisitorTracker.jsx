@@ -8,19 +8,32 @@ export default function VisitorTracker() {
   useEffect(() => {
     const trackVisit = async () => {
       try {
+        if (localStorage.getItem('is_tracked')) return;
+
         let visitorId = localStorage.getItem('visitorId');
         if (!visitorId) {
           visitorId = uuidv4();
           localStorage.setItem('visitorId', visitorId);
         }
 
-        await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/views/track`, {
-          visitorId,
-          device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-          os: navigator.platform,
-        });
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/views/track`,
+          {
+            visitorId,
+            device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+            os: navigator.platform,
+          },
+          { withCredentials: true } 
+        );
+
+        if (response.data.success) {
+          localStorage.setItem('is_tracked', 'true');
+        }
       } catch (error) {
-        console.error('Analytics error:', error);
+        if (error.response?.status === 200) {
+          localStorage.setItem('is_tracked', 'true');
+        }
+        console.error('Analytics error:', error.message);
       }
     };
 
