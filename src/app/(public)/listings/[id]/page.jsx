@@ -81,7 +81,7 @@ const ListingDetails = () => {
     try {
       isProcessing.current = true;
       const res = await axios.post(
-        `${API_BASE_URL}/api/listings/favorite/${id}`,
+        `${API_BASE_URL}/api/listings/favorite/${product._id}`,
         {},
         { withCredentials: true }
       );
@@ -106,7 +106,7 @@ const ListingDetails = () => {
       const deviceId = result.visitorId;
 
       await axios.post(
-        `${API_BASE_URL}/api/listings/${id}/click`,
+        `${API_BASE_URL}/api/listings/${product._id}/click`,
         { deviceId },
         { withCredentials: true }
       );
