@@ -33,7 +33,7 @@ const PublicNavbar = () => {
     { name: 'Explore', href: '/discover' },
     { name: 'Categories', href: '/categories' },
     { name: 'Creators', href: '/creators' },
-    { name: 'About Us', href: '/aboutUs' },
+    { name: 'About', href: '/aboutUs' },
     { name: 'Blogs', href: '/blogs' },
   ];
 

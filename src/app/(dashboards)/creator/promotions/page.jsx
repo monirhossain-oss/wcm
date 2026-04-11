@@ -88,6 +88,13 @@ export default function PromotionsPage() {
   const pathname = usePathname();
   const currentCost = promoType === 'boost' ? Number(boostBudget) : Number(ppcAmount);
 
+  const PPC_COST_PER_CLICK = 0.3; 
+
+  const hasActiveBoost = selectedListing?.promotion?.boost?.isActive;
+  const hasActivePpc = selectedListing?.promotion?.ppc?.isActive;
+
+  const estimatedClicks = Math.floor(ppcAmount / PPC_COST_PER_CLICK);
+
   useEffect(() => {
     initData();
   }, []);
@@ -152,7 +159,6 @@ export default function PromotionsPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8 font-sans pb-20">
       <Toaster position="top-center" />
-
       {/* Wallet Header */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <CreatorWallet walletBalance={walletBalance} pathname={pathname} />
@@ -166,12 +172,11 @@ export default function PromotionsPage() {
           </p>
         </div>
       </div>
-
       {/* Table Section */}
       <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden shadow-sm">
         <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30">
           <h3 className="font-black text-[10px] uppercase tracking-[0.3em] text-zinc-500 flex items-center gap-3">
-            <FiActivity className="text-orange-500" size={16} /> Asset Deployment
+            <FiActivity className="text-orange-500" size={16} /> Asset List
           </h3>
         </div>
         <div className="overflow-x-auto">
@@ -340,114 +345,11 @@ export default function PromotionsPage() {
           </div>
         )}
       </div>
-
-      {/* Promotion Config Modal (Boost/PPC) */}
-      {/* {selectedListing && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-lg">
-          <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800">
-            <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
-              <h3 className="font-black text-[11px] uppercase tracking-widest flex items-center gap-3 dark:text-white">
-                <FiZap className="text-orange-500" size={18} /> Growth Protocol
-              </h3>
-              <button
-                onClick={() => setSelectedListing(null)}
-                className="text-zinc-400 hover:text-red-500"
-              >
-                <FiX size={22} />
-              </button>
-            </div>
-            <div className="p-8 space-y-8">
-              <div className="flex p-1.5 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl">
-                <button
-                  onClick={() => setPromoType('boost')}
-                  className={`flex-1 py-3.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'boost' ? 'bg-white dark:bg-zinc-700 shadow-sm text-orange-600' : 'text-zinc-500'}`}
-                >
-                  Viral Boost
-                </button>
-                <button
-                  onClick={() => setPromoType('ppc')}
-                  className={`flex-1 py-3.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'ppc' ? 'bg-white dark:bg-zinc-700 shadow-sm text-orange-600' : 'text-zinc-500'}`}
-                >
-                  PPC Flow
-                </button>
-              </div>
-
-              {promoType === 'boost' ? (
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">
-                      Duration (Days)
-                    </label>
-                    <input
-                      type="number"
-                      value={boostDays}
-                      onChange={(e) => setBoostDays(e.target.value)}
-                      className="w-full bg-zinc-100 dark:bg-zinc-800 border-none p-4 rounded-xl text-sm font-black outline-none dark:text-white"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">
-                      Budget (€)
-                    </label>
-                    <input
-                      type="number"
-                      value={boostBudget}
-                      onChange={(e) => setBoostBudget(e.target.value)}
-                      className="w-full bg-zinc-100 dark:bg-zinc-800 border-none p-4 rounded-xl text-sm font-black outline-none dark:text-white"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">
-                      Budget (€)
-                    </label>
-                    <input
-                      type="number"
-                      value={ppcAmount}
-                      onChange={(e) => setPpcAmount(e.target.value)}
-                      className="w-full bg-zinc-100 dark:bg-zinc-800 border-none p-4 rounded-xl text-sm font-black outline-none dark:text-white"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">
-                      Clicks Est.
-                    </label>
-                    <input
-                      type="number"
-                      value={targetClicks}
-                      onChange={(e) => setTargetClicks(e.target.value)}
-                      className="w-full bg-zinc-100 dark:bg-zinc-800 border-none p-4 rounded-xl text-sm font-black outline-none dark:text-white"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="p-6 bg-orange-500/5 rounded-2xl border border-orange-500/10 flex justify-between items-center">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                  Investment
-                </span>
-                <span className="text-3xl font-black text-orange-600 italic tracking-tighter">
-                  €{currentCost.toFixed(2)}
-                </span>
-              </div>
-
-              <button
-                onClick={handlePurchase}
-                disabled={actionLoading || walletBalance < currentCost}
-                className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl font-black uppercase text-[11px] tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20"
-              >
-                {actionLoading ? 'Initializing...' : 'Launch Campaign'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
-
+      
       {selectedListing && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
           <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-md overflow-hidden shadow-2xl border border-zinc-200 dark:border-white/10">
+            {/* Header */}
             <div className="p-6 border-b border-zinc-100 dark:border-white/5 flex justify-between items-center bg-zinc-50/50 dark:bg-white/5">
               <h3 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-3 dark:text-white">
                 <FiZap className="text-orange-500" size={18} /> Growth Protocol
@@ -461,23 +363,33 @@ export default function PromotionsPage() {
             </div>
 
             <div className="p-8 space-y-8">
-              {/* Type Switcher */}
+              {/* Type Switcher with Disable Logic */}
               <div className="flex p-1 bg-zinc-100 dark:bg-white/5 rounded-md">
                 <button
+                  disabled={hasActiveBoost}
                   onClick={() => setPromoType('boost')}
-                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'boost' ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600' : 'text-zinc-500'}`}
+                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
+                    promoType === 'boost'
+                      ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600'
+                      : 'text-zinc-500'
+                  } ${hasActiveBoost ? 'opacity-30 cursor-not-allowed' : ''}`}
                 >
-                  Viral Boost
+                  {hasActiveBoost ? 'Boost Active' : 'Viral Boost'}
                 </button>
                 <button
+                  disabled={hasActivePpc}
                   onClick={() => setPromoType('ppc')}
-                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'ppc' ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600' : 'text-zinc-500'}`}
+                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
+                    promoType === 'ppc'
+                      ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600'
+                      : 'text-zinc-500'
+                  } ${hasActivePpc ? 'opacity-30 cursor-not-allowed' : ''}`}
                 >
-                  PPC Flow
+                  {hasActivePpc ? 'PPC Active' : 'PPC Flow'}
                 </button>
               </div>
 
-              {/* Conditional Content */}
+              {/* --- Viral Boost Content --- */}
               {promoType === 'boost' ? (
                 <div className="space-y-3">
                   <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
@@ -511,48 +423,75 @@ export default function PromotionsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-6">
+                /* --- PPC Flow Content --- */
+                <div className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
-                      Budget (€)
+                      Enter Budget (€)
                     </label>
-                    <input
-                      type="number"
-                      value={ppcAmount}
-                      onChange={(e) => setPpcAmount(e.target.value)}
-                      className="w-full bg-zinc-100 dark:bg-white/5 border-none p-4 rounded-md text-sm font-black outline-none dark:text-white"
-                    />
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="5"
+                        value={ppcAmount}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setPpcAmount(val);
+                          setTargetClicks(Math.floor(val / PPC_COST_PER_CLICK)); // ব্যাকএন্ডে পাঠানোর জন্য সেট
+                        }}
+                        className="w-full bg-zinc-100 dark:bg-white/5 border border-transparent focus:border-orange-500 p-4 rounded-md text-sm font-black outline-none dark:text-white transition-all"
+                        placeholder="Min €5"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-400">
+                        EUR
+                      </span>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
-                      Clicks Est.
-                    </label>
-                    <input
-                      type="number"
-                      value={targetClicks}
-                      onChange={(e) => setTargetClicks(e.target.value)}
-                      className="w-full bg-zinc-100 dark:bg-white/5 border-none p-4 rounded-md text-sm font-black outline-none dark:text-white"
-                    />
+
+                  {/* Estimated Clicks Display */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-zinc-50 dark:bg-white/5 rounded-md border border-zinc-100 dark:border-white/5">
+                      <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">
+                        Cost Per Click
+                      </p>
+                      <p className="text-sm font-black dark:text-white">€{PPC_COST_PER_CLICK}</p>
+                    </div>
+                    <div className="p-4 bg-zinc-50 dark:bg-white/5 rounded-md border border-zinc-100 dark:border-white/5">
+                      <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">
+                        Est. Clicks
+                      </p>
+                      <p className="text-sm font-black text-blue-500">~ {estimatedClicks}</p>
+                    </div>
                   </div>
+
+                  <p className="text-[9px] text-zinc-500 font-medium italic">
+                    * Clicks are estimated based on a fixed rate of €0.30 per click.
+                  </p>
                 </div>
               )}
 
               {/* Investment Summary */}
               <div className="p-6 bg-orange-500/5 rounded-md border border-orange-500/10 flex justify-between items-center">
                 <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                  Investment
+                  Total Investment
                 </span>
-                <span className="text-3xl font-black text-orange-600 italic tracking-tighter">
-                  €{currentCost.toFixed(2)}
-                </span>
+                <div className="text-right">
+                  <span className="text-3xl font-black text-orange-600 italic tracking-tighter">
+                    €{currentCost.toFixed(2)}
+                  </span>
+                </div>
               </div>
 
               <button
                 onClick={handlePurchase}
-                disabled={actionLoading || walletBalance < currentCost}
-                className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-md font-black uppercase text-[10px] tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20"
+                disabled={actionLoading || walletBalance < currentCost || currentCost < 5}
+                className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-md font-black uppercase text-[10px] tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20 disabled:hover:bg-zinc-900"
               >
-                {actionLoading ? 'Initializing...' : 'Launch Campaign'}
+                {actionLoading
+                  ? 'Initializing...'
+                  : walletBalance < currentCost
+                    ? 'Insufficient Credits'
+                    : 'Launch Campaign'}
               </button>
             </div>
           </div>

@@ -125,7 +125,7 @@ export default function AdminCategories() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <h1 className="text-xl font-black uppercase italic tracking-tighter dark:text-white text-orange-500">
-              Structure <span className="dark:text-white text-black">Terminal</span>
+              System <span className="dark:text-white text-black">Categories</span>
             </h1>
             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">
               Drag to reorder system categories within page
@@ -170,7 +170,7 @@ export default function AdminCategories() {
                 <div className="grid grid-cols-12 bg-gray-50/50 dark:bg-white/20 px-6 py-4 text-[9px] font-black uppercase tracking-widest text-gray-400">
                   <div className="col-span-1">Move</div>
                   <div className="col-span-8">Category Identity</div>
-                  <div className="col-span-3 text-right">Control Access</div>
+                  <div className="col-span-3 text-right">Modify Category</div>
                 </div>
 
                 {currentItems.map((cat, index) => (

@@ -132,24 +132,28 @@ const CreatorsPage = () => {
 
   {/* Category Dropdown */}
   <div className="relative flex-1 md:w-44">
-    <select 
-      value={selectedCategory} 
-      onChange={(e) => setSelectedCategory(e.target.value)} 
-      className="w-full px-5 py-4 bg-white dark:bg-black text-black dark:text-white border border-black/10 dark:border-white/20 rounded-2xl text-sm outline-none cursor-pointer focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none shadow-sm"
+  <select 
+  value={selectedCategory} 
+  onChange={(e) => setSelectedCategory(e.target.value)} 
+  className="w-full px-5 py-4 bg-white dark:bg-black text-black dark:text-white border border-black/10 dark:border-white/20 rounded-2xl text-sm outline-none cursor-pointer focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none shadow-sm"
+>
+  <option 
+    value="" 
+    className="bg-white dark:bg-black text-black dark:text-white"
+  >
+    All Categories
+  </option>
+
+  {categories.map((cat) => (
+    <option 
+      key={cat._id} 
+      value={cat._id} 
+      className="bg-white dark:bg-black text-black dark:text-white"
     >
-      <option value="" className="bg-white dark:bg-black text-black dark:text-white">
-        All Categories
-      </option>
-      {categories.map((cat) => (
-        <option 
-          key={cat._id} 
-          value={cat._id} 
-          className="bg-white dark:bg-black text-black dark:text-white"
-        >
-          {cat.name}
-        </option>
-      ))}
-    </select>
+      {cat.name}
+    </option>
+  ))}
+</select>
     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black/40 dark:text-white/40">
       <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
         <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
@@ -244,3 +248,5 @@ const CreatorsPage = () => {
 };
 
 export default CreatorsPage;
+
+

@@ -30,7 +30,7 @@ const api = axios.create({
 });
 
 const LISTINGS_CACHE_KEY = 'wcm_admin_listings_cache';
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
+const CACHE_EXPIRY = 1 * 60 * 1000;
 
 // Mandatory Rejection/Block Reasons
 const REASON_CODES = [
@@ -256,7 +256,7 @@ export default function AdminListings() {
                 <th className="px-8 py-4">Preview</th>
                 <th className="px-6 py-4">Creator</th>
                 <th className="px-6 py-4">Classification</th>
-                <th className="px-6 py-4">Protocol Status</th>
+                <th className="px-6 py-4">Listing Status</th>
                 <th className="px-8 py-4 text-right">Actions</th>
               </tr>
             </thead>

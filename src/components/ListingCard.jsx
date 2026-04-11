@@ -16,7 +16,7 @@ export default function ListingCard({ item }) {
   return (
     <div className="group relative flex flex-col w-full transition-all duration-300">
       {/* IMAGE SECTION */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-zinc-900">
+      <div className="relative aspect-[4/5] overflow-hidden bg-gray-100 dark:bg-zinc-900">
         <Link href={`/listings/${item._id}`} className="block w-full h-full relative">
           <Image
             src={postImageSrc || 'https://placehold.co/600x400?text=No+Image'}
@@ -48,10 +48,10 @@ export default function ListingCard({ item }) {
           <CreatorName creator={item.creatorId} item={item} region={item.region} API_BASE_URL={API_BASE_URL} />
 
           <div className="flex gap-2">
-            <div className="font-bold text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded">
+            <div className="hidden md:flex font-bold text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded">
               {item.tradition || 'Heritage'}
             </div>
-            <div className="hidden md:flex items-center text-[10px] gap-1 font-medium text-zinc-500 dark:text-zinc-400">
+            <div className="flex items-center text-[10px] gap-1 font-medium text-zinc-500 dark:text-zinc-400">
               <HiOutlineLocationMarker size={12} /> {item.region || 'Global'}
             </div>
           </div>

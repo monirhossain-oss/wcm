@@ -27,7 +27,7 @@ const api = axios.create({
 });
 
 const LISTINGS_CACHE_KEY = 'wcm_listings_cache';
-const CACHE_TIME = 24 * 60 * 60 * 1000;
+const CACHE_TIME = 1 * 60 * 1000;
 
 export default function MyListings() {
   const [listings, setListings] = useState([]);
@@ -285,28 +285,22 @@ export default function MyListings() {
             <thead>
               <tr className="bg-gray-50/50 dark:bg-white/2 border-b border-gray-100 dark:border-white/10">
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  Node Asset
+                  Listing Asset
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
                   Identity Details
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
-                  Protocol Status
+                  Listing Status
                 </th>
-                {currentItems.length > 0 &&
-                  currentItems.map(
-                    (item) =>
-                      (item.status === 'rejected' || item.status === 'blocked') && (
-                        <th
-                          key={item._id}
-                          className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center"
-                        >
-                          Violation / Reason
-                        </th>
-                      )
-                  )}
+                <th
+                  // key={item._id}
+                  className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center"
+                >
+                  Reason
+                </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-right">
-                  Operations
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -352,26 +346,25 @@ export default function MyListings() {
                         {item.status}
                       </span>
                     </td>
-                    {(item.status === 'rejected' || item.status === 'blocked') && (
-                      <td className="px-6 py-4">
-                        {item.status === 'rejected' || item.status === 'blocked' ? (
-                          <div className="flex flex-col gap-1">
-                            <span className="text-[9px] font-black text-red-500 uppercase tracking-wider bg-red-500/5 border border-red-500/10 px-2 py-0.5 rounded w-fit">
-                              {item.rejectionReason?.replace(/_/g, ' ') || 'GENERAL_VIOLATION'}
-                            </span>
-                            {item.additionalReason && (
-                              <p className="text-[8px] text-gray-400 italic truncate max-w-[150px]">
-                                "{item.additionalReason}"
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-[9px] text-gray-300 font-bold uppercase tracking-widest opacity-30">
-                            ---
+
+                    <td className="px-6 py-4">
+                      {item.status === 'rejected' || item.status === 'blocked' ? (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[9px] font-black text-red-500 uppercase tracking-wider bg-red-500/5 border border-red-500/10 px-2 py-0.5 rounded w-fit">
+                            {item.rejectionReason?.replace(/_/g, ' ') || 'GENERAL_VIOLATION'}
                           </span>
-                        )}
-                      </td>
-                    )}
+                          {item.additionalReason && (
+                            <p className="text-[8px] text-gray-400 italic truncate max-w-[150px]">
+                              "{item.additionalReason}"
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-[9px] text-gray-300 font-bold uppercase tracking-widest opacity-30">
+                          ---
+                        </span>
+                      )}
+                    </td>
 
                     <td className="px-8 py-5 text-right">
                       <div className="flex items-center justify-end gap-2.5">
@@ -385,11 +378,7 @@ export default function MyListings() {
                           disabled={item.status === 'blocked'}
                           icon={FiEdit2}
                           onClick={() => openEditModal(item)}
-                          color={
-                            item.status === 'blocked'
-                              ? 'opacity-20'
-                              : 'hover:bg-orange-600'
-                          }
+                          color={item.status === 'blocked' ? 'opacity-20' : 'hover:bg-orange-600'}
                           label="Edit"
                         />
                         <ActionButton

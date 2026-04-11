@@ -34,7 +34,7 @@ const api = axios.create({
 
 const CACHE_KEY = 'admin_stats_cache';
 const CACHE_TIME_KEY = 'admin_stats_time';
-const ONE_DAY = 24 * 60 * 60 * 1000;
+const ONE_DAY = 1 * 60 * 1000; // 1 minute for testing, change to 24 * 60 * 60 * 1000 for production
 
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
