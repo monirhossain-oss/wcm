@@ -6,27 +6,27 @@ const AboutContent = () => {
         <section className="max-w-7xl mx-auto px-6 md:px-10 ">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-24 items-center">
 
-               
+
                 <div className="space-y-8">
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl 
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl 
                                    font-light leading-tight 
                                    text-gray-900 dark:text-white">
                         Discover
                         <span className="font-serif text-rose-900 dark:text-rose-400"> Culture</span> <br />
                         Worldwide
-                    </h1>
+                    </h2>
 
                     <p className="text-base sm:text-lg md:text-xl 
                                   text-gray-600 dark:text-gray-300 
                                   max-w-md leading-relaxed">
                         WCM was created to
-highlight the people behind cultural expression
-—
-the artists, craftsmen,
-and communities who preserve traditions through their work.From textiles and clothing to
-decorative arts, handmade objects, and cultural storytelling, the platform connects audience
-s
-with creators and the heritage they represent.
+                        highlight the people behind cultural expression
+                        —
+                        the artists, craftsmen,
+                        and communities who preserve traditions through their work.From textiles and clothing to
+                        decorative arts, handmade objects, and cultural storytelling, the platform connects audience
+                        s
+                        with creators and the heritage they represent.
                     </p>
 
                     <div className="flex items-center gap-5 pt-6">

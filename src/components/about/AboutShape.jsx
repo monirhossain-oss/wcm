@@ -8,20 +8,20 @@ const AboutContent = () => {
 
                 {/* Text Section */}
                 <div className="space-y-8 order-2 lg:order-1">
-                    <h2 className="text-3xl md:text-4xl font-light text-gray-900 dark:text-white leading-tight">
+                    <h3 className="text-3xl md:text-4xl font-light text-gray-900 dark:text-white leading-tight">
                         Identity in every thread, <br />
                         <span className="font-serif italic text-rose-900">story in every shape.</span>
-                    </h2>
+                    </h3>
 
                     <div className="space-y-6 text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-xl leading-relaxed">
                         <p>Unlike traditional marketplaces, WCM focuses on
-visibility, cultural context, and
-storytelling
-. The platform acts as a gateway between creators and global audiences, allowing
-visitors to explore cultural wor
-ks while respecting the identity and history behind them.</p>
+                            visibility, cultural context, and
+                            storytelling
+                            . The platform acts as a gateway between creators and global audiences, allowing
+                            visitors to explore cultural wor
+                            ks while respecting the identity and history behind them.</p>
                         <p> Our goal is to contribute to the preservation and appreciation of cultural heritage by
-supporting creators and helping their stories reach a wider world.</p>
+                            supporting creators and helping their stories reach a wider world.</p>
                         <p className="text-gray-900 dark:text-gray-200 font-medium border-l-4 border-rose-900 pl-4">
                             Our platform does not own the craft; we amplify it.
                         </p>

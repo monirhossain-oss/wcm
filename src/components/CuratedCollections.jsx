@@ -48,16 +48,16 @@ const curatedData = [
 export default function CuratedCollections() {
     const router = useRouter();
     const handleClick = (categoryTitle) => {
-        router.push(`/discover?category=${encodeURIComponent(categoryTitle)}`);
+        router.push(`/explore?category=${encodeURIComponent(categoryTitle)}`);
     };
 
     return (
         <section className="max-w-7xl mx-auto px-6 py-4">
             {/* Title */}
             <div className="mb-10">
-                <h2 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white">
+                <h1 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white">
                     Curated Collections
-                </h2>
+                </h1>
                 <p className="text-sm text-zinc-500 mt-2">
                     Handpicked categories to explore culture treasures
                 </p>

@@ -1,4 +1,4 @@
-'use client'; 
+'use client';
 import React, { useState } from 'react';
 
 const AboutPrincpals = () => {
@@ -42,23 +42,20 @@ const AboutPrincpals = () => {
                 {/* Cards Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {principles.map((item, index) => (
-                        <div 
-                            key={index} 
-                            onClick={() => setActiveIndex(index)} 
-                            className={`cursor-pointer p-10 rounded-[2rem] border transition-all duration-500 transform ${
-                                activeIndex === index 
-                                ? 'bg-white dark:bg-zinc-900 border-[#F57C00] shadow-2xl shadow-orange-500/10 scale-[1.05]' 
+                        <div
+                            key={index}
+                            onClick={() => setActiveIndex(index)}
+                            className={`cursor-pointer p-10 rounded-[2rem] border transition-all duration-500 transform ${activeIndex === index
+                                ? 'bg-white dark:bg-zinc-900 border-[#F57C00] shadow-2xl shadow-orange-500/10 scale-[1.05]'
                                 : 'bg-[#FAFAFA] dark:bg-zinc-900/40 border-gray-100 dark:border-white/5 hover:border-[#F57C00]/30'
-                            }`}
+                                }`}
                         >
                             {/* Decorative Line */}
-                            <div className={`w-12 h-1 mb-8 rounded-full transition-all duration-500 ${
-                                activeIndex === index ? 'bg-[#F57C00] w-20' : 'bg-gray-200 dark:bg-zinc-700'
-                            }`}></div>
+                            <div className={`w-12 h-1 mb-8 rounded-full transition-all duration-500 ${activeIndex === index ? 'bg-[#F57C00] w-20' : 'bg-gray-200 dark:bg-zinc-700'
+                                }`}></div>
 
-                            <h3 className={`text-xl md:text-2xl font-black mb-6 leading-tight transition-colors italic ${
-                                activeIndex === index ? 'text-[#F57C00]' : 'text-gray-900 dark:text-white'
-                            }`}>
+                            <h3 className={`text-xl md:text-2xl font-black mb-6 leading-tight transition-colors italic ${activeIndex === index ? 'text-[#F57C00]' : 'text-gray-900 dark:text-white'
+                                }`}>
                                 {item.title}
                             </h3>
                             <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm md:text-base font-medium">

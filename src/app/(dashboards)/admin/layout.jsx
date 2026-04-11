@@ -27,7 +27,7 @@ import {
   MdOutlineInfo,
   MdOutlineWebAsset,
 } from 'react-icons/md';
-import { TbLayoutBottombar } from 'react-icons/tb';
+import { TbLayoutBottombar, TbSeo } from 'react-icons/tb';
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/imageHelper';
 import { Sliders } from 'lucide-react';
@@ -124,6 +124,7 @@ export default function AdminLayout({ children }) {
     { name: 'Manage Blog', path: '/admin/blogs', icon: FiSettings },
     { name: 'Create Blog', path: '/admin/create-blog', icon: FiSettings },
     { name: 'Manage FAQ', path: '/admin/faq', icon: FaQ },
+    { name: 'Manage SEO', path: '/admin/seo-settings', icon: TbSeo },
   ];
 
   const profileImage = user?.profile?.profileImage

@@ -27,13 +27,13 @@ const AboutExplore = () => {
     return (
         <section className="bg-white dark:bg-[#0a0a0a] py-20 px-6 transition-colors duration-500">
             <div className="max-w-7xl mx-auto">
-                
+
                 {/* Section Header */}
                 <div className="text-center mb-16 space-y-4">
                     <span className="text-[#E65100] font-bold text-xs uppercase tracking-[0.3em]">How WCM Works</span>
-                    <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white leading-tight">
-                        The <span className="text-[#E65100]">Explorer's</span> Journey
-                    </h2>
+                    <h3 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white leading-tight">
+                        The <span className="text-[#E65100]">Explorer</span> Journey
+                    </h3>
                     <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-base">
                         A transparent and respectful way to discover authentic cultural craftsmanship.
                     </p>
@@ -44,7 +44,7 @@ const AboutExplore = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
                     {steps.map((step) => (
                         <div key={step.id} className="group relative p-8 bg-gray-50 dark:bg-[#121212] rounded-[2rem] border border-transparent hover:border-[#E65100]/20 hover:bg-white dark:hover:bg-zinc-900 shadow-xl shadow-gray-200/50 dark:shadow-none transition-all duration-500">
-                            
+
                             {/* Decorative Step Number */}
                             <div className="absolute top-6 right-8 text-6xl font-black text-gray-200/50 dark:text-zinc-800/50 group-hover:text-[#E65100]/10 transition-colors">
                                 {step.id}
