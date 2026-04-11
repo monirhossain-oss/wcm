@@ -6,8 +6,6 @@ import Image from 'next/image';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
 
 const CreatorPopover = ({ creator, item, creatorLocation }) => {
-  console.log(creator)
-  // console.log(item)
   const creatorName = creator?.profile.displayName || 'Anonymous';
   const listingCount = item?.creatorStats.totalApprovedListings || 0;
 
@@ -42,7 +40,7 @@ const CreatorPopover = ({ creator, item, creatorLocation }) => {
         {/* Buttons */}
         <div className="flex items-center justify-center gap-2 w-full mt-2">
           <Link
-            href={`/profile/${creator?._id}`}
+            href={`/profile/${creator?.username || creator?.id}`}
             className="w-full py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase rounded-full text-center transition-colors"
           >
             Profile
