@@ -62,7 +62,7 @@ const CreatorSlider = ({ creators }) => {
                                 {creator.totalListings || 0} Listings
                             </div>
                             <Link
-                                href={`/profile/${creator._id}`}
+                                href={`/profile/${creator.username || creator._id}`}
                                 className="w-full py-2 md:py-2.5 text-[10px] md:text-xs font-bold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-all uppercase mt-auto shadow-sm active:scale-95 text-center"
                             >
                                 View Profile
