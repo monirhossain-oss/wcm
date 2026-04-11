@@ -35,7 +35,7 @@ export default function HeroActions() {
     return (
         <div className="mt-8 flex justify-center gap-3 sm:gap-4">
             {/* Explore Button */}
-            <Link href="/discover">
+            <Link href="/explore">
                 <button className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-[#F57C00] text-white font-bold whitespace-nowrap">
                     Discover Creations
                 </button>

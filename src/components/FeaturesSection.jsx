@@ -14,7 +14,7 @@ export default function FeaturedCultures() {
             Craftsmanship & heritage rituals.
           </p>
         </div>
-        <a href="/discover" className="text-[#F57C00] hover:underline font-semibold text-sm">
+        <a href="/explore" className="text-[#F57C00] hover:underline font-semibold text-sm">
           View all &rarr;
         </a>
       </div>

@@ -27,7 +27,7 @@ export default function TrendingListings() {
         {/* View All Button */}
         <div className="mt-8 flex justify-center">
           <Link
-            href="/discover"
+            href="/explore"
             prefetch={true}
             className="group flex items-center gap-2 px-8 py-3 border-2 border-orange-500 text-orange-500 font-bold text-sm rounded-full hover:bg-orange-500 hover:text-white transition-all duration-300 shadow-md hover:shadow-orange-200"
           >

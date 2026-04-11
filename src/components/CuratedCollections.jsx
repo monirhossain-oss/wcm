@@ -48,7 +48,7 @@ const curatedData = [
 export default function CuratedCollections() {
     const router = useRouter();
     const handleClick = (categoryTitle) => {
-        router.push(`/discover?category=${encodeURIComponent(categoryTitle)}`);
+        router.push(`/explore?category=${encodeURIComponent(categoryTitle)}`);
     };
 
     return (
