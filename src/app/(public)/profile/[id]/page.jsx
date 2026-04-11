@@ -2,13 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
-import {
-  FiMapPin,
-  FiLink,
-  FiArrowLeft,
-  FiCheckCircle,
-  FiExternalLink,
-} from 'react-icons/fi';
+import { FiMapPin, FiLink, FiArrowLeft, FiCheckCircle, FiExternalLink } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import { Globe, Languages, Box, MessageCircle, Info } from 'lucide-react';
 import ListingCard from '@/components/ListingCard';
@@ -32,10 +26,10 @@ export default function PublicProfilePage() {
         setLoading(true);
         const profileRes = await api.get(`/api/users/profile/${id}`);
         setProfileData(profileRes.data);
-        const listingRes = await api.get(`/api/listings/public?creatorId=${id}`);
+        const listingRes = await api.get(
+          `/api/listings/public?creatorId=${profileRes.data?.user._id}`
+        );
         setListings(listingRes.data.listings || listingRes.data || []);
-        // console.log(listingRes.data.listings);
-
       } catch (err) {
         console.error('Data Fetch Error:', err);
       } finally {
@@ -59,7 +53,9 @@ export default function PublicProfilePage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-white dark:bg-[#0f0f0f]">
         <p className="text-sm font-bold uppercase tracking-widest text-gray-400">Node Not Found</p>
-        <button onClick={() => router.back()} className="text-orange-500 underline font-bold">Return</button>
+        <button onClick={() => router.back()} className="text-orange-500 underline font-bold">
+          Return
+        </button>
       </div>
     );
   }
@@ -68,11 +64,13 @@ export default function PublicProfilePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0f0f0f] text-[#222] dark:text-gray-200 font-sans selection:bg-orange-100 pb-20">
-
       {/* 🔹 Header Section */}
       <div className="relative h-[250px] md:h-[300px] w-full overflow-hidden">
         <Image
-          src={getImageUrl(user.profile?.coverImage) || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000'}
+          src={
+            getImageUrl(user.profile?.coverImage) ||
+            'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000'
+          }
           alt="cover"
           fill
           priority
@@ -101,11 +99,11 @@ export default function PublicProfilePage() {
             <div className="h-44 w-44 relative rounded-[2.5rem] border-[8px] border-white dark:border-[#0f0f0f] bg-gray-100 overflow-hidden shadow-2xl transition-all duration-500 group-hover:rounded-3xl">
               <Image
                 src={getImageUrl(user.profile?.profileImage, 'avatar')}
-                alt={user.profile?.displayName || "avatar"}
+                alt={user.profile?.displayName || 'avatar'}
                 fill
                 sizes="(max-width: 176px) 100vw, 176px"
                 className="object-cover"
-                priority 
+                priority
               />
             </div>
             {user.role === 'creator' && (
@@ -127,10 +125,12 @@ export default function PublicProfilePage() {
 
             <div className="flex flex-wrap items-center gap-6 text-gray-500 dark:text-gray-400 font-bold uppercase text-[10px] tracking-widest">
               <span className="flex items-center gap-2">
-                <FiMapPin className="text-orange-500" /> {user.profile?.city || 'Unknown'}, {user.profile?.country || 'Earth'}
+                <FiMapPin className="text-orange-500" /> {user.profile?.city || 'Unknown'},{' '}
+                {user.profile?.country || 'Earth'}
               </span>
               <span className="flex items-center gap-2">
-                <Languages className="text-orange-500" size={14} /> {user.profile?.language || 'Global'}
+                <Languages className="text-orange-500" size={14} />{' '}
+                {user.profile?.language || 'Global'}
               </span>
               <span className="text-orange-500 italic lowercase">@{user.username}</span>
             </div>
@@ -146,13 +146,23 @@ export default function PublicProfilePage() {
               </h3>
               <div className="grid gap-3">
                 {user.profile?.websiteLink && (
-                  <SocialLink icon={Globe} label="Official Website" url={user.profile.websiteLink} />
+                  <SocialLink
+                    icon={Globe}
+                    label="Official Website"
+                    url={user.profile.websiteLink}
+                  />
                 )}
                 {user.profile?.socialLink && (
-                  <SocialLink icon={FiExternalLink} label="Portfolio/Social" url={user.profile.socialLink} />
+                  <SocialLink
+                    icon={FiExternalLink}
+                    label="Portfolio/Social"
+                    url={user.profile.socialLink}
+                  />
                 )}
                 {!user.profile?.websiteLink && !user.profile?.socialLink && (
-                  <p className="text-[10px] text-gray-400 italic font-bold">No links shared by creator</p>
+                  <p className="text-[10px] text-gray-400 italic font-bold">
+                    No links shared by creator
+                  </p>
                 )}
               </div>
             </div>
@@ -164,7 +174,8 @@ export default function PublicProfilePage() {
             </h3>
             <div className="p-8 bg-gray-50 dark:bg-white/5 rounded-[2rem] border border-gray-100 dark:border-white/5">
               <p className="text-sm md:text-base leading-relaxed font-medium text-gray-600 dark:text-gray-400 italic whitespace-pre-wrap">
-                {user.profile?.bio || "This node's biography is currently encrypted or has not been initialized."}
+                {user.profile?.bio ||
+                  "This node's biography is currently encrypted or has not been initialized."}
               </p>
             </div>
           </div>
@@ -184,18 +195,17 @@ export default function PublicProfilePage() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {listings && listings.length > 0 ? (
-              listings.map((item) => (
-                <ListingCard key={item._id} item={item} />
-              ))
+              listings.map((item) => <ListingCard key={item._id} item={item} />)
             ) : (
               <div className="col-span-full py-24 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] flex flex-col items-center justify-center text-gray-400">
                 <Box size={48} strokeWidth={1} className="opacity-20 mb-4" />
-                <p className="text-[10px] font-black uppercase tracking-[0.3em]">No active listings found</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em]">
+                  No active listings found
+                </p>
               </div>
             )}
           </div>
         </div>
-
       </div>
     </div>
   );
@@ -212,8 +222,12 @@ const SocialLink = ({ icon: Icon, label, url }) => (
       <Icon size={16} />
     </div>
     <div className="overflow-hidden">
-      <p className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-0.5">{label}</p>
-      <p className="text-[11px] font-bold truncate dark:text-gray-200 group-hover:text-orange-500 transition-colors italic">{url}</p>
+      <p className="text-[8px] font-black uppercase text-gray-400 tracking-widest mb-0.5">
+        {label}
+      </p>
+      <p className="text-[11px] font-bold truncate dark:text-gray-200 group-hover:text-orange-500 transition-colors italic">
+        {url}
+      </p>
     </div>
   </a>
 );

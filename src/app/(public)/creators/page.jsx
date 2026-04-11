@@ -495,7 +495,7 @@ function CreatorCard({ creator, index }) {
         {/* CTA Buttons */}
         <div className="w-full flex flex-col gap-2">
           <Link
-            href={`/profile/${creator._id}`}
+            href={`/profile/${creator?.username || creator._id}`}
             className={`
               w-full text-[10px] font-black uppercase tracking-[0.12em] py-3.5 rounded-[14px] text-center
               transition-all duration-200 shadow-sm
