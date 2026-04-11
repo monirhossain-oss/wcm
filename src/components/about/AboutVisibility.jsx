@@ -6,7 +6,7 @@ import React from 'react';
 const AboutVisibility = () => {
     return (
         <section className="bg-white dark:bg-[#0a0a0a] py-20 px-6 flex flex-col items-center text-center transition-colors duration-500">
-            
+
             {/* অরেঞ্জ হার্ট আইকন - Symbolizing Passion for Culture */}
             <div className="mb-10 animate-pulse">
                 <Heart className="w-14 h-14 text-[#F57C00] stroke-[1.5px]" />
@@ -21,13 +21,13 @@ const AboutVisibility = () => {
             {/* মেইন প্যারাগ্রাফ - Covering the 'Why' of WCM */}
             <div className="max-w-3xl space-y-6 mb-12">
                 <p className="text-gray-600 dark:text-gray-300 text-lg md:text-xl font-medium leading-relaxed">
-                    World Culture Marketplace was founded by <span className="text-gray-900 dark:text-white font-bold">Annette Cousin</span> with a simple idea: 
+                    World Culture Marketplace was founded by <span className="text-gray-900 dark:text-white font-bold">Annette Cousin</span> with a simple idea:
                     culture deserves to be seen, understood, and respected in the digital world.
                 </p>
-                
+
                 <p className="text-gray-500 dark:text-gray-400 text-base md:text-lg leading-relaxed">
-                    We bridge the gap between extraordinary artisans and global audiences, creating a space 
-                    where cultural heritage is not just a commodity, but a <span className="italic">living legacy</span> 
+                    We bridge the gap between extraordinary artisans and global audiences, creating a space
+                    where cultural heritage is not just a commodity, but a <span className="italic">living legacy</span>
                     shared with respect and authenticity.
                 </p>
             </div>
@@ -42,7 +42,7 @@ const AboutVisibility = () => {
             </div>
 
             {/* এক্সপ্লোর বাটন */}
-            <Link href="/discover">
+            <Link href="/explore">
                 <button className="px-10 py-4 cursor-pointer rounded-2xl bg-[#F57C00] text-white font-black hover:bg-[#e67600] transition-all shadow-2xl shadow-orange-500/20 hover:scale-105 active:scale-95 uppercase tracking-wider">
                     Explore Our Creators
                 </button>
@@ -52,7 +52,7 @@ const AboutVisibility = () => {
             <p className="mt-8 text-gray-400 dark:text-gray-600 text-sm font-medium italic">
                 Supporting a more inclusive and respectful global cultural economy.
             </p>
-            
+
         </section>
     );
 };

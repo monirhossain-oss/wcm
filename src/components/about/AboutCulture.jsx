@@ -69,10 +69,10 @@ const AboutCulture = () => {
                         <span className="bg-orange-100 dark:bg-orange-600/20 text-orange-700 dark:text-orange-400 text-[10px] font-bold px-4 py-2 uppercase tracking-[0.3em] rounded-full">
                             Our Vision & Impact
                         </span>
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white leading-[1.1]">
+                        <h3 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white leading-[1.1]">
                             Empowering the <br /> 
                             <span className="text-orange-600">Guardians of Culture.</span>
-                        </h2>
+                        </h3>
                         <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
                             What began as an idea to bridge cultures digitally is evolving into a growing network of creators, communities, and audiences who value authenticity over mass production.
                         </p>

@@ -29,7 +29,7 @@ const PublicNavbar = () => {
   const categoryRef = useRef(null);
 
   const menuItems = [
-    { name: 'Explore', href: '/discover' },
+    { name: 'Explore', href: '/explore' },
     { name: 'Categories', href: null },
     { name: 'Creators', href: '/creators' },
     { name: 'About', href: '/aboutUs' },
@@ -126,7 +126,7 @@ const PublicNavbar = () => {
                                 </span>
                               </div>
                               <Link
-                                href="/discover"
+                                href="/explore"
                                 onClick={() => setIsCategoryDropdownOpen(false)}
                                 className="text-xs font-bold text-[#F57C00] hover:underline underline-offset-2 flex items-center gap-1"
                               >
@@ -155,7 +155,7 @@ const PublicNavbar = () => {
                                 {categories.map((cat) => (
                                   <Link
                                     key={cat._id || cat.id}
-                                    href={`/discover?category=${encodeURIComponent(cat.title || cat.name)}`}
+                                    href={`/explore?category=${encodeURIComponent(cat.title || cat.name)}`}
                                     onClick={() => setIsCategoryDropdownOpen(false)}
                                     className="
                                       group flex items-center gap-2
@@ -297,7 +297,7 @@ const PublicNavbar = () => {
                       >
                         {/* Browse All link at top */}
                         <Link
-                          href="/discover"
+                          href="/explore"
                           onClick={() => { setIsMobileCategoryOpen(false); setIsMobileDrawerOpen(false); }}
                           className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800"
                         >
@@ -318,7 +318,7 @@ const PublicNavbar = () => {
                             {categories.map((cat) => (
                               <Link
                                 key={cat._id || cat.id}
-                                href={`/discover?category=${encodeURIComponent(cat.title || cat.name)}`}
+                                href={`/explore?category=${encodeURIComponent(cat.title || cat.name)}`}
                                 onClick={() => { setIsMobileCategoryOpen(false); setIsMobileDrawerOpen(false); }}
                                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white dark:hover:bg-white/5 hover:text-[#F57C00] text-gray-600 dark:text-gray-400 transition-all group"
                               >

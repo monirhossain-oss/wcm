@@ -17,9 +17,9 @@ const AboutHeader = () => {
                               leading-relaxed font-light 
                               max-w-2xl mx-auto">
                     World Culture Marketplace (WCM)
-is a global platform dedicated to showcasing cultural
-creators, artisans, and storytellers from around the world. Our mission is to provide a space
-where culture can be discovered, appreciated, and shared with respect and authenticity.
+                    is a global platform dedicated to showcasing cultural
+                    creators, artisans, and storytellers from around the world. Our mission is to provide a space
+                    where culture can be discovered, appreciated, and shared with respect and authenticity.
                 </p>
 
             </div>

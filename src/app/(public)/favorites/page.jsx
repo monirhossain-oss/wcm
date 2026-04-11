@@ -66,7 +66,7 @@ export default function FavoritesPage() {
                         <HeartOff size={48} className="text-zinc-300 mb-4" />
                         <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">No favorites yet</h2>
                         <p className="text-zinc-500 text-sm mb-8">Start exploring and save the items that inspire you.</p>
-                        <Link href="/discover" className="bg-[#1a1a1a] dark:bg-white text-white dark:text-black px-8 py-3 rounded-full text-sm font-bold uppercase tracking-wider hover:opacity-90 transition">
+                        <Link href="/explore" className="bg-[#1a1a1a] dark:bg-white text-white dark:text-black px-8 py-3 rounded-full text-sm font-bold uppercase tracking-wider hover:opacity-90 transition">
                             Explore Marketplace
                         </Link>
                     </div>
