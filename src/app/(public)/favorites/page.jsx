@@ -66,7 +66,7 @@ export default function FavoritesPage() {
                         <HeartOff size={48} className="text-zinc-300 mb-4" />
                         <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">No favorites yet</h2>
                         <p className="text-zinc-500 text-sm mb-8">Start exploring and save the items that inspire you.</p>
-                        <Link href="/discover" className="bg-[#1a1a1a] dark:bg-white text-white dark:text-black px-8 py-3 rounded-full text-sm font-bold uppercase tracking-wider hover:opacity-90 transition">
+                        <Link href="/explore" className="bg-[#1a1a1a] dark:bg-white text-white dark:text-black px-8 py-3 rounded-full text-sm font-bold uppercase tracking-wider hover:opacity-90 transition">
                             Explore Marketplace
                         </Link>
                     </div>
@@ -75,7 +75,6 @@ export default function FavoritesPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                         {favorites.map((item) => {
                             // console.log(item)
-                            // ইমেজ পাথ লজিক (আপনার লিস্টিং কার্ড থেকে নেওয়া)
                             const postImageSrc = item.image?.startsWith('http')
                                 ? item.image
                                 : `${API_BASE}${item.image?.startsWith('/') ? '' : '/'}${item.image}`;
@@ -125,10 +124,10 @@ export default function FavoritesPage() {
                                             />
 
                                             <div className="flex gap-2">
-                                                <div className="font-bold text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded">
+                                                <div className="font-bold hidden md:flex text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded">
                                                     {item.tradition || 'Heritage'}
                                                 </div>
-                                                <div className="hidden md:flex items-center text-[10px] gap-1 font-medium text-zinc-500 dark:text-zinc-400">
+                                                <div className="flex items-center text-[10px] gap-1 font-medium text-zinc-500 dark:text-zinc-400">
                                                     <HiOutlineLocationMarker size={12} /> {item.region || 'Global'}
                                                 </div>
                                             </div>

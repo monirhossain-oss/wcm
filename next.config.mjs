@@ -23,6 +23,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.ibb.co.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+      },
     ],
   },
   trailingSlash: false,

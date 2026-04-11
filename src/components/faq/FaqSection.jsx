@@ -1,209 +1,49 @@
 'use client';
-import React, { useState } from 'react';
-import { ChevronDown, Globe, Users, Rocket, Zap, Wallet, Lock, ShieldQuestion } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, Globe, Users, Rocket, Zap, ShieldQuestion, Loader2 } from 'lucide-react';
+import axios from 'axios';
 
 const FaqSection = () => {
     const [activeCategory, setActiveCategory] = useState('General');
     const [openIndex, setOpenIndex] = useState(null);
+    const [faqs, setFaqs] = useState([]);
+    const [loading, setLoading] = useState(true);
 
+    // .env থেকে বেস ইউআরএল নেওয়া
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+    // ক্যাটাগরি লিস্ট (আপনার ডিজাইন অনুযায়ী)
     const categories = [
         { id: 'General', icon: <Globe size={16} />, label: 'General' },
-        { id: 'Artists', icon: <Users size={16} />, label: 'For Creators and Artists' },
-        { id: 'Creators', icon: <Rocket size={16} />, label: 'For Visitors and Buyers' },
+        { id: 'Artists', icon: <Users size={16} />, label: 'For Creators and Artists' }, // ঠিক করা হয়েছে
+        { id: 'Creators', icon: <Rocket size={16} />, label: 'For Visitors and Buyers' }, // ঠিক করা হয়েছে
         { id: 'Platform', icon: <Zap size={16} />, label: 'Platform Policies' },
         { id: 'Technical', icon: <ShieldQuestion size={16} />, label: 'Technical Questions' },
     ];
 
-    const faqData = {
-        General: [
-            { 
-                question: "What is World Culture Marketplace?", 
-                answer: `World Culture Marketplace (WCM) is an online cultural art marketplace dedicated to showcasing and promoting creative works inspired by cultures from around the world. The platform connects creators, artists and artisans with a global audience interested in cultural art, handmade crafts, traditional textiles, fashion, and many more traditional objects.` 
-            },
-            { 
-                question: "Who can join the platform?", 
-                answer: `Creators, artists, artisans, designers, and cultural entrepreneurs from anywhere in the world can join the platform and showcase their work, provided their content complies with our quality and cultural integrity guidelines.` 
-            },
-            { 
-                question: "What types of products or content can be listed?", 
-                answer: `Creators may showcase a wide range of cultural and creative works, including:
-                <ul class="list-disc ml-6 mt-2 space-y-1">
-                    <li>Paintings and illustrations</li>
-                    <li>Sculptures and carvings</li>
-                    <li>Handmade crafts</li>
-                    <li>Cultural fashion and textiles</li>
-                    <li>Decorative objects and home decor</li>
-                    <li>Digital creative works inspired by cultural traditions</li>
-                </ul>
-                <p class="mt-3 font-medium">All listings must respect cultural heritage and intellectual property rights.</p>` 
+    // ডাটাবেজ থেকে FAQ ফেচ করা
+    useEffect(() => {
+        const fetchFaqs = async () => {
+            try {
+                // সরাসরি .env এর ইউআরএল ব্যবহার করে কল
+                const response = await axios.get(`${API_BASE_URL}/api/faqs`);
+                setFaqs(response.data);
+            } catch (error) {
+                console.error("Error fetching FAQs:", error);
+            } finally {
+                setLoading(false);
             }
-        ],
-        Artists: [
-            { question: "How do I create a creator account?", answer: `You can register by creating
-a creator profile on the platform. Once registered, you can
-upload your creations, build your profile, and begin promoting your work to a global
-audience`},
-            { question: "Who can join WCM as a creator?", answer: `Artists, artisans, designers, and creators interested in sharing c
-ultural creativity can join the
-platform. The marketplace welcomes creators working with
-traditional crafts
-manship
-,
-cultural art, handmade decor, and heritage
--
-inspired designs
-.` },
-            { question: "Is World Culture Marketplace free to join?", answer: `Creating a basic creator account i
-s free. Creators may optionally purchase promotional
-services such as boosted listings
-or Pay
--
-Per
--
-Click (PPC)
-to increase the visibility of their
-creations.
-For more details, see
-Boost & PPC
-.` },
-            { question: "What are boosted listings?", answer: `Boosted listings are optional promot
-ional features that allow creators to increase the visibility
-of their creations on the platform. Boosted listings may appear in featured sections, search
-results, or curated collections.
-Boosting helps creators reach a wider audience while keeping partici
-pation optional
-.` },
-            { question: "What is Pay-Per-click (PPC) Promotion", answer: `Pay
--
-Per
--
-Click (PPC) is an optional promotional feature that allows creators to increase the
-visibility of their cultural artwork, handmade crafts, or creative products on World Culture
-Marketplace.
-With PPC promotion, creators only pay when a visitor
-clicks on their promoted listing
-. This
-model allows creators to promote their creations while controlling their promotional budget
-.` },
-            { question: "How much does it cost to boost a listing?", answer: `Boost pricing varies
-depending on the selected promotion package and duration. Pricing is
-displayed before a creator activates a boost, and creators can choose whether or not to use
-this feature.
-Payments may be made in
-USD or EUR
-, depending on the creator’s preference
-.` },
-            { question: "Do you take a commission on sels", answer: `No. Visitors are redirected to Seller/ Creator website to complete their purchase. WCM does
-not take any commission on sales.
-World Culture Marketplace acts as an intermediary platform connecting creators with buyers.
-Creato
-rs remain responsible for the sale, fulfillment, and tax obligations related to their
-products
-.` },
-           { 
-  question: "What types of creators are featured on WCM?", 
-  answer: `WCM features a wide range of cultural creators, including:
-  <ul class="list-disc ml-6 mt-2 space-y-1">
-    <li>Artisans and craftspeople</li>
-    <li>Textile artists and clothing designers</li>
-    <li>Jewelry makers</li>
-    <li>Sculptors and wood carvers</li>
-    <li>Potters and ceramic artists</li>
-    <li>Cultural storytellers and heritage creators</li>
-  </ul>
-  <p class="mt-3">The platform focuses on creators whose work reflects cultural traditions, heritage, and craftsmanship.</p>` 
-},
-{
+        };
+        fetchFaqs();
+    }, [API_BASE_URL]);
 
-  question:"Can I sell digital products?",
-  answer:`Yes. Creators may offer digital products such as downloadable artwork, design files, or
-cultural creative content, provided they compl
-y with platform policies.`
-},
-        ],
-        Creators: [
-         { 
-  question: "How can I discover creators on WCM?", 
-  answer: `Visitors can explore the platform through several pathways, including:
-  <ul class="list-disc ml-6 mt-2 space-y-1">
-    <li>Cultural regions (Africa, Asia, Europe, Americas, Middle East, Oceania)</li>
-    <li>Creator profiles</li>
-    <li>Featured works</li>
-    <li>Cultural topics and stories</li>
-  </ul>
-  <p class="mt-3">These sections help visitors discover creators and learn about the cultural traditions behind their work.</p>` 
-},
-            { question: "Can I find authentic handmade crafts online on WCM?", answer: `Yes. The platform promotes
-authentic handmade crafts and cult
-ural creations
-from artists
-and artisans worldwide.` },
-            { question: "Does WCM verify creators?", answer: `WCM aims to promote authentic cultural creators and heritage
--
-based work. While the
-platform may review profiles and submissions, creators remain responsible for the content
-and
-information they share.` },
-            { question: "Does the marketplace ship products?", answer: `No. WCM does not conduct any sell. C
-reators manage their own fulfillment and shipping.` },
-            { question: "How do I purchase items?", answer: `Buyers can browse the platform, discover creations from different cultures, an
-d follow links
-to complete purchases depending on the seller’s fulfillment method.` },
-            { question: "Does the marketplace ship products?", answer: `Yes.
-Many creators provide links to their websites, social media pages, or other contact
-methods on their profile pages. Visitors can use these links to reach out directly` },
-        ],
-        Platform: [
-            { question: "Can I contact creators directly?", answer: `The platform promotes r
-espectful representation of cultur
-al heritage
-.
-Listings must not
-misrepresent cultural traditions or violate intellectual property rights.
-Content that misrepresents cultural heritage, violates intellectual property rights, or is deemed offensive
-may be re
-moved.` },
-            { question: "How are listings moderated?", answer: `Listings are subject to moderation to ensure they meet platform standards regarding quality,
-legality, and cultural respect.` },
-            { question: "What happens if a listing violates platform rules?", answer: `Listings that violate platform policies
-may be removed and creator accounts may be subject
-to review.` },
-            { question: "How can I report inappropriate content?", answer: `Users can report content directly through the platform using the reporting tools provided on
-listing pages.` }
-        ],
-        Technical: [
-            { question: "What curriencies are supported for promotional features?", answer: "Our support center is available for any technical assistance you may need." },
-            { question: "Do I need special software to use the platform?", answer: `No. The platform is accessible through any modern web brow
-ser on desktop or mobile
-devices.` },
-            { question: "Can I edit my listings after publishing?", answer: `Yes. Creators can update descriptions, images, pricing, and other details from their creator
-dashboard.`},
-            { question: "Is my data safe on WCM?", answer: `WCM is committed to protecting user information
-and follows modern security practices to
-safeguard personal and platform data. More details can be found in our Privacy Policy.`},
-           { 
-  question: "How can I report a problem or request support?", 
-  answer: `If you encounter a technical issue or have questions about the platform, you
-  can contact the
-  WCM team through the contact page or by email at: <strong class="font-bold text-gray-800">contact@worldculturemarketplace.com</strong>` 
-},
-            { question: `I
-s World Culture Marketplace mobile friendly?`, answer: `Yes. The platform is designed to work smoothly on smartphones, tablets, and desktop
-devices` },
-            { question: "Is it safe to use the platform?", answer: `The platform uses secure technologies to protect user data and provide safe browsin
-g
-experiences.`},
-            { question: "How can I stay informed about new cultural creations?", answer: `Visitors can follow creators, browse curated collections, and explore new listings regularly
-added to the marketplace.`},
-        ]
-    };
-
-    const currentFaqs = faqData[activeCategory] || [];
+    // সিলেক্ট করা ক্যাটাগরি অনুযায়ী ফিল্টার
+    const currentFaqs = faqs.filter(faq => faq.category === activeCategory);
 
     return (
-        <section className="bg-white dark:bg-[#0a0a0a] py-6 px-6">
+        <section className="bg-white dark:bg-[#0a0a0a] py-12 px-6 min-h-[500px]">
             <div className="max-w-5xl mx-auto">
-                
+
                 {/* Header */}
                 <div className="text-center mb-16 space-y-4">
                     <span className="px-4 py-1 rounded-full border border-orange-200 text-orange-600 text-[10px] font-bold uppercase tracking-widest">
@@ -223,11 +63,10 @@ added to the marketplace.`},
                                 setActiveCategory(cat.id);
                                 setOpenIndex(null);
                             }}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 border ${
-                                activeCategory === cat.id
-                                    ? 'bg-[#F57C00] border-[#F57C00] text-white shadow-lg' 
-                                    : 'bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400 hover:border-gray-300'
-                            }`}
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 border ${activeCategory === cat.id
+                                ? 'bg-[#F57C00] border-[#F57C00] text-white shadow-lg'
+                                : 'bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400 hover:border-gray-300'
+                                }`}
                         >
                             {cat.icon}
                             {cat.label}
@@ -235,43 +74,51 @@ added to the marketplace.`},
                     ))}
                 </div>
 
-                {/* Dynamic FAQ List */}
+                {/* FAQ Content Area */}
                 <div className="space-y-4">
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 border-b border-gray-100 dark:border-zinc-800 pb-4 w-fit pr-20">
                         {activeCategory}
                     </h3>
-                    
-                    {currentFaqs.map((faq, index) => (
-                        <div 
-                            key={index} 
-                            className="border-b border-gray-100 dark:border-zinc-800 last:border-0"
-                        >
-                            <button
-                                onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                className="w-full flex justify-between items-center py-6 text-left group"
-                            >
-                                <span className={`text-lg font-medium transition-colors ${
-                                    openIndex === index ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'
-                                }`}>
-                                    {faq.question}
-                                </span>
-                                <ChevronDown 
-                                    className={`transition-transform duration-300 ${openIndex === index ? 'rotate-180 text-gray-900' : 'text-gray-400'}`} 
-                                    size={20} 
-                                />
-                            </button>
-                            
-                            {/* dangerouslySetInnerHTML*/}
-                            <div className={`overflow-hidden transition-all duration-300 ${
-                                openIndex === index ? 'max-h-96 pb-6 opacity-100' : 'max-h-0 opacity-0'
-                            }`}>
-                                <div 
-                                    className="text-gray-500 dark:text-gray-400 leading-relaxed text-sm"
-                                    dangerouslySetInnerHTML={{ __html: faq.answer }}
-                                />
-                            </div>
+
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                            <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+                            <p className="text-gray-400 text-sm italic">Loading questions...</p>
                         </div>
-                    ))}
+                    ) : currentFaqs.length > 0 ? (
+                        currentFaqs.map((faq, index) => (
+                            <div
+                                key={faq._id}
+                                className="border-b border-gray-100 dark:border-zinc-800 last:border-0"
+                            >
+                                <button
+                                    onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                                    className="w-full flex justify-between items-center py-6 text-left group"
+                                >
+                                    <span className={`text-lg font-medium transition-colors ${openIndex === index ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'
+                                        }`}>
+                                        {faq.question}
+                                    </span>
+                                    <ChevronDown
+                                        className={`transition-transform duration-300 ${openIndex === index ? 'rotate-180 text-gray-900 dark:text-white' : 'text-gray-400'}`}
+                                        size={20}
+                                    />
+                                </button>
+
+                                <div className={`overflow-hidden transition-all duration-500 ${openIndex === index ? 'max-h-[1000px] pb-6 opacity-100' : 'max-h-0 opacity-0'
+                                    }`}>
+                                    <div
+                                        className="text-gray-500 dark:text-gray-400 leading-relaxed text-sm prose dark:prose-invert max-w-none"
+                                        dangerouslySetInnerHTML={{ __html: faq.answer }}
+                                    />
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-20 border border-dashed border-gray-200 dark:border-zinc-800 rounded-xl">
+                            <p className="text-gray-400">No questions found for this category.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </section>

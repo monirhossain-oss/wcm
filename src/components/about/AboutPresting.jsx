@@ -23,10 +23,10 @@ const AboutPresting = () => {
                 <div className="flex flex-col items-center animate-fade-in">
 
                     {/* Heading */}
-                    <h2 className="text-4xl  md:text-6xl lg:text-7xl font-light text-white leading-tight tracking-tight">
+                    <h3 className="text-4xl  md:text-6xl lg:text-7xl font-light text-white leading-tight tracking-tight">
                         Preserving Identity. <br />
                         <span className="font-serif text-white/90 italic">Amplifying Culture.</span>
-                    </h2>
+                    </h3>
 
                     {/* Orange Divider */}
                     <div className="w-24 h-1 bg-[#F57C00] rounded-full mt-2 animate-pulse"></div>

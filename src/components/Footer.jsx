@@ -9,7 +9,6 @@ import emailjs from '@emailjs/browser';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
 
@@ -19,7 +18,6 @@ const Footer = () => {
 
     setStatus("loading");
 
-    // EmailJS 
     const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
     const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
     const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC;
@@ -38,96 +36,110 @@ const Footer = () => {
       console.error("EmailJS Error:", error);
       setStatus("error");
       alert("Something went wrong. Please try again.");
+    } finally {
+      setStatus("");
     }
   };
 
   return (
-    <footer className="bg-gray-100 dark:bg-gray-950 text-gray-600 dark:text-gray-300 transition-colors duration-500">
+    <footer className="bg-gray-100 dark:bg-gray-950 text-gray-600 dark:text-gray-300 transition-colors duration-500 border-t border-gray-200 dark:border-gray-900">
       <div className="max-w-7xl mx-auto px-6 pt-16 pb-10">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Column 1 - Logo */}
-          <div>
-            <Link href="/" className="flex items-center space-x-3 mb-6">
-              <Image src="/wc,-web-logo.png" alt="Logo Light" width={100} height={100} className="dark:hidden brightness-125 h-auto w-auto" />
-              <Image src="/wc,-web-white.png" alt="Logo Dark" width={100} height={100} className="hidden dark:block brightness-125 h-auto w-auto" />
+        {/* Main Grid Structure */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+
+          {/* Column 1 - Logo & About */}
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+            <Link href="/" className="flex items-center mb-6">
+              <Image src="/wc,-web-logo.png" alt="Logo" width={120} height={40} className="dark:hidden brightness-110 h-auto w-auto" priority />
+              <Image src="/wc,-web-white.png" alt="Logo" width={120} height={40} className="hidden dark:block brightness-110 h-auto w-auto" priority />
             </Link>
-            <p className="text-sm leading-relaxed mb-6">Connecting the world through authentic culture, one story at a time.</p>
-            <div className="flex space-x-4 text-lg">
-              {/* Instagram */}
+            <p className="text-sm leading-relaxed mb-6 max-w-xs">
+              Connecting the world through authentic culture, one story at a time.
+            </p>
+            <div className="flex space-x-5 text-xl">
               <a
-                href="https://www.instagram.com/wordculturemarketplace"
+                href="https://instagram.com/wordculturemarketplace"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.preventDefault()}
+                className="hover:text-[#F57C00] transition-colors cursor-pointer" 
               >
-                <FaInstagram className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
+                <FaInstagram />
               </a>
 
-              {/* Pinterest */}
               <a
-                href="https://www.pinterest.com/wordculturemarketplace"
+                href="https://pinterest.com/wordculturemarketplace"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.preventDefault()}
+                className="hover:text-[#F57C00] transition-colors cursor-pointer"
               >
-                <FaPinterestP className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
+                <FaPinterestP />
               </a>
 
-              {/* LinkedIn */}
               <a
-                href="https://www.linkedin.com/wordculturemarketplace"
+                href="https://linkedin.com/wordculturemarketplace"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.preventDefault()}
+                className="hover:text-[#F57C00] transition-colors cursor-pointer"
               >
-                <FaLinkedinIn className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
+                <FaLinkedinIn />
               </a>
 
-              {/* Facebook */}
               <a
-                href="https://www.facebook.com/wordculturemarketplace"
+                href="https://facebook.com/wordculturemarketplace"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.preventDefault()}
+                className="hover:text-[#F57C00] transition-colors cursor-pointer"
               >
-                <FaFacebook className="hover:text-black dark:hover:text-white cursor-pointer transition-colors" />
+                <FaFacebook />
               </a>
             </div>
           </div>
 
-          {/* Column 2 & 3 */}
-          <div>
-            <h4 className="text-black dark:text-white text-sm font-semibold uppercase tracking-wider mb-6">Platform</h4>
-            <ul className="space-y-3 text-sm">
-              <li><Link href="/aboutUs" className="hover:text-black dark:hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="/HowItWorks" className="hover:text-black dark:hover:text-white transition-colors">How It Works</Link></li>
-              <li><Link href="/faqUs" className="hover:text-black dark:hover:text-white transition-colors">FAQ</Link></li>
-            </ul>
-          </div>
+          {/* Column 2 & 3 - Links (Mobile e Pasa Pasi) */}
+          <div className="grid grid-cols-2 gap-8 lg:col-span-2">
+            {/* Platform */}
+            <div className="text-center md:text-left">
+              <h4 className="text-black dark:text-white text-sm font-bold uppercase tracking-widest mb-6">Platform</h4>
+              <ul className="space-y-3 text-sm">
+                <li><Link href="/aboutUs" className="hover:text-[#F57C00] transition-colors">About Us</Link></li>
+                <li><Link href="/HowItWorks" className="hover:text-[#F57C00] transition-colors">How It Works</Link></li>
+                <li><Link href="/faqUs" className="hover:text-[#F57C00] transition-colors">FAQ</Link></li>
+              </ul>
+            </div>
 
-          <div>
-            <h4 className="text-black dark:text-white text-sm font-semibold uppercase tracking-wider mb-6">Resources</h4>
-            <ul className="space-y-3 text-sm">
-              <li><Link href="/blogs" className="hover:text-black dark:hover:text-white transition-colors">Blogs</Link></li>
-              <li><Link href="/contact" className="hover:text-black dark:hover:text-white transition-colors">Contact</Link></li>
-            </ul>
+            {/* Resources */}
+            <div className="text-center md:text-left">
+              <h4 className="text-black dark:text-white text-sm font-bold uppercase tracking-widest mb-6">Resources</h4>
+              <ul className="space-y-3 text-sm">
+                <li><Link href="/blogs" className="hover:text-[#F57C00] transition-colors">Blogs</Link></li>
+                <li><Link href="/contact" className="hover:text-[#F57C00] transition-colors">Contact</Link></li>
+                <li><Link href="/creators" className="hover:text-[#F57C00] transition-colors">Creators</Link></li>
+              </ul>
+            </div>
           </div>
 
           {/* Column 4 - Newsletter */}
-          <div>
-            <h4 className="text-black dark:text-white text-sm font-semibold uppercase tracking-wider mb-6">Stay Connected</h4>
-            <p className="text-sm mb-4">Weekly cultural stories, delivered to your inbox.</p>
-
-            <form onSubmit={handleSubscribe} className="space-y-3">
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+            <h4 className="text-black dark:text-white text-sm font-bold uppercase tracking-widest mb-6">Stay Connected</h4>
+            <p className="text-sm mb-4">Stay informed about cultural stories and discoveries. More to come.</p>
+            <form onSubmit={handleSubscribe} className="w-full space-y-3">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email address"
-                className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 px-4 py-3 text-sm text-black dark:text-white placeholder-gray-500 focus:outline-none focus:border-black dark:focus:border-white transition-colors"
+                placeholder="Email address"
+                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-4 py-3 text-sm focus:outline-none focus:border-[#F57C00] transition-all rounded-md"
               />
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="w-full bg-black dark:bg-white text-white dark:text-black py-3 text-sm font-medium hover:opacity-90 transition-all disabled:opacity-50"
+                className="w-full bg-[#F57C00] hover:bg-[#e67600] text-white py-3 text-sm font-bold uppercase tracking-widest transition-all disabled:opacity-50 rounded-md shadow-md active:scale-95"
               >
                 {status === "loading" ? "Subscribing..." : "Subscribe"}
               </button>
@@ -136,14 +148,14 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-300 dark:border-gray-600 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center text-sm">
-          <p className="mb-4 md:mb-0">
-            © {currentYear} World Culture Marketplace<sup className="text-[10px] ml-0.5">&reg;</sup>. All rights reserved.
+        <div className="border-t border-gray-200 dark:border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-6 text-[12px] font-medium">
+          <p className="text-center md:text-left order-2 md:order-1">
+            © {currentYear} <span className="text-[#F57C00]">World Culture Marketplace</span><sup className="ml-0.5">&reg;</sup>. All rights reserved.
           </p>
-          <div className="flex space-x-6">
-            <Link href="/privacy-policy" className="hover:text-black dark:hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/terms-&-conditions" className="hover:text-black dark:hover:text-white transition-colors">Terms & Conditions</Link>
-            <Link href="/cookie-policy" className="hover:text-black dark:hover:text-white transition-colors">Cookie Policy</Link>
+          <div className="flex flex-wrap justify-center gap-6 order-1 md:order-2">
+            <Link href="/privacy-policy" className="hover:text-[#F57C00] transition-colors">Privacy Policy</Link>
+            <Link href="/terms-&-conditions" className="hover:text-[#F57C00] transition-colors">Terms & Conditions</Link>
+            <Link href="/cookie-policy" className="hover:text-[#F57C00] transition-colors">Cookie Policy</Link>
           </div>
         </div>
 
