@@ -23,9 +23,9 @@ const WhyWorldCulture = () => {
     return (
         <section className="py-6 px-4 max-w-7xl mx-auto bg-white dark:bg-[#0a0a0a]">
             {/* Heading */}
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800 dark:text-white">
+            <h1 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800 dark:text-white">
                 Why World Culture Marketplace?
-            </h2>
+            </h1>
 
             <div className="flex flex-col gap-10 items-center">
                 {points.map((point) => (

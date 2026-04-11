@@ -32,7 +32,7 @@ const AboutExplore = () => {
                 <div className="text-center mb-16 space-y-4">
                     <span className="text-[#E65100] font-bold text-xs uppercase tracking-[0.3em]">How WCM Works</span>
                     <h3 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white leading-tight">
-                        The <span className="text-[#E65100]">Explorer's</span> Journey
+                        The <span className="text-[#E65100]">Explorer</span> Journey
                     </h3>
                     <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-base">
                         A transparent and respectful way to discover authentic cultural craftsmanship.
