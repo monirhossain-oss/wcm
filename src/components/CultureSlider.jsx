@@ -57,6 +57,7 @@ export default function CultureSlider({ items, API_BASE_URL }) {
                     <SwiperSlide key={item._id}>
                         <div
                             onClick={() => {
+                                // 'Latin America' হবে 'latin-america'
                                 const slug = item.title.toLowerCase().replace(/\s+/g, '-');
                                 window.location.href = `/explore?continent=${slug}`;
                             }}
