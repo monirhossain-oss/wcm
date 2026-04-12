@@ -56,9 +56,12 @@ export default function CultureSlider({ items, API_BASE_URL }) {
                 {items.map((item) => (
                     <SwiperSlide key={item._id}>
                         <div
-                            onClick={() => (window.location.href = `/explore?continent=${encodeURIComponent(item.title)}`)}
+                            onClick={() => {
+                                const slug = item.title.toLowerCase().replace(/\s+/g, '-');
+                                window.location.href = `/explore?continent=${slug}`;
+                            }}
                             // পরিবর্তন এখানে: h-48 md:h-62 সরিয়ে aspect-square যোগ করা হয়েছে
-                            className="relative aspect-square w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500 " 
+                            className="relative aspect-square w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500 "
                         >
                             {/* Image Handling */}
                             <Image
