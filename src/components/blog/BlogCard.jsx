@@ -95,18 +95,6 @@ const BlogCard = () => {
   return (
     <section className="max-w-7xl mx-auto px-6 py-16 bg-white dark:bg-[#0a0a0a] transition-colors duration-300">
       <Toaster position="top-center" />
-
-      {/* হেডলাইন সেকশন */}
-      <div className="mb-20 text-center">
-        <h2 className="text-4xl md:text-6xl font-serif font-black text-zinc-900 dark:text-white mb-4 tracking-tight uppercase italic">
-          Cultural <span className="text-orange-500">Stories</span>
-        </h2>
-        <p className="text-zinc-500 dark:text-zinc-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed font-medium">
-          Explore traditions, craftsmanship, and cultural creativity from{' '}
-          <br className="hidden md:block" /> around the world through an editorial lens.
-        </p>
-      </div>
-
       {/* ব্লগ গ্রিড - লোডিং স্টেট সহ */}
       {loading ? (
         <div className="flex flex-col items-center py-20">
