@@ -337,7 +337,7 @@ const DiscoverContent = () => {
               Try changing your filters or search query.
             </p>
 
-            {/* একটি রিসেট বাটন যোগ করতে পারেন (অপশনাল) */}
+          
             <button
               onClick={() => {
                 setActiveCategory('All');

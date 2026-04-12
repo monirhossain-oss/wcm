@@ -112,7 +112,7 @@ export default async function CultureDataWrapper() {
             };
         });
 
-        // ৩. লিস্টিং সংখ্যা অনুযায়ী সর্ট করা (ঐচ্ছিক: বেশি লিস্টিংগুলো আগে দেখাবে)
+     
         finalData.sort((a, b) => b.listingCount - a.listingCount);
 
         // সরাসরি finalData পাঠানো হচ্ছে, কোনো ফিল্টার ছাড়াই

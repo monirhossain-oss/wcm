@@ -37,7 +37,6 @@ const FaqSection = () => {
         fetchFaqs();
     }, [API_BASE_URL]);
 
-    // সিলেক্ট করা ক্যাটাগরি অনুযায়ী ফিল্টার
     const currentFaqs = faqs.filter(faq => faq.category === activeCategory);
 
     return (

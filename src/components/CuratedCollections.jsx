@@ -72,8 +72,7 @@ export default function CuratedCollections() {
                         tabIndex={0}
                         onClick={() => handleClick(item.title)}
                         onKeyDown={(e) => e.key === 'Enter' && handleClick(item.title)}
-                        // পরিবর্তন: 'h-48 md:h-56' এর পরিবর্তে 'h-auto aspect-square' ব্যবহার করা হয়েছে।
-                        // শ্যাডো ইফেক্টও কিছুটা বাড়ানো হয়েছে 'shadow-md hover:shadow-2xl'।
+
                         className="group relative h-auto aspect-square overflow-hidden cursor-pointer focus:outline-none shadow-md hover:shadow-2xl transition-all duration-300"
                     >
                         {/* Background Image */}
@@ -87,7 +86,7 @@ export default function CuratedCollections() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
 
                         {/* Title (Bottom Left) */}
-                        {/* টেক্সট সাইজ কিছুটা বাড়িয়েছি কার্ড বড় হওয়ার কারণে (md:text-base)। */}
+                        
                         <div className="absolute inset-x-0 bottom-0 p-5 transform translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
                             <h3 className="text-white text-sm md:text-base font-black uppercase tracking-wider">
                                 {item.title}
