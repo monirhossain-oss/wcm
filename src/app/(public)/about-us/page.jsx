@@ -16,9 +16,9 @@ export async function generateMetadata() {
         });
 
         const data = await res.json();
+        // console.log(data)
 
-      
-        return {
+       return {
             title: data?.title || 'About Us',
             description: data?.description || 'Learn about World Culture Marketplace (WCM).',
             keywords: data?.keywords || ['WCM', 'Culture'],

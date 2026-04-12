@@ -1,9 +1,33 @@
-'use client';
-
 import React from 'react';
-import Link from 'next/link';
 
-const howItWorksPage = () => {
+// ১. ডাইনামিক মেটাডাটা ফাংশন
+export async function generateMetadata() {
+  try {
+    // আপনার ব্যাকএন্ড এপিআই থেকে ডাটা ফেচ করা হচ্ছে
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seo?page=how-it-works`, {
+      // next: { revalidate: 3600 } // ১ ঘণ্টা পর পর আপডেট চেক করবে
+    });
+    const seo = await res.json();
+
+    return {
+      title: seo?.title || "How It Works | World Cultural Marketplace",
+      description: seo?.description || "Empowering Global Craftsmanship. Follow simple steps to start your journey with WCM.",
+      keywords: seo?.keywords || "culture, marketplace, craftsmanship, artisan, global",
+      openGraph: {
+        title: seo?.title,
+        description: seo?.description,
+      }
+    };
+  } catch (error) {
+    // এপিআই এরর হলে এই ডিফল্ট মেটাডাটা দেখাবে
+    return {
+      title: "How It Works | WCM",
+      description: "World Cultural Marketplace (WCM) brings the world's finest artisans under one roof.",
+    };
+  }
+}
+
+const HowItWorksPage = () => {
   const steps = [
     {
       id: 1,
@@ -28,29 +52,29 @@ const howItWorksPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#0a0a0a] pt-28 pb-20 px-4 md:px-8 transition-colors duration-300">
+    <main className="min-h-screen bg-gray-100 dark:bg-[#0a0a0a] pt-28 pb-20 px-4 md:px-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto text-center">
 
         {/* Header Section */}
-        <div className="mb-16">
+        <header className="mb-16">
           <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight">
             Empowering Global <span className="text-[#F57C00]">Craftsmanship</span>
           </h1>
-          <p className="text-gray-500 dark:text-gray-400  md:text-xl max-w-3xl mx-auto leading-relaxed">
+          <p className="text-gray-500 dark:text-gray-400 md:text-xl max-w-3xl mx-auto leading-relaxed">
             World Cultural Marketplace (WCM) brings the world's finest artisans under one roof.
             Follow these simple steps to start your journey with us.
           </p>
-        </div>
+        </header>
 
         {/* Steps Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 text-left">
           {steps.map((step) => (
-            <div
+            <article
               key={step.id}
               className="p-8 border border-gray-100 dark:border-gray-800 rounded-2xl bg-white dark:bg-[#0d0d0d] hover:shadow-xl transition-all duration-300 flex flex-col items-start h-full"
             >
               {/* Step Number Badge */}
-              <div className="w-10 h-10 bg-[#F57C00] text-white rounded-full flex items-center justify-center font-bold mb-8 text-sm">
+              <div className="w-10 h-10 bg-[#F57C00] text-white rounded-full flex items-center justify-center font-bold mb-8 text-sm shadow-lg shadow-orange-500/20">
                 {step.id}
               </div>
 
@@ -61,17 +85,12 @@ const howItWorksPage = () => {
               <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
                 {step.description}
               </p>
-            </div>
+            </article>
           ))}
         </div>
-
-
-
-
       </div>
-    </div>
+    </main>
   );
 };
 
-export default howItWorksPage;
-
+export default HowItWorksPage;
