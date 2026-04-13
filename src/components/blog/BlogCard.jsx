@@ -108,7 +108,7 @@ const BlogCard = () => {
           {blogs.map((blog) => (
             <div key={blog._id} className="group flex flex-col cursor-pointer">
               <Link
-                href={`/blogs/${blog._id}`}
+                href={`/blogs/${blog.slug}`}
                 className="relative aspect-4/3 overflow-hidden rounded-2xl mb-6 bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800"
               >
                 <Image
@@ -126,7 +126,7 @@ const BlogCard = () => {
               </Link>
 
               <div className="space-y-3 px-1">
-                <Link href={`/blogs/${blog._id}`}>
+                <Link href={`/blogs/${blog.slug}`}>
                   <h3 className="text-2xl font-bold font-serif text-zinc-900 dark:text-white leading-tight transition-colors group-hover:text-orange-500 line-clamp-2">
                     {blog.title}
                   </h3>
@@ -136,7 +136,7 @@ const BlogCard = () => {
                 </p>
                 <div className="pt-2">
                   <Link
-                    href={`/blogs/${blog._id}`}
+                    href={`/blogs/${blog.slug}`}
                     className="inline-flex items-center gap-1 text-orange-500 font-black text-[10px] uppercase tracking-widest group/link"
                   >
                     Read More
