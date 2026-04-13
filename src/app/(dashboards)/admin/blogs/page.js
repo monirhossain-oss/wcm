@@ -80,14 +80,14 @@ export default function BlogListPage() {
 
             <div className="flex items-center gap-2">
               <Link
-                href={`/blogs/${blog._id}`}
+                href={`/blogs/${blog.slug}`}
                 target="_blank"
                 className="p-2 hover:bg-blue-500/10 text-blue-500 rounded-md transition-all"
               >
                 <FiExternalLink size={18} />
               </Link>
               <Link
-                href={`/admin/blogs/${blog._id}`}
+                href={`/admin/blogs/${blog.slug}`}
                 className="p-2 hover:bg-orange-500/10 text-orange-500 rounded-md transition-all"
               >
                 <FiEdit2 size={18} />
