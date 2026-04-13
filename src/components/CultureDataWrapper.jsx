@@ -1,95 +1,22 @@
 import CultureSlider from './CultureSlider';
+import { continentMapping } from '@/constants/continentData';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
-// ১. মহাদেশ এবং দেশের ম্যাপিং (স্ট্যাটিক ডাটা)
-export const continentsData = [
-    {
-        title: "Asia",
-        image: "/asia.png",
-        countries: [
-            "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh", "Bhutan", "Brunei",
-            "Cambodia", "China", "Georgia", "India", "Indonesia", "Japan", "Kazakhstan",
-            "Kyrgyzstan", "Laos", "Malaysia", "Maldives", "Mongolia", "Myanmar", "Nepal",
-            "North Korea", "Pakistan", "Philippines", "Singapore", "South Korea",
-            "Sri Lanka", "Taiwan", "Tajikistan", "Thailand", "Timor-Leste",
-            "Turkmenistan", "Uzbekistan", "Vietnam"
-        ]
-    },
-    {
-        title: "Middle East",
-        image: "/Middle-East.png",
-        countries: [
-            "Bahrain", "Cyprus", "Iran", "Iraq", "Israel", "Jordan", "Kuwait", "Lebanon",
-            "Oman", "Palestine", "Qatar", "Saudi Arabia", "Syria", "Turkey",
-            "United Arab Emirates", "Yemen"
-        ]
-    },
-    {
-        title: "Europe",
-        image: "/europe.png",
-        countries: [
-            "Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina",
-            "Bulgaria", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland",
-            "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy",
-            "Kosovo", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", "Malta",
-            "Moldova", "Monaco", "Montenegro", "Netherlands", "North Macedonia", "Norway",
-            "Poland", "Portugal", "Romania", "Russia", "San Marino", "Serbia", "Slovakia",
-            "Slovenia", "Spain", "Sweden", "Switzerland", "Ukraine", "United Kingdom",
-            "Vatican City"
-        ]
-    },
-    {
-        title: "Africa",
-        image: "/africa.png",
-        countries: [
-            "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon",
-            "Cape Verde", "Central African Republic", "Chad", "Comoros", "Congo",
-            "DR Congo", "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini",
-            "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast",
-            "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", "Mali",
-            "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", "Niger",
-            "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles",
-            "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan",
-            "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe"
-        ]
-    },
-    {
-        title: "North America",
-        image: "/North America.png",
-        countries: [
-            "Canada", "United States", "Greenland", "Bermuda"
-        ]
-    },
-    {
-        title: "Latin America",
-        image: "/Latin America.png",
-        countries: [
-            "Antigua and Barbuda", "Argentina", "Bahamas", "Barbados", "Belize", "Bolivia",
-            "Brazil", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominica",
-            "Dominican Republic", "Ecuador", "El Salvador", "Grenada", "Guatemala",
-            "Guyana", "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama",
-            "Paraguay", "Peru", "Puerto Rico", "Saint Kitts and Nevis", "Saint Lucia",
-            "Saint Vincent and the Grenadines", "Suriname", "Trinidad and Tobago",
-            "Uruguay", "Venezuela"
-        ]
-    },
-    {
-        title: "Oceania",
-        image: "/Oceania.png",
-        countries: [
-            "Australia", "Fiji", "Kiribati", "Marshall Islands", "Micronesia", "Nauru",
-            "New Zealand", "Palau", "Papua New Guinea", "Samoa", "Solomon Islands",
-            "Tonga", "Tuvalu", "Vanuatu"
-        ]
-    }
+const continentsSliderData = [
+    { title: "Asia", slug: "asia", image: "/asia.png" },
+    { title: "Middle East", slug: "middle-east", image: "/Middle-East.png" },
+    { title: "Europe", slug: "europe", image: "/europe.png" },
+    { title: "Africa", slug: "africa", image: "/africa.png" },
+    { title: "North America", slug: "north-america", image: "/North America.png" },
+    { title: "Latin America", slug: "latin-america", image: "/Latin America.png" },
+    { title: "Oceania", slug: "oceania", image: "/Oceania.png" }
 ];
 
 export default async function CultureDataWrapper() {
     try {
-        // ১. সব লিস্টিং ফেচ করা
         const res = await fetch(`${API_BASE_URL}/api/listings/public?limit=250`, {
-            next: { revalidate: 30 }
+            next: { revalidate: 60 }
         });
 
         if (!res.ok) throw new Error('Failed to fetch listings');
@@ -97,36 +24,40 @@ export default async function CultureDataWrapper() {
         const data = await res.json();
         const allListings = data.listings || [];
 
-        // ২. প্রতিটি মহাদেশের জন্য ডাটা ম্যাপ করা
-        const finalData = continentsData.map(continent => {
-            // লিস্টিং কাউন্ট বের করা
+        const finalData = continentsSliderData.map(continent => {
+            // ১. এখানে continent.title এর বদলে continent.slug ব্যবহার করতে হবে 
+            // কারণ mapping ফাইলে কিগুলো ড্যাশসহ (middle-east) আছে।
+            const associatedCountries = continentMapping[continent.slug] || [];
+
+            // ২. লিস্টিং ফিল্টার (সরাসরি country চেক)
             const count = allListings.filter(listing =>
-                continent.countries.includes(listing.country)
+                associatedCountries.includes(listing.country)
             ).length;
 
             return {
-                _id: continent.title,
-                title: continent.title,
+                _id: continent.slug, // স্লাগ ব্যবহার করা ভালো রাউটিং এর জন্য
+                title: continent.title, // ডিসপ্লে করার জন্য সুন্দর নাম
                 image: continent.image,
-                listingCount: count // ০ হলেও এখন এটি ডাটাতে থাকবে
+                listingCount: count,
+                link: `/explore/${continent.slug}` // স্লাইডারে ক্লিক করলে ডিরেক্ট লিংকে যাওয়ার জন্য
             };
         });
 
-        // ৩. লিস্টিং সংখ্যা অনুযায়ী সর্ট করা (ঐচ্ছিক: বেশি লিস্টিংগুলো আগে দেখাবে)
+        // ৩. লিস্টিং সংখ্যা অনুযায়ী সর্ট করা (বড় থেকে ছোট)
         finalData.sort((a, b) => b.listingCount - a.listingCount);
 
-        // সরাসরি finalData পাঠানো হচ্ছে, কোনো ফিল্টার ছাড়াই
-        return <CultureSlider items={finalData} API_BASE_URL={API_BASE_URL} />;
+        return <CultureSlider items={finalData} />;
 
     } catch (error) {
         console.error("Culture Fetch Error:", error);
-        // এরর হলে অন্তত স্ট্যাটিক ডাটা ০ কাউন্ট নিয়ে দেখানোর ব্যবস্থা
-        const fallbackData = continentsData.map(c => ({
-            _id: c.title,
+
+        const fallbackData = continentsSliderData.map(c => ({
+            _id: c.slug,
             title: c.title,
             image: c.image,
             listingCount: 0
         }));
-        return <CultureSlider items={fallbackData} API_BASE_URL={API_BASE_URL} />;
+
+        return <CultureSlider items={fallbackData} />;
     }
 }
