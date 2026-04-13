@@ -1,6 +1,8 @@
 'use client';
+
 import React, { useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link'; // Link ইম্পোর্ট করা হয়েছে
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode, Navigation } from 'swiper/modules';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
@@ -10,11 +12,20 @@ import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
 
-export default function CultureSlider({ items, API_BASE_URL }) {
+export default function CultureSlider({ items }) {
     const prevRef = useRef(null);
     const nextRef = useRef(null);
 
-    // যদি কোনো ডাটা না থাকে
+    // টেক্সট থেকে এসইও ফ্রেন্ডলি স্লাগ তৈরি করার ফাংশন
+    const textToSlug = (text) => {
+        if (!text) return '';
+        return text.toString().toLowerCase().trim()
+            .replace(/&/g, 'and')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+    };
+
     if (!items || items.length === 0) return null;
 
     return (
@@ -53,41 +64,39 @@ export default function CultureSlider({ items, API_BASE_URL }) {
                 modules={[FreeMode, Navigation]}
                 className="!overflow-visible"
             >
-                {items.map((item) => (
-                    <SwiperSlide key={item._id}>
-                        <div
-                            onClick={() => {
-                                // 'Latin America' হবে 'latin-america'
-                                const slug = item.title.toLowerCase().replace(/\s+/g, '-');
-                                window.location.href = `/explore?continent=${slug}`;
-                            }}
-                            // পরিবর্তন এখানে: h-48 md:h-62 সরিয়ে aspect-square যোগ করা হয়েছে
-                            className="relative aspect-square w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500 "
-                        >
-                            {/* Image Handling */}
-                            <Image
-                                src={item.image || '/placeholder.jpg'}
-                                alt={item.title}
-                                fill
-                                className="object-cover transition-transform duration-700 group-hover/card:scale-110"
-                                sizes="(max-width: 768px) 100vw, 300px"
-                            />
+                {items.map((item) => {
+                    const slug = textToSlug(item.title);
 
-                            {/* Overlay Gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent group-hover/card:from-black/100 transition-opacity" />
+                    return (
+                        <SwiperSlide key={item._id}>
+                            <Link
+                                href={`/explore/${slug}`}
+                                className="relative block aspect-square w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500 rounded-sm"
+                            >
+                                <Image
+                                    src={item.image || '/placeholder.jpg'}
+                                    alt={item.title}
+                                    fill
+                                    className="object-cover transition-transform duration-700 group-hover/card:scale-110"
+                                    sizes="(max-width: 768px) 100vw, 300px"
+                                />
 
-                            {/* Content */}
-                            <div className="absolute bottom-0 left-0 p-5 w-full transform transition-transform duration-300 group-hover/card:-translate-y-1">
-                                <h3 className="text-base md:text-lg font-bold text-white uppercase leading-tight tracking-wide">
-                                    {item.title}
-                                </h3>
-                                <p className="text-[10px] text-gray-300 mt-1 font-medium tracking-widest uppercase">
-                                    {item.listingCount || 0} Listings
-                                </p>
-                            </div>
-                        </div>
-                    </SwiperSlide>
-                ))}
+                                {/* Overlay Gradient */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent group-hover/card:from-black/100 transition-opacity" />
+
+                                {/* Text Content */}
+                                <div className="absolute bottom-0 left-0 p-5 w-full transform transition-transform duration-300 group-hover/card:-translate-y-1">
+                                    <h3 className="text-base md:text-lg font-bold text-white uppercase leading-tight tracking-wide">
+                                        {item.title}
+                                    </h3>
+                                    <p className="text-[10px] text-gray-300 mt-1 font-medium tracking-widest uppercase">
+                                        {item.listingCount || 0} Listings
+                                    </p>
+                                </div>
+                            </Link>
+                        </SwiperSlide>
+                    );
+                })}
             </Swiper>
         </div>
     );
