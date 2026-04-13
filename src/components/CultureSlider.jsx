@@ -2,7 +2,7 @@
 
 import React, { useRef } from 'react';
 import Image from 'next/image';
-import Link from 'next/link'; // Link ইম্পোর্ট করা হয়েছে
+import Link from 'next/link';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode, Navigation } from 'swiper/modules';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
@@ -16,7 +16,6 @@ export default function CultureSlider({ items }) {
     const prevRef = useRef(null);
     const nextRef = useRef(null);
 
-    // টেক্সট থেকে এসইও ফ্রেন্ডলি স্লাগ তৈরি করার ফাংশন
     const textToSlug = (text) => {
         if (!text) return '';
         return text.toString().toLowerCase().trim()

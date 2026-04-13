@@ -16,7 +16,6 @@ const curatedData = [
 
 export default function CuratedCollections() {
 
-    // টেক্সট থেকে স্ল্যাগ বানানোর ফাংশন
     const textToSlug = (text) => {
         return text.toString().toLowerCase().trim()
             .replace(/&/g, 'and')
