@@ -3,7 +3,7 @@ import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
-const AboutVisibility = () => {
+const  AboutVisibility = () => {
     return (
         <section className="bg-white dark:bg-[#0a0a0a] py-20 px-6 flex flex-col items-center text-center transition-colors duration-500">
 

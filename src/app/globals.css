@@ -183,3 +183,18 @@ h6 {
 .animate-creatorFade {
   animation: creatorFade 0.18s ease-out forwards;
 }
+
+@layer utilities {
+
+  /* স্ক্রোলবার হাইড করার জন্য কাস্টম ইউটিলিটি */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+}
