@@ -14,6 +14,10 @@ import RemovalSection from '@/components/creators-terms/RemovalSection'
 import AccountStatusSection from '../terms-and-conditions/AccountStatusSection'
 import GuaranteeSection from '@/components/creators-terms/GuaranteeSection'
 import LimitationSection from '@/components/creators-terms/LimitationSection'
+import ForceMajeureSection from '@/components/creators-terms/ForceMajeureSection'
+import ModificationSection from '@/components/creators-terms/ModificationSection'
+import ContactSection from '@/components/creators-terms/ContactSection'
+import GoverningLawSection from '@/components/creators-terms/GoverningLawSection'
 
 export default function CreatorTermsPage() {
   return (
@@ -35,6 +39,10 @@ export default function CreatorTermsPage() {
         <AccountStatusSection/>
         <GuaranteeSection/>
         <LimitationSection/>
+        <ForceMajeureSection/>
+        <ModificationSection/>
+        <ContactSection/>
+        <GoverningLawSection/>
       </div>
     </main>
   )
