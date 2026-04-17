@@ -2,12 +2,10 @@ import FaqContact from '@/components/faq/FaqContact';
 import FaqSection from '@/components/faq/FaqSection';
 import React from 'react';
 
-// ডাইনামিক মেটাডাটা ফাংশন
 export async function generateMetadata() {
     try {
-        // FAQ পেজের জন্য SEO ডাটা ফেচ করা
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seo/faq`, {
-            // next: { revalidate: 3600 } // ১ ঘণ্টা পর পর আপডেট চেক করবে
+            // next: { revalidate: 3600 }
         });
 
         const data = await res.json();
