@@ -7,6 +7,7 @@ import LicenseSection from '@/components/creators-terms/LicenseSection'
 import OwnershipSection from '@/components/creators-terms/OwnershipSection'
 import Purpose from '@/components/creators-terms/Purpose'
 import ResponsibilitiesSection from '@/components/creators-terms/ResponsibilitiesSection'
+import PlatformRoleSection from '@/components/creators-terms/PlatformRoleSection'
 
 export default function CreatorTermsPage() {
   return (
@@ -21,6 +22,7 @@ export default function CreatorTermsPage() {
         <OwnershipSection />
         <LicenseSection />
         <ResponsibilitiesSection />
+        <PlatformRoleSection/>
       </div>
     </main>
   )
