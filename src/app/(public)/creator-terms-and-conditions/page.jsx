@@ -21,7 +21,7 @@ import GoverningLawSection from '@/components/creators-terms/GoverningLawSection
 
 export default function CreatorTermsPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen ">
       <Hero />
       {/* একটি সেন্ট্রাল কন্টেইনার ব্যবহার করছি যাতে সব সেকশন এলাইনমেন্ট ঠিক থাকে */}
       <div className="max-w-5xl mx-auto py-12 px-4 space-y-16">

@@ -8,26 +8,34 @@ const OwnershipSection = () => {
     ];
 
     return (
-        <div className="relative overflow-hidden bg-white py-12 px-6 md:px-12">
+        <div className="relative overflow-hidden transition-colors duration-300
+         py-12 px-6 md:px-12">
+            
             {/* Minimalist Left Border Accent */}
-            <div className="max-w-4xl mx-auto border-l-2 border-orange-400 pl-8 py-2">
+            <div className="max-w-4xl mx-auto border-l-2 border-orange-400 pl-8 py-2 relative z-10">
                 
                 {/* Section Header */}
-                <span className="block text-[12px] font-bold tracking-[0.15em] uppercase text-[#F57C00] mb-3">
+                <span className="block text-[12px] font-black tracking-[0.2em] uppercase text-[#F57C00] mb-3">
                     Section 04
                 </span>
                 
-                <h2 className="text-[32px] font-black text-[#0B1B33] mb-8 leading-tight uppercase">
+                <h2 className="text-[32px] font-black mb-8 leading-tight uppercase
+                    /* Light */ text-[#0B1B33] 
+                    /* Dark */ dark:text-gray-50">
                     OWNERSHIP OF CONTENT
                 </h2>
 
                 <div className="space-y-8">
                     {/* Sub-heading 4.1 */}
                     <div>
-                        <h3 className="text-[20px] font-bold text-gray-900 mb-4">
+                        <h3 className="text-[20px] font-bold mb-4
+                            /* Light */ text-gray-900 
+                            /* Dark */ dark:text-gray-200">
                             4.1 You Retain Ownership
                         </h3>
-                        <p className="text-[17px] text-zinc-600 leading-relaxed mb-6">
+                        <p className="text-[17px] leading-relaxed mb-6
+                            /* Light */ text-zinc-600 
+                            /* Dark */ dark:text-gray-400">
                             Creators maintain full ownership of all their submitted content, including:
                         </p>
 
@@ -35,8 +43,10 @@ const OwnershipSection = () => {
                         <ul className="space-y-4">
                             {ownershipList.map((item, index) => (
                                 <li key={index} className="flex items-center gap-4 group">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
-                                    <span className="text-[17px] text-zinc-700 capitalize group-hover:text-black transition-colors">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0 shadow-[0_0_8px_rgba(245,124,0,0.4)]" />
+                                    <span className="text-[17px] capitalize transition-colors
+                                        /* Light */ text-zinc-700 group-hover:text-black 
+                                        /* Dark */ dark:text-gray-300 dark:group-hover:text-white">
                                         {item}
                                     </span>
                                 </li>
@@ -44,10 +54,14 @@ const OwnershipSection = () => {
                         </ul>
                     </div>
 
-                    {/* Final Statement Highlight */}
-                    <div className="mt-8 p-5 bg-orange-50/50 rounded-2xl border border-orange-100/50">
-                        <p className="text-[16px] text-gray-800 font-semibold flex items-center gap-3">
-                            <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {/* Final Statement Highlight - Balanced for Dark Mode */}
+                    <div className="mt-8 p-6 rounded-2xl border transition-all
+                        /* Light */ bg-orange-50/50 border-orange-100/50 
+                        /* Dark */ dark:bg-[#2a2a26] dark:border-gray-800">
+                        <p className="text-[16px] font-semibold flex items-center gap-4
+                            /* Light */ text-gray-800 
+                            /* Dark */ dark:text-gray-100">
+                            <svg className="w-6 h-6 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             This Agreement does not transfer ownership to WCM.
