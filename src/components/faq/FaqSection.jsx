@@ -9,10 +9,8 @@ const FaqSection = () => {
     const [faqs, setFaqs] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // .env থেকে বেস ইউআরএল নেওয়া
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-    // ক্যাটাগরি লিস্ট (আপনার ডিজাইন অনুযায়ী)
     const categories = [
         { id: 'General', icon: <Globe size={16} />, label: 'General' },
         { id: 'Artists', icon: <Users size={16} />, label: 'For Creators and Artists' }, // ঠিক করা হয়েছে
@@ -21,11 +19,9 @@ const FaqSection = () => {
         { id: 'Technical', icon: <ShieldQuestion size={16} />, label: 'Technical Questions' },
     ];
 
-    // ডাটাবেজ থেকে FAQ ফেচ করা
     useEffect(() => {
         const fetchFaqs = async () => {
             try {
-                // সরাসরি .env এর ইউআরএল ব্যবহার করে কল
                 const response = await axios.get(`${API_BASE_URL}/api/faqs`);
                 setFaqs(response.data);
             } catch (error) {
