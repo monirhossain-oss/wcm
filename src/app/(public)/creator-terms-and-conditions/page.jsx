@@ -9,6 +9,11 @@ import Purpose from '@/components/creators-terms/Purpose'
 import ResponsibilitiesSection from '@/components/creators-terms/ResponsibilitiesSection'
 import PlatformRoleSection from '@/components/creators-terms/PlatformRoleSection'
 import ProhibitedSubmissions from '@/components/creators-terms/ProhibitedSubmissions'
+import SponsoredContent from '@/components/creators-terms/SponsoredContent'
+import RemovalSection from '@/components/creators-terms/RemovalSection'
+import AccountStatusSection from '../terms-and-conditions/AccountStatusSection'
+import GuaranteeSection from '@/components/creators-terms/GuaranteeSection'
+import LimitationSection from '@/components/creators-terms/LimitationSection'
 
 export default function CreatorTermsPage() {
   return (
@@ -25,6 +30,11 @@ export default function CreatorTermsPage() {
         <ResponsibilitiesSection />
         <PlatformRoleSection/>
         <ProhibitedSubmissions/>
+        <SponsoredContent/>
+        <RemovalSection/>
+        <AccountStatusSection/>
+        <GuaranteeSection/>
+        <LimitationSection/>
       </div>
     </main>
   )
