@@ -41,7 +41,7 @@ export default function RegisterForm({ onClose, onSwitchToLogin }) {
       const result = await registerUser(payload);
       if (result.success) {
         alert('Registration Successful! Please login.');
-        onSwitchToLogin(); // রেজিস্ট্রেশন সফল হলে লগইন মোডালে নিয়ে যাবে
+        onSwitchToLogin(); 
       } else {
         setServerError(result.message || 'Registration failed.');
       }

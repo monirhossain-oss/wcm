@@ -38,7 +38,7 @@ const AboutCulture = () => {
                             Preserving Heritage
                         </span>
                         <Image
-                            src="https://i.postimg.cc/8CSpwq08/image-(18).jpg" // আপনার প্রোভাইড করা ইমেজ
+                            src="https://i.postimg.cc/8CSpwq08/image-(18).jpg"
                             alt="Cultural Craft"
                             fill
                             className="object-contain p-8 transition-transform duration-700 group-hover:scale-105"
