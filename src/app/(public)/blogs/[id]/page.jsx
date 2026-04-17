@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -18,7 +18,6 @@ const api = axios.create({
 
 const MasonryImage = ({ src }) => (
   <div className="w-full rounded-3xl overflow-hidden shadow-lg group bg-zinc-50 dark:bg-zinc-900 mb-0">
-    {/* eslint-disable-next-line @next/next/no-img-element */}
     <img
       src={src}
       alt="Insight"
@@ -36,33 +35,42 @@ const BlogDetails = () => {
 
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
-
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState('');
 
-  const fetchData = async () => {
+  // Fetch Data Logic
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [blogRes, commentRes] = await Promise.all([
-        api.get(`/api/blogs/${id}`),
-        api.get(`/api/blogs/${id}/comments`),
-      ]);
-      setBlog(blogRes.data.blog);
-      setComments(commentRes.data.comments);
+      // ১. প্রথমে আইডি বা স্লাগ দিয়ে ব্লগ ফেচ করুন
+      const blogRes = await api.get(`/api/blogs/${id}`);
+      const blogData = blogRes.data.blog;
+      setBlog(blogData);
+
+      // ২. ব্লগ পাওয়া গেলে তার অরিজিনাল মঙ্গোডিবি আইডি (_id) দিয়ে কমেন্ট ফেচ করুন
+      // এটি করলে স্লাগ রিলেটেড ৪-০-৪ এরর হবে না
+      if (blogData?._id) {
+        const commentRes = await api.get(`/api/blogs/${blogData._id}/comments`);
+        setComments(commentRes.data.comments || []);
+      }
     } catch (err) {
-      console.error('Error:', err);
-      toast.error('Story not found or deleted.');
+      console.error('Error fetching data:', err);
+      if (err.response?.status === 404) {
+        setBlog(null);
+      } else {
+        toast.error('Failed to load the story.');
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id) fetchData();
-  }, [id]);
+  }, [id, fetchData]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
@@ -71,9 +79,14 @@ const BlogDetails = () => {
 
     setSubmittingComment(true);
     try {
-      await api.post(`/api/blogs/comments`, { blogId: id, text: commentText });
+      // স্লাগ (id) এর বদলে ব্লগের আসল _id পাঠানো হচ্ছে
+      await api.post(`/api/blogs/comments`, {
+        blogId: blog._id,
+        text: commentText,
+      });
       setCommentText('');
-      const res = await api.get(`/api/blogs/${id}/comments`);
+      // রিফ্রেশ কমেন্টস
+      const res = await api.get(`/api/blogs/${blog._id}/comments`);
       setComments(res.data.comments);
       toast.success('Comment added!');
     } catch (err) {
@@ -87,13 +100,13 @@ const BlogDetails = () => {
     if (!replyText.trim()) return;
     try {
       await api.post(`/api/blogs/comments`, {
-        blogId: id,
+        blogId: blog._id,
         text: replyText,
         parentCommentId: commentId,
       });
       setReplyText('');
       setReplyingTo(null);
-      const res = await api.get(`/api/blogs/${id}/comments`);
+      const res = await api.get(`/api/blogs/${blog._id}/comments`);
       setComments(res.data.comments);
       toast.success('Reply sent!');
     } catch (err) {
@@ -206,67 +219,58 @@ const BlogDetails = () => {
 
       {/* MAIN IMAGE */}
       <div className="max-w-6xl mx-auto px-6 mb-16">
-        <div className="relative w-full overflow-hidden rounded-xl shadow-2xl shadow-orange-500/5">
-          {/* এখানে আমরা max-w-4xl (প্রায় 1000px এর কাছাকাছি) এবং aspect-[1000/612] ব্যবহার করছি */}
-          <div className="relative w-full max-w-[1000px] mx-auto aspect-[1000/612] bg-gray-50 dark:bg-zinc-900">
-            <Image
-              src={blog.image}
-              alt={blog.title}
-              fill
-              priority
-              sizes="(max-w-screen-xl) 1000px, 100vw"
-              className="object-cover"
-            />
-          </div>
+        <div className="relative w-full max-w-[1000px] mx-auto aspect-[1000/612] rounded-xl overflow-hidden shadow-2xl">
+          <Image
+            src={blog.image}
+            alt={blog.title}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
         </div>
       </div>
 
       {/* CONTENT */}
       <div className="max-w-3xl mx-auto px-6 mb-24">
         <div className="prose prose-zinc dark:prose-invert max-w-none">
-          {blog.content
-            ?.filter((item) => item.type !== 'image_grid')
-            .map((item, idx) => (
-              <div key={`text-${idx}`} className="mb-8">
-                {item.type === 'paragraph' && (
-                  <p className="text-lg md:text-xl text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium opacity-90">
-                    {item.text}
+          {blog.content?.map((item, idx) => (
+            <div key={idx} className="mb-8">
+              {item.type === 'paragraph' && (
+                <p className="text-lg md:text-xl text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium opacity-90">
+                  {item.text}
+                </p>
+              )}
+              {item.type === 'quote' && (
+                <div className="pl-8 my-12 border-l-4 border-orange-500 py-2">
+                  <p className="text-2xl md:text-3xl font-serif font-black dark:text-zinc-100 italic">
+                    "{item.text}"
                   </p>
-                )}
-                {item.type === 'quote' && (
-                  <div className="pl-8 my-12 border-l-4 border-orange-500 py-2">
-                    <p className="text-2xl md:text-3xl font-serif font-black dark:text-zinc-100 leading-snug italic tracking-tight opacity-100">
-                      "{item.text}"
-                    </p>
-                  </div>
-                )}
-                {item.type === 'heading' && (
-                  <h2 className="text-2xl md:text-4xl font-serif font-black text-zinc-900 dark:text-white mt-16 mb-8 tracking-tighter">
-                    {item.text}
-                  </h2>
-                )}
-              </div>
-            ))}
-        </div>
-
-        {/* MASONRY IMAGE GRID */}
-        {blog.content
-          ?.filter((item) => item.type === 'image_grid')
-          .map((grid, idx) => (
-            <div key={`grid-${idx}`} className="mt-20 mb-12 px-4 md:px-0">
-              <Masonry
-                breakpointCols={{ default: 2, 768: 2, 640: 1 }} // ট্যাবলেট মোড ২ কলাম রাখা ভালো
-                className="flex gap-4 md:gap-6"
-                columnClassName="bg-clip-padding"
-              >
-                {grid.images?.map((img, i) => (
-                  <div key={i} className="mb-4 md:mb-6">
-                    <MasonryImage src={img} />
-                  </div>
-                ))}
-              </Masonry>
+                </div>
+              )}
+              {item.type === 'heading' && (
+                <h2 className="text-2xl md:text-4xl font-serif font-black text-zinc-900 dark:text-white mt-16 mb-8">
+                  {item.text}
+                </h2>
+              )}
+              {item.type === 'image_grid' && (
+                <div className="mt-16 mb-12">
+                  <Masonry
+                    breakpointCols={{ default: 2, 768: 2, 640: 1 }}
+                    className="flex gap-4 md:gap-6"
+                    columnClassName="bg-clip-padding"
+                  >
+                    {item.images?.map((img, i) => (
+                      <div key={i} className="mb-4 md:mb-6">
+                        <MasonryImage src={img} />
+                      </div>
+                    ))}
+                  </Masonry>
+                </div>
+              )}
             </div>
           ))}
+        </div>
 
         {/* DISCUSSIONS */}
         <div className="mt-32 pt-16 border-t border-zinc-100 dark:border-zinc-900">
@@ -284,12 +288,12 @@ const BlogDetails = () => {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Share your thoughts..."
-                  className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-2xl p-6 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all min-h-[120px] resize-none"
+                  className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-2xl p-6 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all min-h-[120px] resize-none"
                 />
                 <button
                   type="submit"
                   disabled={submittingComment || !commentText.trim()}
-                  className="absolute bottom-4 right-4 bg-orange-600 text-white p-3 rounded-xl hover:bg-orange-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                  className="absolute bottom-4 right-4 bg-orange-600 text-white p-3 rounded-xl hover:bg-orange-700 disabled:opacity-50"
                 >
                   {submittingComment ? (
                     <Loader2 size={18} className="animate-spin" />
@@ -303,7 +307,7 @@ const BlogDetails = () => {
             <div className="bg-zinc-50 dark:bg-white/5 rounded-2xl p-8 text-center mb-16 border border-dashed dark:border-white/10">
               <Link
                 href="/login"
-                className="px-8 py-3 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all"
+                className="px-8 py-3 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-orange-600"
               >
                 Sign in to Comment
               </Link>
@@ -346,7 +350,7 @@ const BlogDetails = () => {
                             onClick={() =>
                               setReplyingTo(replyingTo === comment._id ? null : comment._id)
                             }
-                            className="text-zinc-400 hover:text-orange-500 transition-colors"
+                            className="text-zinc-400 hover:text-orange-500"
                           >
                             <Reply size={14} />
                           </button>
@@ -354,14 +358,14 @@ const BlogDetails = () => {
                         {isAdmin && (
                           <button
                             onClick={() => handleDeleteComment(comment._id)}
-                            className="text-zinc-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                            className="text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             <Trash2 size={14} />
                           </button>
                         )}
                       </div>
                     </div>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                       {comment.text}
                     </p>
                     <span className="text-[9px] text-zinc-400 font-bold uppercase mt-2 block">
