@@ -9,14 +9,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5
 
 export default function ListingCard({ item }) {
   if (!item) return null;
-  // console.log(item);
 
   const postImageSrc = item.image?.startsWith('http') ? item.image : `${API_BASE_URL}${item.image?.startsWith('/') ? '' : '/'}${item.image}`;
 
   return (
     <div className="group relative flex flex-col w-full transition-all duration-300">
       {/* IMAGE SECTION */}
-      <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-gray-100 dark:bg-zinc-900">
+      <div className="relative aspect-4/5 overflow-hidden rounded-sm bg-gray-100 dark:bg-zinc-900">
         <Link href={`/listings/${item.slug}`} className="block w-full h-full relative">
           <Image
             src={postImageSrc || 'https://placehold.co/600x400?text=No+Image'}
@@ -32,7 +31,11 @@ export default function ListingCard({ item }) {
         </Link>
 
         {/* Client Side Button */}
-        <FavoriteButton listingId={item._id} initialIsFavorited={item.isFavorited} API_BASE_URL={API_BASE_URL} />
+        <FavoriteButton
+          listingId={item._id}
+          initialIsFavorited={item.isFavorited}
+          API_BASE_URL={API_BASE_URL}
+        />
 
         {item.isPromoted && (
           <div className="absolute top-2 left-2 z-20 text-[9px] font-bold text-white bg-orange-600/60 px-2 py-0.5 rounded flex items-center gap-1">
@@ -45,7 +48,12 @@ export default function ListingCard({ item }) {
       <div className="mt-3 px-1">
         <div className="flex items-center justify-between gap-3">
           {/* Client Side Creator Hover */}
-          <CreatorName creator={item.creatorId} item={item} region={item.region} API_BASE_URL={API_BASE_URL} />
+          <CreatorName
+            creator={item.creatorId}
+            item={item}
+            region={item.region}
+            API_BASE_URL={API_BASE_URL}
+          />
 
           <div className="flex gap-2">
             <div className="hidden md:flex font-bold text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded">
