@@ -30,8 +30,9 @@ import {
 import { TbLayoutBottombar, TbSeo } from 'react-icons/tb';
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/imageHelper';
-import { Sliders } from 'lucide-react';
+import { Sliders, TractorIcon } from 'lucide-react';
 import { FaQ } from 'react-icons/fa6';
+import { PiTrainRegional } from 'react-icons/pi';
 
 // ── Submenu item definition
 const customizerSubItems = [
@@ -118,7 +119,9 @@ export default function AdminLayout({ children }) {
     { name: 'Promoted Assets', path: '/admin/listings/promoted', icon: FiTrendingUp },
     { name: 'All Transactions', path: '/admin/transactions', icon: FiDollarSign },
     { name: 'Audit Logs', path: '/admin/logs', icon: FiShield },
-    { name: 'System Tags', path: '/admin/tags', icon: FiTag },
+    { name: 'Manage Tags', path: '/admin/tags', icon: FiTag },
+    { name: 'Manage Region', path: '/admin/region', icon: PiTrainRegional },
+    { name: 'Manage Tradition', path: '/admin/tradition', icon: TractorIcon },
     { name: 'Categories', path: '/admin/categories', icon: FiLayers },
     { name: 'Manage Slider', path: '/admin/manage-slider', icon: Sliders },
     { name: 'Manage Blog', path: '/admin/blogs', icon: FiSettings },

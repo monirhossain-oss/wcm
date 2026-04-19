@@ -51,6 +51,16 @@ const PublicNavbar = () => {
     };
     fetchCategories();
   }, []);
+  const createSlug = (text) => {
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/&/g, '-and-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-');
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -152,18 +162,14 @@ const PublicNavbar = () => {
                                   scrollbarColor: 'rgba(156,163,175,0.5) transparent',
                                 }}
                               >
+                                {/* Desktop Grid Link - Update this part */}
                                 {categories.map((cat) => (
                                   <Link
                                     key={cat._id || cat.id}
-                                    href={`/explore?category=${encodeURIComponent(cat.title || cat.name)}`}
+                                    // query parameter এর বদলে dynamic route ব্যবহার
+                                    href={`/explore/${createSlug(cat.title || cat.name)}`}
                                     onClick={() => setIsCategoryDropdownOpen(false)}
-                                    className="
-                                      group flex items-center gap-2
-                                      px-3 py-2.5 rounded-xl
-                                      border border-gray-100 dark:border-gray-800
-                                      hover:border-[#F57C00]/40 hover:bg-orange-50 dark:hover:bg-orange-500/5
-                                      transition-all duration-150 cursor-pointer
-                                    "
+                                    className="group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-[#F57C00]/40 hover:bg-orange-50 dark:hover:bg-orange-500/5 transition-all duration-150 cursor-pointer"
                                   >
                                     <span className="w-2 h-2 rounded-full bg-gray-200 dark:bg-gray-700 group-hover:bg-[#F57C00] flex-shrink-0 transition-colors duration-150" />
                                     <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 group-hover:text-[#F57C00] truncate transition-colors duration-150 leading-tight">
@@ -173,7 +179,6 @@ const PublicNavbar = () => {
                                 ))}
                               </div>
                             )}
-
                           </div>
                         </div>
                       )}
@@ -315,15 +320,19 @@ const PublicNavbar = () => {
                           </div>
                         ) : (
                           <div className="p-2 flex flex-col gap-0.5">
+                            {/* Desktop Grid Link - Update this part */}
                             {categories.map((cat) => (
                               <Link
                                 key={cat._id || cat.id}
-                                href={`/explore?category=${encodeURIComponent(cat.title || cat.name)}`}
-                                onClick={() => { setIsMobileCategoryOpen(false); setIsMobileDrawerOpen(false); }}
-                                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white dark:hover:bg-white/5 hover:text-[#F57C00] text-gray-600 dark:text-gray-400 transition-all group"
+                                // query parameter এর বদলে dynamic route ব্যবহার
+                                href={`/explore/${createSlug(cat.title || cat.name)}`}
+                                onClick={() => setIsCategoryDropdownOpen(false)}
+                                className="group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-[#F57C00]/40 hover:bg-orange-50 dark:hover:bg-orange-500/5 transition-all duration-150 cursor-pointer"
                               >
-                                <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 group-hover:bg-[#F57C00] flex-shrink-0 transition-colors" />
-                                <span className="text-[13px] font-semibold truncate">{cat.title || cat.name}</span>
+                                <span className="w-2 h-2 rounded-full bg-gray-200 dark:bg-gray-700 group-hover:bg-[#F57C00] flex-shrink-0 transition-colors duration-150" />
+                                <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 group-hover:text-[#F57C00] truncate transition-colors duration-150 leading-tight">
+                                  {cat.title || cat.name}
+                                </span>
                               </Link>
                             ))}
                           </div>
