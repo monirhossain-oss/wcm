@@ -1,10 +1,9 @@
 'use client';
-import { Country } from 'country-state-city';
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import Cropper from 'react-easy-crop'; // New
-import { getCroppedImg } from '@/lib/cropImage'; // New
+import Cropper from 'react-easy-crop';
+import { getCroppedImg } from '@/lib/cropImage';
 import {
   FiUploadCloud,
   FiX,
@@ -18,7 +17,7 @@ import {
   FiMapPin,
   FiLink,
   FiPlus,
-  FiScissors
+  FiScissors,
 } from 'react-icons/fi';
 
 const api = axios.create({
@@ -41,17 +40,19 @@ export default function AddListing() {
 
   const [categories, setCategories] = useState([]);
   const [categoryTags, setCategoryTags] = useState([]);
-  const [metaLoading, setMetaLoading] = useState(true);
-  const [tagsLoading, setTagsLoading] = useState(false);
+  const [regions, setRegions] = useState([]);
+  const [traditions, setTraditions] = useState([]);
 
-  // --- Image & Crop States ---
+  const [metaLoading, setMetaLoading] = useState(true);
+  const [assetsLoading, setAssetsLoading] = useState(false);
+
+  // ── Image & Crop ──────────────────────────────────────────────────────────
   const [previewUrl, setPreviewUrl] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [finalCroppedImage, setFinalCroppedImage] = useState(null);
   const [showCropper, setShowCropper] = useState(false);
-  // ---------------------------
 
   const [loading, setLoading] = useState(false);
   const [showCatDrop, setShowCatDrop] = useState(false);
@@ -61,39 +62,39 @@ export default function AddListing() {
 
   const router = useRouter();
 
-  // ইমেজ সিলেক্ট হ্যান্ডলার
+  // ── Image handlers ────────────────────────────────────────────────────────
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader();
       reader.addEventListener('load', () => {
         setPreviewUrl(reader.result);
-        setShowCropper(true); // ফাইল সিলেক্ট করলেই ক্রপার ওপেন হবে
+        setShowCropper(true);
       });
       reader.readAsDataURL(e.target.files[0]);
     }
   };
 
-  const onCropComplete = useCallback((trimmedArea, trimmedAreaPixels) => {
+  const onCropComplete = useCallback((_, trimmedAreaPixels) => {
     setCroppedAreaPixels(trimmedAreaPixels);
   }, []);
 
-  // ক্রপ কনফার্ম হ্যান্ডলার
   const handleConfirmCrop = async () => {
     try {
       const croppedBlob = await getCroppedImg(previewUrl, croppedAreaPixels);
       setFinalCroppedImage(croppedBlob);
       setShowCropper(false);
     } catch (e) {
-      console.error("Crop error:", e);
+      console.error('Crop error:', e);
     }
   };
 
+  // ── 1. Initial category load ───────────────────────────────────────────────
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await api.get('/api/admin/categories');
         setCategories(res.data);
-      } catch (err) {
+      } catch {
         console.error('Categories load failed');
       } finally {
         setMetaLoading(false);
@@ -102,42 +103,48 @@ export default function AddListing() {
     fetchCategories();
   }, []);
 
+  // ── 2. Load assets when category changes ──────────────────────────────────
   useEffect(() => {
     if (!formData.category) {
       setCategoryTags([]);
+      setRegions([]);
+      setTraditions([]);
       return;
     }
 
-    const fetchTagsByCategory = async () => {
-      setTagsLoading(true);
+    const fetchCategoryAssets = async () => {
+      setAssetsLoading(true);
       try {
-        const res = await api.get(`/api/listings/tags/by-category/${formData.category}`);
-        setCategoryTags(res.data);
-        setFormData((prev) => ({ ...prev, culturalTags: [] }));
-      } catch (err) {
-        console.error('Tags load failed');
+        const res = await api.get(`/api/admin/category-assets/${formData.category}`);
+        if (res.data.success) {
+          setCategoryTags(res.data.tags);
+          setRegions(res.data.regions);
+          setTraditions(res.data.traditions);
+          setFormData((prev) => ({ ...prev, culturalTags: [], region: '', tradition: '' }));
+        }
+      } catch {
+        console.error('Assets load failed');
       } finally {
-        setTagsLoading(false);
+        setAssetsLoading(false);
       }
     };
-    fetchTagsByCategory();
+    fetchCategoryAssets();
   }, [formData.category]);
 
+  // ── URL field helpers ─────────────────────────────────────────────────────
   const handleUrlChange = (index, value) => {
     const newUrls = [...formData.externalUrls];
     newUrls[index] = value;
     setFormData({ ...formData, externalUrls: newUrls });
   };
 
-  const addUrlField = () => {
+  const addUrlField = () =>
     setFormData({ ...formData, externalUrls: [...formData.externalUrls, ''] });
-  };
 
-  const removeUrlField = (index) => {
-    const newUrls = formData.externalUrls.filter((_, i) => i !== index);
-    setFormData({ ...formData, externalUrls: newUrls });
-  };
+  const removeUrlField = (index) =>
+    setFormData({ ...formData, externalUrls: formData.externalUrls.filter((_, i) => i !== index) });
 
+  // ── Filtered lists ────────────────────────────────────────────────────────
   const filteredCats = categories.filter((c) =>
     c.title.toLowerCase().includes(catSearch.toLowerCase())
   );
@@ -145,11 +152,12 @@ export default function AddListing() {
     t.title.toLowerCase().includes(tagSearch.toLowerCase())
   );
 
+  // ── Tag toggle ────────────────────────────────────────────────────────────
   const handleTagToggle = (tagId) => {
     setFormData((prev) => {
-      const isSelected = prev.culturalTags.includes(tagId);
-      if (isSelected)
+      if (prev.culturalTags.includes(tagId)) {
         return { ...prev, culturalTags: prev.culturalTags.filter((id) => id !== tagId) };
+      }
       if (prev.culturalTags.length >= 10) {
         alert('Maximum 10 tags allowed');
         return prev;
@@ -158,9 +166,11 @@ export default function AddListing() {
     });
   };
 
+  // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!finalCroppedImage || !formData.category) return alert('Please upload/crop image and select category');
+    if (!finalCroppedImage || !formData.category)
+      return alert('Please upload/crop image and select category');
 
     setLoading(true);
     try {
@@ -169,23 +179,17 @@ export default function AddListing() {
         if (key === 'culturalTags') {
           formData[key].forEach((tag) => data.append('culturalTags', tag));
         } else if (key === 'externalUrls') {
-          formData[key].forEach((url) => {
-            if (url.trim()) data.append('externalUrls', url);
-          });
+          formData[key].forEach((url) => { if (url.trim()) data.append('externalUrls', url); });
         } else {
           data.append(key, formData[key]);
         }
       });
-      // ক্রপ করা ইমেজ ফাইল যুক্ত করা
       data.append('image', finalCroppedImage, 'listing-image.jpg');
 
       const response = await api.post('/api/listings/add', data);
 
       if (response.data.success || response.status === 201 || response.status === 200) {
-        setTimeout(() => {
-          router.push('/creator/listings');
-          router.refresh();
-        }, 100);
+        setTimeout(() => { router.push('/creator/listings'); router.refresh(); }, 100);
       }
     } catch (err) {
       console.error(err);
@@ -195,15 +199,20 @@ export default function AddListing() {
     }
   };
 
-  if (metaLoading)
+  // ── Early return: loading ─────────────────────────────────────────────────
+  if (metaLoading) {
     return (
       <div className="flex justify-center p-20">
         <FiLoader className="animate-spin text-orange-500" size={30} />
       </div>
     );
+  }
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="max-w-6xl mx-auto py-4 pb-20 font-sans px-4 md:px-0">
+
+      {/* Header */}
       <div className="mb-8 border-b border-gray-100 dark:border-white/10 pb-6">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
           Add <span className="text-orange-500">Listing</span>
@@ -216,7 +225,7 @@ export default function AddListing() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-          {/* Left: Image Upload & Crop Section */}
+          {/* ── Left: Image Upload & Crop ── */}
           <div className="lg:col-span-4">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block ml-1">
               Cover Media (Aspect 4:5 Ratio)
@@ -225,14 +234,12 @@ export default function AddListing() {
             <div className="relative aspect-[4/5] w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center overflow-hidden shadow-sm group">
 
               {showCropper ? (
-                /* ১. ক্রপার ইন্টারফেস */
                 <div className="absolute inset-0 z-40 bg-black">
-                  {/* ক্রপার ইন্টারফেস অংশে পরিবর্তন */}
                   <Cropper
                     image={previewUrl}
                     crop={crop}
                     zoom={zoom}
-                    aspect={4 / 5} // ৪:৫ রেশিও সেট করা হলো
+                    aspect={4 / 5}
                     onCropChange={setCrop}
                     onCropComplete={onCropComplete}
                     onZoomChange={setZoom}
@@ -247,15 +254,15 @@ export default function AddListing() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => { setShowCropper(false); setPreviewUrl(null) }}
+                      onClick={() => { setShowCropper(false); setPreviewUrl(null); }}
                       className="bg-zinc-800 text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase active:scale-95 transition-transform"
                     >
                       Cancel
                     </button>
                   </div>
                 </div>
+
               ) : finalCroppedImage ? (
-                /* ২. ক্রপ করার পর ফাইনাল প্রিভিউ */
                 <div className="relative w-full h-full p-2">
                   <img
                     src={URL.createObjectURL(finalCroppedImage)}
@@ -267,33 +274,25 @@ export default function AddListing() {
                       type="button"
                       onClick={() => setShowCropper(true)}
                       className="p-2 bg-orange-500 text-white rounded-lg shadow-lg hover:bg-orange-600 transition-colors"
-                      title="Re-crop"
                     >
                       <FiScissors size={14} />
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        setFinalCroppedImage(null);
-                        setPreviewUrl(null);
-                      }}
+                      onClick={() => { setFinalCroppedImage(null); setPreviewUrl(null); }}
                       className="p-2 bg-black/60 text-white rounded-lg hover:bg-red-500 backdrop-blur-md transition-colors"
                     >
                       <FiX size={14} />
                     </button>
                   </div>
                 </div>
+
               ) : (
-                /* ৩. আপলোড করার শুরুর অবস্থা */
                 <div className="text-center p-6 space-y-2 relative w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                   <FiUploadCloud size={32} className="text-orange-500 mx-auto" />
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-300">
-                      Click to Upload
-                    </p>
-                    <p className="text-[8px] font-medium text-gray-400 uppercase tracking-tighter">
-                      Image will be cropped to 4:5 ratio
-                    </p>
+                    <p className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-300">Click to Upload</p>
+                    <p className="text-[8px] font-medium text-gray-400 uppercase tracking-tighter">Image will be cropped to 4:5 ratio</p>
                   </div>
                   <input
                     type="file"
@@ -304,15 +303,17 @@ export default function AddListing() {
                 </div>
               )}
             </div>
-            <p className="text-[9px] text-gray-400 mt-2 ml-1 italic font-medium">* Focus on the most important part of your image.</p>
+            <p className="text-[9px] text-gray-400 mt-2 ml-1 italic font-medium">
+              * Focus on the most important part of your image.
+            </p>
           </div>
 
-          {/* Right: Primary Details */}
+          {/* ── Right: Primary Details ── */}
           <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            {/* Title */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-                Listing Title
-              </label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Listing Title</label>
               <input
                 type="text"
                 required
@@ -323,10 +324,9 @@ export default function AddListing() {
               />
             </div>
 
+            {/* Website Link */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-                Website Link
-              </label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Website Link</label>
               <input
                 type="text"
                 required
@@ -337,6 +337,7 @@ export default function AddListing() {
               />
             </div>
 
+            {/* Category Dropdown */}
             <div className="space-y-2 relative">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
                 <FiGrid size={10} /> Category
@@ -348,12 +349,10 @@ export default function AddListing() {
                 {formData.category
                   ? categories.find((c) => c._id === formData.category)?.title
                   : 'Select Category'}
-                <FiChevronDown
-                  className={`${showCatDrop ? 'rotate-180' : ''} transition-transform`}
-                />
+                <FiChevronDown className={`${showCatDrop ? 'rotate-180' : ''} transition-transform`} />
               </div>
               {showCatDrop && (
-                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-lg shadow-2xl overflow-hidden">
                   <div className="p-2 border-b dark:border-white/10 flex items-center gap-2 bg-gray-50 dark:bg-white/5">
                     <FiSearch className="text-gray-400" size={12} />
                     <input
@@ -367,10 +366,7 @@ export default function AddListing() {
                     {filteredCats.map((cat) => (
                       <div
                         key={cat._id}
-                        onClick={() => {
-                          setFormData({ ...formData, category: cat._id });
-                          setShowCatDrop(false);
-                        }}
+                        onClick={() => { setFormData({ ...formData, category: cat._id }); setShowCatDrop(false); }}
                         className="p-3 text-[10px] font-bold uppercase hover:bg-orange-500 hover:text-white cursor-pointer transition-colors dark:text-gray-300 border-b last:border-0 dark:border-white/5"
                       >
                         {cat.title}
@@ -381,35 +377,30 @@ export default function AddListing() {
               )}
             </div>
 
+            {/* Region Dropdown */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
                 <FiMapPin size={10} /> Region
               </label>
               <select
                 required
+                disabled={!formData.category || assetsLoading}
                 value={formData.region}
-                onChange={(e) =>
-                  setFormData({ ...formData, region: e.target.value, country: e.target.value })
-                }
-                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
+                onChange={(e) => setFormData({ ...formData, region: e.target.value, country: e.target.value })}
+                className={`w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
               >
-                <option value="">Select Country</option>
-                {Country.getAllCountries().map((c) => (
-                  <option
-                    className="bg-white dark:bg-[#1f1f1f] text-black dark:text-white"
-                    key={c.isoCode}
-                    value={c.name}
-                  >
-                    {c.name}
+                <option value="">{assetsLoading ? 'Loading...' : 'Select Region'}</option>
+                {regions.map((r) => (
+                  <option key={r._id} value={r.title} className="bg-white dark:bg-[#1f1f1f]">
+                    {r.title}
                   </option>
                 ))}
               </select>
             </div>
 
+            {/* Description */}
             <div className="md:col-span-2 space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-                Story & Description
-              </label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Story & Description</label>
               <textarea
                 required
                 value={formData.description}
@@ -421,25 +412,32 @@ export default function AddListing() {
           </div>
         </div>
 
-        {/* Dynamic Tags */}
+        {/* ── Tags, Tradition & Sources ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-lg">
+
+          {/* Tradition */}
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
-              Tradition
-            </label>
-            <input
-              type="text"
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Tradition</label>
+            <select
               required
+              disabled={!formData.category || assetsLoading}
               value={formData.tradition}
               onChange={(e) => setFormData({ ...formData, tradition: e.target.value })}
-              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500"
-              placeholder="e.g. Jamdani"
-            />
+              className={`w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500 ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
+            >
+              <option value="">{assetsLoading ? 'Loading...' : 'Select Tradition'}</option>
+              {traditions.map((t) => (
+                <option key={t._id} value={t.title} className="bg-white dark:bg-[#1f1f1f]">
+                  {t.title}
+                </option>
+              ))}
+            </select>
           </div>
 
+          {/* Tags */}
           <div className="space-y-2 relative">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
-              <FiTag size={10} />{' '}
+              <FiTag size={10} />
               {formData.category
                 ? `Tags for ${categories.find((c) => c._id === formData.category)?.title}`
                 : 'Select Category first'}
@@ -452,21 +450,12 @@ export default function AddListing() {
                 <span className="text-gray-400">Select up to 10 tags...</span>
               )}
               {formData.culturalTags.map((tId) => (
-                <span
-                  key={tId}
-                  className="bg-orange-500 text-white px-2 py-1 h-fit rounded-lg flex items-center gap-1 animate-in zoom-in-95"
-                >
+                <span key={tId} className="bg-orange-500 text-white px-2 py-1 h-fit rounded-lg flex items-center gap-1">
                   {categoryTags.find((t) => t._id === tId)?.title}
-                  <FiX
-                    size={10}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleTagToggle(tId);
-                    }}
-                  />
+                  <FiX size={10} onClick={(e) => { e.stopPropagation(); handleTagToggle(tId); }} />
                 </span>
               ))}
-              {tagsLoading && <FiLoader className="animate-spin ml-auto" />}
+              {assetsLoading && <FiLoader className="animate-spin ml-auto" />}
             </div>
             {showTagDrop && (
               <div className="absolute bottom-full mb-2 z-50 w-full bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in slide-in-from-bottom-2">
@@ -481,17 +470,19 @@ export default function AddListing() {
                 </div>
                 <div className="max-h-40 overflow-y-auto grid grid-cols-1 p-1 gap-1">
                   {filteredTags.length === 0 ? (
-                    <div className="p-3 text-[9px] text-center text-gray-500 uppercase">
-                      No tags found
-                    </div>
+                    <div className="p-3 text-[9px] text-center text-gray-500 uppercase">No tags found</div>
                   ) : (
                     filteredTags.map((tag) => (
                       <div
                         key={tag._id}
                         onClick={() => handleTagToggle(tag._id)}
-                        className={`p-2 rounded-lg text-[9px] font-black uppercase cursor-pointer flex justify-between items-center ${formData.culturalTags.includes(tag._id) ? 'bg-orange-500 text-white' : 'dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                        className={`p-2 rounded-lg text-[9px] font-black uppercase cursor-pointer flex justify-between items-center ${formData.culturalTags.includes(tag._id)
+                            ? 'bg-orange-500 text-white'
+                            : 'dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
+                          }`}
                       >
-                        {tag.title} {formData.culturalTags.includes(tag._id) && <FiCheck />}
+                        {tag.title}
+                        {formData.culturalTags.includes(tag._id) && <FiCheck />}
                       </div>
                     ))
                   )}
@@ -500,16 +491,13 @@ export default function AddListing() {
             )}
           </div>
 
+          {/* Sources */}
           <div className="space-y-2">
             <div className="flex items-center justify-between ml-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-1">
                 <FiLink size={10} /> Sources
               </label>
-              <button
-                type="button"
-                onClick={addUrlField}
-                className="text-orange-500 hover:text-orange-600"
-              >
+              <button type="button" onClick={addUrlField} className="text-orange-500 hover:text-orange-600">
                 <FiPlus size={14} />
               </button>
             </div>
@@ -539,17 +527,12 @@ export default function AddListing() {
           </div>
         </div>
 
+        {/* ── Submit ── */}
         <button
           disabled={loading}
           className="w-full h-16 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-black text-[11px] tracking-[0.3em] uppercase transition-all flex items-center justify-center gap-3 shadow-lg shadow-orange-500/20 active:scale-[0.98]"
         >
-          {loading ? (
-            <FiLoader className="animate-spin" />
-          ) : (
-            <>
-              Confirm Publication <FiArrowRight />
-            </>
-          )}
+          {loading ? <FiLoader className="animate-spin" /> : <>Confirm Publication <FiArrowRight /></>}
         </button>
       </form>
     </div>
