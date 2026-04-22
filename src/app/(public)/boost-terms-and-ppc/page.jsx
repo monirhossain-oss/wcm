@@ -4,6 +4,8 @@ import BoostPpce from '@/components/boost-terms-and-ppc/BoostPpce'
 import BoostPromotion from '@/components/boost-terms-and-ppc/BoostPromotion'
 import CreatorBoost from '@/components/boost-terms-and-ppc/CreatorBoost'
 import Hero from '@/components/boost-terms-and-ppc/Hero'
+import PayPerClick from '@/components/boost-terms-and-ppc/PayPerClick'
+import PpcPromotion from '@/components/boost-terms-and-ppc/PpcPromotion'
 import PromotionBudget from '@/components/boost-terms-and-ppc/PromotionBudget'
 import React from 'react'
 
@@ -18,6 +20,8 @@ function page() {
       <BoostPpce/>
       <BoostMandatory/>
       <PromotionBudget/>
+      <PayPerClick/>
+      <PpcPromotion/>
     </div>
     </main>
   )
