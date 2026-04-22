@@ -28,10 +28,10 @@ const BoostPricing = () => {
     return (
         <div className="relative overflow-hidden border-b rounded-2xl border-gray-200 dark:border-zinc-800 bg-white dark:bg-[#0F0F0E] rounded-2xl">
             {/* Background Glow Effect */}
-            <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-orange-500 opacity-[0.06] blur-[80px] rounded-full translate-x-1/4 -translate-y-1/4" />
-            <div className="absolute bottom-0 left-0 w-[300px] h-[200px] bg-orange-600 opacity-[0.03] blur-[100px] rounded-full -translate-x-1/4 translate-y-1/4" />
+            {/* <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-orange-500 opacity-[0.06] blur-[80px] rounded-full translate-x-1/4 -translate-y-1/4" />
+            <div className="absolute bottom-0 left-0 w-[300px] h-[200px] bg-orange-600 opacity-[0.03] blur-[100px] rounded-full -translate-x-1/4 translate-y-1/4" /> */}
 
-            <div className="relative max-w-5xl mx-auto px-6 pt-20 pb-16">
+            <div className="relative max-w-4xl mx-auto px-6 py-12">
                 {/* Heading */}
                 <div className="mb-12">
                     <h1 className="text-[40px] md:text-[45px] leading-[1.1] font-black tracking-tight text-zinc-900 dark:text-white mb-4">

@@ -14,9 +14,9 @@ import React from 'react'
 
 function page() {
   return (
-    <main className='min-h-screen'>
+    <main className='min-h-screen bg-white dark:bg-[#0F0F0E]'>
       <Hero/>
-      <div className="max-w-5xl mx-auto py-12 px-4 space-y-16">
+      <div className="max-w-5xl mx-auto  px-4 ">
       <BoostPromotion/>
       <BoostListing/>
       <CreatorBoost/>
