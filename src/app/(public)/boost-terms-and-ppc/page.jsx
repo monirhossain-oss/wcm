@@ -1,9 +1,12 @@
 import BoostListing from '@/components/boost-terms-and-ppc/BoostListing'
 import BoostMandatory from '@/components/boost-terms-and-ppc/BoostMandatory'
 import BoostPpce from '@/components/boost-terms-and-ppc/BoostPpce'
+import BoostPricing from '@/components/boost-terms-and-ppc/BoostPricing'
 import BoostPromotion from '@/components/boost-terms-and-ppc/BoostPromotion'
 import CreatorBoost from '@/components/boost-terms-and-ppc/CreatorBoost'
+import CreatorsPpc from '@/components/boost-terms-and-ppc/CreatorsPpc'
 import Hero from '@/components/boost-terms-and-ppc/Hero'
+import ListingPpc from '@/components/boost-terms-and-ppc/ListingPpc'
 import PayPerClick from '@/components/boost-terms-and-ppc/PayPerClick'
 import PpcPromotion from '@/components/boost-terms-and-ppc/PpcPromotion'
 import PromotionBudget from '@/components/boost-terms-and-ppc/PromotionBudget'
@@ -22,6 +25,9 @@ function page() {
       <PromotionBudget/>
       <PayPerClick/>
       <PpcPromotion/>
+      <ListingPpc/>
+      <CreatorsPpc/>
+      <BoostPricing/>
     </div>
     </main>
   )

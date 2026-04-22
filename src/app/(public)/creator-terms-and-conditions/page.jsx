@@ -19,6 +19,9 @@ import ModificationSection from '@/components/creators-terms/ModificationSection
 import ContactSection from '@/components/creators-terms/ContactSection'
 import GoverningLawSection from '@/components/creators-terms/GoverningLawSection'
 
+
+
+
 export default function CreatorTermsPage() {
   return (
     <main className="min-h-screen ">
@@ -43,6 +46,7 @@ export default function CreatorTermsPage() {
         <ModificationSection/>
         <ContactSection/>
         <GoverningLawSection/>
+        
       </div>
     </main>
   )
