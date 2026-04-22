@@ -9,7 +9,7 @@ const BoostPromotion = () => {
 
             <div className="relative max-w-4xl mx-auto px-6 pt-20 pb-16">
                 {/* Main Heading */}
-                <h2 className="text-[42px] md:text-[52px] leading-[1.1] font-black tracking-tight text-zinc-900 dark:text-white mb-8">
+                <h2 className="text-[40px] md:text-[45px] leading-[1.1] font-black tracking-tight text-zinc-900 dark:text-white mb-8">
                     How does <br />
                     <span className="text-[#F57C00]">Boost promotion work?</span>
                 </h2>
