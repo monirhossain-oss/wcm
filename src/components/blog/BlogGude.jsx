@@ -44,7 +44,7 @@ const BlogGude = () => {
           {categories.map((item) => (
             <div key={item.id} className="group flex flex-col items-center text-center cursor-pointer">
 
-              {/* সার্কুলার ইমেজ (Next.js Image) */}
+              {/*(Next.js Image) */}
               <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-100 dark:bg-slate-800 mb-5 transition-all duration-300 group-hover:scale-105 shadow-sm ring-1 ring-gray-100 dark:ring-slate-800">
                 <Image
                   src={item.img}
@@ -55,7 +55,7 @@ const BlogGude = () => {
                 />
               </div>
 
-              {/* টাইটেল: dark:text-gray-200 */}
+              {/* dark:text-gray-200 */}
               <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1 group-hover:underline decoration-orange-500 underline-offset-4 transition-colors">
                 {item.title}
               </h3>

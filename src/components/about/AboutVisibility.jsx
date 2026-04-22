@@ -3,16 +3,16 @@ import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
-const AboutVisibility = () => {
+const  AboutVisibility = () => {
     return (
         <section className="bg-white dark:bg-[#0a0a0a] px-6 flex flex-col items-center text-center transition-colors duration-500">
 
-            {/* অরেঞ্জ হার্ট আইকন - Symbolizing Passion for Culture */}
+            {/*Symbolizing Passion for Culture */}
             <div className="mb-10 animate-pulse">
                 <Heart className="w-14 h-14 text-[#F57C00] stroke-[1.5px]" />
             </div>
 
-            {/* মেইন হেডলাইন - Inspired by Founder's Vision */}
+            {/*Inspired by Founder's Vision */}
             <h2 className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white leading-[1.1] mb-8 tracking-tight">
                 Culture deserves <br />
                 <span className="text-[#F57C00]">visibility.</span>
@@ -32,7 +32,7 @@ const AboutVisibility = () => {
                 </p>
             </div>
 
-            {/* সাব-টেক্সট - Location and Global Mission */}
+            {/*Location and Global Mission */}
             <div className="mb-12 flex flex-col md:flex-row items-center gap-4 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
                 <span>Based in Paris, France</span>
                 <span className="hidden md:block text-[#F57C00]">•</span>

@@ -41,7 +41,13 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
                 ...(search && { search })
             };
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/public`, { params });
+            const res = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/public`,
+                {
+                    params,
+                    withCredentials: true,
+                }
+            );
 
             if (res.data.success) {
                 const newListings = res.data.listings || [];

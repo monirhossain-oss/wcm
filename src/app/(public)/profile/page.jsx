@@ -347,9 +347,9 @@ export default function ProfilePage() {
           {/* Name & Meta */}
           <div className="flex-1 space-y-3">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase dark:text-white leading-none">
+              <h2 className="text-4xl md:text-5xl font-black tracking-tighter uppercase dark:text-white leading-none">
                 {user?.profile?.displayName || `${user?.firstName} ${user?.lastName}`}
-              </h1>
+              </h2>
               <div className="px-3 py-1 bg-orange-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">
                 {user?.role}
               </div>

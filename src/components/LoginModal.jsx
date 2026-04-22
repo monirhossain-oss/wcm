@@ -22,11 +22,11 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
 
     if (!isOpen || !mounted) return null;
 
-    // handleBackdropClick ফাংশনটি সরিয়ে দেওয়া হয়েছে
+    // handleBackdropClick 
 
     return createPortal(
         <div
-            // এখানে onClick={handleBackdropClick} বাদ দেওয়া হয়েছে
+            // এখানে onClick={handleBackdropClick}
             className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 overflow-y-auto"
         >
             <div className="relative w-full max-w-[440px] my-auto bg-white dark:bg-[#0a0a0a] rounded-[28px] shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-200 overflow-hidden">

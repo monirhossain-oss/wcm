@@ -26,7 +26,7 @@ export default async function CultureDataWrapper() {
 
         const finalData = continentsSliderData.map(continent => {
             // ১. এখানে continent.title এর বদলে continent.slug ব্যবহার করতে হবে 
-            // কারণ mapping ফাইলে কিগুলো ড্যাশসহ (middle-east) আছে।
+           
             const associatedCountries = continentMapping[continent.slug] || [];
 
             // ২. লিস্টিং ফিল্টার (সরাসরি country চেক)
@@ -35,11 +35,11 @@ export default async function CultureDataWrapper() {
             ).length;
 
             return {
-                _id: continent.slug, // স্লাগ ব্যবহার করা ভালো রাউটিং এর জন্য
-                title: continent.title, // ডিসপ্লে করার জন্য সুন্দর নাম
+                _id: continent.slug, 
+                title: continent.title, 
                 image: continent.image,
                 listingCount: count,
-                link: `/explore/${continent.slug}` // স্লাইডারে ক্লিক করলে ডিরেক্ট লিংকে যাওয়ার জন্য
+                link: `/explore/${continent.slug}`
             };
         });
 
