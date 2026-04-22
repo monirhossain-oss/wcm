@@ -255,7 +255,7 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                             {/* Stat Badges */}
                             <div className="grid grid-cols-2 gap-3 mt-3">
                                 <StatBadge icon={FiShield} label="Tradition" value={product.tradition} />
-                                <StatBadge icon={FiMapPin} label="Country" value={product.country} />
+                                <StatBadge icon={FiMapPin} label="Culture" value={product.country} />
                             </div>
                         </div>
                     </div>

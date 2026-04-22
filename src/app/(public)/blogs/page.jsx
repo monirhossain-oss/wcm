@@ -5,10 +5,10 @@ import React from 'react';
 export async function generateMetadata() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seo/blog`, {
-      next: { revalidate: 3600 }, // ১ ঘণ্টা ক্যাশে থাকবে
+      next: { revalidate: 3600 },
     });
     const data = await res.json();
-    console.log(data)
+    // console.log(data)
 
     return {
       title: data?.title || 'blog Stories | World Culture Marketplace',

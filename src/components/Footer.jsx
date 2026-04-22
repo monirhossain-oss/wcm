@@ -43,7 +43,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-gray-100 dark:bg-gray-950 text-gray-600 dark:text-gray-300 transition-colors duration-500 border-t border-gray-200 dark:border-gray-900">
-      <div className="max-w-7xl mx-auto px-6 pt-16 pb-10">
+      <div className="max-w-7xl mx-auto px-6 pt-8 pb-10">
 
         {/* Main Grid Structure */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
