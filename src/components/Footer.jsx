@@ -153,7 +153,7 @@ const Footer = () => {
             © {currentYear} <span className="text-[#F57C00]">World Culture Marketplace</span><sup className="ml-0.5">&reg;</sup>. All rights reserved.
           </p>
           <div className="flex flex-wrap justify-center gap-6 order-1 md:order-2">
-            <Link href="/boost-terms-and-ppc" className="hover:text-[#F57C00] transition-colors">Boost Terms & PPC</Link>
+            <Link href="/boost-terms-and-ppc" className="hover:text-[#F57C00] transition-colors">Boost & PPC terms & condition</Link>
             <Link href="/creator-terms-and-conditions" className="hover:text-[#F57C00] transition-colors">Creator Terms & Condition</Link>
             <Link href="/advertising-policy" className="hover:text-[#F57C00] transition-colors">Advertising Policy</Link>
             <Link href="/privacy-policy" className="hover:text-[#F57C00] transition-colors">Privacy Policy</Link>
