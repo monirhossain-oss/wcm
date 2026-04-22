@@ -340,6 +340,183 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                     </button>
                   ))}
                 </div>
+            </div>
+
+            {/* ── MAIN CONTENT ── */}
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-14 items-start">
+
+                    {/* ── LEFT: IMAGE ── */}
+                    <div className="lg:col-span-5">
+                        <div className="sticky top-36">
+
+                            {/* Hero Image */}
+                            <div
+                                className="relative w-full overflow-hidden bg-gray-100 dark:bg-white/5 shadow-xl border border-gray-100 dark:border-white/5 group"
+                                style={{ aspectRatio: '4 / 5' }}
+                            >
+                                <Image
+                                    src={imageUrl}
+                                    alt={product.title}
+                                    fill
+                                    unoptimized
+                                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                                />
+
+                                {product.isPromoted && (
+                                    <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-[#F57C00] px-3 py-1.5 rounded-full text-[9px] font-black text-white uppercase tracking-widest shadow-lg">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                        Top Ranked
+                                    </div>
+                                )}
+
+                                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-white">
+                                        <FaEye className="w-3 h-3 opacity-80" />
+                                        <span>{product.views || 0} views</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Stat Badges */}
+                            <div className="grid grid-cols-2 gap-3 mt-3">
+                                <StatBadge icon={FiShield} label="Tradition" value={product.tradition} />
+                                <StatBadge icon={FiMapPin} label="Culture" value={product.country} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── RIGHT: DETAILS ── */}
+                    <div className="lg:col-span-7 space-y-7">
+
+                        {/* Country + Category Badges */}
+                        <div className="flex flex-wrap items-center gap-2">
+                            {product.country && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F57C00]/10 text-[#F57C00] text-[10px] font-black uppercase tracking-wider rounded-full">
+                                    <FiMapPin className="w-3 h-3" /> {product.country}
+                                </span>
+                            )}
+                            {product.category?.title && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-wider rounded-full">
+                                    <FiLayers className="w-3 h-3" /> {product.category.title}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Title + Creator */}
+                        <div>
+                            <h1 className="text-[36px] md:text-[44px] font-black text-gray-900 dark:text-white leading-[1.05] tracking-tight mb-3">
+                                {product.title}
+                            </h1>
+                            {creatorUsername && (
+                                <Link href={`/profile/${creatorUsername}`} className="inline-flex items-center gap-2 group">
+                                    <div className="w-5 h-5 rounded-full bg-[#F57C00] flex items-center justify-center text-white text-[8px] font-black">
+                                        {creatorUsername[0].toUpperCase()}
+                                    </div>
+                                    <span className="text-[12px] font-semibold text-gray-400 group-hover:text-[#F57C00] transition-colors">
+                                        by @{creatorUsername}
+                                    </span>
+                                </Link>
+                            )}
+                        </div>
+
+                        <Divider />
+
+                        {/* Description */}
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">About</p>
+                            <p className="text-[15px] leading-[1.8] text-gray-600 dark:text-gray-400">{product.description}</p>
+                        </div>
+
+                        {/* Cultural Tags */}
+                        {product.culturalTags?.length > 0 && (
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">Key Features</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {product.culturalTags.map((tag, idx) => (
+                                        <span
+                                            key={tag._id || idx}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/8 rounded-lg text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                                        >
+                                            <FiTag className="w-3 h-3 text-[#F57C00]" />
+                                            {tag.title || tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Social Links */}
+                        {product.externalUrls?.length > 0 && (
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">Follow on Social</p>
+                                <div className="flex items-center gap-2">
+                                    {product.externalUrls.map((url, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => handleVisitSite(url, true, idx)}
+                                            disabled={externalClickLoading !== null}
+                                            className="w-10 h-10 rounded-xl bg-white dark:bg-white/[0.04] border border-gray-100 dark:border-white/8 flex items-center justify-center text-lg hover:scale-110 transition-all disabled:opacity-40"
+                                        >
+                                            {externalClickLoading === idx
+                                                ? <FaSpinner className="animate-spin text-sm" />
+                                                : getSocialIcon(url)
+                                            }
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <Divider />
+
+                        {/* CTA Buttons */}
+                        <div className="space-y-3">
+                            <button
+                                onClick={() => handleVisitSite(product.websiteLink)}
+                                disabled={clickLoading || !product.websiteLink}
+                                className="group w-full py-4 rounded-xl font-black uppercase tracking-[0.3em] text-[11px] flex items-center justify-center gap-3 transition-all bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-[#F57C00] dark:hover:bg-[#F57C00] dark:hover:text-white disabled:opacity-30"
+                            >
+                                {clickLoading
+                                    ? <FaSpinner className="animate-spin" />
+                                    : <>Visit Creator Website <FiExternalLink className="w-4 h-4" /></>
+                                }
+                            </button>
+
+                            <FavoriteButton
+                                isFavorited={isFavorited}
+                                favCount={favCount}
+                                onClick={handleToggleFavorite}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── RELATED LISTINGS ── */}
+                {initialRelated.length > 0 && (
+                    <div className="mt-20 pt-12 border-t border-gray-100 dark:border-white/5">
+                        <div className="flex justify-between items-end mb-8">
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#F57C00] mb-2">You might also like</p>
+                                <h2 className="text-[28px] md:text-[34px] font-black text-gray-900 dark:text-white">
+                                    More from <span className="text-[#F57C00]">@{creatorUsername}</span>
+                                </h2>
+                            </div>
+                            {creatorUsername && (
+                                <Link
+                                    href={`/profile/${creatorUsername}`}
+                                    className="hidden md:inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#F57C00]"
+                                >
+                                    View all <FiExternalLink className="w-3 h-3" />
+                                </Link>
+                            )}
+                        </div>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                            {initialRelated.map((item) => (
+                                <ListingCard key={item._id} item={item} />
+                            ))}
+                        </div>
+                    </div>
               </div>
             )}
 

@@ -81,6 +81,7 @@ export default function PromotionsPage() {
   const [boostBudget, setBoostBudget] = useState(20);
   const [ppcAmount, setPpcAmount] = useState(10);
   const [targetClicks, setTargetClicks] = useState(50);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
@@ -88,7 +89,7 @@ export default function PromotionsPage() {
   const pathname = usePathname();
   const currentCost = promoType === 'boost' ? Number(boostBudget) : Number(ppcAmount);
 
-  const PPC_COST_PER_CLICK = 0.3; 
+  const PPC_COST_PER_CLICK = 0.3;
 
   const hasActiveBoost = selectedListing?.promotion?.boost?.isActive;
   const hasActivePpc = selectedListing?.promotion?.ppc?.isActive;
@@ -259,11 +260,10 @@ export default function PromotionsPage() {
                         <button
                           disabled={isFullyPromoted}
                           onClick={() => setSelectedListing(item)}
-                          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
-                            isFullyPromoted
-                              ? 'bg-zinc-50 dark:bg-zinc-900 text-zinc-300 dark:text-zinc-600 border border-zinc-100 dark:border-zinc-800 cursor-not-allowed opacity-50'
-                              : 'bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-orange-600 shadow-md'
-                          }`}
+                          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${isFullyPromoted
+                            ? 'bg-zinc-50 dark:bg-zinc-900 text-zinc-300 dark:text-zinc-600 border border-zinc-100 dark:border-zinc-800 cursor-not-allowed opacity-50'
+                            : 'bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-orange-600 shadow-md'
+                            }`}
                         >
                           <FiZap size={14} />
                           {isFullyPromoted ? 'Active' : 'Promote'}
@@ -310,11 +310,10 @@ export default function PromotionsPage() {
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`w-9 h-9 rounded-lg text-[10px] font-black transition-all border ${
-                        currentPage === pageNum
-                          ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20'
-                          : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400'
-                      }`}
+                      className={`w-9 h-9 rounded-lg text-[10px] font-black transition-all border ${currentPage === pageNum
+                        ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20'
+                        : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400'
+                        }`}
                     >
                       {pageNum}
                     </button>
@@ -345,7 +344,7 @@ export default function PromotionsPage() {
           </div>
         )}
       </div>
-      
+
       {selectedListing && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
           <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-md overflow-hidden shadow-2xl border border-zinc-200 dark:border-white/10">
@@ -368,22 +367,20 @@ export default function PromotionsPage() {
                 <button
                   disabled={hasActiveBoost}
                   onClick={() => setPromoType('boost')}
-                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
-                    promoType === 'boost'
-                      ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600'
-                      : 'text-zinc-500'
-                  } ${hasActiveBoost ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'boost'
+                    ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600'
+                    : 'text-zinc-500'
+                    } ${hasActiveBoost ? 'opacity-30 cursor-not-allowed' : ''}`}
                 >
                   {hasActiveBoost ? 'Boost Active' : 'Viral Boost'}
                 </button>
                 <button
                   disabled={hasActivePpc}
                   onClick={() => setPromoType('ppc')}
-                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
-                    promoType === 'ppc'
-                      ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600'
-                      : 'text-zinc-500'
-                  } ${hasActivePpc ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'ppc'
+                    ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600'
+                    : 'text-zinc-500'
+                    } ${hasActivePpc ? 'opacity-30 cursor-not-allowed' : ''}`}
                 >
                   {hasActivePpc ? 'PPC Active' : 'PPC Flow'}
                 </button>
@@ -403,11 +400,10 @@ export default function PromotionsPage() {
                           setBoostBudget(pkg.price);
                           setBoostDays(pkg.days);
                         }}
-                        className={`p-4 rounded-md border text-left transition-all ${
-                          boostBudget === pkg.price
-                            ? 'border-orange-500 bg-orange-500/5 ring-1 ring-orange-500'
-                            : 'border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/5 hover:border-zinc-400'
-                        }`}
+                        className={`p-4 rounded-md border text-left transition-all ${boostBudget === pkg.price
+                          ? 'border-orange-500 bg-orange-500/5 ring-1 ring-orange-500'
+                          : 'border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/5 hover:border-zinc-400'
+                          }`}
                       >
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-[10px] font-black uppercase tracking-widest dark:text-white">
@@ -481,10 +477,39 @@ export default function PromotionsPage() {
                   </span>
                 </div>
               </div>
+              {/* Terms Agreement */}
+              <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-white/5">
+                <div className="space-y-1">
+                  <p className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">
+                    All Boost & PPC purchases are final and non-refundable.
+                  </p>
+                  <Link
+                    href="/boost-terms-and-ppc"
+                    className="text-[10px] font-black text-orange-500 uppercase tracking-tight flex items-center gap-1"
+                  >
+                    Learn more about <span className="underline">Boost & PPC</span>
+                    <FiInfo size={12} />
+                  </Link>
+                </div>
+
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="w-5 h-5 rounded border-zinc-300 dark:border-zinc-700 text-orange-500 focus:ring-orange-500 bg-white dark:bg-zinc-900 transition-all cursor-pointer"
+                    />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
+                    I agree to the Boost & PPC purchase terms
+                  </span>
+                </label>
+              </div>
 
               <button
                 onClick={handlePurchase}
-                disabled={actionLoading || walletBalance < currentCost || currentCost < 5}
+                disabled={actionLoading || walletBalance < currentCost || currentCost < 5 || !agreedToTerms}
                 className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-md font-black uppercase text-[10px] tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20 disabled:hover:bg-zinc-900"
               >
                 {actionLoading

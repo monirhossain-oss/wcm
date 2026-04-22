@@ -39,7 +39,6 @@ export default function Page() {
             <AboutContent />
             <AboutShape />
             <AboutExplore />
-            <AboutPresting />
             <AboutPrincpals />
             <AboutCulture />
             <AboutVisibility />

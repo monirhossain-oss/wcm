@@ -9,7 +9,6 @@ import SkeletonLoader from '@/components/explore/SkeletonLoader';
 import ListingGrid from '@/components/ListingGrid';
 
 export default function ExploreClient({ serverCategory, serverContinent, serverSearch }) {
-    // হুক থেকে ডাটা নিচ্ছি (যা এখন ইউআরএল পাথ থেকে আসবে)
     const { category, continent, search } = useExploreQuery();
 
     const [listings, setListings] = useState([]);
@@ -22,14 +21,12 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
     const currentOffsetRef = useRef(0);
 
     const fetchListings = useCallback(async (isInitial = true) => {
-        // লোডিং থাকলে বা ডাটা শেষ হয়ে গেলে রিকোয়েস্ট আটকানো
         if (loading || (!isInitial && fetchingMore)) return;
 
         if (isInitial) {
             setLoading(true);
             setHasMore(true);
             currentOffsetRef.current = 0;
-            // স্ক্রোল পজিশন উপরে নিয়ে যাওয়া (এসইও ফ্রেন্ডলি পেজ ট্রানজিশন)
             if (typeof window !== 'undefined') window.scrollTo(0, 0);
         } else {
             setFetchingMore(true);
@@ -39,10 +36,8 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
             const params = {
                 limit: 12,
                 offset: currentOffsetRef.current,
-                // 'All' হলে এপিআই-তে পাঠানোর দরকার নেই যদি আপনার ব্যাকএন্ড সেভাবে হ্যান্ডেল করে
                 ...(category !== 'All' && { category }),
                 ...(continent !== 'All Regions' && { continent }),
-                // পাথ থেকে পাওয়া সার্চ ভ্যালু
                 ...(search && { search })
             };
 
@@ -61,7 +56,6 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
                 setTotal(res.data.total || 0);
                 setHasMore(res.data.hasMore);
 
-                // অফসেট আপডেট
                 currentOffsetRef.current += newListings.length;
             }
         } catch (err) {
@@ -73,12 +67,10 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
         }
     }, [category, continent, search]);
 
-    // ফিল্টার বা সার্চ চেঞ্জ হলে নতুন করে ডাটা ফেচ হবে
     useEffect(() => {
         fetchListings(true);
     }, [category, continent, search, fetchListings]);
 
-    // ইনফিনিটি স্ক্রোল লজিক
     useEffect(() => {
         const observer = new IntersectionObserver(
             entries => {
@@ -104,7 +96,6 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
                     <>
                         <ListingGrid listings={listings} />
 
-                        {/* ইনফিনিটি স্ক্রোল লোডার */}
                         <div ref={observerTarget} className="h-24 flex items-center justify-center mt-10">
                             {fetchingMore && (
                                 <div className="flex items-center gap-2 text-orange-500 font-medium">
@@ -118,7 +109,6 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
                         </div>
                     </>
                 ) : (
-                    /* ডাটা না পাওয়া গেলে */
                     <div className="flex flex-col items-center justify-center py-32 text-center">
                         <div className="w-20 h-20 bg-zinc-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
                             <AlertCircle size={32} className="text-zinc-300" />

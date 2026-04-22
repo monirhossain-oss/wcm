@@ -12,7 +12,7 @@ export default function CreatorName({ creator, item, region, API_BASE_URL }) {
             onMouseEnter={() => { clearTimeout(hoverTimeout.current); setShowCreator(true); }}
             onMouseLeave={() => { hoverTimeout.current = setTimeout(() => setShowCreator(false), 150); }}>
             <button className="font-bold hover:underline dark:text-white cursor-pointer transition-colors whitespace-nowrap text-xs sm:text-sm">
-                {item?.creatorId.profile.displayName || 'Anonymous'}
+                {item?.creatorId?.profile.displayName || 'Anonymous'}
             </button>
 
             {showCreator && (

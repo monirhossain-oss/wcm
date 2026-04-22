@@ -5,7 +5,7 @@ import React from 'react';
 
 const  AboutVisibility = () => {
     return (
-        <section className="bg-white dark:bg-[#0a0a0a] py-20 px-6 flex flex-col items-center text-center transition-colors duration-500">
+        <section className="bg-white dark:bg-[#0a0a0a] px-6 flex flex-col items-center text-center transition-colors duration-500">
 
             {/*Symbolizing Passion for Culture */}
             <div className="mb-10 animate-pulse">
@@ -42,7 +42,7 @@ const  AboutVisibility = () => {
             </div>
 
             {/* এক্সপ্লোর বাটন */}
-            <Link href="/explore">
+            <Link href="/creators" className="inline-block">
                 <button className="px-10 py-4 cursor-pointer rounded-2xl bg-[#F57C00] text-white font-black hover:bg-[#e67600] transition-all shadow-2xl shadow-orange-500/20 hover:scale-105 active:scale-95 uppercase tracking-wider">
                     Explore Our Creators
                 </button>
