@@ -1,8 +1,10 @@
 import BoostListing from '@/components/boost-terms-and-ppc/BoostListing'
+import BoostMandatory from '@/components/boost-terms-and-ppc/BoostMandatory'
 import BoostPpce from '@/components/boost-terms-and-ppc/BoostPpce'
 import BoostPromotion from '@/components/boost-terms-and-ppc/BoostPromotion'
 import CreatorBoost from '@/components/boost-terms-and-ppc/CreatorBoost'
 import Hero from '@/components/boost-terms-and-ppc/Hero'
+import PromotionBudget from '@/components/boost-terms-and-ppc/PromotionBudget'
 import React from 'react'
 
 function page() {
@@ -14,6 +16,8 @@ function page() {
       <BoostListing/>
       <CreatorBoost/>
       <BoostPpce/>
+      <BoostMandatory/>
+      <PromotionBudget/>
     </div>
     </main>
   )
