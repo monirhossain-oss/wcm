@@ -18,6 +18,7 @@ import {
 import { getImageUrl } from '@/lib/imageHelper';
 import { Country, City } from 'country-state-city';
 import { ChevronDown, Grid, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
@@ -45,6 +46,7 @@ export default function UserProfileForm() {
       customerType: 'individual',
     },
   });
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   // Watch fields for conditional logic
   const selectedCountryCode = watch('countryCode');
@@ -419,9 +421,35 @@ export default function UserProfileForm() {
                 </div>
               </div>
 
+              {/* Terms and Conditions Checkbox */}
+              <div className="flex items-center gap-3 py-4 border-t border-gray-100 dark:border-white/5 mt-4">
+                <input
+                  type="checkbox"
+                  id="agreeTerms"
+                  checked={agreeTerms}
+                  onChange={(e) => setAgreeTerms(e.target.checked)}
+                  className="w-4 h-4 accent-orange-500 cursor-pointer"
+                />
+
+                <label
+                  htmlFor="agreeTerms"
+                  className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 cursor-pointer leading-relaxed flex items-center gap-1"
+                >
+                  I agree to the{' '}
+                  <Link
+                    href="/creator-terms-and-conditions"
+                    className="text-orange-500 underline hover:text-orange-600"
+                  >
+                    Creator Terms and Conditions
+                  </Link>{' '}
+                  and confirm that all provided information is accurate.
+                </label>
+              </div>
+
+              {/* বাটনটি আপডেট করুন (disabled প্রপার্টি লক্ষ্য করুন) */}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !agreeTerms} // এখানে !agreeTerms যোগ হয়েছে
                 className="w-full bg-orange-500 text-white py-5 rounded-md font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-orange-600 transition-all disabled:bg-gray-400"
               >
                 {isSubmitting ? 'Processing Node...' : 'Submit Application'}

@@ -51,6 +51,7 @@ const PublicNavbar = () => {
     };
     fetchCategories();
   }, []);
+
   const createSlug = (text) => {
     return text
       .toString()
@@ -84,17 +85,44 @@ const PublicNavbar = () => {
   return (
     <>
       <nav className="fixed top-0 left-0 w-full bg-white dark:bg-[#0a0a0a] z-50 border-b border-gray-100 dark:border-gray-900">
-        <div className="flex items-center justify-between max-w-7xl mx-auto px-6 h-20">
+        <div className="flex items-center justify-between max-w-7xl mx-auto px-4 md:px-6 h-20">
 
-          {/* Logo */}
-          <div className="flex items-center space-x-2">
+          {/* ── Left side: Hamburger (mobile only) + Logo ── */}
+          <div className="flex items-center gap-3">
+            {/* Hamburger — visible on mobile, hidden on md+ */}
+            <div
+              className="md:hidden h-9 w-9 p-2 cursor-pointer text-gray-700 dark:text-gray-200 flex-shrink-0 z-[400]"
+              onClick={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
+            >
+              {isMobileDrawerOpen ? (
+                <FiX className="h-full w-full animate-in spin-in-90 duration-200" />
+              ) : (
+                <FiMenu className="h-full w-full animate-in fade-in duration-200" />
+              )}
+            </div>
+
+            {/* Logo */}
             <Link href="/" className="cursor-pointer">
-              <Image src="/wc,-web-logo.png" alt="Logo Light" width={100} height={100} className="dark:hidden brightness-125 h-auto w-auto" />
-              <Image src="/wc,-web-white.png" alt="Logo Dark" width={100} height={100} className="hidden dark:block brightness-125 h-auto w-auto" />
+              {/* Light Mode Logo */}
+              <Image
+                src="/wc,-web-logo.png"
+                alt="Logo Light"
+                width={100}
+                height={100}
+                className="dark:hidden brightness-125 w-[80px] md:w-[100px] h-auto"
+              />
+              {/* Dark Mode Logo */}
+              <Image
+                src="/wc,-web-white.png"
+                alt="Logo Dark"
+                width={100}
+                height={100}
+                className="hidden dark:block brightness-125 w-[80px] md:w-[100px] h-auto"
+              />
             </Link>
           </div>
 
-          {/* Center Menu - Desktop */}
+          {/* ── Center Menu — Desktop only ── */}
           <div className="flex-1 flex justify-center">
             <div className="hidden md:flex space-x-6 items-center">
               {menuItems.map((item) => {
@@ -113,21 +141,10 @@ const PublicNavbar = () => {
                         <FiChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} />
                       </button>
 
-                      {/* ── Desktop Mega Dropdown ── */}
+                      {/* Desktop Mega Dropdown */}
                       {isCategoryDropdownOpen && (
-                        <div
-                          className="
-                            fixed left-0 right-0
-                            top-[79px]
-                            bg-white dark:bg-[#111111]
-                            border-t border-b border-gray-100 dark:border-gray-800
-                            shadow-2xl z-[200]
-                            animate-in fade-in slide-in-from-top-1 duration-200
-                          "
-                        >
+                        <div className="fixed left-0 right-0 top-[79px] bg-white dark:bg-[#111111] border-t border-b border-gray-100 dark:border-gray-800 shadow-2xl z-[200] animate-in fade-in slide-in-from-top-1 duration-200">
                           <div className="max-w-7xl mx-auto px-6 py-6">
-
-                            {/* Header row */}
                             <div className="flex items-center justify-between mb-5">
                               <div className="flex items-center gap-2">
                                 <FiGrid className="text-[#F57C00] w-4 h-4" />
@@ -147,7 +164,6 @@ const PublicNavbar = () => {
                               </Link>
                             </div>
 
-                            {/* Scrollable grid */}
                             {isLoadingCategories ? (
                               <div className="grid grid-cols-6 gap-3">
                                 {Array.from({ length: 12 }).map((_, i) => (
@@ -157,16 +173,11 @@ const PublicNavbar = () => {
                             ) : (
                               <div
                                 className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 max-h-[340px] overflow-y-auto pr-1"
-                                style={{
-                                  scrollbarWidth: 'thin',
-                                  scrollbarColor: 'rgba(156,163,175,0.5) transparent',
-                                }}
+                                style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(156,163,175,0.5) transparent' }}
                               >
-                                {/* Desktop Grid Link - Update this part */}
                                 {categories.map((cat) => (
                                   <Link
                                     key={cat._id || cat.id}
-                                    // query parameter এর বদলে dynamic route ব্যবহার
                                     href={`/explore/${createSlug(cat.title || cat.name)}`}
                                     onClick={() => setIsCategoryDropdownOpen(false)}
                                     className="group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-[#F57C00]/40 hover:bg-orange-50 dark:hover:bg-orange-500/5 transition-all duration-150 cursor-pointer"
@@ -200,9 +211,10 @@ const PublicNavbar = () => {
             </div>
           </div>
 
-          {/* Right Side */}
-          <div className="flex items-center space-x-4">
+          {/* ── Right Side ── */}
+          <div className="flex items-center space-x-2 md:space-x-4">
 
+            {/* Wishlist — only when logged in */}
             {user && (
               <Link href="/favorites" className="relative p-2 group transition-all duration-200" title="My Wishlist">
                 <FiHeart className={`h-6 w-6 transition-colors ${pathname === '/favorites' ? 'text-red-500 fill-red-500' : 'text-gray-600 dark:text-gray-300 group-hover:text-red-500'}`} />
@@ -215,12 +227,15 @@ const PublicNavbar = () => {
             )}
 
             {user ? (
-              <div className="relative flex items-center space-x-3">
+              <div className="relative flex items-center space-x-2 md:space-x-3">
+                {/* "Become a Creator" — desktop only */}
                 {user.role === 'user' && (
                   <Link href="/become-creator" className="hidden md:block px-4 py-2 rounded-lg bg-[#F57C00] text-white text-xs font-bold shadow-md hover:bg-[#e67600] transition-all">
                     Become a Creator
                   </Link>
                 )}
+
+                {/* Profile dropdown */}
                 <div className="relative">
                   <div
                     className="flex items-center space-x-2 cursor-pointer p-1 pr-3 rounded-full border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
@@ -231,12 +246,20 @@ const PublicNavbar = () => {
                     </div>
                     <span className="hidden lg:block text-xs font-semibold capitalize">{user.username}</span>
                   </div>
+
                   {isProfileOpen && (
                     <div className="absolute top-12 right-0 w-48 bg-white dark:bg-[#1a1a1a] shadow-xl border border-gray-100 dark:border-gray-800 rounded-xl py-2 z-[60] animate-in slide-in-from-top-2 duration-200">
-                      <Link href={getDashboardLink()} className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" onClick={() => setIsProfileOpen(false)}>
+                      <Link
+                        href={getDashboardLink()}
+                        className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
                         {user?.role === 'admin' ? 'Admin Dashboard' : user?.role === 'creator' ? 'Creator Dashboard' : 'Profile'}
                       </Link>
-                      <button onClick={() => { logoutUser(); setIsProfileOpen(false); }} className="w-full text-left flex items-center space-x-2 px-4 py-2 text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <button
+                        onClick={() => { logoutUser(); setIsProfileOpen(false); }}
+                        className="w-full text-left flex items-center space-x-2 px-4 py-2 text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
                         <FiLogOut /><span>Logout</span>
                       </button>
                     </div>
@@ -244,17 +267,22 @@ const PublicNavbar = () => {
                 </div>
               </div>
             ) : (
-              <div className="hidden md:flex items-center space-x-2">
-                <button onClick={() => setIsLoginOpen(true)} className="px-5 py-2 border-2 border-[#F57C00] text-[#F57C00] font-bold text-sm rounded-xl hover:bg-[#F57C00] hover:text-white transition-all duration-300">
+              /* ── Auth buttons: visible on BOTH mobile and desktop ── */
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <button
+                  onClick={() => setIsLoginOpen(true)}
+                  className="px-3 py-1.5 md:px-5 md:py-2 border-2 border-[#F57C00] text-[#F57C00] font-bold text-xs md:text-sm rounded-xl hover:bg-[#F57C00] hover:text-white transition-all duration-300 whitespace-nowrap"
+                >
                   Sign In
                 </button>
-                <button onClick={() => setIsRegisterOpen(true)} className="px-5 py-2 rounded-lg bg-[#F57C00] text-white text-sm font-bold hover:bg-[#e67600] transition-all shadow-md active:scale-95">
+                <button
+                  onClick={() => setIsRegisterOpen(true)}
+                  className="px-3 py-1.5 md:px-5 md:py-2 rounded-lg bg-[#F57C00] text-white text-xs md:text-sm font-bold hover:bg-[#e67600] transition-all shadow-md active:scale-95 whitespace-nowrap"
+                >
                   Sign Up
                 </button>
               </div>
             )}
-
-            <FiMenu className="md:hidden h-9 w-9 p-2 cursor-pointer text-gray-700 dark:text-gray-200" onClick={() => setIsMobileDrawerOpen(true)} />
           </div>
         </div>
 
@@ -266,13 +294,11 @@ const PublicNavbar = () => {
           />
         )}
 
-        {/* ── Mobile Drawer ── */}
-        <div className={`fixed top-0 right-0 h-full w-[75%] max-w-xs bg-white dark:bg-[#0a0a0a] shadow-2xl transform transition-transform duration-300 md:hidden z-[300] flex flex-col ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-
-          <div className="flex justify-between items-center px-5 py-5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
-            <span className="font-bold text-[#F57C00] uppercase tracking-widest text-sm">Menu</span>
-            <FiX className="text-2xl cursor-pointer text-gray-500" onClick={() => setIsMobileDrawerOpen(false)} />
-          </div>
+        {/* ── Mobile Drawer — slides in from the LEFT ── */}
+        <div
+          className={`fixed top-18 left-0 h-full w-[75%] max-w-xs bg-white dark:bg-[#0a0a0a] shadow-2xl transform transition-transform duration-300 md:hidden z-[300] flex flex-col
+            ${isMobileDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        >
 
           {/* Scrollable drawer body */}
           <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5">
@@ -300,7 +326,6 @@ const PublicNavbar = () => {
                         className="mx-1 mb-2 mt-1 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-white/[0.02] overflow-y-auto"
                         style={{ maxHeight: '360px', scrollbarWidth: 'thin', scrollbarColor: 'rgba(156,163,175,0.4) transparent' }}
                       >
-                        {/* Browse All link at top */}
                         <Link
                           href="/explore"
                           onClick={() => { setIsMobileCategoryOpen(false); setIsMobileDrawerOpen(false); }}
@@ -320,13 +345,11 @@ const PublicNavbar = () => {
                           </div>
                         ) : (
                           <div className="p-2 flex flex-col gap-0.5">
-                            {/* Desktop Grid Link - Update this part */}
                             {categories.map((cat) => (
                               <Link
                                 key={cat._id || cat.id}
-                                // query parameter এর বদলে dynamic route ব্যবহার
                                 href={`/explore/${createSlug(cat.title || cat.name)}`}
-                                onClick={() => setIsCategoryDropdownOpen(false)}
+                                onClick={() => { setIsMobileCategoryOpen(false); setIsMobileDrawerOpen(false); }}
                                 className="group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-[#F57C00]/40 hover:bg-orange-50 dark:hover:bg-orange-500/5 transition-all duration-150 cursor-pointer"
                               >
                                 <span className="w-2 h-2 rounded-full bg-gray-200 dark:bg-gray-700 group-hover:bg-[#F57C00] flex-shrink-0 transition-colors duration-150" />
@@ -372,19 +395,33 @@ const PublicNavbar = () => {
 
             {user ? (
               <>
-                <Link href={getDashboardLink()} onClick={() => setIsMobileDrawerOpen(false)} className="flex items-center px-3 py-3.5 text-[15px] font-semibold text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5">
+                <Link
+                  href={getDashboardLink()}
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className="flex items-center px-3 py-3.5 text-[15px] font-semibold text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5"
+                >
                   Dashboard
                 </Link>
-                <button onClick={() => { logoutUser(); setIsMobileDrawerOpen(false); }} className="flex items-center gap-2 px-3 py-3.5 text-[15px] font-bold text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-left w-full">
+                <button
+                  onClick={() => { logoutUser(); setIsMobileDrawerOpen(false); }}
+                  className="flex items-center gap-2 px-3 py-3.5 text-[15px] font-bold text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-left w-full"
+                >
                   <FiLogOut className="w-4 h-4" /> Logout
                 </button>
               </>
             ) : (
+              /* Auth buttons inside the drawer (fallback for very small screens) */
               <div className="flex flex-col gap-3 pt-2 px-1">
-                <button onClick={() => { setIsMobileDrawerOpen(false); setIsLoginOpen(true); }} className="px-6 py-3 border-2 border-[#F57C00] text-[#F57C00] font-bold rounded-xl text-center">
+                <button
+                  onClick={() => { setIsMobileDrawerOpen(false); setIsLoginOpen(true); }}
+                  className="px-6 py-3 border-2 border-[#F57C00] text-[#F57C00] font-bold rounded-xl text-center"
+                >
                   Sign In
                 </button>
-                <button onClick={() => { setIsMobileDrawerOpen(false); setIsRegisterOpen(true); }} className="bg-[#F57C00] text-white px-6 py-3 rounded-xl text-center font-bold shadow-md">
+                <button
+                  onClick={() => { setIsMobileDrawerOpen(false); setIsRegisterOpen(true); }}
+                  className="bg-[#F57C00] text-white px-6 py-3 rounded-xl text-center font-bold shadow-md"
+                >
                   Sign Up
                 </button>
               </div>

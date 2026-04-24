@@ -395,7 +395,7 @@ const PrivacyPolicyPage = () => {
                                     </svg>
                                 </div>
                                 <span className="text-[14px] text-gray-400">
-                                    Paris, France &nbsp;·&nbsp; Washington, USA
+                                    50 avenue des Champs Élysées, 75008 Paris, France. &nbsp;·&nbsp; Washington, USA
                                 </span>
                             </div>
                         </div>

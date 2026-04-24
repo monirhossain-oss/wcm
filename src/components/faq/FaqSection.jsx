@@ -13,8 +13,8 @@ const FaqSection = () => {
 
     const categories = [
         { id: 'General', icon: <Globe size={16} />, label: 'General' },
-        { id: 'Artists', icon: <Users size={16} />, label: 'For Creators and Artists' }, // ঠিক করা হয়েছে
-        { id: 'Creators', icon: <Rocket size={16} />, label: 'For Visitors and Buyers' }, // ঠিক করা হয়েছে
+        { id: 'Artists', icon: <Users size={16} />, label: 'For Creators and Artists' },
+        { id: 'Creators', icon: <Rocket size={16} />, label: 'For Visitors and Buyers' },
         { id: 'Platform', icon: <Zap size={16} />, label: 'Platform Policies' },
         { id: 'Technical', icon: <ShieldQuestion size={16} />, label: 'Technical Questions' },
     ];
@@ -34,6 +34,7 @@ const FaqSection = () => {
     }, [API_BASE_URL]);
 
     const currentFaqs = faqs.filter(faq => faq.category === activeCategory);
+    console.log(currentFaqs)
 
     return (
         <section className="bg-white dark:bg-[#0a0a0a] py-12 px-6 min-h-[500px]">
