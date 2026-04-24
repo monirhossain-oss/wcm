@@ -34,7 +34,7 @@ const  AboutVisibility = () => {
 
             {/*Location and Global Mission */}
             <div className="mb-12 flex flex-col md:flex-row items-center gap-4 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
-                <span>Based in Paris, France</span>
+                <span>Based in 50 avenue des Champs Élysées, 75008 Paris, France.</span>
                 <span className="hidden md:block text-[#F57C00]">•</span>
                 <span>Washington, USA</span>
                 <span className="hidden md:block text-[#F57C00]">•</span>

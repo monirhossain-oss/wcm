@@ -499,7 +499,7 @@ const AdvertisingPolicyPage = () => {
                 <ContactSection />
                 {/* 15. Governing Law */}
                 <PolicySection number="Section 15" title="Governing Law">
-                    <p>These Advertising Terms shall be governed by the laws of **France**. Any disputes shall be subject to the jurisdiction of the courts of **Paris, France**.</p>
+                    <p>These Advertising Terms shall be governed by the laws of **France**. Any disputes shall be subject to the jurisdiction of the courts of **50 avenue des Champs Élysées, 75008 Paris, France**.</p>
                 </PolicySection>
             </div>
         </div>

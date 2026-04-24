@@ -403,7 +403,7 @@ const CookiePolicy = () => {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
                                         ),
-                                        text: <span className="text-[14px] text-gray-400">Paris, France &nbsp;·&nbsp; Washington, USA</span>,
+                                        text: <span className="text-[14px] text-gray-400">50 avenue des Champs Élysées, 75008 Paris, France. &nbsp;·&nbsp; Washington, USA</span>,
                                     },
                                 ].map((row, i) => (
                                     <div key={i} className="flex items-center gap-3">

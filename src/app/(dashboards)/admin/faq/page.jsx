@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Save, X, Loader2, Eye } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import Swal from 'sweetalert2'; // SweetAlert2 ইম্পোর্ট করুন
+import Swal from 'sweetalert2';
 import { createFaq, deleteFaq, updateFaq, getAllFaqs } from '@/services/faqService';
 
 const AdminFaqPage = () => {
@@ -19,8 +19,8 @@ const AdminFaqPage = () => {
 
     const categories = [
         { id: 'General', label: 'General' },
-        { id: 'Artists', label: 'For Creators and Artists' },
-        { id: 'Creators', label: 'For Visitors and Buyers' },
+        { id: 'Creators', label: 'For Creators and Artists' },
+        { id: 'Visitors', label: 'For Visitors and Buyers' },
         { id: 'Platform', label: 'Platform Policies' },
         { id: 'Technical', label: 'Technical Questions' },
     ];
