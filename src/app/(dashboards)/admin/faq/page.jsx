@@ -17,9 +17,10 @@ const AdminFaqPage = () => {
         category: 'General'
     });
 
+    // ক্যাটাগরি আইডি এবং লেবেল ফ্রন্টএন্ডের সাথে মিল রেখে ফিক্স করা হয়েছে
     const categories = [
         { id: 'General', label: 'General' },
-        { id: 'Creators', label: 'For Creators and Artists' },
+        { id: 'Artists', label: 'For Creators and Artists' },
         { id: 'Visitors', label: 'For Visitors and Buyers' },
         { id: 'Platform', label: 'Platform Policies' },
         { id: 'Technical', label: 'Technical Questions' },
@@ -41,18 +42,17 @@ const AdminFaqPage = () => {
         }
     };
 
-    // --- ডিলিট হ্যান্ডলার (SweetAlert2 সহ) ---
     const handleDelete = async (id) => {
         Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ea580c', // আপনার অরেঞ্জ থিমের সাথে মিল রেখে
+            confirmButtonColor: '#ea580c',
             cancelButtonColor: '#3f3f46',
             confirmButtonText: 'Yes, delete it!',
             cancelButtonText: 'Cancel',
-            background: '#18181b', // ডার্ক মোড ব্যাকগ্রাউন্ড
+            background: '#18181b',
             color: '#fff'
         }).then(async (result) => {
             if (result.isConfirmed) {
@@ -66,7 +66,7 @@ const AdminFaqPage = () => {
                         color: '#fff',
                         confirmButtonColor: '#ea580c',
                     });
-                    loadFaqs(); // টেবিল রিফ্রেশ
+                    loadFaqs();
                 } catch (err) {
                     toast.error("Delete failed");
                 }
@@ -77,13 +77,12 @@ const AdminFaqPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // অ্যাড বা আপডেট করার আগে কনফার্মেশন অ্যালার্ট
         Swal.fire({
             title: isEditing ? 'Update FAQ?' : 'Add New FAQ?',
             text: isEditing ? "Do you want to save the changes?" : "Do you want to publish this FAQ?",
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#ea580c', // Orange theme
+            confirmButtonColor: '#ea580c',
             cancelButtonColor: '#3f3f46',
             confirmButtonText: isEditing ? 'Yes, Update' : 'Yes, Save it!',
             cancelButtonText: 'Cancel',
@@ -99,8 +98,6 @@ const AdminFaqPage = () => {
                         await createFaq(formData);
                         toast.success("New FAQ Added!");
                     }
-
-                    // সাকসেস হওয়ার পর ফর্ম রিসেট এবং ডাটা রিলোড
                     setFormData({ question: '', answer: '', category: 'General' });
                     setIsEditing(null);
                     loadFaqs();
@@ -193,6 +190,7 @@ const AdminFaqPage = () => {
                                         <td className="py-4 px-6 font-medium max-w-md truncate">{faq.question}</td>
                                         <td className="py-4 px-6">
                                             <span className="px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold uppercase tracking-wider">
+                                                {/* ID থেকে Label খুঁজে দেখাচ্ছে */}
                                                 {categories.find(c => c.id === faq.category)?.label || faq.category}
                                             </span>
                                         </td>
