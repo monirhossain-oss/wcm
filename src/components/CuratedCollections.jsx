@@ -11,7 +11,7 @@ const curatedData = [
     { title: 'Cultural Art & Sculptures', key: 'art', image: '/Cultural-art-and-sculptures.png' },
     { title: 'Handmade Crafts', key: 'crafts', image: '/Hand-made-crafts (2).png' },
     { title: 'Beauty & Personal Care', key: 'beauty', image: '/Beauty-and-personal-care.png' },
-    { title: 'Festivals & Cultural Celebrations', key: 'festivals', image: '/fastivals & cultural Celebration.png' },
+    { title: 'Festivals & Cultural Celebrations', key: 'festivals', image: '/fastivals-and-cultural-Celebration.png' },
 ];
 
 export default function CuratedCollections() {
