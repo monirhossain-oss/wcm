@@ -39,7 +39,7 @@ export default function CookieConsent() {
             </h4>
             <p className="text-[10px] md:text-[12px] text-gray-500 dark:text-gray-400 font-bold leading-relaxed max-w-2xl uppercase italic">
               We use analytics cookies for a superior asset discovery experience. Review our{' '}
-              <a href="/privacy" className="text-orange-500 underline underline-offset-4">
+              <a href="/privacy-policy" className="text-orange-500 underline underline-offset-4">
                 Legal Documentation
               </a>
               .

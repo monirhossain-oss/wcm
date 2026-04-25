@@ -11,10 +11,11 @@ const FaqSection = () => {
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+    // ক্যাটাগরি আইডি এবং লেবেল ফিক্স করা হয়েছে
     const categories = [
         { id: 'General', icon: <Globe size={16} />, label: 'General' },
         { id: 'Artists', icon: <Users size={16} />, label: 'For Creators and Artists' },
-        { id: 'Creators', icon: <Rocket size={16} />, label: 'For Visitors and Buyers' },
+        { id: 'Visitors', icon: <Rocket size={16} />, label: 'For Visitors and Buyers' },
         { id: 'Platform', icon: <Zap size={16} />, label: 'Platform Policies' },
         { id: 'Technical', icon: <ShieldQuestion size={16} />, label: 'Technical Questions' },
     ];
@@ -33,8 +34,8 @@ const FaqSection = () => {
         fetchFaqs();
     }, [API_BASE_URL]);
 
+    // অ্যাক্টিভ ক্যাটাগরি অনুযায়ী ফিল্টার
     const currentFaqs = faqs.filter(faq => faq.category === activeCategory);
-    console.log(currentFaqs)
 
     return (
         <section className="bg-white dark:bg-[#0a0a0a] py-12 px-6 min-h-[500px]">
@@ -60,8 +61,8 @@ const FaqSection = () => {
                                 setOpenIndex(null);
                             }}
                             className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 border ${activeCategory === cat.id
-                                ? 'bg-[#F57C00] border-[#F57C00] text-white shadow-lg'
-                                : 'bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400 hover:border-gray-300'
+                                    ? 'bg-[#F57C00] border-[#F57C00] text-white shadow-lg'
+                                    : 'bg-gray-50 dark:bg-zinc-900 border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400 hover:border-gray-300'
                                 }`}
                         >
                             {cat.icon}
@@ -72,9 +73,6 @@ const FaqSection = () => {
 
                 {/* FAQ Content Area */}
                 <div className="space-y-4">
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 border-b border-gray-100 dark:border-zinc-800 pb-4 w-fit pr-20">
-                        {activeCategory}
-                    </h3>
 
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 space-y-4">
@@ -96,7 +94,8 @@ const FaqSection = () => {
                                         {faq.question}
                                     </span>
                                     <ChevronDown
-                                        className={`transition-transform duration-300 ${openIndex === index ? 'rotate-180 text-gray-900 dark:text-white' : 'text-gray-400'}`}
+                                        className={`transition-transform duration-300 ${openIndex === index ? 'rotate-180 text-gray-900 dark:text-white' : 'text-gray-400'
+                                            }`}
                                         size={20}
                                     />
                                 </button>
