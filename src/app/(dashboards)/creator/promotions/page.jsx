@@ -91,8 +91,8 @@ export default function PromotionsPage() {
 
   const PPC_COST_PER_CLICK = 0.3;
 
-  const hasActiveBoost = selectedListing?.promotion?.boost?.isActive;
-  const hasActivePpc = selectedListing?.promotion?.ppc?.isActive;
+  const hasActiveBoost = selectedListing?.activePromoTypes?.boost || false;
+  const hasActivePpc = selectedListing?.activePromoTypes?.ppc || false;
 
   const estimatedClicks = Math.floor(ppcAmount / PPC_COST_PER_CLICK);
 
@@ -106,7 +106,29 @@ export default function PromotionsPage() {
         api.get('/api/listings/my-listings'),
         api.get('/api/users/me'),
       ]);
-      setListings(listRes.data.filter((l) => l.status === 'approved'));
+      const normalizedListings = listRes.data
+        .filter((l) => l.status === 'approved')
+        .map((listing) => {
+          const boostActive =
+            listing.activePromoTypes?.boost ??
+            (listing.promotion?.boost?.isActive &&
+              listing.promotion?.boost?.expiresAt &&
+              new Date(listing.promotion.boost.expiresAt) > new Date());
+          const ppcActive =
+            listing.activePromoTypes?.ppc ??
+            (listing.promotion?.ppc?.isActive && Number(listing.promotion?.ppc?.ppcBalance || 0) > 0);
+
+          return {
+            ...listing,
+            isPromoted: boostActive || ppcActive,
+            activePromoTypes: {
+              boost: !!boostActive,
+              ppc: !!ppcActive,
+            },
+          };
+        });
+
+      setListings(normalizedListings);
       setWalletBalance(userRes.data.walletBalance || 0);
     } catch (err) {
       toast.error('Synchronization failed');
@@ -146,9 +168,8 @@ export default function PromotionsPage() {
     }
   };
 
-  const isBoostActive = (l) =>
-    l.promotion?.boost?.isActive && new Date(l.promotion.boost.expiresAt) > new Date();
-  const isPpcActive = (l) => l.promotion?.ppc?.isActive && l.promotion.ppc.ppcBalance > 0;
+  const isBoostActive = (listing) => !!listing?.activePromoTypes?.boost;
+  const isPpcActive = (listing) => !!listing?.activePromoTypes?.ppc;
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -219,7 +240,7 @@ export default function PromotionsPage() {
                       </div>
                     </td>
                     <td className="px-8 py-5">
-                      {item.isPromoted ? (
+                      {isFullyPromoted || boost || ppc ? (
                         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase bg-green-500/10 text-green-500 border border-green-500/20">
                           <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse" /> Live
                         </span>

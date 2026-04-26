@@ -80,9 +80,7 @@ export default function PromotionInsightsPage() {
     let estimatedRefund = 0;
     const now = new Date();
 
-    // ডাটা থেকে বুস্ট এবং পিপিসি আলাদা করে নেওয়া (যাতে কোড ক্লিন থাকে)
     const currentBoost = data?.boost;
-    console.log(currentBoost)
     const currentPpc = data?.ppc;
 
     if (packageType === 'boost' && currentBoost?.isActive && currentBoost?.expiresAt) {
@@ -181,6 +179,14 @@ export default function PromotionInsightsPage() {
 
   if (!data) return null;
   const { ppc, boost } = data;
+  const boostIsLive =
+    !!boost?.isActive &&
+    !!boost?.expiresAt &&
+    new Date(boost.expiresAt).getTime() > Date.now() &&
+    Number(boost.hoursRemaining || 0) > 0;
+  const ppcIsLive = !!ppc?.isActive && Number(ppc.balance || 0) > 0;
+  const ppcStatusLabel = ppcIsLive ? (ppc.isPaused ? 'Paused' : 'Live') : 'Ended';
+  const boostStatusLabel = boostIsLive ? (boost.isPaused ? 'Paused' : 'Live') : 'Ended';
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans">
@@ -243,11 +249,7 @@ export default function PromotionInsightsPage() {
                   <MetricBox label="In Queue" value={ppc.clicksRemaining} sub="Clicks Left" />
                   <MetricBox label="Delivered" value={ppc.clicksUsed} sub="Total Sent" />
                   <MetricBox label="Budget" value={`€${ppc.balance}`} sub="Remaining" />
-                  <MetricBox
-                    label="Status"
-                    value={ppc.isActive ? (ppc.isPaused ? 'Paused' : 'Live') : 'Ended'}
-                    sub="Current State"
-                  />
+                  <MetricBox label="Status" value={ppcStatusLabel} sub="Current State" />
                 </div>
                 <div className="space-y-4 mb-10">
                   <div className="flex justify-between items-end">
@@ -270,11 +272,11 @@ export default function PromotionInsightsPage() {
           </div>
 
           {/* Action Buttons at Bottom */}
-          {ppc.isActive && editMode !== 'ppc' && (
+          {ppcIsLive && editMode !== 'ppc' && (
             <div className="flex items-center pt-6 border-t border-black/5 dark:border-white/5">
               <ControlBtn
                 icon={ppc.isPaused ? FiPlayCircle : FiPauseCircle}
-                label={ppc.isPaused ? 'Resume' : 'Paused'}
+                label={ppc.isPaused ? 'Resume' : 'Pause'}
                 onClick={() => handleTogglePause('ppc')}
                 loading={actionLoading === 'ppc_pause'}
               />
@@ -292,7 +294,7 @@ export default function PromotionInsightsPage() {
 
         {/* BOOST CARD */}
         <div
-          className={`rounded-2xl p-6 border transition-all flex flex-col justify-between relative shadow-sm ${boost.isActive ? 'bg-white dark:bg-[#0c0c0c] border-orange-500/20' : 'bg-zinc-50 dark:bg-white/2 opacity-60'}`}
+          className={`rounded-2xl p-6 border transition-all flex flex-col justify-between relative shadow-sm ${boostIsLive ? 'bg-white dark:bg-[#0c0c0c] border-orange-500/20' : 'bg-zinc-50 dark:bg-white/2 opacity-60'}`}
         >
           <div>
             <div className="flex items-center gap-3 mb-10">
@@ -316,25 +318,34 @@ export default function PromotionInsightsPage() {
                 <div
                   className={`text-7xl font-black tracking-tighter mb-2 ${boost.isPaused ? 'text-zinc-400' : 'text-zinc-900 dark:text-white'}`}
                 >
-                  {boost.isActive
+                  {boostIsLive
                     ? boost.isExpiringSoon
                       ? boost.hoursRemaining
                       : boost.daysRemaining
                     : '0'}
                 </div>
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em]">
-                  {boost.isPaused ? 'PAUSED' : boost.isExpiringSoon ? 'Hours Left' : 'Days Left'}
+                  {boostIsLive
+                    ? boost.isPaused
+                      ? 'Paused'
+                      : boost.isExpiringSoon
+                        ? 'Hours Left'
+                        : 'Days Left'
+                    : 'Ended'}
+                </p>
+                <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-orange-500">
+                  {boostStatusLabel}
                 </p>
               </div>
             )}
           </div>
 
           {/* Action Buttons at Bottom */}
-          {boost.isActive && editMode !== 'boost' && (
+          {boostIsLive && editMode !== 'boost' && (
             <div className="flex items-center pt-6 border-t border-black/5 dark:border-white/5">
               <ControlBtn
                 icon={boost.isPaused ? FiPlayCircle : FiPauseCircle}
-                label={boost.isPaused ? 'Resume' : 'Paused'}
+                label={boost.isPaused ? 'Resume' : 'Pause'}
                 onClick={() => handleTogglePause('boost')}
                 loading={actionLoading === 'boost_pause'}
               />
