@@ -109,7 +109,7 @@ const PublicNavbar = () => {
                 alt="Logo Light"
                 width={100}
                 height={100}
-                className="dark:hidden brightness-125 w-[80px] md:w-[100px] h-auto"
+                className="dark:hidden brightness-125 w-[80px] md:w-[130px] h-auto"
               />
               {/* Dark Mode Logo */}
               <Image
@@ -117,7 +117,7 @@ const PublicNavbar = () => {
                 alt="Logo Dark"
                 width={100}
                 height={100}
-                className="hidden dark:block brightness-125 w-[80px] md:w-[100px] h-auto"
+                className="hidden dark:block brightness-125 w-[80px] md:w-[130px] h-auto"
               />
             </Link>
           </div>
@@ -144,25 +144,7 @@ const PublicNavbar = () => {
                       {/* Desktop Mega Dropdown */}
                       {isCategoryDropdownOpen && (
                         <div className="fixed left-0 right-0 top-[79px] bg-white dark:bg-[#111111] border-t border-b border-gray-100 dark:border-gray-800 shadow-2xl z-[200] animate-in fade-in slide-in-from-top-1 duration-200">
-                          <div className="max-w-7xl mx-auto px-6 py-6">
-                            <div className="flex items-center justify-between mb-5">
-                              <div className="flex items-center gap-2">
-                                <FiGrid className="text-[#F57C00] w-4 h-4" />
-                                <span className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                  All Categories
-                                </span>
-                              </div>
-                              <Link
-                                href="/explore"
-                                onClick={() => setIsCategoryDropdownOpen(false)}
-                                className="text-xs font-bold text-[#F57C00] hover:underline underline-offset-2 flex items-center gap-1"
-                              >
-                                Browse All
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                                </svg>
-                              </Link>
-                            </div>
+                          <div className="max-w-7xl mx-auto px-6 py-2">
 
                             {isLoadingCategories ? (
                               <div className="grid grid-cols-6 gap-3">
