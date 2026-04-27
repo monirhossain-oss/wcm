@@ -40,8 +40,8 @@ export default function RegisterForm({ onClose, onSwitchToLogin }) {
     try {
       const result = await registerUser(payload);
       if (result.success) {
-        alert('Registration Successful! Please login.');
-        onSwitchToLogin(); 
+        onClose();
+        alert('Registration successful! Please check your email to verify your account.');
       } else {
         setServerError(result.message || 'Registration failed.');
       }
