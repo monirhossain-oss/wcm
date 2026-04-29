@@ -112,7 +112,14 @@ export default function CreateBlogPage() {
     setFormData({ ...formData, content: newContent });
     const newGridFiles = { ...gridFiles };
     delete newGridFiles[index];
-    setGridFiles(newGridFiles);
+    // Re-index remaining grid files
+    const reIndexed = {};
+    Object.keys(newGridFiles).forEach((key) => {
+      const numKey = parseInt(key);
+      const newKey = numKey > index ? numKey - 1 : numKey;
+      reIndexed[newKey] = newGridFiles[key];
+    });
+    setGridFiles(reIndexed);
   };
 
   const handleGridImageChange = (blockIdx, file) => {
@@ -120,6 +127,13 @@ export default function CreateBlogPage() {
     const currentFiles = gridFiles[blockIdx] || [];
     if (currentFiles.length >= 4) return toast.error('Max 4 images per grid');
     setGridFiles({ ...gridFiles, [blockIdx]: [...currentFiles, file] });
+  };
+
+  // ✅ New: Remove a single image from a grid block by its file index
+  const handleRemoveGridImage = (blockIdx, fileIdx) => {
+    const currentFiles = gridFiles[blockIdx] || [];
+    const updatedFiles = currentFiles.filter((_, i) => i !== fileIdx);
+    setGridFiles({ ...gridFiles, [blockIdx]: updatedFiles });
   };
 
   const handleSubmit = async (e) => {
@@ -300,7 +314,7 @@ export default function CreateBlogPage() {
               </label>
               <div
                 onClick={() => formData.category && setShowTagDrop(!showTagDrop)}
-                className={`flex flex-wrap gap-2 p-4 min-h-[56px] bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-lg text-xs font-bold cursor-pointer ${!formData.category && 'opacity-50 grayscale cursor-not-allowed'}`}
+                className={`flex flex-wrap gap-2 p-4 min-h-14 bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-lg text-xs font-bold cursor-pointer ${!formData.category && 'opacity-50 grayscale cursor-not-allowed'}`}
               >
                 {formData.selectedTags.length === 0 && (
                   <span className="text-gray-400 italic">Select category first...</span>
@@ -383,7 +397,7 @@ export default function CreateBlogPage() {
           <section>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xs font-black uppercase text-orange-500 tracking-widest flex items-center gap-2">
-                <span className="w-8 h-[2px] bg-orange-500"></span> Body Builder
+                <span className="w-8 h-0.5 bg-orange-500"></span> Body Builder
               </h3>
               <div className="flex flex-wrap gap-2">
                 <ToolBtn icon={<FiPlus />} label="Heading" onClick={() => addBlock('heading')} />
@@ -413,12 +427,21 @@ export default function CreateBlogPage() {
                           {(gridFiles[idx] || []).map((file, fIdx) => (
                             <div
                               key={fIdx}
-                              className="aspect-square rounded-lg overflow-hidden border dark:border-white/10"
+                              className="relative aspect-square rounded-lg overflow-hidden border dark:border-white/10 group/img"
                             >
                               <img
                                 src={URL.createObjectURL(file)}
                                 className="w-full h-full object-cover"
+                                alt={`grid-${fIdx}`}
                               />
+                              {/* ✅ Individual delete button per image */}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveGridImage(idx, fIdx)}
+                                className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 text-white rounded-full opacity-0 group-hover/img:opacity-100 hover:bg-red-500 transition-all"
+                              >
+                                <FiX size={12} />
+                              </button>
                             </div>
                           ))}
                           {(gridFiles[idx] || []).length < 4 && (
