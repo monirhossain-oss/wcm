@@ -47,7 +47,6 @@ const BOOST_PACKAGES = [
   },
 ];
 
-// EU Countries for VAT dropdown
 const EU_COUNTRIES = [
   { code: 'FR', name: 'France' },
   { code: 'DE', name: 'Germany' },
@@ -67,6 +66,32 @@ const EU_COUNTRIES = [
   { code: 'GB', name: 'United Kingdom (Non-EU)' },
   { code: 'CA', name: 'Canada (Non-EU)' },
 ];
+
+/**
+ * Returns the display status of a listing based on its promotion state.
+ *
+ * Logic:
+ * - 'live'    → at least one campaign (boost or ppc) is active AND not paused
+ * - 'paused'  → at least one campaign exists (boost or ppc) but ALL active ones are paused
+ * - 'organic' → no campaigns at all
+ */
+function getListingStatus(listing) {
+  const boost = listing.activePromoTypes?.boost;
+  const ppc = listing.activePromoTypes?.ppc;
+  const boostPaused = listing.promoMeta?.boostPaused;
+  const ppcPaused = listing.promoMeta?.ppcPaused;
+
+  const hasAny = boost || ppc;
+  if (!hasAny) return 'organic';
+
+  // If at least one is active and NOT paused → live
+  const boostLive = boost && !boostPaused;
+  const ppcLive = ppc && !ppcPaused;
+  if (boostLive || ppcLive) return 'live';
+
+  // Has campaigns but all are paused
+  return 'paused';
+}
 
 export default function PromotionsPage() {
   const [listings, setListings] = useState([]);
@@ -106,6 +131,7 @@ export default function PromotionsPage() {
         api.get('/api/listings/my-listings'),
         api.get('/api/users/me'),
       ]);
+
       const normalizedListings = listRes.data
         .filter((l) => l.status === 'approved')
         .map((listing) => {
@@ -114,9 +140,15 @@ export default function PromotionsPage() {
             (listing.promotion?.boost?.isActive &&
               listing.promotion?.boost?.expiresAt &&
               new Date(listing.promotion.boost.expiresAt) > new Date());
+
           const ppcActive =
             listing.activePromoTypes?.ppc ??
-            (listing.promotion?.ppc?.isActive && Number(listing.promotion?.ppc?.ppcBalance || 0) > 0);
+            (listing.promotion?.ppc?.isActive &&
+              Number(listing.promotion?.ppc?.ppcBalance || 0) > 0);
+
+          // Read isPaused from the promotion object (from mongoose schema)
+          const boostPaused = listing.promotion?.boost?.isPaused ?? false;
+          const ppcPaused = listing.promotion?.ppc?.isPaused ?? false;
 
           return {
             ...listing,
@@ -124,6 +156,11 @@ export default function PromotionsPage() {
             activePromoTypes: {
               boost: !!boostActive,
               ppc: !!ppcActive,
+            },
+            // Store pause state separately so getListingStatus can use it
+            promoMeta: {
+              boostPaused,
+              ppcPaused,
             },
           };
         });
@@ -194,6 +231,7 @@ export default function PromotionsPage() {
           </p>
         </div>
       </div>
+
       {/* Table Section */}
       <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden shadow-sm">
         <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30">
@@ -217,6 +255,9 @@ export default function PromotionsPage() {
                 const ppc = isPpcActive(item);
                 const isFullyPromoted = boost && ppc;
 
+                // ✅ Derive the correct status using the helper
+                const listingStatus = getListingStatus(item);
+
                 return (
                   <tr
                     key={item._id}
@@ -239,17 +280,28 @@ export default function PromotionsPage() {
                         </div>
                       </div>
                     </td>
+
+                    {/* ✅ Status Badge — now uses getListingStatus() */}
                     <td className="px-8 py-5">
-                      {isFullyPromoted || boost || ppc ? (
+                      {listingStatus === 'live' && (
                         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase bg-green-500/10 text-green-500 border border-green-500/20">
-                          <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse" /> Live
+                          <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                          Live
                         </span>
-                      ) : (
+                      )}
+                      {listingStatus === 'paused' && (
+                        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                          <span className="w-1 h-1 rounded-full bg-yellow-500" />
+                          Paused
+                        </span>
+                      )}
+                      {listingStatus === 'organic' && (
                         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase bg-zinc-100 dark:bg-zinc-800 text-zinc-400">
                           Organic
                         </span>
                       )}
                     </td>
+
                     <td className="px-8 py-5">
                       <div className="flex gap-2">
                         {boost && (
@@ -267,6 +319,7 @@ export default function PromotionsPage() {
                         )}
                       </div>
                     </td>
+
                     <td className="px-8 py-5 text-right">
                       <div className="flex justify-end items-center gap-3">
                         <Link
@@ -281,10 +334,11 @@ export default function PromotionsPage() {
                         <button
                           disabled={isFullyPromoted}
                           onClick={() => setSelectedListing(item)}
-                          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${isFullyPromoted
-                            ? 'bg-zinc-50 dark:bg-zinc-900 text-zinc-300 dark:text-zinc-600 border border-zinc-100 dark:border-zinc-800 cursor-not-allowed opacity-50'
-                            : 'bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-orange-600 shadow-md'
-                            }`}
+                          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+                            isFullyPromoted
+                              ? 'bg-zinc-50 dark:bg-zinc-900 text-zinc-300 dark:text-zinc-600 border border-zinc-100 dark:border-zinc-800 cursor-not-allowed opacity-50'
+                              : 'bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-orange-600 dark:hover:bg-orange-600 shadow-md'
+                          }`}
                         >
                           <FiZap size={14} />
                           {isFullyPromoted ? 'Active' : 'Promote'}
@@ -298,10 +352,9 @@ export default function PromotionsPage() {
           </table>
         </div>
 
-        {/* --- Enhanced Pagination UI --- */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="px-8 py-6 bg-zinc-50 dark:bg-zinc-900/50 flex flex-col sm:flex-row items-center justify-between border-t border-zinc-100 dark:border-zinc-800 gap-4">
-            {/* Info Text */}
             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest order-2 sm:order-1">
               Showing <span className="text-zinc-900 dark:text-white">{indexOfFirstItem + 1}</span>{' '}
               to{' '}
@@ -311,9 +364,7 @@ export default function PromotionsPage() {
               of <span className="text-orange-500">{listings.length}</span> Assets
             </p>
 
-            {/* Controls */}
             <div className="flex items-center gap-2 order-1 sm:order-2">
-              {/* Prev Button */}
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
@@ -322,19 +373,18 @@ export default function PromotionsPage() {
                 Prev
               </button>
 
-              {/* Numbered Buttons */}
               <div className="flex items-center gap-1.5 px-2">
                 {[...Array(totalPages)].map((_, index) => {
                   const pageNum = index + 1;
-                  // Logic to show only a few numbers if totalPages is huge (Optional)
                   return (
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`w-9 h-9 rounded-lg text-[10px] font-black transition-all border ${currentPage === pageNum
-                        ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20'
-                        : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400'
-                        }`}
+                      className={`w-9 h-9 rounded-lg text-[10px] font-black transition-all border ${
+                        currentPage === pageNum
+                          ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20'
+                          : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400'
+                      }`}
                     >
                       {pageNum}
                     </button>
@@ -342,7 +392,6 @@ export default function PromotionsPage() {
                 })}
               </div>
 
-              {/* Next Button */}
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}
@@ -351,7 +400,6 @@ export default function PromotionsPage() {
                 Next
               </button>
 
-              {/* Jump to Last */}
               {totalPages > 2 && currentPage !== totalPages && (
                 <button
                   onClick={() => setCurrentPage(totalPages)}
@@ -366,10 +414,10 @@ export default function PromotionsPage() {
         )}
       </div>
 
+      {/* Promotion Modal */}
       {selectedListing && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
           <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-md overflow-hidden shadow-2xl border border-zinc-200 dark:border-white/10">
-            {/* Header */}
             <div className="p-6 border-b border-zinc-100 dark:border-white/5 flex justify-between items-center bg-zinc-50/50 dark:bg-white/5">
               <h3 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-3 dark:text-white">
                 <FiZap className="text-orange-500" size={18} /> Growth Protocol
@@ -383,31 +431,31 @@ export default function PromotionsPage() {
             </div>
 
             <div className="p-8 space-y-8">
-              {/* Type Switcher with Disable Logic */}
               <div className="flex p-1 bg-zinc-100 dark:bg-white/5 rounded-md">
                 <button
                   disabled={hasActiveBoost}
                   onClick={() => setPromoType('boost')}
-                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'boost'
-                    ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600'
-                    : 'text-zinc-500'
-                    } ${hasActiveBoost ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
+                    promoType === 'boost'
+                      ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600'
+                      : 'text-zinc-500'
+                  } ${hasActiveBoost ? 'opacity-30 cursor-not-allowed' : ''}`}
                 >
                   {hasActiveBoost ? 'Boost Active' : 'Viral Boost'}
                 </button>
                 <button
                   disabled={hasActivePpc}
                   onClick={() => setPromoType('ppc')}
-                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${promoType === 'ppc'
-                    ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600'
-                    : 'text-zinc-500'
-                    } ${hasActivePpc ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  className={`flex-1 py-3 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
+                    promoType === 'ppc'
+                      ? 'bg-white dark:bg-zinc-800 shadow-sm text-orange-600'
+                      : 'text-zinc-500'
+                  } ${hasActivePpc ? 'opacity-30 cursor-not-allowed' : ''}`}
                 >
                   {hasActivePpc ? 'PPC Active' : 'PPC Flow'}
                 </button>
               </div>
 
-              {/* --- Viral Boost Content --- */}
               {promoType === 'boost' ? (
                 <div className="space-y-3">
                   <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
@@ -421,10 +469,11 @@ export default function PromotionsPage() {
                           setBoostBudget(pkg.price);
                           setBoostDays(pkg.days);
                         }}
-                        className={`p-4 rounded-md border text-left transition-all ${boostBudget === pkg.price
-                          ? 'border-orange-500 bg-orange-500/5 ring-1 ring-orange-500'
-                          : 'border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/5 hover:border-zinc-400'
-                          }`}
+                        className={`p-4 rounded-md border text-left transition-all ${
+                          boostBudget === pkg.price
+                            ? 'border-orange-500 bg-orange-500/5 ring-1 ring-orange-500'
+                            : 'border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/5 hover:border-zinc-400'
+                        }`}
                       >
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-[10px] font-black uppercase tracking-widest dark:text-white">
@@ -440,7 +489,6 @@ export default function PromotionsPage() {
                   </div>
                 </div>
               ) : (
-                /* --- PPC Flow Content --- */
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
@@ -454,7 +502,7 @@ export default function PromotionsPage() {
                         onChange={(e) => {
                           const val = Number(e.target.value);
                           setPpcAmount(val);
-                          setTargetClicks(Math.floor(val / PPC_COST_PER_CLICK)); // ব্যাকএন্ডে পাঠানোর জন্য সেট
+                          setTargetClicks(Math.floor(val / PPC_COST_PER_CLICK));
                         }}
                         className="w-full bg-zinc-100 dark:bg-white/5 border border-transparent focus:border-orange-500 p-4 rounded-md text-sm font-black outline-none dark:text-white transition-all"
                         placeholder="Min €5"
@@ -465,7 +513,6 @@ export default function PromotionsPage() {
                     </div>
                   </div>
 
-                  {/* Estimated Clicks Display */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-zinc-50 dark:bg-white/5 rounded-md border border-zinc-100 dark:border-white/5">
                       <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">
@@ -487,7 +534,6 @@ export default function PromotionsPage() {
                 </div>
               )}
 
-              {/* Investment Summary */}
               <div className="p-6 bg-orange-500/5 rounded-md border border-orange-500/10 flex justify-between items-center">
                 <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
                   Total Investment
@@ -498,7 +544,7 @@ export default function PromotionsPage() {
                   </span>
                 </div>
               </div>
-              {/* Terms Agreement */}
+
               <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-white/5">
                 <div className="space-y-1">
                   <p className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">
@@ -530,7 +576,9 @@ export default function PromotionsPage() {
 
               <button
                 onClick={handlePurchase}
-                disabled={actionLoading || walletBalance < currentCost || currentCost < 5 || !agreedToTerms}
+                disabled={
+                  actionLoading || walletBalance < currentCost || currentCost < 5 || !agreedToTerms
+                }
                 className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-md font-black uppercase text-[10px] tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20 disabled:hover:bg-zinc-900"
               >
                 {actionLoading
