@@ -1,27 +1,36 @@
 import React from "react";
 
-const AboutHeader = () => {
-    return (
-        <section className="w-full p-8 ">
-            <div className="max-w-4xl mx-auto px-6 md:px-8 text-center space-y-8">
+const AboutHeader = ({ data }) => {
+    // ডাটাবেজ থেকে আসা ভ্যালুগুলো সেট করা, না থাকলে ডিফল্ট লেখা থাকবে
+    const title = data?.title || "About Our Marketplace";
+    const subTitle = data?.subTitle || "World Culture Marketplace (WCM) is a global platform dedicated to showcasing cultural creators, artisans, and storytellers from around the world.";
+    // console.log(data)
 
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl 
-                               font-bold tracking-tight 
-                               text-[#1F1F1F] dark:text-white
-                               leading-tight">
-                    About Our Marketplace
+    // স্টাইল সেটিংস (যদি ডাটাবেজ থেকে ব্যাকগ্রাউন্ড বা টেক্সট কালার কন্ট্রোল করতে চান)
+    const bgColor = data?.styleSettings?.backgroundColor || "transparent";
+    const textColor = data?.styleSettings?.textColor || "inherit";
+
+    return (
+        <section
+            className="w-full py-16 md:py-24 px-6"
+            style={{ backgroundColor: bgColor }}
+        >
+            <div className="max-w-4xl mx-auto text-center space-y-8">
+                {/* মেইন টাইটেল */}
+                <h1
+                    className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight animate-in fade-in slide-in-from-top-4 duration-700"
+                    style={{ color: textColor === "inherit" ? "" : textColor }}
+                >
+                    {title}
                 </h1>
 
-                <p className="text-base sm:text-lg md:text-xl 
-                              text-[#555555] dark:text-gray-300 
-                              leading-relaxed font-light 
-                              max-w-2xl mx-auto">
-                    World Culture Marketplace (WCM)
-                    is a global platform dedicated to showcasing cultural
-                    creators, artisans, and storytellers from around the world. Our mission is to provide a space
-                    where culture can be discovered, appreciated, and shared with respect and authenticity.
+                {/* সাব-টাইটেল বা ডেসক্রিপশন */}
+                <p
+                    className="text-base sm:text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto opacity-90 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200"
+                    style={{ color: textColor === "inherit" ? "" : textColor }}
+                >
+                    {subTitle}
                 </p>
-
             </div>
         </section>
     );
