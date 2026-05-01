@@ -127,6 +127,7 @@ export default function AdminLayout({ children }) {
     { name: 'Manage Blog', path: '/admin/blogs', icon: FiSettings },
     { name: 'Create Blog', path: '/admin/create-blog', icon: FiSettings },
     { name: 'Manage FAQ', path: '/admin/faq', icon: FaQ },
+    { name: 'Manage About', path: '/admin/manage-about', icon: MdOutlineInfo },
     { name: 'Manage Footer', path: '/admin/manage-footer', icon: TbLayoutBottombarCollapse },
     { name: 'Manage SEO', path: '/admin/seo-settings', icon: TbSeo },
   ];
