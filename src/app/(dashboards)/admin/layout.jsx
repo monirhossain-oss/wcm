@@ -116,6 +116,7 @@ export default function AdminLayout({ children }) {
     { name: 'User Management', path: '/admin/users', icon: FiUsers },
     { name: 'Creator Requests', path: '/admin/requests', icon: FiCheckCircle },
     { name: 'Global Listings', path: '/admin/listings', icon: FiLayout },
+    { name: 'Manage Curated Collection', path: '/admin/manage-curated-collection', icon: FiLayout },
     { name: 'Promoted Assets', path: '/admin/listings/promoted', icon: FiTrendingUp },
     { name: 'All Transactions', path: '/admin/transactions', icon: FiDollarSign },
     { name: 'Audit Logs', path: '/admin/logs', icon: FiShield },

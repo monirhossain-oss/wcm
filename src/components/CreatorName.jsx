@@ -1,25 +1,52 @@
 'use client';
 import { useState, useRef } from 'react';
 import CreatorPopover from './CreatorPopover';
-
+ 
 export default function CreatorName({ creator, item, region, API_BASE_URL }) {
-    const [showCreator, setShowCreator] = useState(false);
-    const hoverTimeout = useRef(null);
-    // console.log(item)
-
+  const [showCreator, setShowCreator] = useState(false);
+  const hoverTimeout = useRef(null);
+ 
+  // FIX: creator বা creator.profile যেকোনোটা null/undefined হলে crash করত
+  // এখন তিনটা স্তরে fallback আছে
+  const name =
+    creator?.profile?.displayName ||
+    creator?.username ||
+    'Unknown';
+ 
+  // creator না থাকলে শুধু নাম দেখাও, popover দেখাবে না
+  if (!creator) {
     return (
-        <div className="relative inline-block"
-            onMouseEnter={() => { clearTimeout(hoverTimeout.current); setShowCreator(true); }}
-            onMouseLeave={() => { hoverTimeout.current = setTimeout(() => setShowCreator(false), 150); }}>
-            <button className="font-bold hover:underline dark:text-white cursor-pointer transition-colors whitespace-nowrap text-xs sm:text-sm">
-                {item?.creatorId?.profile.displayName || 'Anonymous'}
-            </button>
-
-            {showCreator && (
-                <div className="absolute z-[200] bottom-full left-0 -translate-y-1 animate-creatorFade">
-                    <CreatorPopover creator={creator} item={item} API_BASE_URL={API_BASE_URL} creatorLocation={region} />
-                </div>
-            )}
-        </div>
+      <span className="font-bold dark:text-white text-xs sm:text-sm text-zinc-400">
+        Unknown
+      </span>
     );
+  }
+ 
+  return (
+    <div
+      className="relative inline-block"
+      onMouseEnter={() => {
+        clearTimeout(hoverTimeout.current);
+        setShowCreator(true);
+      }}
+      onMouseLeave={() => {
+        hoverTimeout.current = setTimeout(() => setShowCreator(false), 150);
+      }}
+    >
+      <button className="font-bold hover:underline dark:text-white cursor-pointer transition-colors whitespace-nowrap text-xs sm:text-sm">
+        {name}
+      </button>
+ 
+      {showCreator && (
+        <div className="absolute z-[200] bottom-full left-0 -translate-y-1 animate-creatorFade">
+          <CreatorPopover
+            creator={creator}
+            item={item}
+            API_BASE_URL={API_BASE_URL}
+            creatorLocation={region}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
