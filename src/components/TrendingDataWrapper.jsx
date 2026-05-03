@@ -7,12 +7,13 @@ export default async function TrendingDataWrapper() {
   try {
     // FIX: `api/` → `/api/` — আগে slash না থাকায় URL ভুল হচ্ছিল
     const res = await fetch(`${API_BASE_URL}/api/listings/trending?limit=8&page=1`, {
-      next: { revalidate: 30 },
+      // next: { revalidate: 30 },
     });
  
     if (!res.ok) throw new Error('Failed to fetch');
     const data = await res.json();
     const listings = data.listings || [];
+    console.log(listings);
  
     if (listings.length === 0) {
       return (
