@@ -20,6 +20,7 @@ import {
   FiDollarSign,
   FiTrendingUp,
   FiChevronDown,
+  FiHelpCircle,
 } from 'react-icons/fi';
 import {
   MdOutlineNavigation,
@@ -128,6 +129,7 @@ export default function AdminLayout({ children }) {
     { name: 'Manage Blog', path: '/admin/blogs', icon: FiSettings },
     { name: 'Create Blog', path: '/admin/create-blog', icon: FiSettings },
     { name: 'Manage FAQ', path: '/admin/faq', icon: FaQ },
+    { name: 'Manage How It Works', path: '/admin/manage-how-it-work', icon: FiHelpCircle },
     { name: 'Manage About', path: '/admin/manage-about', icon: MdOutlineInfo },
     { name: 'Manage Footer', path: '/admin/manage-footer', icon: TbLayoutBottombarCollapse },
     { name: 'Manage SEO', path: '/admin/seo-settings', icon: TbSeo },

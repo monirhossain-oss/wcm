@@ -1,9 +1,12 @@
 import React from 'react';
 
+// API URL কনফিগারেশন
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 export async function generateMetadata() {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seo?page=how-it-works`, {
-            // next: { revalidate: 3600 }
+        const res = await fetch(`${API_BASE}/api/seo?page=how-it-works`, {
+            next: { revalidate: 3600 }
         });
         const seo = await res.json();
 
@@ -24,48 +27,50 @@ export async function generateMetadata() {
     }
 }
 
-const HowItWorksPage = () => {
-    const steps = [
-        {
-            id: 1,
-            title: "Create Your Profile",
-            description: "Sign up as a creator and tell the world about your craft, culture, and story."
-        },
-        {
-            id: 2,
-            title: "Upload Listings",
-            description: "Add your creations with photos, descriptions, and cultural tags that connect visitors to your traditions."
-        },
-        {
-            id: 3,
-            title: "Review & Approval",
-            description: "Our team reviews listings for authenticity and cultural relevance before publishing."
-        },
-        {
-            id: 4,
-            title: "Get Discovered",
-            description: "Your listings appear in our discovery feed. Boost visibility with optional featured placements."
+const HowItWorksPage = async () => {
+    let pageData = null;
+
+    try {
+        // অ্যাডমিন থেকে সেট করা কন্টেন্ট ফেচ করা হচ্ছে
+        const res = await fetch(`${API_BASE}/api/admin/how-it-works`);
+
+        if (res.ok) {
+            pageData = await res.json();
         }
-    ];
+    } catch (error) {
+        console.error("Failed to fetch page content:", error);
+    }
+
+    // ডেটাবেজে ডাটা না থাকলে বা এরর হলে এই ডিফল্ট ডেটা দেখাবে
+    const displayData = pageData || {
+        headerTitle: "Empowering Global Craftsmanship",
+        headerDescription: "World Cultural Marketplace (WCM) brings the world's finest artisans under one roof. Follow these simple steps to start your journey with us.",
+        steps: [
+            { id: 1, title: "Create Your Profile", description: "Sign up as a creator and tell the world about your craft, culture, and story." },
+            { id: 2, title: "Upload Listings", description: "Add your creations with photos, descriptions, and cultural tags that connect visitors to your traditions." },
+            { id: 3, title: "Review & Approval", description: "Our team reviews listings for authenticity and cultural relevance before publishing." },
+            { id: 4, title: "Get Discovered", description: "Your listings appear in our discovery feed. Boost visibility with optional featured placements." }
+        ]
+    };
 
     return (
-        <main className="min-h-screen bg-gray-100 dark:bg-[#0a0a0a] pt-28 pb-20 px-4 md:px-8 transition-colors duration-300">
+        <main className="min-h-screen bg-gray-100 dark:bg-[#0a0a0a] pt-8 pb-20 px-4 md:px-8 transition-colors duration-300">
             <div className="max-w-7xl mx-auto text-center">
 
                 {/* Header Section */}
-                <header className="mb-16">
+                <header className="mb-8">
                     <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight">
-                        Empowering Global <span className="text-[#F57C00]">Craftsmanship</span>
+                        {/* Title এর 'Craftsmanship' অংশটি অরেঞ্জ রাখার জন্য স্লাইস বা কন্ডিশনাল লজিক দেওয়া যায়, আপাতত সরাসরি দেখাচ্ছি */}
+                        {displayData.headerTitle}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 md:text-xl max-w-3xl mx-auto leading-relaxed">
-                        World Cultural Marketplace (WCM) brings the world's finest artisans under one roof.
-                        Follow these simple steps to start your journey with us.
+                        {displayData.headerDescription}
                     </p>
                 </header>
 
                 {/* Steps Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 text-left">
-                    {steps.map((step) => (
+                    {displayData.steps?.map((step) => (
                         <article
                             key={step.id}
                             className="p-8 border border-gray-100 dark:border-gray-800 rounded-2xl bg-white dark:bg-[#0d0d0d] hover:shadow-xl transition-all duration-300 flex flex-col items-start h-full"
