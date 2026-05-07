@@ -27,6 +27,7 @@ import {
   MdOutlineHome,
   MdOutlineInfo,
   MdOutlineWebAsset,
+  MdEmail,
 } from 'react-icons/md';
 import { TbLayoutBottombar, TbLayoutBottombarCollapse, TbSeo } from 'react-icons/tb';
 import Image from 'next/image';
@@ -133,6 +134,7 @@ export default function AdminLayout({ children }) {
     { name: 'Manage About', path: '/admin/manage-about', icon: MdOutlineInfo },
     { name: 'Manage Footer', path: '/admin/manage-footer', icon: TbLayoutBottombarCollapse },
     { name: 'Manage SEO', path: '/admin/seo-settings', icon: TbSeo },
+    { name: 'Subscription', path: '/admin/subscriptions', icon: MdEmail },
   ];
 
   const profileImage = user?.profile?.profileImage

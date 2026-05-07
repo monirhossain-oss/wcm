@@ -95,25 +95,56 @@ const Footer = () => {
     fetchFooter();
   }, []);
 
+  // const handleSubscribe = async (e) => {
+  //   e.preventDefault();
+  //   if (!email) return;
+  //   setStatus("loading");
+
+  //   const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+  //   const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+  //   const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC;
+
+  //   try {
+  //     await emailjs.send(serviceId, templateId, { user_email: email, message: "New Newsletter Subscription" }, publicKey);
+  //     setStatus("success");
+  //     setEmail("");
+  //     alert("Subscription Successful!");
+  //   } catch (error) {
+  //     setStatus("error");
+  //     alert("Something went wrong.");
+  //   } finally {
+  //     setStatus("");
+  //   }
+  // };
+
   const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email) return;
     setStatus("loading");
 
-    const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
-    const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
-    const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC;
-
     try {
-      await emailjs.send(serviceId, templateId, { user_email: email, message: "New Newsletter Subscription" }, publicKey);
-      setStatus("success");
-      setEmail("");
-      alert("Subscription Successful!");
+      // আপনার লোকাল বা প্রোডাকশন API URL ব্যবহার করুন
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/emails`;
+      
+      const response = await axios.post(apiUrl, { email: email });
+
+      if (response.status === 201 || response.status === 200) {
+        setStatus("success");
+        setEmail("");
+        alert("Subscription Successful! Thank you for staying connected.");
+      }
     } catch (error) {
+      console.error("Subscription Error:", error);
       setStatus("error");
-      alert("Something went wrong.");
+      
+      if (error.response && error.response.status === 400) {
+        alert("This email is already subscribed!");
+      } else {
+        alert("Something went wrong. Please try again later.");
+      }
     } finally {
-      setStatus("");
+      
+      setTimeout(() => setStatus(""), 3000);
     }
   };
 
