@@ -16,7 +16,7 @@ const AboutContent = ({ data }) => {
     console.log("Rendering with creatorCount:", socialProof?.creatorCountText);
 
     return (
-        <section className="max-w-7xl mx-auto px-6 md:px-10 py-16">
+        <section className="max-w-7xl mx-auto px-6 md:px-10 py-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-24 items-center">
 
                 {/* Left Side: Content Management */}

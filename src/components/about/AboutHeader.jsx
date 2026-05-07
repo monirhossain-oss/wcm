@@ -12,10 +12,10 @@ const AboutHeader = ({ data }) => {
 
     return (
         <section
-            className="w-full py-16 md:py-24 px-6"
+            className="w-full py-16 md:py-8 px-6"
             style={{ backgroundColor: bgColor }}
         >
-            <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="max-w-4xl mx-auto text-center space-y-2">
                 {/* মেইন টাইটেল */}
                 <h1
                     className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight animate-in fade-in slide-in-from-top-4 duration-700"

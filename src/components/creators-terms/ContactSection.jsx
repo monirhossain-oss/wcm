@@ -9,15 +9,15 @@ const ContactSection = () => {
     return (
         // আপনার দেওয়া ডার্ক গ্র্যাডিয়েন্ট ব্যাকগ্রাউন্ড বজায় রাখা হয়েছে
         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 dark:from-[#1a1a18] dark:to-[#111110] border border-gray-700 dark:border-gray-800 py-12 px-6 md:px-12">
-            
+
             {/* Signature Left Border Accent */}
             <div className="max-w-4xl mx-auto border-l-2 border-orange-400 pl-8 py-2">
-                
+
                 {/* Section Header */}
                 <span className="block text-[12px] font-bold tracking-[0.15em] uppercase text-[#F57C00] mb-3">
                     Section 16
                 </span>
-                
+
                 {/* Section Title with Dark Blue color - এটি ডার্ক মোডে ফুটে উঠছিল না */}
                 {/* এটিকে আমরা টেক্সট বাটন স্টাইলে বা লাইট গ্রে কালার দিতে পারি */}
                 <h2 className="text-[32px] font-black text-gray-50 mb-8 leading-tight uppercase">
@@ -33,7 +33,7 @@ const ContactSection = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Email Card with light background */}
                         {/* এটিকে ডার্ক গ্রাউন্ডে ফুটে তোলার জন্য আমরা একটু ডার্ক/নিউট্রাল কালার ব্যবহার করতে পারি */}
-                        <a 
+                        <a
                             href="mailto:contact@worldculturemarketplace.com"
                             className="p-6 bg-[#1a1a18] rounded-2xl border border-gray-700 hover:border-orange-500 transition-all group"
                         >
@@ -50,18 +50,14 @@ const ContactSection = () => {
                         {/* Locations Card with neutral background */}
                         <div className="p-6 bg-[#1a1a18] rounded-2xl border border-gray-700">
                             <span className="text-[12px] font-bold text-gray-500 uppercase tracking-widest block mb-4">
-                                Business Locations
+                                Business Location
                             </span>
-                            {/* Location tags resembling status */}
-                            <div className="flex flex-wrap gap-4">
-                                {locations.map((loc, index) => (
-                                    <div key={index} className="flex items-center gap-2 bg-[#2a2a26] px-4 py-2 rounded-full border border-gray-600 shadow-sm">
-                                        <span>{loc.flag}</span>
-                                        <span className="text-[14px] font-semibold text-gray-100">
-                                            {loc.city}, {loc.country}
-                                        </span>
-                                    </div>
-                                ))}
+
+                            <div className="flex items-center gap-2 bg-[#2a2a26] px-4 py-3 rounded-xl border border-gray-600 shadow-sm">
+                                <span className="text-xl">🇫🇷</span>
+                                <span className="text-[14px] font-semibold text-gray-100">
+                                    50 Avenue des Champs-Élysées, 75008 Paris, France.
+                                </span>
                             </div>
                         </div>
                     </div>
