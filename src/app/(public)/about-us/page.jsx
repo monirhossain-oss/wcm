@@ -35,7 +35,7 @@ export default async function AboutPage() {
 
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/about`, {
-            cache: 'no-store' // রিয়েল-টাইম ডেটার জন্য
+            next: { revalidate: 60 } 
         });
         const result = await res.json();
 
