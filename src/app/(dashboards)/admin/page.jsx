@@ -216,7 +216,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 font-sans">
+    <div className="space-y-8 animate-in fade-in duration-700 font-sans overflow-x-hidden">
       {/* --- Header --- */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="flex items-center gap-4">
