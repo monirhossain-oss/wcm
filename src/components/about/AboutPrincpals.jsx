@@ -9,7 +9,7 @@ const AboutPrincpals = ({ data }) => {
     const principles = data?.principlesList || [];
 
     return (
-        <section className="bg-white dark:bg-[#0a0a0a] px-4 py-20 transition-colors duration-500">
+        <section className="bg-white dark:bg-[#0a0a0a] px-4 py-4 transition-colors duration-500">
             <div className="max-w-7xl mx-auto">
 
                 {/* Header Section */}
