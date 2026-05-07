@@ -49,7 +49,7 @@ const Footer = () => {
   useEffect(() => {
     const fetchFooter = async () => {
       try {
-        const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/footer`);
+        const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/footer`,{next: {revalidate: 60}});
 
         if (data.success && data.data) {
           const db = data.data;

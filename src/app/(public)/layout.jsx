@@ -1,8 +1,8 @@
 import CookieConsent from '@/components/CookieConsent';
 import Footer from '@/components/Footer';
-import PublicNavbar from '@/components/PublicNavbar';
 import Analytics from '@/components/Analytics';
 import VisitorTracker from '@/components/VisitorTracker';
+import PublicNavbar from '@/components/PublicNavbar';
 
 export default function PublicLayout({ children }) {
   return (

@@ -1,5 +1,3 @@
-// CuratedCollections.jsx (NO 'use client')
-
 import ListingCard from '@/components/ListingCard';
 import Link from 'next/link';
 
@@ -7,7 +5,9 @@ async function getCuratedData() {
     try {
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/listings/curated`,
-            { cache: 'no-store' } // or revalidate: 60
+            {
+                next: { revalidate: 60 }
+            }
         );
 
         const data = await res.json();

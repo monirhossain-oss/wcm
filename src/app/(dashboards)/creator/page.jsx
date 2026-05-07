@@ -103,7 +103,7 @@ export default function CreatorDashboard() {
   const walletBalance = stats?.walletBalance || '0.00';
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans overflow-x-hidden">
       {/* 🚀 Header Section with Refresh */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>

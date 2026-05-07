@@ -67,16 +67,7 @@ const AboutCulture = ({ data }) => {
     };
 
     return (
-        <section className="bg-[#fafafa] dark:bg-[#0d0d0d] py-20 px-6 relative">
-
-            <div className="max-w-7xl mx-auto flex justify-end mb-4">
-                <button
-                    onClick={() => setIsEditing(!isEditing)}
-                    className="flex items-center gap-2 bg-zinc-800 text-white px-4 py-2 rounded-full text-sm hover:bg-orange-600 transition-all"
-                >
-                    {isEditing ? <><X size={16} /> Cancel</> : <><Edit3 size={16} /> Edit Section</>}
-                </button>
-            </div>
+        <section className="bg-[#fafafa] dark:bg-[#0d0d0d] py-8 px-6 relative">
 
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 

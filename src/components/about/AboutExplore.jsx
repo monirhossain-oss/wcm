@@ -24,7 +24,7 @@ const AboutExplore = ({ data }) => {
     // console.log("Final Steps to Render:", steps);
 
     return (
-        <section className="bg-white dark:bg-[#0a0a0a] py-20 px-6 transition-colors duration-500">
+        <section className="bg-white dark:bg-[#0a0a0a] py-8 px-6 transition-colors duration-500">
             <div className="max-w-7xl mx-auto">
 
                 {/* Section Header */}

@@ -15,7 +15,7 @@ export default function FeaturedCultures() {
           </p>
         </div>
         <a href="/explore" className="text-[#F57C00] hover:underline font-semibold text-sm">
-          View all &rarr;
+          View all →
         </a>
       </div>
 

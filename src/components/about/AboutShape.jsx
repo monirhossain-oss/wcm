@@ -12,8 +12,8 @@ const AboutShape = ({ data }) => {
     const mainImage = data?.mainImage || "https://i.postimg.cc/NjG2b29W/image-(16).jpg";
 
     return (
-        <section className="bg-[#fcfbf7] dark:bg-[#0d0d0d] py-20 px-6 overflow-hidden transition-colors duration-300">
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+        <section className="bg-[#fcfbf7] dark:bg-[#0d0d0d] py-8 px-6 overflow-hidden transition-colors duration-300">
+            <div className=" grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
 
                 {/* Text Section (Left Side) - Mobile এ নিচে যাবে, Desktop এ বামে থাকবে */}
                 <div className="space-y-8 order-2 lg:order-1">
