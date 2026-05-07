@@ -186,9 +186,12 @@ export default function PromotionsPage() {
     setActionLoading(true);
     const toastId = toast.loading('Executing Protocol...');
     try {
+      const selectedPkgId =
+        promoType === 'boost' ? BOOST_PACKAGES.find((pkg) => pkg.price === boostBudget)?.id : null;
       const payload = {
         listingId: selectedListing._id,
         packageType: promoType,
+        packageId: selectedPkgId,
         amountInEUR: currentCost,
         days: promoType === 'boost' ? Number(boostDays) : 0,
         totalClicks: promoType === 'ppc' ? Number(targetClicks) : 0,
