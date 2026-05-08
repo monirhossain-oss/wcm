@@ -34,7 +34,6 @@ export default function EditBlogPage() {
   const [categories, setCategories] = useState([]);
   const [categoryTags, setCategoryTags] = useState([]);
   const [showCatDrop, setShowCatDrop] = useState(false);
-  const [catSearch, setCatSearch] = useState('');
   const [showTagDrop, setShowTagDrop] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
 
@@ -47,7 +46,6 @@ export default function EditBlogPage() {
   });
   const [gridFiles, setGridFiles] = useState({});
 
-  // ১. আগের ডাটা লোড করা
   useEffect(() => {
     const loadBlogData = async () => {
       try {
@@ -59,24 +57,22 @@ export default function EditBlogPage() {
         setCategories(catRes.data);
         const blog = blogRes.data.blog;
 
-        // বর্তমান ক্যাটাগরির আইডি খুঁজে বের করা
         const currentCat = catRes.data.find((c) => c.title === blog.category);
 
         setFormData({
           title: blog.title,
           description: blog.description,
           category: currentCat?._id || '',
-          content: blog.content,
-          selectedTags: [], // ট্যাগগুলো পরে সেট হবে
+          content: blog.content || [],
+          selectedTags: [],
         });
         setPreviewImage(blog.image);
 
-        // যদি ব্লগে আগে থেকে ট্যাগ থাকে, সেগুলো ক্যাটাগরি লোডের পর হ্যান্ডেল হবে
         if (currentCat) {
           const tagsRes = await api.get(`/api/listings/tags/by-category/${currentCat._id}`);
           setCategoryTags(tagsRes.data);
           const matchedTagIds = tagsRes.data
-            .filter((t) => blog.tags.includes(t.title))
+            .filter((t) => blog.tags?.includes(t.title))
             .map((t) => t._id);
           setFormData((prev) => ({ ...prev, selectedTags: matchedTagIds }));
         }
@@ -89,7 +85,6 @@ export default function EditBlogPage() {
     loadBlogData();
   }, [id]);
 
-  // ক্যাটাগরি ম্যানুয়ালি চেঞ্জ করলে ট্যাগ আপডেট
   useEffect(() => {
     if (!formData.category || fetching) return;
     const fetchTags = async () => {
@@ -119,8 +114,24 @@ export default function EditBlogPage() {
   const handleGridImageChange = (blockIdx, file) => {
     if (!file) return;
     const currentFiles = gridFiles[blockIdx] || [];
-    if (currentFiles.length >= 4) return toast.error('Max 4 images per grid');
+    const existingImages = formData.content[blockIdx].images || [];
+    if (currentFiles.length + existingImages.length >= 4)
+      return toast.error('Max 4 images per grid');
     setGridFiles({ ...gridFiles, [blockIdx]: [...currentFiles, file] });
+  };
+
+  // ✅ ফিক্সড: আগের আপলোড করা ইমেজ রিমুভ করার ফাংশন
+  const handleRemoveExistingImage = (blockIdx, imgIdx) => {
+    const newContent = [...formData.content];
+    newContent[blockIdx].images = newContent[blockIdx].images.filter((_, i) => i !== imgIdx);
+    setFormData({ ...formData, content: newContent });
+  };
+
+  // ✅ ফিক্সড: নতুন সিলেক্ট করা ফাইল রিমুভ করার ফাংশন
+  const handleRemoveNewFile = (blockIdx, fileIdx) => {
+    const updatedFiles = [...(gridFiles[blockIdx] || [])];
+    updatedFiles.splice(fileIdx, 1);
+    setGridFiles({ ...gridFiles, [blockIdx]: updatedFiles });
   };
 
   const handleSubmit = async (e) => {
@@ -168,23 +179,21 @@ export default function EditBlogPage() {
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 pb-6 border-b dark:border-white/10">
-        <div>
-          <h1 className="text-3xl font-black italic tracking-tighter uppercase">
-            Update <span className="text-orange-500">Journal</span>
-          </h1>
-        </div>
+        <h1 className="text-3xl font-black italic tracking-tighter uppercase">
+          Update <span className="text-orange-500">Journal</span>
+        </h1>
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-5 py-2.5 text-xs font-bold uppercase border dark:border-white/10 rounded-md hover:bg-gray-50 transition-all"
+            className="px-5 py-2.5 text-xs font-bold uppercase border dark:border-white/10 rounded-md"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-8 py-2.5 bg-orange-600 text-white rounded-md font-bold text-xs uppercase flex items-center gap-2 shadow-lg shadow-orange-500/20"
+            className="px-8 py-2.5 bg-orange-600 text-white rounded-md font-bold text-xs uppercase flex items-center gap-2"
           >
             {loading ? (
               <FiLoader className="animate-spin" />
@@ -198,21 +207,17 @@ export default function EditBlogPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Left: Sidebar */}
         <div className="lg:col-span-4 space-y-8">
           <section className="space-y-3">
             <label className="text-[11px] font-black uppercase text-gray-400 tracking-wider">
               Main Banner
             </label>
-            <div className="relative group aspect-16/10 bg-gray-50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-lg overflow-hidden hover:border-orange-500 transition-all">
+            <div className="relative group aspect-16/10 bg-gray-50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-lg overflow-hidden">
               <img
                 src={mainImage ? URL.createObjectURL(mainImage) : previewImage}
                 className="w-full h-full object-cover"
                 alt="Banner"
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center pointer-events-none">
-                <FiUploadCloud size={30} className="text-white" />
-              </div>
               <input
                 type="file"
                 className="absolute inset-0 opacity-0 cursor-pointer"
@@ -222,7 +227,7 @@ export default function EditBlogPage() {
           </section>
 
           <section className="bg-gray-50 dark:bg-white/5 p-6 rounded-lg space-y-6 border dark:border-white/5">
-            {/* Category */}
+            {/* Category Dropdown */}
             <div className="space-y-2 relative">
               <label className="text-[11px] font-black uppercase text-gray-400 tracking-wider">
                 Category
@@ -234,7 +239,7 @@ export default function EditBlogPage() {
                 {formData.category
                   ? categories.find((c) => c._id === formData.category)?.title
                   : 'Select One'}
-                <FiChevronDown className={showCatDrop ? 'rotate-180' : ''} />
+                <FiChevronDown />
               </div>
               {showCatDrop && (
                 <div className="absolute z-50 w-full mt-2 bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-lg shadow-2xl">
@@ -245,7 +250,7 @@ export default function EditBlogPage() {
                         setFormData({ ...formData, category: cat._id });
                         setShowCatDrop(false);
                       }}
-                      className="p-4 text-xs font-bold uppercase hover:bg-orange-500 hover:text-white cursor-pointer transition-colors"
+                      className="p-4 text-xs font-bold uppercase hover:bg-orange-500 hover:text-white cursor-pointer"
                     >
                       {cat.title}
                     </div>
@@ -256,18 +261,13 @@ export default function EditBlogPage() {
 
             {/* Tags Section */}
             <div className="space-y-2 relative">
-              {' '}
-              {/* added relative here */}
               <label className="text-[11px] font-black uppercase text-gray-400 tracking-wider">
                 Tags (Max 5)
               </label>
               <div
                 onClick={() => formData.category && setShowTagDrop(!showTagDrop)}
-                className={`flex flex-wrap gap-2 p-4 min-h-[56px] bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-lg text-xs font-bold cursor-pointer transition-all ${!formData.category && 'opacity-50 grayscale cursor-not-allowed'}`}
+                className={`flex flex-wrap gap-2 p-4 min-h-[56px] bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-lg text-xs font-bold cursor-pointer`}
               >
-                {formData.selectedTags.length === 0 && (
-                  <span className="text-gray-400">Select tags...</span>
-                )}
                 {formData.selectedTags.map((tId) => (
                   <span
                     key={tId}
@@ -275,7 +275,6 @@ export default function EditBlogPage() {
                   >
                     {categoryTags.find((t) => t._id === tId)?.title}
                     <FiX
-                      className="hover:scale-125 transition-transform"
                       onClick={(e) => {
                         e.stopPropagation();
                         setFormData((prev) => ({
@@ -287,179 +286,139 @@ export default function EditBlogPage() {
                   </span>
                 ))}
               </div>
-              {/* Dropdown Fix */}
               {showTagDrop && (
-                <div className="absolute z-[100] w-full mt-2 bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-lg shadow-2xl overflow-hidden ring-1 ring-black/5">
-                  <div className="p-2 border-b dark:border-white/10 flex items-center gap-2 bg-gray-50 dark:bg-white/5">
-                    <FiSearch className="text-gray-400" size={14} />
-                    <input
-                      autoFocus
-                      placeholder="Search tags..."
-                      className="w-full bg-transparent p-2 text-xs font-bold outline-none"
-                      value={tagSearch}
-                      onChange={(e) => setTagSearch(e.target.value)}
-                    />
-                    <FiX
-                      className="cursor-pointer text-gray-400"
-                      onClick={() => setShowTagDrop(false)}
-                    />
-                  </div>
-                  <div className="max-h-52 overflow-y-auto p-2 grid grid-cols-1 gap-1">
-                    {categoryTags
-                      .filter((t) => t.title.toLowerCase().includes(tagSearch.toLowerCase()))
-                      .map((tag) => (
-                        <div
-                          key={tag._id}
-                          onClick={() => {
-                            if (formData.selectedTags.includes(tag._id)) {
-                              setFormData((p) => ({
-                                ...p,
-                                selectedTags: p.selectedTags.filter((id) => id !== tag._id),
-                              }));
-                            } else if (formData.selectedTags.length < 5) {
-                              setFormData((p) => ({
-                                ...p,
-                                selectedTags: [...p.selectedTags, tag._id],
-                              }));
-                            }
-                          }}
-                          className={`p-3 rounded-md text-[11px] font-bold uppercase cursor-pointer flex justify-between items-center transition-all ${formData.selectedTags.includes(tag._id) ? 'bg-orange-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
-                        >
-                          {tag.title}
-                          {formData.selectedTags.includes(tag._id) && <FiCheck />}
-                        </div>
-                      ))}
-                    {categoryTags.length === 0 && (
-                      <div className="p-4 text-[10px] text-center text-gray-400 uppercase font-bold">
-                        No tags found for this category
+                <div className="absolute z-[100] w-full mt-2 bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-lg shadow-2xl p-2">
+                  <input
+                    placeholder="Search tags..."
+                    className="w-full bg-transparent p-2 text-xs font-bold outline-none border-b dark:border-white/10 mb-2"
+                    value={tagSearch}
+                    onChange={(e) => setTagSearch(e.target.value)}
+                  />
+                  {categoryTags
+                    .filter((t) => t.title.toLowerCase().includes(tagSearch.toLowerCase()))
+                    .map((tag) => (
+                      <div
+                        key={tag._id}
+                        onClick={() => {
+                          if (formData.selectedTags.includes(tag._id)) {
+                            setFormData((p) => ({
+                              ...p,
+                              selectedTags: p.selectedTags.filter((id) => id !== tag._id),
+                            }));
+                          } else if (formData.selectedTags.length < 5) {
+                            setFormData((p) => ({
+                              ...p,
+                              selectedTags: [...p.selectedTags, tag._id],
+                            }));
+                          }
+                        }}
+                        className={`p-3 rounded-md text-[11px] font-bold uppercase cursor-pointer flex justify-between items-center ${formData.selectedTags.includes(tag._id) ? 'bg-orange-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                      >
+                        {tag.title} {formData.selectedTags.includes(tag._id) && <FiCheck />}
                       </div>
-                    )}
-                  </div>
+                    ))}
                 </div>
               )}
             </div>
           </section>
         </div>
 
-        {/* Right: Content */}
         <div className="lg:col-span-8 space-y-8">
-          <section className="space-y-6">
-            <input
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Headline..."
-              className="w-full bg-transparent border-b-2 dark:border-white/10 py-4 text-3xl font-black outline-none focus:border-orange-500"
-            />
-            <textarea
-              rows="2"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Short Summary..."
-              className="w-full bg-gray-50 dark:bg-white/5 border dark:border-white/10 p-5 rounded-lg text-sm font-medium outline-none focus:border-orange-500"
-            />
-          </section>
+          <input
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            placeholder="Headline..."
+            className="w-full bg-transparent border-b-2 dark:border-white/10 py-4 text-3xl font-black outline-none focus:border-orange-500"
+          />
+          <textarea
+            rows="2"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Short Summary..."
+            className="w-full bg-gray-50 dark:bg-white/5 border dark:border-white/10 p-5 rounded-lg text-sm font-medium outline-none"
+          />
 
           <section>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xs font-black uppercase text-orange-500 tracking-widest flex items-center gap-2">
-                <span className="w-8 h-[2px] bg-orange-500"></span> Content Builder
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                <ToolBtn icon={<FiPlus />} label="Heading" onClick={() => addBlock('heading')} />
-                <ToolBtn icon={<FiType />} label="Text" onClick={() => addBlock('paragraph')} />
-                <ToolBtn icon={<FiGrid />} label="Grid" onClick={() => addBlock('image_grid')} />
-                <ToolBtn
-                  icon={<FiMessageSquare />}
-                  label="Quote"
-                  onClick={() => addBlock('quote')}
-                />
-              </div>
+            <div className="flex flex-wrap gap-2 mb-6">
+              <ToolBtn icon={<FiPlus />} label="Heading" onClick={() => addBlock('heading')} />
+              <ToolBtn icon={<FiType />} label="Text" onClick={() => addBlock('paragraph')} />
+              <ToolBtn icon={<FiGrid />} label="Grid" onClick={() => addBlock('image_grid')} />
+              <ToolBtn icon={<FiMessageSquare />} label="Quote" onClick={() => addBlock('quote')} />
             </div>
 
             <div className="space-y-4">
               {formData.content.map((block, idx) => (
                 <div
                   key={idx}
-                  className="group relative bg-gray-50 dark:bg-white/5 border dark:border-white/5 p-6 rounded-lg"
+                  className="relative bg-gray-50 dark:bg-white/5 p-6 rounded-lg border dark:border-white/5"
                 >
-                  <div className="flex items-start gap-4">
-                    <span className="text-[10px] font-black text-gray-300 mt-1 uppercase">
-                      #0{idx + 1}
-                    </span>
-                    <div className="flex-1">
-                      {block.type === 'image_grid' ? (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          {/* Existing Images */}
-                          {block.images?.map((img, i) => (
-                            <div
-                              key={i}
-                              className="relative aspect-square rounded-lg overflow-hidden group/img"
+                  <div className="flex-1">
+                    {block.type === 'image_grid' ? (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {/* ✅ ফিক্সড: বিদ্যমান ইমেজ রিমুভ (ল্যাপটপ + মোবাইল) */}
+                        {block.images?.map((img, i) => (
+                          <div
+                            key={i}
+                            className="relative aspect-square rounded-lg overflow-hidden group"
+                          >
+                            <img src={img} className="w-full h-full object-cover" />
+                            <button
+                              onClick={() => handleRemoveExistingImage(idx, i)}
+                              className="absolute top-1 right-1 bg-red-500 text-white p-1.5 rounded-full md:opacity-0 group-hover:opacity-100 transition-all"
                             >
-                              <img src={img} className="w-full h-full object-cover" />
-                              <button
-                                onClick={() => {
-                                  const newContent = [...formData.content];
-                                  newContent[idx].images = newContent[idx].images.filter(
-                                    (_, imgIdx) => imgIdx !== i
-                                  );
-                                  setFormData({ ...formData, content: newContent });
-                                }}
-                                className="absolute inset-0 bg-red-500/80 opacity-0 group-hover/img:opacity-100 transition-all flex items-center justify-center text-white"
-                              >
-                                <FiTrash2 />
-                              </button>
-                            </div>
-                          ))}
-                          {/* New Files to Upload */}
-                          {(gridFiles[idx] || []).map((file, fIdx) => (
-                            <div
-                              key={fIdx}
-                              className="aspect-square rounded-lg overflow-hidden border-2 border-orange-500"
+                              <FiTrash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                        {/* ✅ ফিক্সড: নতুন ফাইল রিমুভ (ল্যাপটপ + মোবাইল) */}
+                        {(gridFiles[idx] || []).map((file, fIdx) => (
+                          <div
+                            key={fIdx}
+                            className="relative aspect-square rounded-lg overflow-hidden border-2 border-orange-500 group"
+                          >
+                            <img
+                              src={URL.createObjectURL(file)}
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              onClick={() => handleRemoveNewFile(idx, fIdx)}
+                              className="absolute top-1 right-1 bg-red-600 text-white p-1.5 rounded-full md:opacity-0 group-hover:opacity-100 transition-all"
                             >
-                              <img
-                                src={URL.createObjectURL(file)}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ))}
-                          {(block.images?.length || 0) + (gridFiles[idx]?.length || 0) < 4 && (
-                            <label className="aspect-square border-2 border-dashed border-gray-200 dark:border-white/10 rounded-lg flex items-center justify-center cursor-pointer hover:border-orange-500 text-gray-400">
-                              <FiPlus size={24} />
-                              <input
-                                type="file"
-                                className="hidden"
-                                onChange={(e) => handleGridImageChange(idx, e.target.files[0])}
-                              />
-                            </label>
-                          )}
-                        </div>
-                      ) : (
-                        <textarea
-                          value={block.text}
-                          onChange={(e) => {
-                            const newContent = [...formData.content];
-                            newContent[idx].text = e.target.value;
-                            setFormData({ ...formData, content: newContent });
-                          }}
-                          className={`w-full bg-transparent outline-none border-none p-0 resize-none ${
-                            block.type === 'heading'
-                              ? 'text-xl font-black'
-                              : block.type === 'quote'
-                                ? 'italic border-l-4 border-orange-500 pl-5 font-bold'
-                                : 'text-sm font-medium'
-                          }`}
-                          rows={block.type === 'paragraph' ? 3 : 1}
-                        />
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeBlock(idx)}
-                      className="p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                    >
-                      <FiTrash2 size={18} />
-                    </button>
+                              <FiX size={14} />
+                            </button>
+                          </div>
+                        ))}
+                        {(block.images?.length || 0) + (gridFiles[idx]?.length || 0) < 4 && (
+                          <label className="aspect-square border-2 border-dashed border-gray-200 dark:border-white/10 rounded-lg flex items-center justify-center cursor-pointer hover:border-orange-500">
+                            <FiPlus size={24} className="text-gray-400" />
+                            <input
+                              type="file"
+                              className="hidden"
+                              onChange={(e) => handleGridImageChange(idx, e.target.files[0])}
+                            />
+                          </label>
+                        )}
+                      </div>
+                    ) : (
+                      <textarea
+                        value={block.text}
+                        onChange={(e) => {
+                          const newContent = [...formData.content];
+                          newContent[idx].text = e.target.value;
+                          setFormData({ ...formData, content: newContent });
+                        }}
+                        className={`w-full bg-transparent outline-none border-none p-0 resize-none ${block.type === 'heading' ? 'text-xl font-black' : block.type === 'quote' ? 'italic border-l-4 border-orange-500 pl-5 font-bold' : 'text-sm font-medium'}`}
+                        rows={block.type === 'paragraph' ? 3 : 1}
+                      />
+                    )}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => removeBlock(idx)}
+                    className="absolute -top-2 -right-2 bg-zinc-200 dark:bg-zinc-800 p-2 rounded-full text-red-500 hover:scale-110 transition-all shadow-md"
+                  >
+                    <FiTrash2 size={16} />
+                  </button>
                 </div>
               ))}
             </div>
