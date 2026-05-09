@@ -25,39 +25,21 @@ const CURATED_CACHE_KEY = 'wcm_admin_curated_cache';
 const CACHE_EXPIRY = 1 * 60 * 1000; // ১ মিনিট ক্যাশ
 
 export default function ManageCuratedCollection() {
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState('');
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [lastSynced, setLastSynced] = useState(null);
 
-    // ক্যাটাগরি ফেচ করা
-    const fetchCategories = useCallback(async () => {
-        try {
-            const res = await api.get('/api/admin/categories');
-            setCategories(res.data);
-            if (res.data.length > 0 && !selectedCategory) {
-                setSelectedCategory(res.data[0]._id);
-            }
-        } catch (err) {
-            toast.error('Failed to load categories');
-        }
-    }, [selectedCategory]);
-
     // লিস্টিং ফেচ করা (Cache এবং Force Refresh সহ)
     const fetchListings = useCallback(async (isForce = false) => {
-        if (!selectedCategory) return;
-
         try {
             if (isForce) setRefreshing(true);
             else setLoading(true);
 
-            const res = await api.get(`/api/admin/listings?category=${selectedCategory}`);
+            const res = await api.get(`/api/admin/listings`);
 
             // ডাটা সেট করার সময় চেক করুন সেটি অ্যারে কি না
-            // আপনার প্রোভাইড করা ডাটা অনুযায়ী সরাসরি res.data ব্যবহার করুন
             const fetchedData = Array.isArray(res.data) ? res.data : (res.data.listings || []);
 
             setListings(fetchedData);
@@ -65,7 +47,7 @@ export default function ManageCuratedCollection() {
             const timestamp = Date.now();
             setLastSynced(timestamp);
             localStorage.setItem(
-                `${CURATED_CACHE_KEY}_${selectedCategory}`,
+                CURATED_CACHE_KEY,
                 JSON.stringify({ data: fetchedData, timestamp })
             );
 
@@ -76,11 +58,7 @@ export default function ManageCuratedCollection() {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [selectedCategory]);
-
-    useEffect(() => {
-        fetchCategories();
-    }, [fetchCategories]);
+    }, []);
 
     useEffect(() => {
         fetchListings();
@@ -91,7 +69,6 @@ export default function ManageCuratedCollection() {
         setActionLoading(true);
         try {
             await api.patch(`/api/admin/listings/${listingId}/pin`, {
-                categoryId: selectedCategory,
                 position: Number(position),
             });
             toast.success(`Pinned to Slot ${position}`);
@@ -128,7 +105,7 @@ export default function ManageCuratedCollection() {
         <div className="space-y-8 animate-in fade-in duration-700 pb-20 font-sans">
             <Toaster position="top-right" />
 
-            {/* Header & Filter */}
+            {/* Header */}
             <div className="bg-white dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/10 overflow-hidden shadow-sm">
                 <div className="p-6 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-4">
@@ -143,21 +120,6 @@ export default function ManageCuratedCollection() {
                         >
                             <FiRefreshCw size={14} />
                         </button>
-                    </div>
-
-                    <div className="flex items-center gap-3 bg-gray-100 dark:bg-white/5 p-2 rounded-lg border dark:border-white/10">
-                        <FiFilter className="text-orange-500 ml-2" size={14} />
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="bg-transparent outline-none text-[10px] font-black uppercase dark:text-white cursor-pointer pr-4"
-                        >
-                            {categories.map((cat) => (
-                                <option key={cat._id} value={cat._id} className="dark:bg-[#0a0a0a]">
-                                    {cat.title}
-                                </option>
-                            ))}
-                        </select>
                     </div>
                 </div>
             </div>
@@ -229,7 +191,7 @@ export default function ManageCuratedCollection() {
             {listings.length === 0 && !loading && (
                 <div className="p-20 text-center border border-dashed border-gray-200 dark:border-white/10 rounded-2xl">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic opacity-50">
-                        No active listings found in this category
+                        No active listings found
                     </p>
                 </div>
             )}

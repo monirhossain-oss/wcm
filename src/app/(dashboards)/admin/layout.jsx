@@ -1,4 +1,5 @@
 'use client';
+
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
@@ -39,24 +40,34 @@ import { PiTrainRegional } from 'react-icons/pi';
 // ── Submenu item definition
 const customizerSubItems = [
   {
-    name: 'Navbar Edit',
-    path: '/admin/theme/navbar',
-    icon: MdOutlineNavigation,
+    name: 'Manage Slider',
+    path: '/admin/manage-slider',
+    icon: Sliders,
   },
   {
-    name: 'Home Page Edit',
-    path: '/admin/theme/home',
-    icon: MdOutlineHome,
+    name: 'Manage FAQ',
+    path: '/admin/faq',
+    icon: FaQ,
   },
   {
-    name: 'Footer Edit',
-    path: '/admin/theme/footer',
-    icon: TbLayoutBottombar,
+    name: 'Manage How It Works',
+    path: '/admin/manage-how-it-work',
+    icon: FiHelpCircle,
   },
   {
-    name: 'About Page Edit',
-    path: '/admin/theme/about',
+    name: 'Manage About',
+    path: '/admin/manage-about',
     icon: MdOutlineInfo,
+  },
+  {
+    name: 'Manage Footer',
+    path: '/admin/manage-footer',
+    icon: TbLayoutBottombarCollapse,
+  },
+  {
+    name: 'Manage SEO',
+    path: '/admin/seo-settings',
+    icon: TbSeo,
   },
 ];
 
@@ -65,14 +76,23 @@ export default function AdminLayout({ children }) {
   const router = useRouter();
   const { logoutUser, user, loading } = useAuth();
 
+  // ═══════════════════════════════════════════════════
+  // ✅ ALL HOOKS FIRST — No conditions before this!
+  // ═══════════════════════════════════════════════════
+
+  // 1. useState hooks
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [customizerOpen, setCustomizerOpen] = useState(
-    // keep open if currently on any theme sub-route
     pathname?.startsWith('/admin/theme') ?? false
   );
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  // 2. useRef hooks
+  const sidebarRef = useRef(null);
   const dropdownRef = useRef(null);
 
+  // 3. useEffect hooks — ALL TOGETHER
   useEffect(() => {
     if (!loading) {
       if (!user || user.role !== 'admin') {
@@ -81,7 +101,6 @@ export default function AdminLayout({ children }) {
     }
   }, [user, loading, router]);
 
-  // auto-expand customizer submenu when navigating to a theme route
   useEffect(() => {
     if (pathname?.startsWith('/admin/theme')) {
       setCustomizerOpen(true);
@@ -98,10 +117,15 @@ export default function AdminLayout({ children }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
-    await logoutUser();
-    router.push('/');
-  };
+  useEffect(() => {
+    if (sidebarRef.current && scrollPosition > 0) {
+      sidebarRef.current.scrollTop = scrollPosition;
+    }
+  }, [pathname, scrollPosition]);
+
+  // ═══════════════════════════════════════════════════
+  // ✅ CONDITIONAL RENDERING AFTER ALL HOOKS
+  // ═══════════════════════════════════════════════════
 
   if (loading) {
     return (
@@ -112,6 +136,11 @@ export default function AdminLayout({ children }) {
   }
 
   if (!user || user.role !== 'admin') return null;
+
+  const handleLogout = async () => {
+    await logoutUser();
+    router.push('/');
+  };
 
   const menuItems = [
     { name: 'Overview', path: '/admin', icon: FiGrid },
@@ -126,7 +155,6 @@ export default function AdminLayout({ children }) {
     { name: 'Manage Region', path: '/admin/region', icon: PiTrainRegional },
     { name: 'Manage Tradition', path: '/admin/tradition', icon: TractorIcon },
     { name: 'Categories', path: '/admin/categories', icon: FiLayers },
-    { name: 'Manage Slider', path: '/admin/manage-slider', icon: Sliders },
     { name: 'Manage Blog', path: '/admin/blogs', icon: FiSettings },
     { name: 'Create Blog', path: '/admin/create-blog', icon: FiSettings },
     { name: 'Manage FAQ', path: '/admin/faq', icon: FaQ },
@@ -141,7 +169,14 @@ export default function AdminLayout({ children }) {
     ? getImageUrl(user.profile.profileImage, 'avatar')
     : '/default-avatar.png';
 
-  const isThemeActive = pathname?.startsWith('/admin/theme');
+  const isThemeActive = pathname?.startsWith('/admin/theme') ||
+    customizerSubItems.some(item => pathname === item.path);
+
+  const handleLinkClick = () => {
+    if (sidebarRef.current) {
+      setScrollPosition(sidebarRef.current.scrollTop);
+    }
+  };
 
   const SidebarContent = () => (
     <>
@@ -165,7 +200,10 @@ export default function AdminLayout({ children }) {
         </Link>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 scrollbar-hide">
+      <div
+        ref={sidebarRef}
+        className="flex-1 overflow-y-auto py-6 px-4 space-y-8 scrollbar-hide"
+      >
         {/* Main nav */}
         <div>
           <p className="px-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">
@@ -179,6 +217,8 @@ export default function AdminLayout({ children }) {
                 <Link
                   key={item.path}
                   href={item.path}
+                  scroll={false}
+                  onClick={handleLinkClick}
                   className={`flex items-center gap-4 px-4 py-3 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all group ${isActive
                     ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
                     : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-black dark:hover:text-white'
@@ -218,7 +258,7 @@ export default function AdminLayout({ children }) {
 
               {/* Submenu */}
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${customizerOpen ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0'
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${customizerOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                   }`}
               >
                 <div className="ml-4 mt-1 pl-4 border-l border-orange-500/20 dark:border-orange-500/15 space-y-0.5 py-1">
@@ -229,6 +269,8 @@ export default function AdminLayout({ children }) {
                       <Link
                         key={sub.path}
                         href={sub.path}
+                        scroll={false}
+                        onClick={handleLinkClick}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all group ${isSubActive
                           ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20'
                           : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-black dark:hover:text-white'
@@ -257,6 +299,7 @@ export default function AdminLayout({ children }) {
           </p>
           <Link
             href="/"
+            scroll={false}
             className="flex items-center gap-4 px-4 py-3 rounded-sm text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-orange-500 transition-all"
           >
             <FiArrowLeft size={14} /> Go to Marketplace
@@ -335,6 +378,7 @@ export default function AdminLayout({ children }) {
                   </div>
                   <Link
                     href="/profile"
+                    scroll={false}
                     onClick={() => setIsDropdownOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-black dark:hover:text-white transition-all rounded-sm"
                   >

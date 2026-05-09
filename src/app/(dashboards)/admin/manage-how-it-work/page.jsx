@@ -84,9 +84,6 @@ const ManageHowItWorks = () => {
                         <h1 className="text-3xl font-bold text-[#F57C00]">Manage How It Works</h1>
                         <p className="text-gray-400 mt-1 text-sm">Update the global craftsmanship journey steps</p>
                     </div>
-                    <div className="text-xs text-gray-500 bg-gray-900 px-3 py-1 rounded-full border border-gray-800">
-                        Endpoint: {API_BASE}
-                    </div>
                 </header>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
