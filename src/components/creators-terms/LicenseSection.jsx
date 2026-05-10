@@ -65,7 +65,7 @@ const LicenseSection = () => {
                         <p className="text-[14px] italic
                             /* Light */ text-zinc-500 
                             /* Dark */ dark:text-gray-500">
-                            Creators may request removal of their content at any time (see <span className="text-orange-600 font-bold cursor-pointer hover:underline transition-all">Section 9</span>).
+                            Creators may request removal of their content at any time .
                         </p>
                     </div>
                 </div>

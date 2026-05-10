@@ -21,6 +21,23 @@ const ContactSection = () => (
                         contact@worldculturemarketplace.com
                     </a>
                 </ContactRow>
+                <ContactRow
+                    icon={
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"
+                        />
+                    }
+                >
+                    <a
+                        href="https://maps.google.com/?q=50 Avenue des Champs-Élysées, Paris"
+                        className="text-[14.5px] text-gray-300 hover:text-[#F57C00] transition-colors"
+                    >
+                        50 Avenue des Champs-Élysées, 75008 Paris, France. Washington, USA.
+                    </a>
+                </ContactRow>
             </div>
         </div>
     </div>

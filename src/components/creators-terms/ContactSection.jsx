@@ -56,7 +56,7 @@ const ContactSection = () => {
                             <div className="flex items-center gap-2 bg-[#2a2a26] px-4 py-3 rounded-xl border border-gray-600 shadow-sm">
                                 <span className="text-xl">🇫🇷</span>
                                 <span className="text-[14px] font-semibold text-gray-100">
-                                    50 Avenue des Champs-Élysées, 75008 Paris, France.
+                                    50 Avenue des Champs-Élysées, 75008 Paris, France. Washington, USA.
                                 </span>
                             </div>
                         </div>

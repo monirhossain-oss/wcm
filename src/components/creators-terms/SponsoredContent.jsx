@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React from 'react';
 
 const SponsoredContent = () => {
@@ -75,7 +76,10 @@ const SponsoredContent = () => {
                         <p className="text-[16px] leading-relaxed
                             /* Light */ text-zinc-700 
                             /* Dark */ dark:text-gray-300">
-                            Creators who use paid promotional services (such as <span className="font-bold /* Light */ text-black /* Dark */ dark:text-white">Boost</span> or <span className="font-bold /* Light */ text-black /* Dark */ dark:text-white">PPC</span>) are also subject to the <span className="text-orange-600 font-bold cursor-pointer hover:underline transition-all">Advertising Policy</span>.
+                            Creators who use paid promotional services (such as <span className="font-bold /* Light */ text-black /* Dark */ dark:text-white">Boost</span> or <span className="font-bold /* Light */ text-black /* Dark */ dark:text-white">PPC</span>) are also subject to the <Link href="/advertising-policy" className="text-orange-600 font-bold cursor-pointer hover:underline transition-all">
+                                Advertising Policy
+                            </Link>
+                            .
                         </p>
                     </div>
                 </div>

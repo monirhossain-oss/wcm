@@ -332,7 +332,7 @@ export default function CreatorDashboard() {
                 <th className="px-8 py-4">Transaction Date</th>
                 <th className="px-8 py-4">Protocol</th>
                 <th className="px-8 py-4">Amount</th>
-                <th className="px-8 py-4 text-right">Action</th>
+                <th className="px-8 py-4 text-right">Invoice</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
