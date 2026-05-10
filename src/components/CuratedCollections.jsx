@@ -33,7 +33,7 @@ export default async function CuratedCollections() {
     return (
         <section className="max-w-7xl mx-auto px-6 py-12">
             <div className="mb-4">
-                <h1 className="text-2xl md:text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">
+                <h1 className="text-2xl md:text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">
                     Curated Collections
                 </h1>
                 <p className="text-sm md:text-base text-zinc-500 mt-2">
@@ -41,11 +41,11 @@ export default async function CuratedCollections() {
                 </p>
             </div>
 
-            <div className="space-y-16">
+            <div className="space-y-8">
                 {collections.map((collection) => (
                     <div key={collection.categoryId}>
                         <div className="flex justify-between items-center pb-3">
-                            <h2 className="text-lg md:text-2xl font-bold text-zinc-800 dark:text-zinc-100 uppercase italic tracking-tight">
+                            <h2 className="text-lg md:text-xl font-bold text-zinc-800 dark:text-zinc-100 uppercase italic tracking-tight">
                                 {collection.categoryTitle}
                             </h2>
 

@@ -5,7 +5,6 @@ import { Navigation } from "swiper/modules";
 import Image from "next/image";
 import Link from "next/link";
 
-// Swiper CSS ইমপোর্ট নিশ্চিত করুন
 import "swiper/css";
 
 const CreatorSlider = ({ creators }) => {
@@ -33,11 +32,11 @@ const CreatorSlider = ({ creators }) => {
                 className="pb-4 !overflow-visible"
             >
                 {creators.map((creator) => (
-                    <SwiperSlide key={creator._id} className="h-auto">
+                    <SwiperSlide key={creator._id} className="!h-auto">
                         <div className="bg-gray-100 dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 p-4 md:p-6 text-center hover:shadow-lg transition-all duration-300 group h-full flex flex-col items-center">
 
                             {/* Profile Image */}
-                            <div className="relative w-20 h-20 md:w-24 md:h-24 mb-3 md:mb-4">
+                            <div className="relative w-20 h-20 md:w-24 md:h-24 mb-3 md:mb-4 shrink-0">
                                 <Image
                                     src={creator.profile?.profileImage || "/default-avatar.png"}
                                     alt={creator.username || "creator"}
@@ -61,6 +60,8 @@ const CreatorSlider = ({ creators }) => {
                             <div className="text-[9px] md:text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-900/20 py-1 px-3 rounded-full mb-4 uppercase">
                                 {creator.totalListings || 0} Listings
                             </div>
+
+                            {/* এই লিংকটা mt-auto দিয়ে নিচে চলে আসবে */}
                             <Link
                                 href={`/profile/${creator.username || creator._id}`}
                                 className="w-full py-2 md:py-2.5 text-[10px] md:text-xs font-bold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-all uppercase mt-auto shadow-sm active:scale-95 text-center"

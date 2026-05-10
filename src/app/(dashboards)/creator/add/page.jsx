@@ -380,7 +380,7 @@ export default function AddListing() {
             {/* Region Dropdown */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
-                <FiMapPin size={10} /> Region
+                <FiMapPin size={10} /> Culture
               </label>
               <select
                 required
@@ -389,7 +389,7 @@ export default function AddListing() {
                 onChange={(e) => setFormData({ ...formData, region: e.target.value, country: e.target.value })}
                 className={`w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
               >
-                <option value="">{assetsLoading ? 'Loading...' : 'Select Region'}</option>
+                <option value="">{assetsLoading ? 'Loading...' : 'Select Culture'}</option>
                 {regions.map((r) => (
                   <option key={r._id} value={r.title} className="bg-white dark:bg-[#1f1f1f]">
                     {r.title}

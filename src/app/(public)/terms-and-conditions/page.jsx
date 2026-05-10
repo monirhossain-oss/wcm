@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React from 'react';
 
 /* ── Reusable Components ── */
@@ -300,8 +301,10 @@ const TermsAndConditions = () => {
             <TwoColList items={['Banner ads', 'Sponsored cultural content', 'Boosted visibility', 'PPC-based advertising']} />
             <NoteBox>
               All advertising activities are governed by the{' '}
-              <span className="font-bold text-[#F57C00] underline underline-offset-2 cursor-pointer">Advertising Terms</span>,
-              which form part of this legal suite.
+              <Link href="/advertising-policy" className="font-bold text-[#F57C00] underline underline-offset-2 cursor-pointer">
+                Advertising Terms
+              </Link>
+              , which form part of this legal suite.
             </NoteBox>
           </SectionBlock>
 

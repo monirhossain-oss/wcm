@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React from 'react';
 
 const AccountStatusSection = () => {
@@ -68,12 +69,12 @@ const AccountStatusSection = () => {
                                 Creators may request account deletion at any time.
                             </p>
                         </div>
-                        <button className="text-[13px] font-black text-[#F57C00] uppercase tracking-widest hover:text-[#fb8c00] transition-colors flex items-center gap-2 group">
+                        <Link href="/contact" className="text-[13px] font-black text-[#F57C00] uppercase tracking-widest hover:text-[#fb8c00] transition-colors flex items-center gap-2 group">
                             Contact Support
                             <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>
