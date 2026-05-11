@@ -72,9 +72,21 @@ export default function BlogListPage() {
               <img src={blog.image} className="w-16 h-16 rounded-lg object-cover" alt="" />
               <div>
                 <h3 className="font-bold text-sm line-clamp-1">{blog.title}</h3>
-                <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">
-                  {blog.category} • {new Date(blog.createdAt).toLocaleDateString()}
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  {/* Status Badge */}
+                  <span
+                    className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                      blog.status === 'published'
+                        ? 'bg-green-500/10 text-green-500'
+                        : 'bg-yellow-500/10 text-yellow-500'
+                    }`}
+                  >
+                    {blog.status === 'published' ? '● Published' : '○ Draft'}
+                  </span>
+                  <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">
+                    {blog.category} • {new Date(blog.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
               </div>
             </div>
 

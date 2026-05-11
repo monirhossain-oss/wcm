@@ -134,14 +134,15 @@ export default function EditBlogPage() {
     setGridFiles({ ...gridFiles, [blockIdx]: updatedFiles });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, status) => {
     if (e) e.preventDefault();
-    setLoading(true);
+    setLoading(status || 'save');
     try {
       const data = new FormData();
       data.append('title', formData.title);
       data.append('description', formData.description);
       data.append('category', categories.find((c) => c._id === formData.category)?.title);
+      if (status) data.append('status', status); // শুধু explicitly দিলে পাঠাবে
 
       if (mainImage) data.append('image', mainImage);
 
@@ -157,7 +158,9 @@ export default function EditBlogPage() {
       data.append('content', JSON.stringify(formData.content));
 
       await api.put(`/api/blogs/${id}`, data);
-      toast.success('Journal Updated Successfully!');
+      toast.success(
+        status === 'draft' ? 'Saved as Draft!' : status === 'published' ? 'Published!' : 'Updated!'
+      );
       router.push('/admin/blogs');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Update failed');
@@ -190,16 +193,25 @@ export default function EditBlogPage() {
           >
             Cancel
           </button>
+
           <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="px-8 py-2.5 bg-orange-600 text-white rounded-md font-bold text-xs uppercase flex items-center gap-2"
+            onClick={(e) => handleSubmit(e, 'draft')}
+            disabled={!!loading}
+            className="px-6 py-2.5 border dark:border-white/10 rounded-md font-bold text-xs uppercase flex items-center gap-2 disabled:opacity-50 hover:border-orange-500 hover:text-orange-500"
           >
-            {loading ? (
+            {loading === 'draft' ? <FiLoader className="animate-spin" /> : '🗒 Save Draft'}
+          </button>
+
+          <button
+            onClick={(e) => handleSubmit(e, 'published')}
+            disabled={!!loading}
+            className="px-8 py-2.5 bg-orange-600 text-white rounded-md font-bold text-xs uppercase flex items-center gap-2 disabled:opacity-50"
+          >
+            {loading === 'published' ? (
               <FiLoader className="animate-spin" />
             ) : (
               <>
-                <FiEdit3 /> Save Changes
+                <FiEdit3 /> Publish
               </>
             )}
           </button>
