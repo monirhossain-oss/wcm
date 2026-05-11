@@ -136,16 +136,17 @@ export default function CreateBlogPage() {
     setGridFiles({ ...gridFiles, [blockIdx]: updatedFiles });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, status = 'published') => {
     if (e) e.preventDefault();
     if (!mainImage) return toast.error('Main Banner is required');
     if (!formData.category) return toast.error('Category is required');
     if (!formData.title) return toast.error('Title is required');
 
-    setLoading(true);
+    setLoading(status); // 'draft' বা 'published' set হবে loading এ
     try {
       const data = new FormData();
       data.append('title', formData.title);
+      data.append('status', status); // ← status পাঠাচ্ছি
       const catTitle = categories.find((c) => c._id === formData.category)?.title || '';
       data.append('category', catTitle);
       data.append('description', formData.description);
@@ -156,7 +157,6 @@ export default function CreateBlogPage() {
       );
       data.append('tags', tagTitles.join(','));
 
-      // Append grid images with proper indexing
       Object.keys(gridFiles).forEach((blockIdx) => {
         gridFiles[blockIdx].forEach((file) => {
           data.append(`gridImages_${blockIdx}`, file);
@@ -168,11 +168,11 @@ export default function CreateBlogPage() {
       const res = await api.post('/api/blogs', data);
 
       if (res.data.success) {
-        toast.success('Journal Published Successfully!');
+        toast.success(status === 'draft' ? 'Draft Saved!' : 'Journal Published!');
         router.push('/admin/blogs');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error publishing journal');
+      toast.error(err.response?.data?.message || 'Error');
     } finally {
       setLoading(false);
     }
@@ -207,12 +207,23 @@ export default function CreateBlogPage() {
           >
             Cancel
           </button>
+
+          {/* Draft Button */}
           <button
-            onClick={handleSubmit}
-            disabled={loading}
+            onClick={(e) => handleSubmit(e, 'draft')}
+            disabled={!!loading}
+            className="px-6 py-2.5 border dark:border-white/10 rounded-md font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-2 disabled:opacity-50 hover:border-orange-500 hover:text-orange-500"
+          >
+            {loading === 'draft' ? <FiLoader className="animate-spin" /> : '🗒 Save Draft'}
+          </button>
+
+          {/* Publish Button */}
+          <button
+            onClick={(e) => handleSubmit(e, 'published')}
+            disabled={!!loading}
             className="px-8 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-md font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-2 disabled:opacity-50 shadow-lg shadow-orange-500/20"
           >
-            {loading ? (
+            {loading === 'published' ? (
               <FiLoader className="animate-spin" />
             ) : (
               <>
