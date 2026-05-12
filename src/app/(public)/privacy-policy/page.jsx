@@ -387,16 +387,44 @@ const PrivacyPolicyPage = () => {
                                 </a>
                             </div>
 
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-[#F57C00]/20 flex items-center justify-center flex-shrink-0">
-                                    <svg className="w-4 h-4 text-[#F57C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
+                            <div className="flex items-start gap-3">
+                                <div className="flex flex-col gap-2 mt-1">
+
+                                    {/* Paris */}
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-7 h-7 rounded-lg bg-[#F57C00]/20 flex items-center justify-center">
+                                            <svg className="w-4 h-4 text-[#F57C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </div>
+
+                                        <a
+                                            href="https://maps.google.com/?q=50 Avenue des Champs-Élysées, Paris"
+                                            className="text-[14px] text-gray-400 hover:text-[#F57C00] transition-colors"
+                                        >
+                                            50 Avenue des Champs-Élysées, 75008 Paris, France.
+                                        </a>
+                                    </div>
+
+                                    {/* Washington */}
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-7 h-7 rounded-lg bg-[#F57C00]/20 flex items-center justify-center">
+                                            <svg className="w-4 h-4 text-[#F57C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </div>
+
+                                        <a
+                                            href="https://maps.google.com/?q=Washington, USA"
+                                            className="text-[14px] text-gray-400 hover:text-[#F57C00] transition-colors"
+                                        >
+                                            🇺🇸 Washington, USA.
+                                        </a>
+                                    </div>
+
                                 </div>
-                                <span className="text-[14px] text-gray-400">
-                                    50 avenue des Champs Élysées, 75008 Paris, France. &nbsp;·&nbsp; Washington, USA
-                                </span>
                             </div>
                         </div>
                     </div>

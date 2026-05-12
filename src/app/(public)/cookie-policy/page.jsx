@@ -369,12 +369,19 @@ const CookiePolicy = () => {
                     {/* 8 — Contact */}
                     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 dark:from-[#1a1a18] dark:to-[#111110] border border-gray-700 dark:border-gray-800 p-8">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-[#F57C00] opacity-[0.07] blur-[60px] rounded-full translate-x-1/3 -translate-y-1/3" />
+
                         <div className="relative">
                             <span className="inline-block text-[11px] font-black tracking-[0.2em] uppercase text-[#F57C00] mb-3">
                                 Section 08
                             </span>
-                            <h2 className="text-[22px] font-black text-white mb-6 uppercase tracking-tight">Contact Information</h2>
+
+                            <h2 className="text-[22px] font-black text-white mb-6 uppercase tracking-tight">
+                                Contact Information
+                            </h2>
+
                             <div className="space-y-3">
+
+                                {/* Name + Email (mapped) */}
                                 {[
                                     {
                                         icon: (
@@ -391,19 +398,13 @@ const CookiePolicy = () => {
                                             </svg>
                                         ),
                                         text: (
-                                            <a href="mailto:contact@worldculturemarketplace.com" className="text-[14.5px] text-gray-300 hover:text-[#F57C00] transition-colors">
+                                            <a
+                                                href="mailto:contact@worldculturemarketplace.com"
+                                                className="text-[14.5px] text-gray-300 hover:text-[#F57C00] transition-colors"
+                                            >
                                                 contact@worldculturemarketplace.com
                                             </a>
                                         ),
-                                    },
-                                    {
-                                        icon: (
-                                            <svg className="w-4 h-4 text-[#F57C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                        ),
-                                        text: <span className="text-[14px] text-gray-400">50 avenue des Champs Élysées, 75008 Paris, France. &nbsp;·&nbsp; Washington, USA</span>,
                                     },
                                 ].map((row, i) => (
                                     <div key={i} className="flex items-center gap-3">
@@ -413,6 +414,44 @@ const CookiePolicy = () => {
                                         {row.text}
                                     </div>
                                 ))}
+
+                                {/* Locations (separate, NOT in map) */}
+                                <div className="flex flex-col gap-2">
+
+                                    {/* Paris */}
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-[#F57C00]/20 flex items-center justify-center flex-shrink-0">
+                                            <svg className="w-4 h-4 text-[#F57C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </div>
+                                        <a
+                                            href="https://maps.google.com/?q=50 Avenue des Champs-Élysées, Paris"
+                                            className="text-[14px] text-gray-400 hover:text-[#F57C00] transition-colors"
+                                        >
+                                            50 Avenue des Champs-Élysées, 75008 Paris, France
+                                        </a>
+                                    </div>
+
+                                    {/* Washington */}
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-[#F57C00]/20 flex items-center justify-center flex-shrink-0">
+                                            <svg className="w-4 h-4 text-[#F57C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </div>
+                                        <a
+                                            href="https://maps.google.com/?q=Washington, USA"
+                                            className="text-[14px] text-gray-400 hover:text-[#F57C00] transition-colors"
+                                        >
+                                            Washington, USA
+                                        </a>
+                                    </div>
+
+                                </div>
+
                             </div>
                         </div>
                     </div>
