@@ -53,11 +53,22 @@ const ContactSection = () => {
                                 Business Location
                             </span>
 
-                            <div className="flex items-center gap-2 bg-[#2a2a26] px-4 py-3 rounded-xl border border-gray-600 shadow-sm">
-                                <span className="text-xl">🇫🇷</span>
-                                <span className="text-[14px] font-semibold text-gray-100">
-                                    50 Avenue des Champs-Élysées, 75008 Paris, France. Washington, USA.
-                                </span>
+                            <div className="space-y-3">
+                                {/* France */}
+                                <div className="flex items-center gap-2 bg-[#2a2a26] px-4 py-3 rounded-xl border border-gray-600 shadow-sm">
+                                    <span className="text-xl">🇫🇷</span>
+                                    <span className="text-[14px] font-semibold text-gray-100">
+                                        50 Avenue des Champs-Élysées, 75008 Paris, France.
+                                    </span>
+                                </div>
+
+                                {/* USA */}
+                                <div className="flex items-center gap-2 bg-[#2a2a26] px-4 py-3 rounded-xl border border-gray-600 shadow-sm">
+                                    <span className="text-xl">🇺🇸</span>
+                                    <span className="text-[14px] font-semibold text-gray-100">
+                                        Washington, USA.
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>

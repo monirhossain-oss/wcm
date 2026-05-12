@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { Country } from 'country-state-city';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '@/lib/cropImage';
 import {
@@ -32,16 +33,21 @@ export default function AddListing() {
     externalUrls: [''],
     websiteLink: '',
     region: '',
-    country: '',
+    country: '',        // ✅ এটা আগের মতোই — DB-তে যাবে
     tradition: '',
     category: '',
     culturalTags: [],
   });
 
+  // ✅ শো-অফলি country state (কোনো কাজ নেই, শুধু দেখাবে)
+  const [showCountry, setShowCountry] = useState('');
+  const [showCountryCode, setShowCountryCode] = useState('');
+
   const [categories, setCategories] = useState([]);
   const [categoryTags, setCategoryTags] = useState([]);
   const [regions, setRegions] = useState([]);
   const [traditions, setTraditions] = useState([]);
+  const [countries, setCountries] = useState([]);  // ✅ country-state-city থেকে
 
   const [metaLoading, setMetaLoading] = useState(true);
   const [assetsLoading, setAssetsLoading] = useState(false);
@@ -59,6 +65,8 @@ export default function AddListing() {
   const [catSearch, setCatSearch] = useState('');
   const [showTagDrop, setShowTagDrop] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
+  const [showCountryDrop, setShowCountryDrop] = useState(false);  // ✅
+  const [countrySearch, setCountrySearch] = useState('');          // ✅
 
   const router = useRouter();
 
@@ -88,19 +96,23 @@ export default function AddListing() {
     }
   };
 
-  // ── 1. Initial category load ───────────────────────────────────────────────
+  // ── 1. Initial load: categories + countries ────────────────────────────────
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchMeta = async () => {
       try {
-        const res = await api.get('/api/admin/categories');
-        setCategories(res.data);
+        const [catRes, allCountries] = await Promise.all([
+          api.get('/api/admin/categories'),
+          Promise.resolve(Country.getAllCountries()),
+        ]);
+        setCategories(catRes.data);
+        setCountries(allCountries.sort((a, b) => a.name.localeCompare(b.name)));
       } catch {
-        console.error('Categories load failed');
+        console.error('Meta load failed');
       } finally {
         setMetaLoading(false);
       }
     };
-    fetchCategories();
+    fetchMeta();
   }, []);
 
   // ── 2. Load assets when category changes ──────────────────────────────────
@@ -151,6 +163,9 @@ export default function AddListing() {
   const filteredTags = categoryTags.filter((t) =>
     t.title.toLowerCase().includes(tagSearch.toLowerCase())
   );
+  const filteredCountries = countries.filter((c) =>
+    c.name.toLowerCase().includes(countrySearch.toLowerCase())
+  );
 
   // ── Tag toggle ────────────────────────────────────────────────────────────
   const handleTagToggle = (tagId) => {
@@ -187,6 +202,7 @@ export default function AddListing() {
       data.append('image', finalCroppedImage, 'listing-image.jpg');
 
       const response = await api.post('/api/listings/add', data);
+      // console.log(data)
 
       if (response.data.success || response.status === 201 || response.status === 200) {
         setTimeout(() => { router.push('/creator/listings'); router.refresh(); }, 100);
@@ -376,8 +392,63 @@ export default function AddListing() {
                 </div>
               )}
             </div>
+            <div className="space-y-2 relative">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
+                <FiMapPin size={10} /> Region
+              </label>
+              <div
+                onClick={() => setShowCountryDrop(!showCountryDrop)}
+                className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold dark:text-white flex justify-between items-center cursor-pointer hover:border-orange-500/50"
+              >
+                <div className="flex items-center gap-2">
+                  {showCountryCode && (
+                    <img
+                      src={`https://flagcdn.com/w20/${showCountryCode.toLowerCase()}.png`}
+                      alt={showCountry}
+                      className="w-5 h-auto rounded-sm"
+                    />
+                  )}
+                  {showCountry || 'Select Country'}
+                </div>
+                <FiChevronDown className={`${showCountryDrop ? 'rotate-180' : ''} transition-transform`} />
+              </div>
+              {showCountryDrop && (
+                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-lg shadow-2xl overflow-hidden">
+                  <div className="p-2 border-b dark:border-white/10 flex items-center gap-2 bg-gray-50 dark:bg-white/5">
+                    <FiSearch className="text-gray-400" size={12} />
+                    <input
+                      autoFocus
+                      placeholder="Search country..."
+                      className="w-full bg-transparent text-[10px] font-bold outline-none dark:text-white"
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="max-h-48 overflow-y-auto">
+                    {filteredCountries.map((country) => (
+                      <div
+                        key={country.isoCode}
+                        onClick={() => {
+                          setShowCountry(country.name);        // ✅ শুধু state update
+                          setShowCountryCode(country.isoCode); // ✅ শুধু state update
+                          setShowCountryDrop(false);
+                          setCountrySearch('');
+                        }}
+                        className={`p-3 text-[10px] font-bold flex items-center gap-2 hover:bg-orange-500 hover:text-white cursor-pointer transition-colors dark:text-gray-300 border-b last:border-0 dark:border-white/5 ${showCountryCode === country.isoCode ? 'bg-orange-50 text-orange-600' : ''}`}
+                      >
+                        <img
+                          src={`https://flagcdn.com/w20/${country.isoCode.toLowerCase()}.png`}
+                          alt={country.name}
+                          className="w-5 h-auto rounded-sm"
+                        />
+                        {country.name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
-            {/* Region Dropdown */}
+            {/* Region Dropdown - আগের মতোই */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
                 <FiMapPin size={10} /> Culture
@@ -477,8 +548,8 @@ export default function AddListing() {
                         key={tag._id}
                         onClick={() => handleTagToggle(tag._id)}
                         className={`p-2 rounded-lg text-[9px] font-black uppercase cursor-pointer flex justify-between items-center ${formData.culturalTags.includes(tag._id)
-                            ? 'bg-orange-500 text-white'
-                            : 'dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
+                          ? 'bg-orange-500 text-white'
+                          : 'dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
                           }`}
                       >
                         {tag.title}

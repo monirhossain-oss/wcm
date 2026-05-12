@@ -14,13 +14,21 @@ const ContactSection = () => (
             <p className="text-[13.5px] text-gray-400 mb-5">For advertising inquiries:</p>
             <div className="space-y-3">
                 <ContactRow icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />}>
-                    <span className="text-[15px] font-bold text-white">World Culture Marketplace (WCM)</span>
+                    <span className="text-[15px] font-bold text-white">
+                        World Culture Marketplace (WCM)
+                    </span>
                 </ContactRow>
+
                 <ContactRow icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />}>
-                    <a href="mailto:contact@worldculturemarketplace.com" className="text-[14.5px] text-gray-300 hover:text-[#F57C00] transition-colors">
+                    <a
+                        href="mailto:contact@worldculturemarketplace.com"
+                        className="text-[14.5px] text-gray-300 hover:text-[#F57C00] transition-colors"
+                    >
                         contact@worldculturemarketplace.com
                     </a>
                 </ContactRow>
+
+                {/* Paris Location */}
                 <ContactRow
                     icon={
                         <path
@@ -35,7 +43,26 @@ const ContactSection = () => (
                         href="https://maps.google.com/?q=50 Avenue des Champs-Élysées, Paris"
                         className="text-[14.5px] text-gray-300 hover:text-[#F57C00] transition-colors"
                     >
-                        50 Avenue des Champs-Élysées, 75008 Paris, France. Washington, USA.
+                        50 Avenue des Champs-Élysées, 75008 Paris, France.
+                    </a>
+                </ContactRow>
+
+                {/* Washington Location */}
+                <ContactRow
+                    icon={
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"
+                        />
+                    }
+                >
+                    <a
+                        href="https://maps.google.com/?q=Washington, USA"
+                        className="text-[14.5px] text-gray-300 hover:text-[#F57C00] transition-colors"
+                    >
+                        Washington, USA.
                     </a>
                 </ContactRow>
             </div>
