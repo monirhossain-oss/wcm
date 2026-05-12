@@ -391,13 +391,39 @@ export default function UserProfileForm() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className={labelStyle}>Language</label>
-                  <input
+                <div className="flex flex-col">
+                  <label className={`${labelStyle} text-black dark:text-white`}>
+                    Language
+                  </label>
+
+                  <select
                     {...register('language', { required: true })}
-                    placeholder="English, Bangla etc."
-                    className={inputStyle}
-                  />
+                    className={`${inputStyle} 
+      bg-white text-black border border-gray-300 
+      dark:bg-black dark:text-white dark:border-gray-600 
+      focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  >
+                    <option
+                      value=""
+                      className="bg-white text-black dark:bg-black dark:text-white"
+                    >
+                      Select Language
+                    </option>
+
+                    <option
+                      value="English"
+                      className="bg-white text-black dark:bg-black dark:text-white"
+                    >
+                      English
+                    </option>
+
+                    <option
+                      value="French"
+                      className="bg-white text-black dark:bg-black dark:text-white"
+                    >
+                      French
+                    </option>
+                  </select>
                 </div>
               </div>
 
@@ -457,7 +483,7 @@ export default function UserProfileForm() {
             </form>
           </div>
         </div>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 }

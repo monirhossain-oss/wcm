@@ -33,7 +33,7 @@ export default function AddListing() {
     externalUrls: [''],
     websiteLink: '',
     region: '',
-    country: '',        // ✅ এটা আগের মতোই — DB-তে যাবে
+    country: '',
     tradition: '',
     category: '',
     culturalTags: [],
@@ -51,6 +51,14 @@ export default function AddListing() {
 
   const [metaLoading, setMetaLoading] = useState(true);
   const [assetsLoading, setAssetsLoading] = useState(false);
+
+  // ── Custom Input States (Others option) ──────────────────────────────────
+  const [customRegion, setCustomRegion] = useState('');
+  const [customTradition, setCustomTradition] = useState('');
+  const [customTag, setCustomTag] = useState('');
+  const [showCustomRegion, setShowCustomRegion] = useState(false);
+  const [showCustomTradition, setShowCustomTradition] = useState(false);
+  const [showCustomTagInput, setShowCustomTagInput] = useState(false);
 
   // ── Image & Crop ──────────────────────────────────────────────────────────
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -133,6 +141,13 @@ export default function AddListing() {
           setRegions(res.data.regions);
           setTraditions(res.data.traditions);
           setFormData((prev) => ({ ...prev, culturalTags: [], region: '', tradition: '' }));
+          // Reset custom states
+          setCustomRegion('');
+          setCustomTradition('');
+          setCustomTag('');
+          setShowCustomRegion(false);
+          setShowCustomTradition(false);
+          setShowCustomTagInput(false);
         }
       } catch {
         console.error('Assets load failed');
@@ -181,6 +196,25 @@ export default function AddListing() {
     });
   };
 
+  // ── Add Custom Tag ────────────────────────────────────────────────────────
+  const handleAddCustomTag = () => {
+    if (!customTag.trim()) return;
+    if (formData.culturalTags.length >= 10) {
+      alert('Maximum 10 tags allowed');
+      return;
+    }
+    // Generate unique ID for custom tag
+    const customTagId = `custom-${Date.now()}`;
+    // Add to categoryTags list temporarily for display
+    setCategoryTags((prev) => [...prev, { _id: customTagId, title: customTag.trim() }]);
+    setFormData((prev) => ({
+      ...prev,
+      culturalTags: [...prev.culturalTags, customTagId],
+    }));
+    setCustomTag('');
+    setShowCustomTagInput(false);
+  };
+
   // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -190,11 +224,32 @@ export default function AddListing() {
     setLoading(true);
     try {
       const data = new FormData();
+
+      // Handle region - if Others selected, use custom value
+      const finalRegion = showCustomRegion && customRegion.trim()
+        ? customRegion.trim()
+        : formData.region;
+
+      // Handle tradition - if Others selected, use custom value
+      const finalTradition = showCustomTradition && customTradition.trim()
+        ? customTradition.trim()
+        : formData.tradition;
+
+      // Handle tags - convert custom tags to their text values
+      const finalTags = formData.culturalTags.map((tagId) => {
+        const tag = categoryTags.find((t) => t._id === tagId);
+        return tag ? tag.title : tagId;
+      });
+
       Object.keys(formData).forEach((key) => {
         if (key === 'culturalTags') {
-          formData[key].forEach((tag) => data.append('culturalTags', tag));
+          finalTags.forEach((tag) => data.append('culturalTags', tag));
         } else if (key === 'externalUrls') {
           formData[key].forEach((url) => { if (url.trim()) data.append('externalUrls', url); });
+        } else if (key === 'region') {
+          data.append('region', finalRegion);
+        } else if (key === 'tradition') {
+          data.append('tradition', finalTradition);
         } else {
           data.append(key, formData[key]);
         }
@@ -202,7 +257,6 @@ export default function AddListing() {
       data.append('image', finalCroppedImage, 'listing-image.jpg');
 
       const response = await api.post('/api/listings/add', data);
-      // console.log(data)
 
       if (response.data.success || response.status === 201 || response.status === 200) {
         setTimeout(() => { router.push('/creator/listings'); router.refresh(); }, 100);
@@ -394,7 +448,7 @@ export default function AddListing() {
             </div>
             <div className="space-y-2 relative">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
-                <FiMapPin size={10} /> Region
+                <FiMapPin size={10} /> Region / Country
               </label>
               <div
                 onClick={() => setShowCountryDrop(!showCountryDrop)}
@@ -448,16 +502,26 @@ export default function AddListing() {
               )}
             </div>
 
-            {/* Region Dropdown - আগের মতোই */}
+            {/* Region Dropdown with Others option */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
-                <FiMapPin size={10} /> Culture
+                <FiMapPin size={10} /> Culture / Origin
               </label>
               <select
                 required
                 disabled={!formData.category || assetsLoading}
                 value={formData.region}
-                onChange={(e) => setFormData({ ...formData, region: e.target.value, country: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === 'others') {
+                    setShowCustomRegion(true);
+                    setFormData({ ...formData, region: 'others', country: 'others' });
+                  } else {
+                    setShowCustomRegion(false);
+                    setCustomRegion('');
+                    setFormData({ ...formData, region: value, country: value });
+                  }
+                }}
                 className={`w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
               >
                 <option value="">{assetsLoading ? 'Loading...' : 'Select Culture'}</option>
@@ -466,7 +530,66 @@ export default function AddListing() {
                     {r.title}
                   </option>
                 ))}
+                <option value="others" className="bg-orange-50 text-orange-600 font-black">+ Others (Custom)</option>
               </select>
+
+              {/* Custom Region Input */}
+              {showCustomRegion && (
+                <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <input
+                    type="text"
+                    required
+                    value={customRegion}
+                    onChange={(e) => setCustomRegion(e.target.value)}
+                    className="w-full bg-white dark:bg-white/10 border border-orange-300 dark:border-orange-500/30 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white placeholder:text-gray-400"
+                    placeholder="Enter your custom culture/origin..."
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Tradition Dropdown with Others option */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Tradition / Technique</label>
+              <select
+                required
+                disabled={!formData.category || assetsLoading}
+                value={formData.tradition}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === 'others') {
+                    setShowCustomTradition(true);
+                    setFormData({ ...formData, tradition: 'others' });
+                  } else {
+                    setShowCustomTradition(false);
+                    setCustomTradition('');
+                    setFormData({ ...formData, tradition: value });
+                  }
+                }}
+                className={`w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500 ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
+              >
+                <option value="">{assetsLoading ? 'Loading...' : 'Select Tradition'}</option>
+                {traditions.map((t) => (
+                  <option key={t._id} value={t.title} className="bg-white dark:bg-[#1f1f1f]">
+                    {t.title}
+                  </option>
+                ))}
+                <option value="others" className="bg-orange-50 text-orange-600 font-black">+ Others (Custom)</option>
+              </select>
+
+              {/* Custom Tradition Input */}
+              {showCustomTradition && (
+                <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <input
+                    type="text"
+                    required
+                    value={customTradition}
+                    onChange={(e) => setCustomTradition(e.target.value)}
+                    className="w-full bg-white dark:bg-white/10 border border-orange-300 dark:border-orange-500/30 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white placeholder:text-gray-400"
+                    placeholder="Enter your custom tradition/technique..."
+                  />
+                </div>
+              )}
             </div>
 
             {/* Description */}
@@ -484,28 +607,9 @@ export default function AddListing() {
         </div>
 
         {/* ── Tags, Tradition & Sources ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-lg">
 
-          {/* Tradition */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Tradition</label>
-            <select
-              required
-              disabled={!formData.category || assetsLoading}
-              value={formData.tradition}
-              onChange={(e) => setFormData({ ...formData, tradition: e.target.value })}
-              className={`w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500 ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
-            >
-              <option value="">{assetsLoading ? 'Loading...' : 'Select Tradition'}</option>
-              {traditions.map((t) => (
-                <option key={t._id} value={t.title} className="bg-white dark:bg-[#1f1f1f]">
-                  {t.title}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Tags */}
+          {/* Tags with Others option */}
           <div className="space-y-2 relative">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
               <FiTag size={10} />
@@ -540,7 +644,38 @@ export default function AddListing() {
                   />
                 </div>
                 <div className="max-h-40 overflow-y-auto grid grid-cols-1 p-1 gap-1">
-                  {filteredTags.length === 0 ? (
+                  {/* Others option for tags */}
+                  <div
+                    onClick={() => setShowCustomTagInput(!showCustomTagInput)}
+                    className="p-2 rounded-lg text-[9px] font-black uppercase cursor-pointer flex justify-between items-center bg-orange-50 text-orange-600 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400"
+                  >
+                    <span className="flex items-center gap-1"><FiPlus size={10} /> Add Custom Tag</span>
+                  </div>
+
+                  {/* Custom Tag Input */}
+                  {showCustomTagInput && (
+                    <div className="p-2 border-t dark:border-white/10">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={customTag}
+                          onChange={(e) => setCustomTag(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-2 rounded-lg text-[10px] font-bold outline-none focus:border-orange-500 dark:text-white"
+                          placeholder="Enter custom tag..."
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handleAddCustomTag(); }}
+                          className="bg-orange-500 text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-orange-600"
+                        >
+                          <FiPlus size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {filteredTags.length === 0 && !showCustomTagInput ? (
                     <div className="p-3 text-[9px] text-center text-gray-500 uppercase">No tags found</div>
                   ) : (
                     filteredTags.map((tag) => (
