@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter, useParams } from 'next/navigation';
+import { compressImageForUpload } from '@/lib/imageCompression';
 import {
   FiUploadCloud,
   FiX,
@@ -27,6 +28,7 @@ export default function EditBlogPage() {
   const router = useRouter();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+  const [imageProcessing, setImageProcessing] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [mainImage, setMainImage] = useState(null);
   const [previewImage, setPreviewImage] = useState('');
@@ -111,13 +113,36 @@ export default function EditBlogPage() {
     setGridFiles(newGridFiles);
   };
 
-  const handleGridImageChange = (blockIdx, file) => {
+  const handleMainImageChange = async (file) => {
+    if (!file) return;
+    setImageProcessing(true);
+    try {
+      setMainImage(await compressImageForUpload(file));
+    } catch (err) {
+      toast.error(err.message || 'Image processing failed');
+    } finally {
+      setImageProcessing(false);
+    }
+  };
+
+  const handleGridImageChange = async (blockIdx, file) => {
     if (!file) return;
     const currentFiles = gridFiles[blockIdx] || [];
     const existingImages = formData.content[blockIdx].images || [];
     if (currentFiles.length + existingImages.length >= 4)
       return toast.error('Max 4 images per grid');
-    setGridFiles({ ...gridFiles, [blockIdx]: [...currentFiles, file] });
+    setImageProcessing(true);
+    try {
+      const compressedFile = await compressImageForUpload(file);
+      setGridFiles((prev) => ({
+        ...prev,
+        [blockIdx]: [...(prev[blockIdx] || []), compressedFile],
+      }));
+    } catch (err) {
+      toast.error(err.message || 'Image processing failed');
+    } finally {
+      setImageProcessing(false);
+    }
   };
 
   // ✅ ফিক্সড: আগের আপলোড করা ইমেজ রিমুভ করার ফাংশন
@@ -136,6 +161,7 @@ export default function EditBlogPage() {
 
   const handleSubmit = async (e, status) => {
     if (e) e.preventDefault();
+    if (imageProcessing) return toast.error('Please wait for image processing to finish');
     setLoading(status || 'save');
     try {
       const data = new FormData();
@@ -196,7 +222,7 @@ export default function EditBlogPage() {
 
           <button
             onClick={(e) => handleSubmit(e, 'draft')}
-            disabled={!!loading}
+            disabled={!!loading || imageProcessing}
             className="px-6 py-2.5 border dark:border-white/10 rounded-md font-bold text-xs uppercase flex items-center gap-2 disabled:opacity-50 hover:border-orange-500 hover:text-orange-500"
           >
             {loading === 'draft' ? <FiLoader className="animate-spin" /> : '🗒 Save Draft'}
@@ -204,7 +230,7 @@ export default function EditBlogPage() {
 
           <button
             onClick={(e) => handleSubmit(e, 'published')}
-            disabled={!!loading}
+            disabled={!!loading || imageProcessing}
             className="px-8 py-2.5 bg-orange-600 text-white rounded-md font-bold text-xs uppercase flex items-center gap-2 disabled:opacity-50"
           >
             {loading === 'published' ? (
@@ -233,7 +259,8 @@ export default function EditBlogPage() {
               <input
                 type="file"
                 className="absolute inset-0 opacity-0 cursor-pointer"
-                onChange={(e) => setMainImage(e.target.files[0])}
+                accept="image/*"
+                onChange={(e) => handleMainImageChange(e.target.files[0])}
               />
             </div>
           </section>
@@ -406,6 +433,7 @@ export default function EditBlogPage() {
                             <input
                               type="file"
                               className="hidden"
+                              accept="image/*"
                               onChange={(e) => handleGridImageChange(idx, e.target.files[0])}
                             />
                           </label>
