@@ -1,201 +1,196 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import aboutService from '../_services/aboutService';
-import { toast } from 'react-hot-toast';
-import { FiSave, FiBookOpen, FiUploadCloud, FiEdit3 } from 'react-icons/fi';
+import React, { useState, useEffect } from "react";
+import aboutService from "../_services/aboutService";
+import { toast } from "react-hot-toast";
+import { FiBookOpen, FiSave, FiX, FiEdit3, FiUpload } from "react-icons/fi";
 
 const StorySection = ({ data, refresh }) => {
     const [loading, setLoading] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null); // নতুন ইমেজ ফাইল
-    const [previewUrl, setPreviewUrl] = useState(null); // প্রিভিউ দেখানোর জন্য
-
+    const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({
-        upperLine: '',
-        lowerLine: '',
-        descriptions: '',
-        highlightText: '',
-        testimonialQuote: '',
-        testimonialAuthor: ''
+        upperLine: "",
+        lowerLine: "",
+        descriptions: "",
+        highlightText: "",
+        testimonialQuote: "",
+        testimonialAuthor: ""
     });
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState("");
 
     useEffect(() => {
         if (data) {
             setFormData({
-                upperLine: data.headline?.upperLine || '',
-                lowerLine: data.headline?.lowerLine || '',
-                descriptions: data.descriptions?.join('\n\n') || '',
-                highlightText: data.highlightText || '',
-                testimonialQuote: data.testimonialCard?.quote || '',
-                testimonialAuthor: data.testimonialCard?.author || ''
+                upperLine: data.headline?.upperLine || "",
+                lowerLine: data.headline?.lowerLine || "",
+                descriptions: data.descriptions?.join("\n\n") || "",
+                highlightText: data.highlightText || "",
+                testimonialQuote: data.testimonialCard?.quote || "",
+                testimonialAuthor: data.testimonialCard?.author || ""
             });
-            // ডাটা লোড হলে প্রিভিউ রিসেট করা
-            setPreviewUrl(null);
-            setSelectedFile(null);
+            setPreviewUrl("");
         }
     }, [data]);
 
-    // ইমেজ সিলেক্ট করলে শুধু প্রিভিউ দেখাবে, আপলোড হবে না
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file)); // লোকাল প্রিভিউ ইউআরএল তৈরি
+            setPreviewUrl(URL.createObjectURL(file));
         }
     };
 
-    const handleUpdateAll = async (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
-            setLoading(true);
-
-            // যেহেতু ইমেজ ফাইল আছে, তাই FormData ব্যবহার করতে হবে
             const uploadData = new FormData();
-
             uploadData.append('upperLine', formData.upperLine);
             uploadData.append('lowerLine', formData.lowerLine);
             uploadData.append('highlightText', formData.highlightText);
             uploadData.append('testimonialQuote', formData.testimonialQuote);
             uploadData.append('testimonialAuthor', formData.testimonialAuthor);
 
-            // ডেসক্রিপশন অ্যারে হিসেবে JSON স্ট্রিং করে পাঠানো (আপনার ব্যাকএন্ডের JSON.parse অনুযায়ী)
             const descArray = formData.descriptions.split('\n\n').filter(p => p.trim() !== '');
             uploadData.append('descriptions', JSON.stringify(descArray));
 
-            // যদি নতুন কোনো ফাইল সিলেক্ট করা থাকে
             if (selectedFile) {
                 uploadData.append('mainImage', selectedFile);
             }
 
             const res = await aboutService.updateStory(uploadData);
-
-            if (res.data.success) {
-                toast.success("Story updated successfully!");
+            if (res.data?.success) {
+                toast.success("Story updated!");
+                setEditMode(false);
                 setSelectedFile(null);
-                setPreviewUrl(null);
+                setPreviewUrl("");
                 refresh();
             }
         } catch (error) {
-            console.error(error);
-            toast.error("Update failed!");
+            toast.error("Update failed");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="bg-[#0f172a]/60 backdrop-blur-md border border-gray-800 rounded-3xl p-8 shadow-2xl mt-10">
-            <div className="flex items-center gap-3 mb-8">
-                <div className="p-3 bg-amber-500/20 text-amber-500 rounded-2xl">
-                    <FiBookOpen size={24} />
+        <section className="bg-[#111] p-8 w-7xl mx-auto rounded-2xl border border-gray-800 shadow-xl">
+            <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-amber-500/20 text-amber-500 rounded-lg">
+                        <FiBookOpen size={20} />
+                    </div>
+                    <h2 className="text-xl font-semibold text-amber-500">Story Section</h2>
                 </div>
-                <h2 className="text-2xl font-bold text-white">Our Story Section</h2>
+                {editMode ? (
+                    <div className="flex gap-2">
+                        <button onClick={() => setEditMode(false)} className="p-2 bg-gray-800 rounded-lg hover:bg-gray-700">
+                            <FiX size={18} />
+                        </button>
+                        <button onClick={handleSave} disabled={loading} className="p-2 bg-green-900/30 text-green-400 rounded-lg hover:bg-green-900/50">
+                            <FiSave size={18} />
+                        </button>
+                    </div>
+                ) : (
+                    <button onClick={() => setEditMode(true)} className="p-2 bg-gray-800 rounded-lg hover:bg-amber-600 hover:text-white transition-all">
+                        <FiEdit3 size={18} />
+                    </button>
+                )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-                {/* Left: Image Preview & Selection */}
-                <div className="lg:col-span-2 space-y-4">
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Main Story Image</label>
-                    <div className="relative group aspect-[4/5] bg-gray-900 rounded-2xl border-2 border-dashed border-gray-800 hover:border-amber-500/50 overflow-hidden transition-all">
-                        {/* যদি নতুন সিলেক্ট করা প্রিভিউ থাকে সেটা দেখাবে, না থাকলে সার্ভারেরটা */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Image */}
+                <div className="space-y-4">
+                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider">Main Image</label>
+                    <div className="relative aspect-[4/3] bg-[#0d0d0d] rounded-xl border border-gray-800 overflow-hidden group">
                         <img
-                            src={previewUrl || data?.mainImage || "/placeholder-image.jpg"}
+                            src={previewUrl || data?.mainImage || "/placeholder.jpg"}
                             alt="Story"
-                            className={`w-full h-full object-cover transition-opacity ${selectedFile ? 'opacity-100' : 'opacity-70 group-hover:opacity-50'}`}
+                            className="w-full h-full object-cover opacity-60"
                         />
-
-                        <label className="absolute inset-0 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
-                            <input
-                                type="file"
-                                className="hidden"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                            />
-                            <div className="bg-amber-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-2xl font-semibold">
-                                <FiEdit3 /> {selectedFile ? "Change Selection" : "Select Image"}
-                            </div>
-                        </label>
+                        {editMode && (
+                            <label className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                                <div className="bg-amber-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-bold">
+                                    <FiUpload size={16} /> Change Image
+                                </div>
+                            </label>
+                        )}
                     </div>
                     {selectedFile && (
-                        <p className="text-xs text-amber-500 text-center font-medium animate-pulse italic">
-                            * New image selected. Click update to save.
-                        </p>
+                        <p className="text-xs text-amber-500 animate-pulse">* New image selected. Click save to update.</p>
                     )}
                 </div>
 
-                {/* Right: Form Data */}
-                <form onSubmit={handleUpdateAll} className="lg:col-span-3 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-amber-500 uppercase tracking-widest">Upper Headline</label>
+                {/* Text Fields */}
+                <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Upper Headline</label>
                             <input
-                                type="text"
                                 value={formData.upperLine}
                                 onChange={(e) => setFormData({ ...formData, upperLine: e.target.value })}
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-1 focus:ring-amber-500"
+                                disabled={!editMode}
+                                className={`w-full bg-[#0d0d0d] border rounded-xl p-3 text-gray-200 ${editMode ? "border-amber-500" : "border-gray-700 opacity-70"}`}
                             />
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-amber-500 uppercase tracking-widest">Lower Headline</label>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Lower Headline</label>
                             <input
-                                type="text"
                                 value={formData.lowerLine}
                                 onChange={(e) => setFormData({ ...formData, lowerLine: e.target.value })}
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-1 focus:ring-amber-500"
+                                disabled={!editMode}
+                                className={`w-full bg-[#0d0d0d] border rounded-xl p-3 text-gray-200 ${editMode ? "border-amber-500" : "border-gray-700 opacity-70"}`}
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">The Narrative (Descriptions)</label>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Descriptions (separate with blank line)</label>
                         <textarea
                             value={formData.descriptions}
                             onChange={(e) => setFormData({ ...formData, descriptions: e.target.value })}
-                            className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-4 text-white h-48 resize-none leading-relaxed outline-none focus:ring-1 focus:ring-amber-500"
+                            disabled={!editMode}
+                            rows={5}
+                            className={`w-full bg-[#0d0d0d] border rounded-xl p-4 text-gray-200 resize-none ${editMode ? "border-amber-500" : "border-gray-700 opacity-70"}`}
                         />
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-rose-400 uppercase tracking-widest">Highlight Text</label>
+                    <div>
+                        <label className="block text-xs font-medium text-rose-400 uppercase tracking-wider mb-2">Highlight Text</label>
                         <input
-                            type="text"
                             value={formData.highlightText}
                             onChange={(e) => setFormData({ ...formData, highlightText: e.target.value })}
-                            className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-1 focus:ring-rose-500"
+                            disabled={!editMode}
+                            className={`w-full bg-[#0d0d0d] border rounded-xl p-3 text-gray-200 ${editMode ? "border-rose-500" : "border-gray-700 opacity-70"}`}
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-900/30 p-4 rounded-2xl border border-gray-800">
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Testimonial Quote</label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Quote</label>
                             <textarea
                                 value={formData.testimonialQuote}
                                 onChange={(e) => setFormData({ ...formData, testimonialQuote: e.target.value })}
-                                className="w-full bg-black/20 border border-gray-700 rounded-lg px-3 py-2 text-white h-20 outline-none"
+                                disabled={!editMode}
+                                rows={2}
+                                className={`w-full bg-[#0d0d0d] border rounded-xl p-3 text-gray-200 resize-none ${editMode ? "border-amber-500" : "border-gray-700 opacity-70"}`}
                             />
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Author Name</label>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Author</label>
                             <input
-                                type="text"
                                 value={formData.testimonialAuthor}
                                 onChange={(e) => setFormData({ ...formData, testimonialAuthor: e.target.value })}
-                                className="w-full bg-black/20 border border-gray-700 rounded-lg px-3 py-2 text-white outline-none"
+                                disabled={!editMode}
+                                className={`w-full bg-[#0d0d0d] border rounded-xl p-3 text-gray-200 ${editMode ? "border-amber-500" : "border-gray-700 opacity-70"}`}
                             />
                         </div>
                     </div>
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg"
-                    >
-                        <FiSave size={20} />
-                        {loading ? 'Processing Update...' : 'Update Our Story'}
-                    </button>
-                </form>
+                </div>
             </div>
-        </div>
+        </section>
     );
 };
 

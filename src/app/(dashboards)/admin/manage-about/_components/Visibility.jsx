@@ -1,196 +1,296 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import aboutService from '../_services/aboutService';
 import { toast } from 'react-hot-toast';
-import { FiEye, FiSave, FiPlus, FiTrash2, FiInfo } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiX, FiCheck, FiEdit3, FiHeart } from 'react-icons/fi';
+import aboutService from '../_services/aboutService';
 
 const Visibility = ({ data, refresh }) => {
     const [loading, setLoading] = useState(false);
-    const [header, setHeader] = useState({
-        badge: '',
-        title: '',
-        subtitle: ''
+    const [editMode, setEditMode] = useState(false);
+
+    const [visibilityData, setVisibilityData] = useState({
+        headline: { textPart: '', coloredPart: '' },
+        founderText: { prefix: '', founderName: '', suffix: '' },
+        description: '',
+        footerInfo: { locations: [], serviceText: '' }
     });
+
+    const [newLocation, setNewLocation] = useState('');
 
     useEffect(() => {
         if (data) {
-            setHeader({
-                badge: data.badge || '',
-                title: data.title || '',
-                subtitle: data.subtitle || ''
+            setVisibilityData({
+                headline: {
+                    textPart: data.headline?.textPart || '',
+                    coloredPart: data.headline?.coloredPart || ''
+                },
+                founderText: {
+                    prefix: data.founderText?.prefix || '',
+                    founderName: data.founderText?.founderName || '',
+                    suffix: data.founderText?.suffix || ''
+                },
+                description: data.description || '',
+                footerInfo: {
+                    locations: data.footerInfo?.locations || [],
+                    serviceText: data.footerInfo?.serviceText || ''
+                }
             });
         }
     }, [data]);
 
-    // ১. মেইন হেডার আপডেট
-    const handleUpdateHeader = async () => {
+    // 1. Update Main Section
+    const handleUpdateMain = async () => {
         try {
             setLoading(true);
-            const res = await aboutService.updateVisibility(header);
+            const res = await aboutService.updateVisibility({
+                textPart: visibilityData.headline.textPart,
+                coloredPart: visibilityData.headline.coloredPart,
+                prefix: visibilityData.founderText.prefix,
+                founderName: visibilityData.founderText.founderName,
+                suffix: visibilityData.founderText.suffix,
+                description: visibilityData.description,
+                locations: visibilityData.footerInfo.locations,
+                serviceText: visibilityData.footerInfo.serviceText
+            });
+
             if (res.data.success) {
-                toast.success("Visibility header updated!");
+                toast.success("Visibility section updated!");
+                setEditMode(false);
                 refresh();
             }
-        } catch (error) {
-            toast.error("Failed to update visibility header");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to update");
         } finally {
             setLoading(false);
         }
     };
 
-    // ২. নতুন ভিজিবিলিটি কার্ড অ্যাড করা
-    const handleAddCard = async () => {
-        const newCard = {
-            title: "New Value Title",
-            description: "Detail explanation goes here...",
-            iconId: "eye"
-        };
-        try {
-            const res = await aboutService.addVisibilityCard(newCard);
-            if (res.data.success) {
-                toast.success("New visibility card added!");
-                refresh();
+    // 2. Add Location
+    const handleAddLocation = () => {
+        if (!newLocation.trim()) return;
+        setVisibilityData({
+            ...visibilityData,
+            footerInfo: {
+                ...visibilityData.footerInfo,
+                locations: [...visibilityData.footerInfo.locations, newLocation.trim()]
             }
-        } catch (error) {
-            toast.error("Failed to add card");
-        }
+        });
+        setNewLocation('');
     };
 
-    // ৩. কার্ড আপডেট (onBlur)
-    const handleUpdateCard = async (index, card) => {
-        try {
-            const res = await aboutService.updateVisibilityCard(index, card);
-            if (res.data.success) {
-                toast.success("Card updated!");
-                refresh();
+    // 3. Remove Location
+    const handleRemoveLocation = (index) => {
+        const updatedLocations = [...visibilityData.footerInfo.locations];
+        updatedLocations.splice(index, 1);
+        setVisibilityData({
+            ...visibilityData,
+            footerInfo: {
+                ...visibilityData.footerInfo,
+                locations: updatedLocations
             }
-        } catch (error) {
-            toast.error("Update failed");
-        }
+        });
     };
 
-    // ৪. কার্ড ডিলিট করা
-    const handleDeleteCard = async (index) => {
-        if (!window.confirm("Delete this card?")) return;
-        try {
-            const res = await aboutService.deleteVisibilityCard(index);
-            if (res.data.success) {
-                toast.success("Card removed!");
-                refresh();
+    // 4. Update Location
+    const handleUpdateLocation = (index, value) => {
+        const updatedLocations = [...visibilityData.footerInfo.locations];
+        updatedLocations[index] = value;
+        setVisibilityData({
+            ...visibilityData,
+            footerInfo: {
+                ...visibilityData.footerInfo,
+                locations: updatedLocations
             }
-        } catch (error) {
-            toast.error("Delete failed");
-        }
+        });
     };
 
     return (
         <div className="bg-[#0f172a]/60 backdrop-blur-md border border-gray-800 rounded-3xl p-8 shadow-2xl mt-10">
-            {/* Top Bar */}
+
+            {/* Section Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-3 bg-cyan-500/20 text-cyan-400 rounded-2xl">
-                        <FiEye size={24} />
+                    <div className="p-3 bg-orange-500/20 text-orange-500 rounded-2xl">
+                        <FiHeart size={24} />
                     </div>
                     <div>
                         <h2 className="text-2xl font-bold text-white">Visibility Section</h2>
-                        <p className="text-gray-400 text-sm">Transparency & Impact Metrics</p>
+                        <p className="text-gray-500 text-xs">Manage founder story & mission</p>
                     </div>
                 </div>
-                <button
-                    onClick={handleUpdateHeader}
-                    disabled={loading}
-                    className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-cyan-900/20"
-                >
-                    <FiSave size={18} /> {loading ? 'Saving...' : 'Save Settings'}
-                </button>
-            </div>
-
-            {/* Header Inputs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 p-6 bg-black/20 rounded-2xl border border-gray-800/50">
-                <div className="space-y-4">
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-cyan-500 uppercase tracking-widest px-1">Badge Text</label>
-                        <input
-                            type="text"
-                            value={header.badge}
-                            onChange={(e) => setHeader({ ...header, badge: e.target.value })}
-                            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:ring-1 focus:ring-cyan-500 outline-none"
-                            placeholder="e.g. IMPACT"
-                        />
-                    </div>
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Main Title</label>
-                        <input
-                            type="text"
-                            value={header.title}
-                            onChange={(e) => setHeader({ ...header, title: e.target.value })}
-                            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:ring-1 focus:ring-cyan-500 outline-none"
-                        />
-                    </div>
-                </div>
-                <div className="space-y-1.5 flex flex-col h-full">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Description</label>
-                    <textarea
-                        value={header.subtitle}
-                        onChange={(e) => setHeader({ ...header, subtitle: e.target.value })}
-                        className="w-full h-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-cyan-500 outline-none resize-none"
-                        placeholder="Section summary..."
-                    />
+                <div className="flex gap-2">
+                    {editMode ? (
+                        <>
+                            <button onClick={() => setEditMode(false)} className="p-2 bg-red-900/30 text-red-400 rounded-lg hover:bg-red-900/50 transition-all">
+                                <FiX size={18} />
+                            </button>
+                            <button onClick={handleUpdateMain} disabled={loading} className="p-2 bg-green-900/30 text-green-400 rounded-lg hover:bg-green-900/50 transition-all">
+                                <FiCheck size={18} />
+                            </button>
+                        </>
+                    ) : (
+                        <button onClick={() => setEditMode(true)} className="p-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-orange-600 hover:text-white transition-all">
+                            <FiEdit3 size={18} />
+                        </button>
+                    )}
                 </div>
             </div>
 
-            {/* Visibility Cards List */}
-            <div className="space-y-6">
-                <div className="flex items-center justify-between border-b border-gray-800 pb-4">
-                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                        <FiInfo className="text-cyan-400" /> Information Cards
+            {/* Headline Section */}
+            <div className="mb-8 bg-black/20 p-6 rounded-2xl border border-gray-800/50">
+                <h3 className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-orange-500 rounded-full"></span> Headline
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Text Part</label>
+                        <input
+                            type="text"
+                            placeholder="Culture deserves"
+                            value={visibilityData.headline.textPart}
+                            onChange={(e) => setVisibilityData({ ...visibilityData, headline: { ...visibilityData.headline, textPart: e.target.value } })}
+                            disabled={!editMode}
+                            className={`w-full bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
+                        />
+                    </div>
+                    <div>
+                        <label className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-1.5">Colored Part</label>
+                        <input
+                            type="text"
+                            placeholder="visibility."
+                            value={visibilityData.headline.coloredPart}
+                            onChange={(e) => setVisibilityData({ ...visibilityData, headline: { ...visibilityData.headline, coloredPart: e.target.value } })}
+                            disabled={!editMode}
+                            className={`w-full bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm font-bold outline-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Founder Text Section */}
+            <div className="mb-8 bg-black/20 p-6 rounded-2xl border border-gray-800/50">
+                <h3 className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-orange-500 rounded-full"></span> Founder Text
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Prefix</label>
+                        <input
+                            type="text"
+                            placeholder="World Culture Marketplace was founded by"
+                            value={visibilityData.founderText.prefix}
+                            onChange={(e) => setVisibilityData({ ...visibilityData, founderText: { ...visibilityData.founderText, prefix: e.target.value } })}
+                            disabled={!editMode}
+                            className={`w-full bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
+                        />
+                    </div>
+                    <div>
+                        <label className="text-[10px] font-bold text-orange-500 uppercase tracking-widest block mb-1.5">Founder Name</label>
+                        <input
+                            type="text"
+                            placeholder="Annette Cousin"
+                            value={visibilityData.founderText.founderName}
+                            onChange={(e) => setVisibilityData({ ...visibilityData, founderText: { ...visibilityData.founderText, founderName: e.target.value } })}
+                            disabled={!editMode}
+                            className={`w-full bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm font-bold outline-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
+                        />
+                    </div>
+                    <div>
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Suffix</label>
+                        <input
+                            type="text"
+                            placeholder="with a simple idea..."
+                            value={visibilityData.founderText.suffix}
+                            onChange={(e) => setVisibilityData({ ...visibilityData, founderText: { ...visibilityData.founderText, suffix: e.target.value } })}
+                            disabled={!editMode}
+                            className={`w-full bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Description Section */}
+            <div className="mb-8 bg-black/20 p-6 rounded-2xl border border-gray-800/50">
+                <h3 className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-orange-500 rounded-full"></span> Description
+                </h3>
+                <textarea
+                    placeholder="Main description..."
+                    rows="4"
+                    value={visibilityData.description}
+                    onChange={(e) => setVisibilityData({ ...visibilityData, description: e.target.value })}
+                    disabled={!editMode}
+                    className={`w-full bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm outline-none resize-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
+                />
+            </div>
+
+            {/* Locations Section */}
+            <div className="mb-8 bg-black/20 p-6 rounded-2xl border border-gray-800/50">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-bold text-orange-500 uppercase tracking-widest flex items-center gap-2">
+                        <span className="w-2 h-2 bg-orange-500 rounded-full"></span> Locations
                     </h3>
-                    <button
-                        onClick={handleAddCard}
-                        className="flex items-center gap-2 bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 px-4 py-1.5 rounded-lg text-sm border border-emerald-600/20 transition-all"
-                    >
-                        <FiPlus /> Add New Card
-                    </button>
+                    <span className="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">
+                        {visibilityData.footerInfo.locations?.length || 0}
+                    </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {data?.cards?.map((card, index) => (
-                        <div key={index} className="group bg-[#111827]/80 border border-gray-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all">
-                            <div className="flex items-center justify-between mb-4">
-                                <input
-                                    type="text"
-                                    defaultValue={card.iconId}
-                                    onBlur={(e) => handleUpdateCard(index, { ...card, iconId: e.target.value })}
-                                    className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-cyan-400 border border-gray-700 text-center outline-none text-[10px] focus:border-cyan-500"
-                                    title="Icon Name"
-                                />
+                <div className="space-y-3">
+                    {visibilityData.footerInfo.locations?.map((location, index) => (
+                        <div key={index} className="flex items-center gap-3 group">
+                            <input
+                                type="text"
+                                value={location}
+                                onChange={(e) => handleUpdateLocation(index, e.target.value)}
+                                disabled={!editMode}
+                                className={`flex-1 bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
+                            />
+                            {editMode && (
                                 <button
-                                    onClick={() => handleDeleteCard(index)}
-                                    className="text-gray-600 hover:text-red-500 transition-colors"
+                                    onClick={() => handleRemoveLocation(index)}
+                                    className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                                 >
-                                    <FiTrash2 size={18} />
+                                    <FiTrash2 size={16} />
                                 </button>
-                            </div>
-
-                            <div className="space-y-3">
-                                <input
-                                    type="text"
-                                    defaultValue={card.title}
-                                    onBlur={(e) => handleUpdateCard(index, { ...card, title: e.target.value })}
-                                    placeholder="Value Title"
-                                    className="w-full bg-transparent text-lg font-bold text-white border-b border-transparent focus:border-cyan-500 outline-none transition-all"
-                                />
-                                <textarea
-                                    defaultValue={card.description}
-                                    onBlur={(e) => handleUpdateCard(index, { ...card, description: e.target.value })}
-                                    placeholder="Description..."
-                                    className="w-full bg-transparent text-gray-400 text-sm leading-relaxed border-b border-transparent focus:border-cyan-500 outline-none resize-none h-24"
-                                />
-                            </div>
+                            )}
                         </div>
                     ))}
+
+                    {editMode && (
+                        <div className="flex items-center gap-3 pt-2">
+                            <input
+                                type="text"
+                                placeholder="Add new location..."
+                                value={newLocation}
+                                onChange={(e) => setNewLocation(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleAddLocation()}
+                                className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-orange-500 transition-all"
+                            />
+                            <button
+                                onClick={handleAddLocation}
+                                className="p-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl transition-all"
+                            >
+                                <FiPlus size={18} />
+                            </button>
+                        </div>
+                    )}
                 </div>
+            </div>
+
+            {/* Service Text Section */}
+            <div className="bg-black/20 p-6 rounded-2xl border border-gray-800/50">
+                <h3 className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-orange-500 rounded-full"></span> Service Text
+                </h3>
+                <input
+                    type="text"
+                    placeholder="SERVING GLOBAL ARTISANS"
+                    value={visibilityData.footerInfo.serviceText}
+                    onChange={(e) => setVisibilityData({ ...visibilityData, footerInfo: { ...visibilityData.footerInfo, serviceText: e.target.value } })}
+                    disabled={!editMode}
+                    className={`w-full bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
+                />
             </div>
         </div>
     );
