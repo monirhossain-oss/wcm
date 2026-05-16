@@ -1,54 +1,83 @@
 "use client";
+
 import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
-const  AboutVisibility = () => {
-    return (
-        <section className="bg-white dark:bg-[#0a0a0a] px-6 flex flex-col items-center text-center transition-colors duration-500">
+const AboutVisibility = ({ data }) => {
+    // Data destructuring with fallbacks
+    const header = data?.headline || {};
+    const founder = data?.founderText || {};
+    const description = data?.description || '';
+    const footerInfo = data?.footerInfo || {};
+    const locations = footerInfo?.locations || [];
+    const serviceText = footerInfo?.serviceText || 'Serving Global Artisans';
 
-            {/*Symbolizing Passion for Culture */}
+    return (
+        <section className="bg-white dark:bg-[#0a0a0a] px-6 flex flex-col items-center text-center transition-colors duration-500 py-20">
+
+            {/* Symbolizing Passion for Culture */}
             <div className="mb-10 animate-pulse">
                 <Heart className="w-14 h-14 text-[#F57C00] stroke-[1.5px]" />
             </div>
 
-            {/*Inspired by Founder's Vision */}
+            {/* Headline */}
             <h2 className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white leading-[1.1] mb-8 tracking-tight">
-                Culture deserves <br />
-                <span className="text-[#F57C00]">visibility.</span>
+                {header.textPart || "Culture deserves"} <br />
+                <span className="text-[#F57C00]">{header.coloredPart || "visibility."}</span>
             </h2>
 
-            {/* মেইন প্যারাগ্রাফ - Covering the 'Why' of WCM */}
+            {/* Main Paragraphs */}
             <div className="max-w-3xl space-y-6 mb-12">
+                {/* Founder Text */}
                 <p className="text-gray-600 dark:text-gray-300 text-lg md:text-xl font-medium leading-relaxed">
-                    World Culture Marketplace was founded by <span className="text-gray-900 dark:text-white font-bold">Annette Cousin</span> with a simple idea:
-                    culture deserves to be seen, understood, and respected in the digital world.
+                    {founder.prefix || "World Culture Marketplace was founded by"}{' '}
+                    <span className="text-gray-900 dark:text-white font-bold">
+                        {founder.founderName || "Annette Cousin"}
+                    </span>{' '}
+                    {founder.suffix || "with a simple idea: culture deserves to be seen, understood, and respected in the digital world."}
                 </p>
 
+                {/* Description */}
                 <p className="text-gray-500 dark:text-gray-400 text-base md:text-lg leading-relaxed">
-                    We bridge the gap between extraordinary artisans and global audiences, creating a space
-                    where cultural heritage is not just a commodity, but a <span className="italic">living legacy</span>
-                    shared with respect and authenticity.
+                    {description || "We bridge the gap between extraordinary artisans and global audiences, creating a space where cultural heritage is not just a commodity, but a living legacy shared with respect and authenticity."}
                 </p>
             </div>
 
-            {/*Location and Global Mission */}
+            {/* Location and Global Mission */}
             <div className="mb-12 flex flex-col md:flex-row items-center gap-4 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
-                <span>Based in 50 avenue des Champs Élysées, 75008 Paris, France.</span>
-                <span className="hidden md:block text-[#F57C00]">•</span>
-                <span>Washington, USA</span>
-                <span className="hidden md:block text-[#F57C00]">•</span>
-                <span>Serving Global Artisans</span>
+                {locations.length > 0 ? (
+                    locations.map((location, index) => (
+                        <React.Fragment key={index}>
+                            <span>{location}</span>
+                            {index < locations.length - 1 && (
+                                <span className="hidden md:block text-[#F57C00]">•</span>
+                            )}
+                        </React.Fragment>
+                    ))
+                ) : (
+                    <>
+                        <span>Based in 50 avenue des Champs Élysées, 75008 Paris, France.</span>
+                        <span className="hidden md:block text-[#F57C00]">•</span>
+                        <span>Washington, USA</span>
+                    </>
+                )}
+                {serviceText && (
+                    <>
+                        <span className="hidden md:block text-[#F57C00]">•</span>
+                        <span>{serviceText}</span>
+                    </>
+                )}
             </div>
 
-            {/* এক্সপ্লোর বাটন */}
+            {/* Explore Button */}
             <Link href="/creators" className="inline-block">
                 <button className="px-10 py-4 cursor-pointer rounded-2xl bg-[#F57C00] text-white font-black hover:bg-[#e67600] transition-all shadow-2xl shadow-orange-500/20 hover:scale-105 active:scale-95 uppercase tracking-wider">
                     Explore Our Creators
                 </button>
             </Link>
 
-            {/* ট্রাস্ট ব্যাজ বা ছোট মেসেজ */}
+            {/* Trust Badge */}
             <p className="mt-8 text-gray-400 dark:text-gray-600 text-sm font-medium italic">
                 Supporting a more inclusive and respectful global cultural economy.
             </p>
