@@ -75,7 +75,7 @@ const StorySection = ({ data, refresh }) => {
     };
 
     return (
-        <section className="bg-[#111] p-8 w-7xl mx-auto rounded-2xl border border-gray-800 shadow-xl">
+        <section className="bg-[#111] p-8  rounded-2xl border border-gray-800 shadow-xl">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-amber-500/20 text-amber-500 rounded-lg">
