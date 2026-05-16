@@ -1,12 +1,15 @@
 import React from "react";
 
+export const revalidate = 60;
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
-// ===== SEO METADATA =====
+// ===== SEO METADATA (1 minute cache) =====
 export async function generateMetadata() {
     try {
+        // Metadata fetch - 1 minute cache
         const res = await fetch(`${API_BASE}/api/admin/how-it-works`, {
-            next: { revalidate: 0 }, // No cache - always fresh
+            next: { revalidate: 60 },
         });
 
         if (!res.ok) throw new Error("Failed to fetch");
@@ -45,11 +48,12 @@ const getGridClass = (count) => {
     return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 };
 
-// ===== FETCH DATA =====
+// ===== FETCH DATA (10 seconds cache) =====
 const fetchHowItWorks = async () => {
     try {
+        // ✅ Data fetch - 10 seconds cache
         const res = await fetch(`${API_BASE}/api/admin/how-it-works`, {
-            cache: "no-store",
+            next: { revalidate: 10 },
         });
 
         if (!res.ok) throw new Error("Failed to fetch");
@@ -106,7 +110,6 @@ const HowItWorksPage = async () => {
             {/* ===== HERO HEADER ===== */}
             <section className="relative overflow-hidden bg-gradient-to-b from-orange-900/20 to-transparent dark:from-orange-900/10 p-8 px-4">
                 <div className="max-w-4xl mx-auto text-center">
-                    {/* Decorative element */}
                     <div className="flex justify-center">
                         <div className="w-16 h-1 bg-[#F57C00] rounded-full"></div>
                     </div>
@@ -119,7 +122,6 @@ const HowItWorksPage = async () => {
                         {displayData.headerDescription}
                     </p>
 
-                    {/* Decorative dots */}
                     <div className="flex justify-center gap-2 mt-4">
                         {[...Array(3)].map((_, i) => (
                             <div
@@ -134,38 +136,32 @@ const HowItWorksPage = async () => {
             {/* ===== STEPS SECTION ===== */}
             <section className="py-4 px-4 md:px-8">
                 <div className="max-w-7xl mx-auto">
-                    {/* Section label */}
                     <div className="text-center mb-8">
                         <span className="inline-block px-4 py-1 bg-orange-100 dark:bg-orange-900/20 text-[#F57C00] text-sm font-semibold rounded-full uppercase tracking-wider">
                             Our Process
                         </span>
                     </div>
 
-                    {/* Steps Grid */}
                     <div className={`grid gap-6 ${getGridClass(stepsCount)}`}>
                         {displayData.steps?.map((step, index) => (
                             <article
                                 key={step.id}
                                 className="group relative bg-gray-200 dark:bg-[#111] rounded-2xl border border-gray-200 dark:border-gray-800 p-8 hover:shadow-xl hover:shadow-orange-500/10 dark:hover:shadow-orange-900/20 transition-all duration-300 hover:-translate-y-1"
                             >
-                                {/* Step Number - Large Background */}
                                 <div className="absolute top-4 right-4 text-6xl font-black text-gray-100 dark:text-gray-800/50 select-none">
                                     {String(step.id).padStart(2, "0")}
                                 </div>
 
-                                {/* Step Number Badge */}
                                 <div className="relative mb-6">
                                     <div className="w-14 h-14 bg-[#F57C00] text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-orange-500/30 group-hover:scale-110 transition-transform duration-300">
                                         {step.id}
                                     </div>
                                 </div>
 
-                                {/* Connector Line (except last) */}
                                 {index < stepsCount - 1 && (
                                     <div className="hidden lg:block absolute top-14 -right-3 w-6 h-0.5 bg-gradient-to-r from-[#F57C00] to-transparent"></div>
                                 )}
 
-                                {/* Content */}
                                 <h3 className="relative text-xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-[#F57C00] transition-colors">
                                     {step.title}
                                 </h3>
@@ -174,7 +170,6 @@ const HowItWorksPage = async () => {
                                     {step.description}
                                 </p>
 
-                                {/* Hover indicator */}
                                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#F57C00] rounded-b-2xl scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                             </article>
                         ))}
