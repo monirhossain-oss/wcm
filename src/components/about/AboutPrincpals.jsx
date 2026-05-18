@@ -24,9 +24,6 @@ const AboutPrincpals = ({ data }) => {
                                 {header.titleColored || "Principles."}
                             </span>
                         </h2>
-                        <p className="text-gray-500 dark:text-gray-400 text-lg max-w-xl font-medium">
-                            {header.description || "The core values that guide our global community."}
-                        </p>
                     </div>
                 </div>
 

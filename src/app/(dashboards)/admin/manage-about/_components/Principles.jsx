@@ -169,15 +169,6 @@ const Principles = ({ data, refresh }) => {
                         className={`w-full bg-gray-900 border rounded-lg px-4 py-2.5 text-white outline-none text-sm font-bold transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
                     />
                 </div>
-                <div className="md:col-span-3 space-y-1.5 pt-2">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Section Description</label>
-                    <textarea
-                        value={header.description}
-                        onChange={(e) => setHeader({ ...header, description: e.target.value })}
-                        disabled={!editMode}
-                        className={`w-full bg-gray-900 border rounded-lg px-4 py-2.5 text-white outline-none text-sm h-20 resize-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
-                    />
-                </div>
             </div>
 
             {/* Principles Cards List */}

@@ -29,9 +29,6 @@ const AboutExplore = ({ data }) => {
 
                 {/* Section Header */}
                 <div className="text-center mb-16 space-y-4">
-                    <span className="text-[#E65100] font-bold text-xs uppercase tracking-[0.3em]">
-                        {topSection?.badge || "How WCM Works"}
-                    </span>
                     <h3 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white leading-tight">
                         {topSection?.titleMain || "The Explorer Journey"}
                     </h3>
@@ -71,13 +68,6 @@ const AboutExplore = ({ data }) => {
                     )) : (
                         <p className="text-center col-span-3 text-gray-500">No steps found in Database.</p>
                     )}
-                </div>
-
-                {/* Bottom Callout */}
-                <div className="mt-16 text-center">
-                    <p className="text-gray-400 dark:text-zinc-500 text-sm font-medium">
-                        {explorerJourney?.footerText || "WCM bridges the gap between heritage and a global audience."}
-                    </p>
                 </div>
 
             </div>
