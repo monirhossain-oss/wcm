@@ -277,21 +277,6 @@ const Visibility = ({ data, refresh }) => {
                     )}
                 </div>
             </div>
-
-            {/* Service Text Section */}
-            <div className="bg-black/20 p-6 rounded-2xl border border-gray-800/50">
-                <h3 className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-orange-500 rounded-full"></span> Service Text
-                </h3>
-                <input
-                    type="text"
-                    placeholder="SERVING GLOBAL ARTISANS"
-                    value={visibilityData.footerInfo.serviceText}
-                    onChange={(e) => setVisibilityData({ ...visibilityData, footerInfo: { ...visibilityData.footerInfo, serviceText: e.target.value } })}
-                    disabled={!editMode}
-                    className={`w-full bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
-                />
-            </div>
         </div>
     );
 };
