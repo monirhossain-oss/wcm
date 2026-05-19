@@ -177,16 +177,6 @@ const IntroSection = ({ data, refresh }) => {
                         className={`w-full bg-[#0d0d0d] border rounded-xl p-4 text-gray-200 resize-none ${editMode ? "border-purple-500" : "border-gray-700 opacity-70"}`}
                     />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Creator Count</label>
-                        <input
-                            value={formData.creatorCountText}
-                            onChange={(e) => setFormData({ ...formData, creatorCountText: e.target.value })}
-                            disabled={!editMode}
-                            className={`w-full bg-[#0d0d0d] border rounded-xl p-3 text-gray-200 ${editMode ? "border-purple-500" : "border-gray-700 opacity-70"}`}
-                        />
-                    </div>
                     <div>
                         <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Suffix</label>
                         <input
@@ -196,7 +186,6 @@ const IntroSection = ({ data, refresh }) => {
                             className={`w-full bg-[#0d0d0d] border rounded-xl p-3 text-gray-200 ${editMode ? "border-purple-500" : "border-gray-700 opacity-70"}`}
                         />
                     </div>
-                </div>
             </div>
         </section>
     );

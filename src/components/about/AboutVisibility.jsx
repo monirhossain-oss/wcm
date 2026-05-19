@@ -11,8 +11,6 @@ const AboutVisibility = ({ data }) => {
     const description = data?.description || '';
     const footerInfo = data?.footerInfo || {};
     const locations = footerInfo?.locations || [];
-    const serviceText = footerInfo?.serviceText || 'Serving Global Artisans';
-
     return (
         <section className="bg-white dark:bg-[#0a0a0a] px-6 flex flex-col items-center text-center transition-colors duration-500 py-20">
 
@@ -60,12 +58,6 @@ const AboutVisibility = ({ data }) => {
                         <span>Based in 50 avenue des Champs Élysées, 75008 Paris, France.</span>
                         <span className="hidden md:block text-[#F57C00]">•</span>
                         <span>Washington, USA</span>
-                    </>
-                )}
-                {serviceText && (
-                    <>
-                        <span className="hidden md:block text-[#F57C00]">•</span>
-                        <span>{serviceText}</span>
                     </>
                 )}
             </div>

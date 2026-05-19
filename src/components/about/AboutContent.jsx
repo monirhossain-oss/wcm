@@ -58,10 +58,7 @@ const AboutContent = ({ data }) => {
                         </div>
 
                         {/* এখন এখানে ডাইনামিক "300" বা ডাটাবেজের ভ্যালু দেখাবে */}
-                        <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium">
-                            Joined by <span className="text-amber-500 font-bold">
-                                {socialProof?.creatorCountText || "12,000+"}
-                            </span> {socialProof?.fullTextSuffix || "independent creators"}
+                        <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium"> {socialProof?.fullTextSuffix || "independent creators"}
                         </p>
                     </div>
                 </div>
