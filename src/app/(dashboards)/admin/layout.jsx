@@ -33,7 +33,7 @@ import {
 import { TbLayoutBottombar, TbLayoutBottombarCollapse, TbSeo } from 'react-icons/tb';
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/imageHelper';
-import { Sliders, TractorIcon } from 'lucide-react';
+import { DatabaseBackup, Sliders, TractorIcon } from 'lucide-react';
 import { FaQ } from 'react-icons/fa6';
 import { PiTrainRegional } from 'react-icons/pi';
 
@@ -154,6 +154,7 @@ export default function AdminLayout({ children }) {
     { name: 'Create Blog', path: '/admin/create-blog', icon: FiSettings },
     { name: 'Manage SEO', path: '/admin/seo-settings', icon: TbSeo },
     { name: 'Subscription', path: '/admin/subscriptions', icon: MdEmail },
+    { name: 'DB Backups', path: '/admin/db-backups', icon: DatabaseBackup },
   ];
 
   const profileImage = user?.profile?.profileImage
