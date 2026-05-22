@@ -2,6 +2,7 @@ import { Inter, Poppins, Roboto, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ListingsProvider } from '@/context/ListingsContext';
+import VerificationMeta from '@/components/VerificationMeta';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -34,6 +35,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <VerificationMeta />
+      </head>
       <body
         className={`${inter.variable} ${poppins.variable} ${roboto.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
