@@ -29,6 +29,7 @@ import {
   MdOutlineInfo,
   MdOutlineWebAsset,
   MdEmail,
+  MdOutlineWebAssetOff,
 } from 'react-icons/md';
 import { TbLayoutBottombar, TbLayoutBottombarCollapse, TbSeo } from 'react-icons/tb';
 import Image from 'next/image';
@@ -153,6 +154,7 @@ export default function AdminLayout({ children }) {
     { name: 'Manage Blog', path: '/admin/blogs', icon: FiSettings },
     { name: 'Create Blog', path: '/admin/create-blog', icon: FiSettings },
     { name: 'Manage SEO', path: '/admin/seo-settings', icon: TbSeo },
+    { name: 'Meta Verification', path: '/admin/verification', icon: MdOutlineWebAssetOff },
     { name: 'Subscription', path: '/admin/subscriptions', icon: MdEmail },
     { name: 'DB Backups', path: '/admin/db-backups', icon: DatabaseBackup },
   ];
