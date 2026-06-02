@@ -156,7 +156,6 @@ export default function AdminLayout({ children }) {
     { name: 'Manage SEO', path: '/admin/seo-settings', icon: TbSeo },
     { name: 'Meta Verification', path: '/admin/verification', icon: MdOutlineWebAssetOff },
     { name: 'Subscription', path: '/admin/subscriptions', icon: MdEmail },
-    { name: 'DB Backups', path: '/admin/db-backups', icon: DatabaseBackup },
   ];
 
   const profileImage = user?.profile?.profileImage

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import ExcelJS from 'exceljs';
 import {
   FiSearch,
   FiLoader,
@@ -13,6 +14,7 @@ import {
   FiAlertTriangle,
   FiCheckCircle,
   FiX,
+  FiDownload,
 } from 'react-icons/fi';
 
 const api = axios.create({
@@ -20,7 +22,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor to add token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -32,7 +33,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -61,18 +61,28 @@ const Toast = ({ message, type = 'success', onClose }) => {
   };
 
   const bgColors = {
-    success: 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400',
-    error: 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400',
-    warning: 'bg-orange-50 border-orange-200 text-orange-800 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-400',
+    success:
+      'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400',
+    error:
+      'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400',
+    warning:
+      'bg-orange-50 border-orange-200 text-orange-800 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-400',
     info: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400',
   };
 
   return (
     <div className="fixed top-6 right-6 z-[9999] animate-slide-in">
-      <div className={`flex items-center gap-3 px-5 py-3 rounded-xl border shadow-lg min-w-[300px] ${bgColors[type]}`}>
+      <div
+        className={`flex items-center gap-3 px-5 py-3 rounded-xl border shadow-lg min-w-[300px] ${bgColors[type]}`}
+      >
         {icons[type]}
         <span className="text-sm font-medium">{message}</span>
-        <button onClick={onClose} className="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">✕</button>
+        <button
+          onClick={onClose}
+          className="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+        >
+          ✕
+        </button>
       </div>
     </div>
   );
@@ -81,7 +91,16 @@ const Toast = ({ message, type = 'success', onClose }) => {
 // ============================================
 // 🔔 CUSTOM CONFIRM MODAL
 // ============================================
-const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText = 'Yes', cancelText = 'Cancel', type = 'warning' }) => {
+const ConfirmModal = ({
+  isOpen,
+  title,
+  message,
+  onConfirm,
+  onCancel,
+  confirmText = 'Yes',
+  cancelText = 'Cancel',
+  type = 'warning',
+}) => {
   if (!isOpen) return null;
 
   const colors = {
@@ -95,7 +114,7 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9998]">
       <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-2xl p-6 shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in duration-200">
         <div className="text-center mb-6">
-          <div className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 dark:bg-zinc-800 mb-4`}>
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 dark:bg-zinc-800 mb-4">
             <FiAlertTriangle size={28} className={colors[type]} />
           </div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{title}</h3>
@@ -110,8 +129,11 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 py-3 rounded-xl font-bold text-white transition-all hover:opacity-90 active:scale-95 ${type === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700'
-              }`}
+            className={`flex-1 py-3 rounded-xl font-bold text-white transition-all hover:opacity-90 active:scale-95 ${
+              type === 'danger'
+                ? 'bg-red-600 hover:bg-red-700'
+                : 'bg-orange-600 hover:bg-orange-700'
+            }`}
           >
             {confirmText}
           </button>
@@ -129,6 +151,7 @@ const AdminSubscriptions = () => {
   const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalEmails, setTotalEmails] = useState(0);
+  const [exporting, setExporting] = useState(false);
 
   // 🔔 Toast State
   const [toastData, setToastData] = useState(null);
@@ -143,50 +166,28 @@ const AdminSubscriptions = () => {
     confirmText: 'Yes',
   });
 
-  // 🔔 Toast Helper
-  const showToast = (message, type = 'success') => {
-    setToastData({ message, type });
-  };
+  const showToast = (message, type = 'success') => setToastData({ message, type });
+  const hideToast = () => setToastData(null);
 
-  const hideToast = () => {
-    setToastData(null);
-  };
-
-  // 🔔 Confirm Modal Helper
   const showConfirm = ({ title, message, onConfirm, type = 'warning', confirmText = 'Yes' }) => {
-    setConfirmModal({
-      isOpen: true,
-      title,
-      message,
-      onConfirm,
-      type,
-      confirmText,
-    });
+    setConfirmModal({ isOpen: true, title, message, onConfirm, type, confirmText });
   };
 
   const hideConfirm = () => {
-    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
   };
 
-  // ডাটা ফেচ করার মূল ফাংশন
   const fetchEmails = async () => {
     setLoading(true);
     try {
       const response = await api.get('/api/emails', {
-        params: {
-          page: page,
-          limit: limit,
-          search: search,
-          sort: '-createdAt',
-        },
+        params: { page, limit, search, sort: '-createdAt' },
       });
-
       const result = response.data;
       setEmails(result.emails || []);
       setTotalPages(result.pagination?.totalPages || 1);
       setTotalEmails(result.pagination?.total || 0);
     } catch (error) {
-      console.log('Error status:', error.response?.status);
       if (error.response?.status === 401) {
         showToast('Your token is invalid or has expired. Please login again.', 'error');
       } else {
@@ -197,19 +198,16 @@ const AdminSubscriptions = () => {
     }
   };
 
-  // পেজ পরিবর্তন হলে অটোমেটিক ফেচ হবে
   useEffect(() => {
     fetchEmails();
   }, [page]);
 
-  // সার্চ বাটনে ক্লিক করলে এই ফাংশন কল হবে
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
     fetchEmails();
   };
 
-  // 🗑️ DELETE HANDLER
   const handleDelete = (emailId, emailAddress) => {
     showConfirm({
       title: 'Delete Subscriber?',
@@ -229,7 +227,6 @@ const AdminSubscriptions = () => {
     });
   };
 
-  // 📧 BULK DELETE ALL
   const handleDeleteAll = () => {
     showConfirm({
       title: 'Delete All Subscribers?',
@@ -250,16 +247,143 @@ const AdminSubscriptions = () => {
     });
   };
 
+  // ============================================
+  // 📥 EXCEL EXPORT — fetches ALL subscribers
+  // ============================================
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      // Fetch all subscribers (no pagination limit)
+      const response = await api.get('/api/emails', {
+        params: { page: 1, limit: totalEmails || 99999, search: '', sort: '-createdAt' },
+      });
+
+      const allEmails = response.data.emails || [];
+
+      if (allEmails.length === 0) {
+        showToast('No subscribers to export', 'warning');
+        return;
+      }
+
+      // Build workbook
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Admin Panel';
+      workbook.created = new Date();
+
+      const sheet = workbook.addWorksheet('Subscribers', {
+        pageSetup: { paperSize: 9, orientation: 'portrait' },
+      });
+
+      // ── Column definitions ──
+      sheet.columns = [
+        { key: 'sl', width: 8 },
+        { key: 'email', width: 40 },
+        { key: 'joinedAt', width: 22 },
+      ];
+
+      // ── Title row ──
+      sheet.mergeCells('A1:C1');
+      const titleCell = sheet.getCell('A1');
+      titleCell.value = 'Newsletter Subscribers';
+      titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+      titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEA580C' } }; // orange-600
+      titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      sheet.getRow(1).height = 32;
+
+      // ── Meta row ──
+      sheet.mergeCells('A2:C2');
+      const metaCell = sheet.getCell('A2');
+      metaCell.value = `Exported on ${new Date().toLocaleString('en-US')}  |  Total: ${allEmails.length}`;
+      metaCell.font = { name: 'Arial', size: 9, italic: true, color: { argb: 'FF6B7280' } };
+      metaCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      metaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF7ED' } }; // orange-50
+      sheet.getRow(2).height = 18;
+
+      // ── Header row ──
+      const headerRow = sheet.getRow(3);
+      headerRow.values = ['#', 'Email Address', 'Joined Date'];
+      headerRow.eachCell((cell) => {
+        cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F2937' } }; // gray-800
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = {
+          bottom: { style: 'thin', color: { argb: 'FFEA580C' } },
+        };
+      });
+      headerRow.height = 24;
+
+      // ── Data rows ──
+      allEmails.forEach((item, index) => {
+        const row = sheet.addRow({
+          sl: index + 1,
+          email: item.email?.toLowerCase(),
+          joinedAt: new Date(item.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          }),
+        });
+
+        const isEven = index % 2 === 0;
+        row.eachCell((cell) => {
+          cell.font = { name: 'Arial', size: 10 };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: isEven ? 'FFFFFFFF' : 'FFFFF7ED' }, // white / orange-50
+          };
+          cell.alignment = { vertical: 'middle', horizontal: cell.col === 1 ? 'center' : 'left' };
+          cell.border = {
+            bottom: { style: 'hair', color: { argb: 'FFFDE8D8' } },
+          };
+        });
+        row.height = 20;
+      });
+
+      // ── Total footer row ──
+      const totalRow = sheet.addRow({
+        sl: '',
+        email: `Total Subscribers: ${allEmails.length}`,
+        joinedAt: '',
+      });
+      sheet.mergeCells(`B${totalRow.number}:C${totalRow.number}`);
+      totalRow.eachCell((cell) => {
+        cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFEA580C' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF7ED' } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFEA580C' } },
+        };
+      });
+      totalRow.height = 22;
+
+      // ── Freeze header rows ──
+      sheet.views = [{ state: 'frozen', ySplit: 3 }];
+
+      // ── Download ──
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `subscribers_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      showToast(`${allEmails.length} subscribers exported successfully!`, 'success');
+    } catch (error) {
+      showToast('Failed to export subscribers', 'error');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20 font-sans">
-      {/* 🔔 TOAST NOTIFICATION */}
-      {toastData && (
-        <Toast
-          message={toastData.message}
-          type={toastData.type}
-          onClose={hideToast}
-        />
-      )}
+      {/* 🔔 TOAST */}
+      {toastData && <Toast message={toastData.message} type={toastData.type} onClose={hideToast} />}
 
       {/* 🔔 CONFIRM MODAL */}
       <ConfirmModal
@@ -291,6 +415,22 @@ const AdminSubscriptions = () => {
             Total: <span className="text-orange-500">{totalEmails}</span>
           </span>
 
+          {/* Export Excel Button */}
+          {totalEmails > 0 && (
+            <button
+              onClick={handleExportExcel}
+              disabled={exporting}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-all shadow-md text-[10px] font-black uppercase tracking-widest"
+            >
+              {exporting ? (
+                <FiLoader size={14} className="animate-spin" />
+              ) : (
+                <FiDownload size={14} />
+              )}
+              {exporting ? 'Exporting...' : 'Export Excel'}
+            </button>
+          )}
+
           {/* Delete All Button */}
           {totalEmails > 0 && (
             <button
@@ -303,14 +443,14 @@ const AdminSubscriptions = () => {
         </div>
       </div>
 
-      {/* সার্চ ফর্ম */}
+      {/* Search Form */}
       <form onSubmit={handleSearchSubmit} className="flex w-full md:w-auto gap-2">
         <input
           type="text"
           placeholder="Search by email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-gray-50 dark:bg-white/20 border border-gray-100 dark:border-white/10 rounded-lg px-4 py-2 text-[11px] font-bold uppercase tracking-widest outline-none focus:ring-1 focus:ring-orange-500 transition-all dark:text-white w-full md:w-64 lowercase"  // ✅ lowercase added
+          className="bg-gray-50 dark:bg-white/20 border border-gray-100 dark:border-white/10 rounded-lg px-4 py-2 text-[11px] font-bold uppercase tracking-widest outline-none focus:ring-1 focus:ring-orange-500 transition-all dark:text-white w-full md:w-64 lowercase"
         />
         <button
           type="submit"
@@ -350,7 +490,6 @@ const AdminSubscriptions = () => {
                 </div>
                 <div className="col-span-7 flex items-center gap-3">
                   <FiMail className="text-orange-500 opacity-50" size={14} />
-                  {/* ✅ lowercase class added, uppercase removed */}
                   <span className="text-[10px] font-black tracking-widest dark:text-white lowercase">
                     {item.email?.toLowerCase()}
                   </span>
@@ -385,7 +524,8 @@ const AdminSubscriptions = () => {
         {/* Pagination */}
         <div className="p-5 border-t border-gray-100 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/20">
           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-            Page <span className="text-orange-500 font-bold">{page}</span> of <span className="text-orange-500">{totalPages}</span>
+            Page <span className="text-orange-500 font-bold">{page}</span> of{' '}
+            <span className="text-orange-500">{totalPages}</span>
           </p>
           <div className="flex gap-2">
             <button
