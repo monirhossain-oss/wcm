@@ -34,11 +34,11 @@ export async function generateMetadata() {
 async function getCreatorsData() {
   try {
     const [creatorRes, metaRes] = await Promise.all([
-      axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/top-creators-dropdown`),
+      axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/famous-creators?limit=1000&offset=0`),
       axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/meta-data`),
     ]);
 
-    const creators = creatorRes.data.success ? creatorRes.data.data.top30 || [] : [];
+    const creators = creatorRes.data.success ? creatorRes.data.data || [] : [];
     const categories = metaRes.data.categories || [];
 
     return { creators, categories };
