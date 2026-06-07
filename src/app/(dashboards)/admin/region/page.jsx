@@ -139,7 +139,7 @@ export default function AdminRegions() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                 <div>
                     <h1 className="text-3xl font-black uppercase italic tracking-tighter dark:text-white mb-1">
-                        System <span className="text-orange-500">Regions</span>
+                        System <span className="text-orange-500">Culture</span>
                     </h1>
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                         Manage geographical regions for your listings
@@ -208,7 +208,7 @@ export default function AdminRegions() {
                             disabled={submitting}
                             className="bg-orange-500 hover:bg-orange-600 text-white rounded-md px-8 font-black uppercase text-[11px] tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2 m-1 h-14 cursor-pointer"
                         >
-                            {submitting ? <FiLoader className="animate-spin" size={16} /> : <><FiPlus size={18} /> Add Region</>}
+                            {submitting ? <FiLoader className="animate-spin" size={16} /> : <><FiPlus size={18} /> Add Culture</>}
                         </button>
                     </form>
                 </div>
@@ -227,7 +227,7 @@ export default function AdminRegions() {
                                 <tr>
                                     <td colSpan={2} className="py-24 text-center">
                                         <FiLoader className="animate-spin text-orange-500 mx-auto" size={30} />
-                                        <p className="mt-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">Loading regions...</p>
+                                        <p className="mt-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">Loading Cultures...</p>
                                     </td>
                                 </tr>
                             ) : currentItems.length === 0 ? (
@@ -236,7 +236,7 @@ export default function AdminRegions() {
                                         <div className="bg-gray-100 dark:bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                             <FiMapPin className="text-gray-300 dark:text-gray-700" size={24} />
                                         </div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 italic">No regions found in this category</p>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 italic">No cultures found in this category</p>
                                     </td>
                                 </tr>
                             ) : (
