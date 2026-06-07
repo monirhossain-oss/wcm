@@ -307,7 +307,8 @@ export default function UserProfileForm() {
 
               {/* Images */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <label className="relative h-32 flex flex-col items-center justify-center border border-dashed border-gray-300 dark:border-white/10 rounded-md overflow-hidden bg-gray-50 dark:bg-white/5 cursor-pointer group">
+                {/* PROFILE IMAGE - Square (1:1) */}
+                <label className="relative aspect-square flex flex-col items-center justify-center border border-dashed border-gray-300 dark:border-white/10 rounded-md overflow-hidden bg-gray-50 dark:bg-white/5 cursor-pointer group">
                   <img
                     src={previews.profile}
                     className="absolute inset-0 w-full h-full object-cover group-hover:opacity-20 transition-all"
@@ -322,6 +323,7 @@ export default function UserProfileForm() {
                   <input
                     type="file"
                     name="profileImageReq"
+                    accept="image/*"
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files[0];
@@ -330,7 +332,8 @@ export default function UserProfileForm() {
                   />
                 </label>
 
-                <label className="relative h-32 flex flex-col items-center justify-center border border-dashed border-gray-300 dark:border-white/10 rounded-md overflow-hidden bg-gray-50 dark:bg-white/5 cursor-pointer group">
+                {/* COVER PHOTO - Square (1:1) ✅ Same as profile */}
+                <label className="relative aspect-square flex flex-col items-center justify-center border border-dashed border-gray-300 dark:border-white/10 rounded-md overflow-hidden bg-gray-50 dark:bg-white/5 cursor-pointer group">
                   <img
                     src={
                       previews.cover ||
@@ -348,6 +351,7 @@ export default function UserProfileForm() {
                   <input
                     type="file"
                     name="coverImageReq"
+                    accept="image/*"
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files[0];

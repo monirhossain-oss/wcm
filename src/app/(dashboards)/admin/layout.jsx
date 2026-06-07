@@ -148,7 +148,7 @@ export default function AdminLayout({ children }) {
     { name: 'All Transactions', path: '/admin/transactions', icon: FiDollarSign },
     { name: 'Audit Logs', path: '/admin/logs', icon: FiShield },
     { name: 'Manage Tags', path: '/admin/tags', icon: FiTag },
-    { name: 'Manage Region', path: '/admin/region', icon: PiTrainRegional },
+    { name: 'Manage Culture', path: '/admin/region', icon: PiTrainRegional },
     { name: 'Manage Tradition', path: '/admin/tradition', icon: TractorIcon },
     { name: 'Categories', path: '/admin/categories', icon: FiLayers },
     { name: 'Manage Blog', path: '/admin/blogs', icon: FiSettings },
