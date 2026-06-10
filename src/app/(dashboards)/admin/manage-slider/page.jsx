@@ -2,23 +2,25 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg } from '@/lib/cropImage';
 import { getImageUrl } from '@/lib/imageHelper';
 import {
     Trash2, Plus, ImageIcon, Loader2, UploadCloud,
     Type, Link2, AlignLeft, Pencil, X, Check, Eye,
-    GripVertical, AlertTriangle,
+    Scissors, AlertTriangle,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
 // ─────────────────────────────────────────────────────────
-// Cloudinary helper
+// Cloudinary helper — blob সরাসরি upload করে
 // ─────────────────────────────────────────────────────────
-async function uploadToCloudinary(imageFile) {
+async function uploadToCloudinary(imageBlob) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
     const formData = new FormData();
-    formData.append('file', imageFile);
+    formData.append('file', imageBlob, 'slider-image.jpg');
     formData.append('upload_preset', uploadPreset);
     const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
         method: 'POST',
@@ -32,7 +34,7 @@ async function uploadToCloudinary(imageFile) {
 }
 
 // ─────────────────────────────────────────────────────────
-// Shared field wrapper (dark glass style)
+// Shared field wrapper
 // ─────────────────────────────────────────────────────────
 function FieldWrapper({ icon, label, children }) {
     return (
@@ -58,72 +60,237 @@ function CharCount({ value, max }) {
 }
 
 // ─────────────────────────────────────────────────────────
-// Image upload zone (reused in Add + Edit)
+// Full-screen Cropper Modal (12:9 — Hero Slider ratio)
 // ─────────────────────────────────────────────────────────
-function ImageUploadZone({ preview, onFileChange, onRemove }) {
+function CropModal({ imageSrc, onConfirm, onCancel }) {
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [cropping, setCropping] = useState(false);
+
+    const onCropComplete = useCallback((_, pixels) => {
+        setCroppedAreaPixels(pixels);
+    }, []);
+
+    const handleConfirm = async () => {
+        if (!croppedAreaPixels) return;
+        setCropping(true);
+        try {
+            const blob = await getCroppedImg(imageSrc, croppedAreaPixels);
+            onConfirm(blob);
+        } catch (e) {
+            console.error('Crop error:', e);
+        } finally {
+            setCropping(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[300] bg-black flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 bg-black/80 backdrop-blur-sm border-b border-white/10 z-10">
+                <div className="flex items-center gap-2">
+                    <Scissors size={14} className="text-orange-500" />
+                    <span className="text-[11px] font-black uppercase tracking-widest text-white">
+                        Crop Image
+                    </span>
+                    <span className="ml-2 px-2 py-0.5 bg-orange-500/15 border border-orange-500/25 rounded-md text-[9px] font-bold text-orange-400 uppercase tracking-wider">
+                        16 : 9
+                    </span>
+                </div>
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+                >
+                    <X size={14} />
+                </button>
+            </div>
+
+            {/* Cropper */}
+            <div className="relative flex-1">
+                <Cropper
+                    image={imageSrc}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={12 / 9}
+                    onCropChange={setCrop}
+                    onCropComplete={onCropComplete}
+                    onZoomChange={setZoom}
+                />
+            </div>
+
+            {/* Zoom slider + actions */}
+            <div className="flex flex-col items-center gap-3 px-5 py-4 bg-black/80 backdrop-blur-sm border-t border-white/10 z-10">
+                {/* Zoom */}
+                <div className="flex items-center gap-3 w-full max-w-xs">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-white/30">Zoom</span>
+                    <input
+                        type="range"
+                        min={1}
+                        max={3}
+                        step={0.05}
+                        value={zoom}
+                        onChange={(e) => setZoom(Number(e.target.value))}
+                        className="flex-1 accent-orange-500 cursor-pointer"
+                    />
+                    <span className="text-[9px] font-bold text-white/30 w-8 text-right tabular-nums">
+                        {zoom.toFixed(1)}×
+                    </span>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-white/8 hover:bg-white/12 border border-white/10 text-white/60 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95"
+                    >
+                        <X size={13} /> Cancel
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleConfirm}
+                        disabled={cropping}
+                        className="flex items-center gap-2 px-6 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-orange-500/25 transition-all active:scale-95"
+                    >
+                        {cropping
+                            ? <><Loader2 size={13} className="animate-spin" /> Processing…</>
+                            : <><Check size={13} /> Set Crop Area</>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─────────────────────────────────────────────────────────
+// Image upload zone — crop-aware
+// ─────────────────────────────────────────────────────────
+function ImageUploadZone({ preview, rawSrc, onCropDone, onRemove, onReCrop }) {
     const [dragging, setDragging] = useState(false);
+    const [rawPreview, setRawPreview] = useState(null);
+    const [showCropper, setShowCropper] = useState(false);
     const fileRef = useRef(null);
+
+    const readFile = (file) => {
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+            setRawPreview(reader.result);
+            setShowCropper(true);
+        });
+        reader.readAsDataURL(file);
+    };
 
     const onDrop = useCallback((e) => {
         e.preventDefault();
         setDragging(false);
         const file = e.dataTransfer.files?.[0];
-        if (file) onFileChange({ target: { files: [file] } });
-    }, [onFileChange]);
+        if (file) readFile(file);
+    }, []);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) readFile(file);
+        // reset input so same file can be re-selected
+        e.target.value = '';
+    };
+
+    const handleCropConfirm = (blob) => {
+        const url = URL.createObjectURL(blob);
+        setShowCropper(false);
+        onCropDone(blob, url, rawPreview);
+    };
+
+    const handleReCrop = () => {
+        if (rawSrc) {
+            setRawPreview(rawSrc);
+            setShowCropper(true);
+        }
+    };
 
     return (
-        <div className="space-y-1.5">
-            <label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/40">
-                <UploadCloud size={11} /> Slider Image
-            </label>
-
-            {preview ? (
-                <div className="relative group rounded-xl overflow-hidden border border-white/10 aspect-video bg-black">
-                    <img src={preview} alt="Preview" className="w-full h-full object-cover transition-opacity group-hover:opacity-50" />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button type="button" onClick={onRemove}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-colors shadow-lg">
-                            <X size={12} /> Remove
-                        </button>
-                    </div>
-                    <div className="absolute top-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-sm text-[9px] font-bold text-white/60 uppercase tracking-widest rounded-md border border-white/10">
-                        Preview
-                    </div>
-                </div>
-            ) : (
-                <div
-                    onClick={() => fileRef.current?.click()}
-                    onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                    onDragLeave={() => setDragging(false)}
-                    onDrop={onDrop}
-                    className={`relative flex flex-col items-center justify-center gap-3 aspect-video rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 select-none 
-    ${dragging
-                            ? 'border-orange-500 bg-orange-500/5 scale-[1.01]'
-                            : 'border-black/10 bg-gray-50 hover:border-black/20 hover:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20 dark:hover:bg-white/10'
-                        }`}
-                >
-                    {/* Icon Container */}
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors 
-        ${dragging ? 'bg-orange-500/20' : 'bg-black/5 dark:bg-white/5'}`}>
-                        <UploadCloud
-                            size={20}
-                            className={dragging ? 'text-orange-500' : 'text-black/30 dark:text-white/30'}
-                        />
-                    </div>
-
-                    {/* Text Section */}
-                    <div className="text-center px-4">
-                        <p className="text-[11px] font-bold text-black/60 dark:text-white/50">
-                            {dragging ? 'Drop to upload' : 'Drag & drop or click to browse'}
-                        </p>
-                        <p className="text-[9px] text-black/40 dark:text-white/20 mt-1 uppercase tracking-widest font-medium">
-                            PNG, JPG, WEBP · Max 5MB
-                        </p>
-                    </div>
-                </div>
+        <>
+            {/* Full-screen crop modal */}
+            {showCropper && rawPreview && (
+                <CropModal
+                    imageSrc={rawPreview}
+                    onConfirm={handleCropConfirm}
+                    onCancel={() => { setShowCropper(false); setRawPreview(null); }}
+                />
             )}
-            <input ref={fileRef} type="file" onChange={onFileChange} accept="image/*" className="hidden" />
-        </div>
+
+            <div className="space-y-1.5">
+                <label className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/40">
+                    <UploadCloud size={11} /> Slider Image
+                    <span className="ml-1 px-1.5 py-0.5 bg-white/5 border border-white/8 rounded text-[8px] text-white/25 font-bold">
+                        12:9
+                    </span>
+                </label>
+
+                {preview ? (
+                    <div className="relative group rounded-xl overflow-hidden border border-white/10 aspect-video bg-black">
+                        <img
+                            src={preview}
+                            alt="Preview"
+                            className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-40"
+                        />
+
+                        {/* Hover actions */}
+                        <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            {rawSrc && (
+                                <button
+                                    type="button"
+                                    onClick={handleReCrop}
+                                    className="flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg transition-colors"
+                                >
+                                    <Scissors size={12} /> Re-crop
+                                </button>
+                            )}
+                            <button
+                                type="button"
+                                onClick={onRemove}
+                                className="flex items-center gap-1.5 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg transition-colors"
+                            >
+                                <X size={12} /> Remove
+                            </button>
+                        </div>
+
+                        {/* Badge */}
+                        <div className="absolute top-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-sm text-[9px] font-bold text-orange-400/80 uppercase tracking-widest rounded-md border border-orange-500/20">
+                            ✓ Cropped 12:9
+                        </div>
+                    </div>
+                ) : (
+                    <div
+                        onClick={() => fileRef.current?.click()}
+                        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                        onDragLeave={() => setDragging(false)}
+                        onDrop={onDrop}
+                        className={`relative flex flex-col items-center justify-center gap-3 aspect-video rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 select-none
+                            ${dragging
+                                ? 'border-orange-500 bg-orange-500/5 scale-[1.01]'
+                                : 'border-black/10 bg-gray-50 hover:border-black/20 hover:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20 dark:hover:bg-white/10'
+                            }`}
+                    >
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${dragging ? 'bg-orange-500/20' : 'bg-black/5 dark:bg-white/5'}`}>
+                            <UploadCloud size={20} className={dragging ? 'text-orange-500' : 'text-black/30 dark:text-white/30'} />
+                        </div>
+                        <div className="text-center px-4">
+                            <p className="text-[11px] font-bold text-black/60 dark:text-white/50">
+                                {dragging ? 'Drop to upload' : 'Drag & drop or click to browse'}
+                            </p>
+                            <p className="text-[9px] text-black/40 dark:text-white/20 mt-1 uppercase tracking-widest font-medium">
+                                PNG, JPG, WEBP · Will be cropped to 12:9
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                <input ref={fileRef} type="file" onChange={handleFileChange} accept="image/*" className="hidden" />
+            </div>
+        </>
     );
 }
 
@@ -134,29 +301,36 @@ function AddSlidePanel({ onSuccess }) {
     const [title, setTitle] = useState('');
     const [subTitle, setSubTitle] = useState('');
     const [link, setLink] = useState('');
-    const [file, setFile] = useState(null);
+    const [croppedBlob, setCroppedBlob] = useState(null);
     const [preview, setPreview] = useState(null);
+    const [rawSrc, setRawSrc] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const handleFileChange = (e) => {
-        const f = e.target.files[0];
-        setFile(f);
-        if (f) setPreview(URL.createObjectURL(f));
+    const handleCropDone = (blob, url, raw) => {
+        setCroppedBlob(blob);
+        setPreview(url);
+        setRawSrc(raw);
+    };
+
+    const handleRemove = () => {
+        setCroppedBlob(null);
+        setPreview(null);
+        setRawSrc(null);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!file) return alert('Please select an image');
+        if (!croppedBlob) return alert('Please select and crop an image');
         setLoading(true);
         try {
-            const imageData = await uploadToCloudinary(file);
+            const imageData = await uploadToCloudinary(croppedBlob);
             await axios.post(`${API_BASE}/api/sliders/add`, {
                 title, subTitle, link,
                 imageUrl: imageData.secure_url,
                 public_id: imageData.public_id,
             }, { withCredentials: true });
             setTitle(''); setSubTitle(''); setLink('');
-            setFile(null); setPreview(null);
+            setCroppedBlob(null); setPreview(null); setRawSrc(null);
             onSuccess();
         } catch (err) {
             alert(err.response?.data?.message || 'Something went wrong');
@@ -182,13 +356,14 @@ function AddSlidePanel({ onSuccess }) {
             </div>
 
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
-                <ImageUploadZone preview={preview} onFileChange={handleFileChange} onRemove={() => { setFile(null); setPreview(null); }} />
+                <ImageUploadZone
+                    preview={preview}
+                    rawSrc={rawSrc}
+                    onCropDone={handleCropDone}
+                    onRemove={handleRemove}
+                />
 
-                <FieldWrapper
-                    icon={<Type size={11} />}
-                    label="Main Title"
-                // যদি FieldWrapper এ ক্লাসের অপশন থাকে, তবে সেখানে border-black/10 dark:border-white/10 দিতে পারেন
-                >
+                <FieldWrapper icon={<Type size={11} />} label="Main Title">
                     <div className="relative w-full">
                         <input
                             type="text"
@@ -196,11 +371,7 @@ function AddSlidePanel({ onSuccess }) {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             maxLength={80}
-                            className="w-full bg-transparent text-sm outline-none py-3 pr-10 transition-colors
-                /* Light Mode Colors */
-                text-black/80 placeholder:text-black/20 focus:placeholder:text-black/10
-                /* Dark Mode Colors */
-                dark:text-white dark:placeholder:text-white/20 dark:focus:placeholder:text-white/10"
+                            className="w-full bg-transparent text-sm outline-none py-3 pr-10 transition-colors text-black/80 placeholder:text-black/20 focus:placeholder:text-black/10 dark:text-white dark:placeholder:text-white/20 dark:focus:placeholder:text-white/10"
                         />
                         <CharCount value={title} max={80} />
                     </div>
@@ -213,11 +384,7 @@ function AddSlidePanel({ onSuccess }) {
                         onChange={(e) => setSubTitle(e.target.value)}
                         maxLength={160}
                         rows={2}
-                        className="w-full bg-transparent text-sm outline-none py-3 pr-10 resize-none transition-colors
-            /* Light Mode */
-            text-black/80 placeholder:text-black/20 focus:placeholder:text-black/10
-            /* Dark Mode */
-            dark:text-white dark:placeholder:text-white/20 dark:focus:placeholder:text-white/10"
+                        className="w-full bg-transparent text-sm outline-none py-3 pr-10 resize-none transition-colors text-black/80 placeholder:text-black/20 dark:text-white dark:placeholder:text-white/20"
                     />
                     <div className="absolute bottom-3 right-3">
                         <CharCount value={subTitle} max={160} />
@@ -225,19 +392,13 @@ function AddSlidePanel({ onSuccess }) {
                 </FieldWrapper>
 
                 <FieldWrapper icon={<Link2 size={11} />} label="Button Link">
-                    {/* Slash (/) prefix color update */}
                     <span className="text-black/20 dark:text-white/20 text-sm py-3 select-none pr-1">/</span>
-
                     <input
                         type="text"
                         placeholder="discover"
                         value={link.replace(/^\//, '')}
                         onChange={(e) => setLink('/' + e.target.value.replace(/^\//, ''))}
-                        className="flex-1 bg-transparent text-sm outline-none py-3 transition-colors
-            /* Light Mode */
-            text-black/80 placeholder:text-black/20 focus:placeholder:text-black/10
-            /* Dark Mode */
-            dark:text-white dark:placeholder:text-white/20 dark:focus:placeholder:text-white/10"
+                        className="flex-1 bg-transparent text-sm outline-none py-3 transition-colors text-black/80 placeholder:text-black/20 dark:text-white dark:placeholder:text-white/20"
                     />
                 </FieldWrapper>
 
@@ -259,22 +420,23 @@ function EditModal({ slide, onClose, onSuccess }) {
     const [title, setTitle] = useState(slide.title || '');
     const [subTitle, setSubTitle] = useState(slide.subTitle || '');
     const [link, setLink] = useState(slide.link || '');
-    const [file, setFile] = useState(null);
+    const [croppedBlob, setCroppedBlob] = useState(null);
     const [preview, setPreview] = useState(getImageUrl(slide.imageUrl) || null);
+    const [rawSrc, setRawSrc] = useState(null);
     const [loading, setLoading] = useState(false);
     const [imageChanged, setImageChanged] = useState(false);
 
-    const handleFileChange = (e) => {
-        const f = e.target.files[0];
-        if (!f) return;
-        setFile(f);
-        setPreview(URL.createObjectURL(f));
+    const handleCropDone = (blob, url, raw) => {
+        setCroppedBlob(blob);
+        setPreview(url);
+        setRawSrc(raw);
         setImageChanged(true);
     };
 
-    const handleRemoveImage = () => {
-        setFile(null);
+    const handleRemove = () => {
+        setCroppedBlob(null);
         setPreview(null);
+        setRawSrc(null);
         setImageChanged(true);
     };
 
@@ -285,8 +447,8 @@ function EditModal({ slide, onClose, onSuccess }) {
             let imageUrl = slide.imageUrl;
             let public_id = slide.public_id;
 
-            if (imageChanged && file) {
-                const imageData = await uploadToCloudinary(file);
+            if (imageChanged && croppedBlob) {
+                const imageData = await uploadToCloudinary(croppedBlob);
                 imageUrl = imageData.secure_url;
                 public_id = imageData.public_id;
             }
@@ -304,11 +466,9 @@ function EditModal({ slide, onClose, onSuccess }) {
         }
     };
 
-    // close on backdrop click
     const backdropRef = useRef(null);
     const handleBackdrop = (e) => { if (e.target === backdropRef.current) onClose(); };
 
-    // close on Escape
     useEffect(() => {
         const h = (e) => { if (e.key === 'Escape') onClose(); };
         document.addEventListener('keydown', h);
@@ -320,10 +480,8 @@ function EditModal({ slide, onClose, onSuccess }) {
             className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="relative w-full max-w-lg bg-[#0f0f0f] border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
 
-                {/* top accent */}
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-70" />
 
-                {/* header */}
                 <div className="px-6 pt-6 pb-4 border-b border-white/6 flex items-center justify-between flex-shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
@@ -339,9 +497,13 @@ function EditModal({ slide, onClose, onSuccess }) {
                     </button>
                 </div>
 
-                {/* scrollable body */}
                 <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5 overflow-y-auto scrollbar-hide flex-1">
-                    <ImageUploadZone preview={preview} onFileChange={handleFileChange} onRemove={handleRemoveImage} />
+                    <ImageUploadZone
+                        preview={preview}
+                        rawSrc={rawSrc}
+                        onCropDone={handleCropDone}
+                        onRemove={handleRemove}
+                    />
 
                     <FieldWrapper icon={<Type size={11} />} label="Main Title">
                         <input type="text" placeholder="Main title…" value={title}
@@ -365,7 +527,6 @@ function EditModal({ slide, onClose, onSuccess }) {
                             className="flex-1 bg-transparent text-sm text-white placeholder:text-white/20 outline-none py-3 transition-colors" />
                     </FieldWrapper>
 
-                    {/* actions */}
                     <div className="flex gap-3 pt-1">
                         <button type="button" onClick={onClose}
                             className="flex-1 py-3.5 rounded-xl border border-white/10 text-white/40 hover:text-white hover:border-white/20 text-[11px] font-black uppercase tracking-widest transition-all">
@@ -422,11 +583,9 @@ function DeleteModal({ slide, onClose, onConfirm }) {
 function SlideCard({ slide, onEdit, onDelete }) {
     return (
         <div className="group relative bg-[#0f0f0f] border border-white/8 rounded-2xl overflow-hidden transition-all duration-300 hover:border-white/15 hover:shadow-xl hover:shadow-black/40">
-            {/* image */}
             <div className="relative aspect-video overflow-hidden">
                 <img src={getImageUrl(slide.imageUrl)} alt={slide.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                {/* overlay on hover */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-3">
                     <a href={slide.link || '#'} target="_blank" rel="noreferrer"
                         className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-white/60 hover:text-white transition-colors">
@@ -445,7 +604,6 @@ function SlideCard({ slide, onEdit, onDelete }) {
                 </div>
             </div>
 
-            {/* info */}
             <div className="px-4 py-3 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                     <h3 className="text-[12px] font-black text-black dark:text-white truncate">{slide.title || 'Untitled'}</h3>
@@ -496,7 +654,6 @@ const ManageSlider = () => {
 
     return (
         <div className="min-h-screen bg-[#080808] p-6 md:p-8">
-            {/* Page header */}
             <div className="mb-10 flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
                     <ImageIcon size={18} className="text-orange-500" />
@@ -510,22 +667,15 @@ const ManageSlider = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-
-                {/* ── Left: Add form ── */}
                 <div className="lg:col-span-1">
                     <AddSlidePanel onSuccess={fetchSliders} />
                 </div>
 
-                {/* ── Right: Slides list ── */}
                 <div className="lg:col-span-2">
                     <div className="flex items-center justify-between mb-5">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
-                            Current Slides
-                        </p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">Current Slides</p>
                         <div className="h-px flex-1 mx-4 bg-white/5" />
-                        <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                            {sliders.length} total
-                        </span>
+                        <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{sliders.length} total</span>
                     </div>
 
                     {fetchLoading ? (
@@ -549,34 +699,18 @@ const ManageSlider = () => {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {sliders.map((slide) => (
-                                <SlideCard
-                                    key={slide._id}
-                                    slide={slide}
-                                    onEdit={setEditingSlide}
-                                    onDelete={setDeletingSlide}
-                                />
+                                <SlideCard key={slide._id} slide={slide} onEdit={setEditingSlide} onDelete={setDeletingSlide} />
                             ))}
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Edit modal */}
             {editingSlide && (
-                <EditModal
-                    slide={editingSlide}
-                    onClose={() => setEditingSlide(null)}
-                    onSuccess={fetchSliders}
-                />
+                <EditModal slide={editingSlide} onClose={() => setEditingSlide(null)} onSuccess={fetchSliders} />
             )}
-
-            {/* Delete confirm modal */}
             {deletingSlide && (
-                <DeleteModal
-                    slide={deletingSlide}
-                    onClose={() => setDeletingSlide(null)}
-                    onConfirm={handleConfirmDelete}
-                />
+                <DeleteModal slide={deletingSlide} onClose={() => setDeletingSlide(null)} onConfirm={handleConfirmDelete} />
             )}
         </div>
     );

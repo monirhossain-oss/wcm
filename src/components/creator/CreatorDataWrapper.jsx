@@ -6,7 +6,7 @@ export default async function CreatorDataWrapper() {
     try {
         const res = await fetch(
             `${API_BASE_URL}/api/users/famous-creators?limit=12&offset=0`,
-            { next: { revalidate: 3600 } } 
+            { next: { revalidate: 300 } } 
         );
 
         if (!res.ok) throw new Error("Fetch failed");

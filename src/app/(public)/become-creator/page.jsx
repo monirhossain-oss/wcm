@@ -467,10 +467,12 @@ export default function UserProfileForm() {
                 >
                   I agree to the{' '}
                   <Link
-                    href="/creator-terms-and-conditions"
+                    href="https://worldculturemarketplace.com/creator-terms-and-conditions"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-orange-500 underline hover:text-orange-600"
                   >
-                    Creator Terms and Conditions
+                    Terms and Conditions
                   </Link>{' '}
                   and confirm that all provided information is accurate.
                 </label>
