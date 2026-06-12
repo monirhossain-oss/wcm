@@ -182,9 +182,9 @@ export default function UserProfileForm() {
           >
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
             <div className="relative z-10 text-white px-10 text-center">
-              <h2 className="text-4xl font-black mb-3 uppercase tracking-tighter">
+              <h1 className="text-3xl font-black uppercase tracking-tighter text-gray-900 dark:text-white mb-6">
                 Become a <span className="text-orange-500">Creator</span>
-              </h2>
+              </h1>
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
                 Unlock your professional node
               </p>

@@ -34,9 +34,9 @@ const BoostPricing = () => {
             <div className="relative max-w-4xl mx-auto px-6 py-12">
                 {/* Heading */}
                 <div className="mb-12">
-                    <h1 className="text-[40px] md:text-[45px] leading-[1.1] font-black tracking-tight text-zinc-900 dark:text-white mb-4">
+                    <h2 className="text-[40px] md:text-[45px] leading-[1.1] font-black tracking-tight text-zinc-900 dark:text-white mb-4">
                         Boost <span className="text-[#F57C00]">Pricing Table</span>
-                    </h1>
+                    </h2>
                     <p className="text-zinc-500 dark:text-zinc-400">Choose the right boost plan for your cultural creations.</p>
                 </div>
 

@@ -123,7 +123,7 @@ export default function CreatorsClient({ initialCreators, categories }) {
                             placeholder="All Categories"
                             value={selectedCategory}
                             onChange={setSelectedCategory}
-                            options={[{ value: '', label: 'All Categories' }, ...categories.map((cat) => ({ value: cat._id, label: cat.name }))]}
+                            options={[{ value: '', label: 'All Categories' }, ...categories.map((cat) => ({ value: cat._id, label: cat.title }))]}
                         />
                     </div>
 

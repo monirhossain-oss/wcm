@@ -18,7 +18,7 @@ export async function generateMetadata({ params }) {
     const searchIndex = filters.indexOf('search');
     const baseFilters = searchIndex !== -1 ? filters.slice(0, searchIndex) : filters;
 
-    // কনটিনেন্ট লিস্টকে ছোট হাতের অক্ষরে নিয়ে আসা (তুলনার জন্য)
+    // কনটিনেন্ট লিস্টকে ছোট হাতের অক্ষরে নিয়ে আসা (তুলনার জন্য)
     const continentsList = Object.keys(continentMapping).map(c => c.toLowerCase().trim());
 
     if (baseFilters.length === 1) {
@@ -110,7 +110,7 @@ export default async function ExplorePage({ params }) {
         const textValue = slugToText(baseFilters[0]);
         const normalizedVal = textValue.toLowerCase().trim();
 
-        // মেইন ফিক্স: Latin America বা Middle East-এর মতো স্পেসওয়ালা নাম চেক করা
+        // মেইন ফিক্স: Latin America বা Middle East-এর মতো স্পেসওয়ালা নাম চেক করা
         if (continentsList.includes(normalizedVal)) {
             const originalKey = Object.keys(continentMapping).find(
                 key => key.toLowerCase().trim() === normalizedVal
@@ -126,11 +126,24 @@ export default async function ExplorePage({ params }) {
         continent = slugToText(baseFilters[1]);
     }
 
+    // h1-এর জন্য ডাইনামিক টেক্সট বানানো
+    let pageHeading = 'Explore World Culture';
+    if (category !== 'All' && continent !== 'All Regions') {
+        pageHeading = `${category} from ${continent}`;
+    } else if (category !== 'All') {
+        pageHeading = `${category} Collections`;
+    } else if (continent !== 'All Regions') {
+        pageHeading = `Cultural Heritage of ${continent}`;
+    }
+
     return (
-        <ExploreClient
-            serverCategory={category}
-            serverContinent={continent}
-            serverSearch={search}
-        />
+        <>
+            <h1 className="sr-only">{pageHeading}</h1>
+            <ExploreClient
+                serverCategory={category}
+                serverContinent={continent}
+                serverSearch={search}
+            />
+        </>
     );
 }

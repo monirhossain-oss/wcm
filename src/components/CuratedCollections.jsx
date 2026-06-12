@@ -33,9 +33,9 @@ export default async function CuratedCollections() {
     return (
         <section className="max-w-7xl mx-auto px-6 py-12">
             <div className="mb-4">
-                <h1 className="text-2xl md:text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">
+                <h2 className="text-2xl md:text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">
                     Curated Collections
-                </h1>
+                </h2>
                 <p className="text-sm md:text-base text-zinc-500 mt-2">
                     Handpicked treasures from top-ranked global creators
                 </p>

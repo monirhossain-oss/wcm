@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
 
+// ✅ স্ট্যাটিক জেনারেশন বন্ধ — বিল্ড টাইমে fetch এরর আসবে না
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata() {
   try {
     const verifications = await getVerifications();

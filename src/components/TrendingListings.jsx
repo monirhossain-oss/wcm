@@ -10,9 +10,9 @@ export default function TrendingListings() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl  font-bold text-[#1F1F1F] dark:text-[#ededed]">
+            <h2 className="text-2xl  font-bold text-[#1F1F1F] dark:text-[#ededed]">
               Trending Listings
-            </h1>
+            </h2>
             <p className="text-sm text-zinc-500">
               Handpicked traditions for you.
             </p>

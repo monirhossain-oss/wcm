@@ -279,9 +279,9 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
 
                         {/* Title + Creator */}
                         <div>
-                            <h1 className="text-[36px] md:text-[44px] font-black text-gray-900 dark:text-white leading-[1.05] tracking-tight mb-3">
+                            <h2 className="text-[36px] md:text-[44px] font-black text-gray-900 dark:text-white leading-[1.05] tracking-tight mb-3">
                                 {product.title}
-                            </h1>
+                            </h2>
                             {creatorUsername && (
                                 <Link href={`/profile/${creatorUsername}`} className="inline-flex items-center gap-2 group">
                                     <div className="w-5 h-5 rounded-full bg-[#F57C00] flex items-center justify-center text-white text-[8px] font-black">

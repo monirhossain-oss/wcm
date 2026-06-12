@@ -40,8 +40,14 @@ export async function getFooterData() {
 
 // ==================== VERIFICATION API ====================
 
-// Get all verifications (no cache — always fresh)
+// ✅ Get all verifications — build-safe fallback
 export async function getVerifications() {
+  // বিল্ড টাইমে BASE_URL না থাকলে empty array রিটার্ন
+  if (!BASE_URL || BASE_URL.includes('localhost:5000')) {
+    console.warn('[Build] Skipping verification fetch — API not available during build');
+    return [];
+  }
+
   try {
     const res = await fetch(`${BASE_URL}/api/verifications`, {
       cache: 'no-store',

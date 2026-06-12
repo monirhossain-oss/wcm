@@ -40,17 +40,6 @@ const FaqSection = () => {
     return (
         <section className="bg-white dark:bg-[#0a0a0a] py-12 px-6 min-h-[500px]">
             <div className="max-w-5xl mx-auto">
-
-                {/* Header */}
-                <div className="text-center mb-16 space-y-4">
-                    <span className="px-4 py-1 rounded-full border border-orange-200 text-orange-600 text-[10px] font-bold uppercase tracking-widest">
-                        Support Center
-                    </span>
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
-                        Frequently Asked Questions
-                    </h2>
-                </div>
-
                 {/* Category Filtering Buttons */}
                 <div className="flex flex-wrap justify-center gap-3 mb-16">
                     {categories.map((cat) => (

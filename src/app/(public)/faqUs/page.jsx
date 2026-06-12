@@ -26,6 +26,15 @@ export async function generateMetadata() {
 const Page = () => {
     return (
         <main className="bg-white dark:bg-[#0a0a0a]">
+            {/* Header */}
+            <div className="text-center my-4 space-y-4">
+                <span className="px-4 py-1 rounded-full border border-orange-200 text-orange-600 text-[10px] font-bold uppercase tracking-widest">
+                    Support Center
+                </span>
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+                    Frequently Asked Questions
+                </h1>
+            </div>
             <FaqSection />
             <FaqContact />
         </main>

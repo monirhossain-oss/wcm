@@ -300,6 +300,8 @@ export default function TransactionsPage() {
       {selectedTx && (
         <div className="fixed inset-0 z-[100] flex items-center justify-end bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
           <div className="w-full max-w-md bg-white dark:bg-[#0c0c0c] h-full rounded-3xl shadow-2xl overflow-hidden border border-white/10 flex flex-col animate-in slide-in-from-right duration-500">
+
+            {/* Header */}
             <div className="p-6 bg-orange-600 flex justify-between items-center">
               <h3 className="text-white font-black uppercase italic tracking-tighter">
                 Transaction Details
@@ -313,6 +315,8 @@ export default function TransactionsPage() {
             </div>
 
             <div className="p-8 space-y-8 flex-1 overflow-y-auto">
+
+              {/* Total Paid */}
               <div className="text-center">
                 <p className="text-[9px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">
                   Total Paid
@@ -322,6 +326,7 @@ export default function TransactionsPage() {
                 </h1>
               </div>
 
+              {/* Status, Invoice, Stripe ID */}
               <div className="grid grid-cols-2 gap-6 pt-6 border-t dark:border-white/5">
                 <DetailItem
                   label="Status"
@@ -344,6 +349,8 @@ export default function TransactionsPage() {
                 </div>
               </div>
 
+
+              {/* Financial Breakdown */}
               <div className="space-y-4 pt-6 border-t dark:border-white/5">
 
                 {/* Original Payment */}
@@ -371,10 +378,12 @@ export default function TransactionsPage() {
                 />
 
                 {/* Stripe Fee */}
-                <SummaryRow
-                  label="Stripe Fee (est.)"
-                  value={`- €${((selectedTx.amountPaid * 0.029 + 0.30) / (selectedTx.fxRate || 1)).toFixed(2)}`}
-                />
+                {selectedTx.packageType === 'wallet_topup' && (
+                  <SummaryRow
+                    label="Stripe Fee (est.)"
+                    value={`- €${((selectedTx.amountPaid * 0.029 + 0.30) / (selectedTx.fxRate || 1)).toFixed(2)}`}
+                  />
+                )}
 
                 {/* Divider */}
                 <div className="pt-4 border-t border-dashed dark:border-white/10 flex justify-between items-center">
@@ -391,7 +400,6 @@ export default function TransactionsPage() {
           </div>
         </div>
       )}
-
       {/* --- Range Export Modal --- */}
       {showExportModal && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
