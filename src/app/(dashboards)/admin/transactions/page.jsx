@@ -345,17 +345,47 @@ export default function TransactionsPage() {
               </div>
 
               <div className="space-y-4 pt-6 border-t dark:border-white/5">
-                <SummaryRow label="VAT Amount" value={`€${selectedTx.vatAmount || 0}`} />
+
+                {/* Original Payment */}
+                <SummaryRow
+                  label="Original Paid"
+                  value={`${selectedTx.currency} ${selectedTx.amountPaid}`}
+                />
+
+                {/* VAT */}
+                <SummaryRow
+                  label="VAT Included"
+                  value={`- ${selectedTx.currency} ${selectedTx.vatAmount || 0}`}
+                />
+
+                {/* Net in original currency */}
+                <SummaryRow
+                  label="Net Amount"
+                  value={`${selectedTx.currency} ${(selectedTx.amountPaid - (selectedTx.vatAmount || 0)).toFixed(2)}`}
+                />
+
+                {/* Exchange Rate */}
                 <SummaryRow
                   label="Exchange Rate"
                   value={`1 ${selectedTx.currency} = ${selectedTx.fxRate} EUR`}
                 />
+
+                {/* Stripe Fee */}
+                <SummaryRow
+                  label="Stripe Fee (est.)"
+                  value={`- €${((selectedTx.amountPaid * 0.029 + 0.30) / (selectedTx.fxRate || 1)).toFixed(2)}`}
+                />
+
+                {/* Divider */}
                 <div className="pt-4 border-t border-dashed dark:border-white/10 flex justify-between items-center">
-                  <p className="text-[10px] font-black text-orange-500 uppercase">Revenue (EUR)</p>
+                  <p className="text-[10px] font-black text-orange-500 uppercase">
+                    Revenue (EUR)
+                  </p>
                   <p className="text-2xl font-black dark:text-white italic">
                     €{selectedTx.amountInEUR}
                   </p>
                 </div>
+
               </div>
             </div>
           </div>
