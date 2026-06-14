@@ -192,14 +192,6 @@ function EditModal({ item, onClose, onSave }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (titleLen > 60) {
-            toast.error('Title should be under 60 characters for optimal display');
-            return;
-        }
-        if (descLen > 160) {
-            toast.error('Description should be under 160 characters for optimal display');
-            return;
-        }
         setLoading(true);
         try {
             const keywords = form.keywords ? form.keywords.split(',').map(k => k.trim()).filter(Boolean) : [];
@@ -245,7 +237,6 @@ function EditModal({ item, onClose, onSave }) {
                                 type="text"
                                 value={form.title}
                                 onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
-                                maxLength={70}
                                 className={getInputClasses(titleLen > 60)}
                                 required
                             />
@@ -266,7 +257,6 @@ function EditModal({ item, onClose, onSave }) {
                                 rows={4}
                                 value={form.description}
                                 onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                                maxLength={200}
                                 className={`${getInputClasses(descLen > 160)} resize-none`}
                                 required
                             />
@@ -308,7 +298,7 @@ function EditModal({ item, onClose, onSave }) {
                         </button>
                         <button
                             type="submit"
-                            disabled={loading || titleLen > 60 || descLen > 160}
+                            disabled={loading}
                             className="flex items-center gap-2 px-6 md:px-8 py-2.5 md:py-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-black transition-all shadow-xl shadow-orange-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
@@ -352,14 +342,6 @@ const SeoSettings = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (titleLen > 60) {
-            toast.error('Title should be under 60 characters');
-            return;
-        }
-        if (descLen > 160) {
-            toast.error('Description should be under 160 characters');
-            return;
-        }
         setLoading(true);
         try {
             const keywords = formData.keywords ? formData.keywords.split(',').map(k => k.trim()).filter(Boolean) : [];
@@ -439,7 +421,6 @@ const SeoSettings = () => {
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
-                                maxLength={70}
                                 placeholder="e.g. Best Cultural Marketplace | WCM"
                                 className={getInputClasses(titleLen > 60)}
                                 required
@@ -462,7 +443,6 @@ const SeoSettings = () => {
                             rows={3}
                             value={formData.description}
                             onChange={handleChange}
-                            maxLength={200}
                             placeholder="A brief summary of what this page offers..."
                             className={`${getInputClasses(descLen > 160)} resize-none`}
                             required
@@ -498,7 +478,7 @@ const SeoSettings = () => {
                         </div>
                         <button
                             type="submit"
-                            disabled={loading || titleLen > 60 || descLen > 160}
+                            disabled={loading}
                             className="flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-black transition-all shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 whitespace-nowrap"
                         >
                             {loading ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}

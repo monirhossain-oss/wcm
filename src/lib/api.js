@@ -42,9 +42,7 @@ export async function getFooterData() {
 
 // ✅ Get all verifications — build-safe fallback
 export async function getVerifications() {
-  // বিল্ড টাইমে BASE_URL না থাকলে empty array রিটার্ন
-  if (!BASE_URL || BASE_URL.includes('localhost:5000')) {
-    console.warn('[Build] Skipping verification fetch — API not available during build');
+  if (!BASE_URL) {
     return [];
   }
 
