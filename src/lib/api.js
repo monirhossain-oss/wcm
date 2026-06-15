@@ -6,7 +6,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export async function getCategories() {
   try {
     const res = await fetch(`${BASE_URL}/api/admin/categories`, {
-      next: { revalidate: 3600 }, // ISR — 1 hour cache
+      next: { revalidate: 3600 },
       cache: 'force-cache',
     });
 
@@ -16,7 +16,7 @@ export async function getCategories() {
     return Array.isArray(data) ? data : data.data || [];
   } catch (error) {
     console.error('Error fetching categories:', error);
-    return []; // Return empty array on error
+    return [];
   }
 }
 
@@ -40,15 +40,13 @@ export async function getFooterData() {
 
 // ==================== VERIFICATION API ====================
 
-// ✅ Get all verifications — build-safe fallback
+// ✅ ISR — 1 ঘন্টা পর পর refresh
 export async function getVerifications() {
-  if (!BASE_URL) {
-    return [];
-  }
+  if (!BASE_URL) return [];
 
   try {
     const res = await fetch(`${BASE_URL}/api/verifications`, {
-      cache: 'no-store',
+      next: { revalidate: 3600 }, // ← ISR: 1 hour
     });
 
     if (!res.ok) throw new Error('Failed to fetch verifications');

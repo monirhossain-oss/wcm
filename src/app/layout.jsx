@@ -9,13 +9,26 @@ const inter = Inter({
   weight: ['400', '500', '600', '700'],
   variable: '--font-inter',
 });
-const poppins = Poppins({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-poppins' });
-const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-roboto' });
-const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  variable: '--font-poppins',
+});
 
-export const revalidate = 0;
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-roboto',
+});
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+});
+
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
 
 export async function generateMetadata() {
   try {

@@ -34,12 +34,12 @@ export default function AddListing() {
     websiteLink: '',
     region: '',
     country: '',
+    countryIsoCode: '', // ✅ নতুন
     tradition: '',
     category: '',
     culturalTags: [],
   });
 
-  // ✅ শো-অফলি country state (কোনো কাজ নেই, শুধু দেখাবে)
   const [showCountry, setShowCountry] = useState('');
   const [showCountryCode, setShowCountryCode] = useState('');
 
@@ -47,12 +47,11 @@ export default function AddListing() {
   const [categoryTags, setCategoryTags] = useState([]);
   const [regions, setRegions] = useState([]);
   const [traditions, setTraditions] = useState([]);
-  const [countries, setCountries] = useState([]);  // ✅ country-state-city থেকে
+  const [countries, setCountries] = useState([]);
 
   const [metaLoading, setMetaLoading] = useState(true);
   const [assetsLoading, setAssetsLoading] = useState(false);
 
-  // ── Custom Input States (Others option) ──────────────────────────────────
   const [customRegion, setCustomRegion] = useState('');
   const [customTradition, setCustomTradition] = useState('');
   const [customTag, setCustomTag] = useState('');
@@ -60,7 +59,6 @@ export default function AddListing() {
   const [showCustomTradition, setShowCustomTradition] = useState(false);
   const [showCustomTagInput, setShowCustomTagInput] = useState(false);
 
-  // ── Image & Crop ──────────────────────────────────────────────────────────
   const [previewUrl, setPreviewUrl] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -73,12 +71,11 @@ export default function AddListing() {
   const [catSearch, setCatSearch] = useState('');
   const [showTagDrop, setShowTagDrop] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
-  const [showCountryDrop, setShowCountryDrop] = useState(false);  // ✅
-  const [countrySearch, setCountrySearch] = useState('');          // ✅
+  const [showCountryDrop, setShowCountryDrop] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
 
   const router = useRouter();
 
-  // ── Image handlers ────────────────────────────────────────────────────────
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader();
@@ -104,7 +101,6 @@ export default function AddListing() {
     }
   };
 
-  // ── 1. Initial load: categories + countries ────────────────────────────────
   useEffect(() => {
     const fetchMeta = async () => {
       try {
@@ -123,7 +119,6 @@ export default function AddListing() {
     fetchMeta();
   }, []);
 
-  // ── 2. Load assets when category changes ──────────────────────────────────
   useEffect(() => {
     if (!formData.category) {
       setCategoryTags([]);
@@ -141,7 +136,6 @@ export default function AddListing() {
           setRegions(res.data.regions);
           setTraditions(res.data.traditions);
           setFormData((prev) => ({ ...prev, culturalTags: [], region: '', tradition: '' }));
-          // Reset custom states
           setCustomRegion('');
           setCustomTradition('');
           setCustomTag('');
@@ -158,7 +152,6 @@ export default function AddListing() {
     fetchCategoryAssets();
   }, [formData.category]);
 
-  // ── URL field helpers ─────────────────────────────────────────────────────
   const handleUrlChange = (index, value) => {
     const newUrls = [...formData.externalUrls];
     newUrls[index] = value;
@@ -171,7 +164,6 @@ export default function AddListing() {
   const removeUrlField = (index) =>
     setFormData({ ...formData, externalUrls: formData.externalUrls.filter((_, i) => i !== index) });
 
-  // ── Filtered lists ────────────────────────────────────────────────────────
   const filteredCats = categories.filter((c) =>
     c.title.toLowerCase().includes(catSearch.toLowerCase())
   );
@@ -182,7 +174,6 @@ export default function AddListing() {
     c.name.toLowerCase().includes(countrySearch.toLowerCase())
   );
 
-  // ── Tag toggle ────────────────────────────────────────────────────────────
   const handleTagToggle = (tagId) => {
     setFormData((prev) => {
       if (prev.culturalTags.includes(tagId)) {
@@ -196,16 +187,13 @@ export default function AddListing() {
     });
   };
 
-  // ── Add Custom Tag ────────────────────────────────────────────────────────
   const handleAddCustomTag = () => {
     if (!customTag.trim()) return;
     if (formData.culturalTags.length >= 10) {
       alert('Maximum 10 tags allowed');
       return;
     }
-    // Generate unique ID for custom tag
     const customTagId = `custom-${Date.now()}`;
-    // Add to categoryTags list temporarily for display
     setCategoryTags((prev) => [...prev, { _id: customTagId, title: customTag.trim() }]);
     setFormData((prev) => ({
       ...prev,
@@ -218,24 +206,26 @@ export default function AddListing() {
   // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!finalCroppedImage || !formData.category)
       return alert('Please upload/crop image and select category');
+
+    // ✅ country validation
+    if (!formData.countryIsoCode)
+      return alert('Please select a country');
 
     setLoading(true);
     try {
       const data = new FormData();
 
-      // Handle region - if Others selected, use custom value
       const finalRegion = showCustomRegion && customRegion.trim()
         ? customRegion.trim()
         : formData.region;
 
-      // Handle tradition - if Others selected, use custom value
       const finalTradition = showCustomTradition && customTradition.trim()
         ? customTradition.trim()
         : formData.tradition;
 
-      // Handle tags - convert custom tags to their text values
       const finalTags = formData.culturalTags.map((tagId) => {
         const tag = categoryTags.find((t) => t._id === tagId);
         return tag ? tag.title : tagId;
@@ -254,6 +244,7 @@ export default function AddListing() {
           data.append(key, formData[key]);
         }
       });
+
       data.append('image', finalCroppedImage, 'listing-image.jpg');
 
       const response = await api.post('/api/listings/add', data);
@@ -269,7 +260,6 @@ export default function AddListing() {
     }
   };
 
-  // ── Early return: loading ─────────────────────────────────────────────────
   if (metaLoading) {
     return (
       <div className="flex justify-center p-20">
@@ -278,7 +268,6 @@ export default function AddListing() {
     );
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="max-w-6xl mx-auto py-4 pb-20 font-sans px-4 md:px-0">
 
@@ -300,9 +289,7 @@ export default function AddListing() {
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block ml-1">
               Cover Media (Aspect 4:5 Ratio)
             </label>
-
             <div className="relative aspect-[4/5] w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center overflow-hidden shadow-sm group">
-
               {showCropper ? (
                 <div className="absolute inset-0 z-40 bg-black">
                   <Cropper
@@ -331,7 +318,6 @@ export default function AddListing() {
                     </button>
                   </div>
                 </div>
-
               ) : finalCroppedImage ? (
                 <div className="relative w-full h-full p-2">
                   <img
@@ -356,7 +342,6 @@ export default function AddListing() {
                     </button>
                   </div>
                 </div>
-
               ) : (
                 <div className="text-center p-6 space-y-2 relative w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                   <FiUploadCloud size={32} className="text-orange-500 mx-auto" />
@@ -446,6 +431,8 @@ export default function AddListing() {
                 </div>
               )}
             </div>
+
+            {/* ✅ Country Dropdown — এখন formData update করে */}
             <div className="space-y-2 relative">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
                 <FiMapPin size={10} /> Region / Country
@@ -482,10 +469,16 @@ export default function AddListing() {
                       <div
                         key={country.isoCode}
                         onClick={() => {
-                          setShowCountry(country.name);        // ✅ শুধু state update
-                          setShowCountryCode(country.isoCode); // ✅ শুধু state update
+                          setShowCountry(country.name);
+                          setShowCountryCode(country.isoCode);
                           setShowCountryDrop(false);
                           setCountrySearch('');
+                          // ✅ formData-তে country name + isoCode দুটোই save করো
+                          setFormData((prev) => ({
+                            ...prev,
+                            country: country.name,
+                            countryIsoCode: country.isoCode,
+                          }));
                         }}
                         className={`p-3 text-[10px] font-bold flex items-center gap-2 hover:bg-orange-500 hover:text-white cursor-pointer transition-colors dark:text-gray-300 border-b last:border-0 dark:border-white/5 ${showCountryCode === country.isoCode ? 'bg-orange-50 text-orange-600' : ''}`}
                       >
@@ -502,7 +495,7 @@ export default function AddListing() {
               )}
             </div>
 
-            {/* Region Dropdown with Others option */}
+            {/* Culture / Origin (Region) */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
                 <FiMapPin size={10} /> Culture / Origin
@@ -515,11 +508,11 @@ export default function AddListing() {
                   const value = e.target.value;
                   if (value === 'others') {
                     setShowCustomRegion(true);
-                    setFormData({ ...formData, region: 'others', country: 'others' });
+                    setFormData({ ...formData, region: 'others' });
                   } else {
                     setShowCustomRegion(false);
                     setCustomRegion('');
-                    setFormData({ ...formData, region: value, country: value });
+                    setFormData({ ...formData, region: value });
                   }
                 }}
                 className={`w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
@@ -532,8 +525,6 @@ export default function AddListing() {
                 ))}
                 <option value="others" className="bg-orange-50 text-orange-600 font-black">+ Others (Custom)</option>
               </select>
-
-              {/* Custom Region Input */}
               {showCustomRegion && (
                 <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                   <input
@@ -548,7 +539,7 @@ export default function AddListing() {
               )}
             </div>
 
-            {/* Tradition Dropdown with Others option */}
+            {/* Tradition */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Tradition / Technique</label>
               <select
@@ -576,8 +567,6 @@ export default function AddListing() {
                 ))}
                 <option value="others" className="bg-orange-50 text-orange-600 font-black">+ Others (Custom)</option>
               </select>
-
-              {/* Custom Tradition Input */}
               {showCustomTradition && (
                 <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                   <input
@@ -606,10 +595,10 @@ export default function AddListing() {
           </div>
         </div>
 
-        {/* ── Tags, Tradition & Sources ── */}
+        {/* ── Tags & Sources ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-6 bg-gray-50/50 dark:bg-white/10 border border-gray-100 dark:border-white/10 rounded-lg">
 
-          {/* Tags with Others option */}
+          {/* Tags */}
           <div className="space-y-2 relative">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
               <FiTag size={10} />
@@ -644,15 +633,12 @@ export default function AddListing() {
                   />
                 </div>
                 <div className="max-h-40 overflow-y-auto grid grid-cols-1 p-1 gap-1">
-                  {/* Others option for tags */}
                   <div
                     onClick={() => setShowCustomTagInput(!showCustomTagInput)}
                     className="p-2 rounded-lg text-[9px] font-black uppercase cursor-pointer flex justify-between items-center bg-orange-50 text-orange-600 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400"
                   >
                     <span className="flex items-center gap-1"><FiPlus size={10} /> Add Custom Tag</span>
                   </div>
-
-                  {/* Custom Tag Input */}
                   {showCustomTagInput && (
                     <div className="p-2 border-t dark:border-white/10">
                       <div className="flex gap-2">
@@ -674,7 +660,6 @@ export default function AddListing() {
                       </div>
                     </div>
                   )}
-
                   {filteredTags.length === 0 && !showCustomTagInput ? (
                     <div className="p-3 text-[9px] text-center text-gray-500 uppercase">No tags found</div>
                   ) : (

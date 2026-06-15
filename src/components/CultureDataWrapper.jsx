@@ -1,5 +1,4 @@
 import CultureSlider from './CultureSlider';
-import { continentMapping } from '@/constants/continentData';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -25,25 +24,20 @@ export default async function CultureDataWrapper() {
         const allListings = data.listings || [];
 
         const finalData = continentsSliderData.map(continent => {
-            // ১. এখানে continent.title এর বদলে continent.slug ব্যবহার করতে হবে 
-           
-            const associatedCountries = continentMapping[continent.slug] || [];
-
-            // ২. লিস্টিং ফিল্টার (সরাসরি country চেক)
+            // ✅ সরাসরি listing.continent === continent.slug দিয়ে match
             const count = allListings.filter(listing =>
-                associatedCountries.includes(listing.country)
+                listing.continent === continent.slug
             ).length;
 
             return {
-                _id: continent.slug, 
-                title: continent.title, 
+                _id: continent.slug,
+                title: continent.title,
                 image: continent.image,
                 listingCount: count,
                 link: `/explore/${continent.slug}`
             };
         });
 
-        // ৩. লিস্টিং সংখ্যা অনুযায়ী সর্ট করা (বড় থেকে ছোট)
         finalData.sort((a, b) => b.listingCount - a.listingCount);
 
         return <CultureSlider items={finalData} />;
