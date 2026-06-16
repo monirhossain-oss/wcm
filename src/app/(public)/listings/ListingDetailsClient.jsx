@@ -299,7 +299,11 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                         {/* Description */}
                         <div>
                             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">About</p>
-                            <p className="text-[15px] leading-[1.8] text-gray-600 dark:text-gray-400">{product.description}</p>
+                            <div className="text-[15px] leading-[1.8] text-gray-600 dark:text-gray-400 space-y-4">
+                                {product.description.split('\n').filter(Boolean).map((para, idx) => (
+                                    <p key={idx}>{para}</p>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Cultural Tags */}

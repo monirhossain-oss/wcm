@@ -377,11 +377,14 @@ export default function TransactionsPage() {
                   value={`1 ${selectedTx.currency} = ${selectedTx.fxRate} EUR`}
                 />
 
-                {/* Stripe Fee */}
                 {selectedTx.packageType === 'wallet_topup' && (
                   <SummaryRow
                     label="Stripe Fee (est.)"
-                    value={`- €${((selectedTx.amountPaid * 0.029 + 0.30) / (selectedTx.fxRate || 1)).toFixed(2)}`}
+                    value={`- €${(
+                      selectedTx.currency !== 'EUR'
+                        ? selectedTx.amountInEUR * 0.0573
+                        : selectedTx.amountInEUR * 0.0373
+                    ).toFixed(2)}`}
                   />
                 )}
 

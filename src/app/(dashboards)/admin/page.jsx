@@ -398,7 +398,7 @@ export default function AdminDashboard() {
             </p>
             <p className="text-[11px] text-gray-500 leading-relaxed italic font-medium">
               System calculates Stripe fees at{' '}
-              <span className="text-orange-500 font-bold">2.9% + 0.30€</span>. Net margin is
+              <span className="text-orange-500 font-bold">3.73% (EUR) / 5.73% (Non-EUR)</span>. Net margin is
               healthy.
             </p>
           </div>
