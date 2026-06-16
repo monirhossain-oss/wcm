@@ -296,7 +296,6 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      {/* --- Detail Sidebar (All Dynamic) --- */}
       {selectedTx && (
         <div className="fixed inset-0 z-[100] flex items-center justify-end bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
           <div className="w-full max-w-md bg-white dark:bg-[#0c0c0c] h-full rounded-3xl shadow-2xl overflow-hidden border border-white/10 flex flex-col animate-in slide-in-from-right duration-500">
@@ -306,10 +305,7 @@ export default function TransactionsPage() {
               <h3 className="text-white font-black uppercase italic tracking-tighter">
                 Transaction Details
               </h3>
-              <button
-                onClick={() => setSelectedTx(null)}
-                className="text-white hover:rotate-90 transition-all"
-              >
+              <button onClick={() => setSelectedTx(null)} className="text-white hover:rotate-90 transition-all">
                 <FiX size={20} />
               </button>
             </div>
@@ -322,7 +318,7 @@ export default function TransactionsPage() {
                   Total Paid
                 </p>
                 <h1 className="text-4xl font-black dark:text-white tracking-tighter italic">
-                  {(selectedTx.currency || 'EUR').toUpperCase()} {selectedTx.amountPaid}
+                  {(selectedTx.currency || 'EUR').toUpperCase()} {Number(selectedTx.amountPaid).toFixed(2)}
                 </h1>
               </div>
 
@@ -332,71 +328,116 @@ export default function TransactionsPage() {
                   label="Status"
                   value={selectedTx.status}
                   icon={
-                    selectedTx.status === 'completed' ? (
-                      <FiCheckCircle className="text-green-500" />
-                    ) : (
-                      <FiAlertCircle className="text-orange-500" />
-                    )
+                    selectedTx.status === 'completed'
+                      ? <FiCheckCircle className="text-green-500" />
+                      : <FiAlertCircle className="text-orange-500" />
                   }
                 />
                 <DetailItem label="Invoice No" value={selectedTx.invoiceNumber || 'N/A'} />
                 <div className="col-span-2">
-                  <DetailItem
-                    label="Stripe ID"
-                    value={selectedTx.stripeSessionId || 'Manual/N/A'}
-                    isMono
-                  />
+                  <DetailItem label="Stripe ID" value={selectedTx.stripeSessionId || 'Manual/N/A'} isMono />
                 </div>
               </div>
 
-
               {/* Financial Breakdown */}
-              <div className="space-y-4 pt-6 border-t dark:border-white/5">
+              <div className="space-y-3 pt-6 border-t dark:border-white/5">
 
-                {/* Original Payment */}
-                <SummaryRow
-                  label="Original Paid"
-                  value={`${selectedTx.currency} ${selectedTx.amountPaid}`}
-                />
+                {(() => {
+                  const currency = (selectedTx.currency || 'EUR').toUpperCase();
+                  const totalPaid = Number(selectedTx.amountPaid) || 0;       // e.g. $121.00
+                  const fxRate = Number(selectedTx.fxRate) || 1;
+                  const amountInEUR = Number(selectedTx.amountInEUR) || 0;      // net EUR in wallet
+                  const vatAmountEUR = Number(selectedTx.vatAmount) || 0;        // VAT in EUR
+                  const isNonEUR = currency !== 'EUR';
 
-                {/* VAT */}
-                <SummaryRow
-                  label="VAT Included"
-                  value={`- ${selectedTx.currency} ${selectedTx.vatAmount || 0}`}
-                />
+                  // ✅ back-calculate to original currency for display
+                  const netAmount = isNonEUR
+                    ? Number((amountInEUR / fxRate).toFixed(2))
+                    : amountInEUR;
 
-                {/* Net in original currency */}
-                <SummaryRow
-                  label="Net Amount"
-                  value={`${selectedTx.currency} ${(selectedTx.amountPaid - (selectedTx.vatAmount || 0)).toFixed(2)}`}
-                />
+                  const vatAmount = isNonEUR
+                    ? Number((vatAmountEUR / fxRate).toFixed(2))
+                    : vatAmountEUR;
 
-                {/* Exchange Rate */}
-                <SummaryRow
-                  label="Exchange Rate"
-                  value={`1 ${selectedTx.currency} = ${selectedTx.fxRate} EUR`}
-                />
+                  // ✅ Stripe fee on totalPaid converted to EUR
+                  const totalPaidInEUR = Number((totalPaid * fxRate).toFixed(2));
+                  const processingFee = Number((totalPaidInEUR * 0.0373).toFixed(2));
+                  const conversionFee = isNonEUR ? Number((totalPaidInEUR * 0.02).toFixed(2)) : 0;
+                  const totalStripeFee = Number((processingFee + conversionFee).toFixed(2));
+                  const netReceivedByWCM = Number((totalPaidInEUR - totalStripeFee).toFixed(2));  // VAT সহ
+                  const walletCredited = Number((netReceivedByWCM - vatAmountEUR).toFixed(2));  // VAT বাদে
 
-                {selectedTx.packageType === 'wallet_topup' && (
-                  <SummaryRow
-                    label="Stripe Fee (est.)"
-                    value={`- €${(
-                      selectedTx.currency !== 'EUR'
-                        ? selectedTx.amountInEUR * 0.0573
-                        : selectedTx.amountInEUR * 0.0373
-                    ).toFixed(2)}`}
-                  />
-                )}
+                  return (
+                    <>
+                      {/* Net + VAT */}
+                      <SummaryRow
+                        label="Net Amount"
+                        value={`${currency} ${netAmount.toFixed(2)}`}
+                      />
+                      <SummaryRow
+                        label={`VAT (${netAmount > 0 ? ((vatAmount / netAmount) * 100).toFixed(0) : 0}%)`}
+                        value={`+ ${currency} ${vatAmount.toFixed(2)}`}
+                      />
 
-                {/* Divider */}
-                <div className="pt-4 border-t border-dashed dark:border-white/10 flex justify-between items-center">
-                  <p className="text-[10px] font-black text-orange-500 uppercase">
-                    Revenue (EUR)
-                  </p>
-                  <p className="text-2xl font-black dark:text-white italic">
-                    €{selectedTx.amountInEUR}
-                  </p>
-                </div>
+                      {/* Total */}
+                      <div className="flex justify-between items-center py-2 border-t border-dashed dark:border-white/10">
+                        <p className="text-[10px] font-black uppercase text-gray-500">Total Charged</p>
+                        <p className="text-sm font-black dark:text-white">{currency} {totalPaid.toFixed(2)}</p>
+                      </div>
+
+                      {/* Exchange Rate (non-EUR only) */}
+                      {isNonEUR && (
+                        <SummaryRow
+                          label="Exchange Rate"
+                          value={`1 ${currency} = ${fxRate} EUR`}
+                        />
+                      )}
+
+                      {/* EUR equivalent */}
+                      {isNonEUR && (
+                        <SummaryRow
+                          label="Total in EUR"
+                          value={`€${totalPaidInEUR.toFixed(2)}`}
+                        />
+                      )}
+
+                      {/* Stripe Fee Breakdown (wallet_topup only) */}
+                      {selectedTx.packageType === 'wallet_topup' && (
+                        <div className="space-y-2 p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-orange-500 mb-2">
+                            Stripe Fee Breakdown
+                          </p>
+                          <div className="flex justify-between text-[10px]">
+                            <span className="text-gray-400">Processing Fee (3.73%)</span>
+                            <span className="text-red-400 font-bold">- €{processingFee.toFixed(2)}</span>
+                          </div>
+                          {isNonEUR && (
+                            <div className="flex justify-between text-[10px]">
+                              <span className="text-gray-400">Conversion Fee (2.00%)</span>
+                              <span className="text-red-400 font-bold">- €{conversionFee.toFixed(2)}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-[10px] pt-1 border-t dark:border-white/10">
+                            <span className="text-gray-500 font-bold">Total Stripe Fees</span>
+                            <span className="text-red-500 font-black">- €{totalStripeFee.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Final Revenue */}
+                      <div className="pt-3 border-t border-dashed dark:border-white/10 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <p className="text-[10px] font-black text-gray-400 uppercase">Net Received (incl. VAT)</p>
+                          <p className="text-sm font-black dark:text-white">€{netReceivedByWCM.toFixed(2)}</p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-[10px] font-black text-orange-500 uppercase">Wallet Credited</p>
+                          <p className="text-2xl font-black dark:text-white italic">€{walletCredited.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
 
               </div>
             </div>
