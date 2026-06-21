@@ -40,13 +40,13 @@ export async function getFooterData() {
 
 // ==================== VERIFICATION API ====================
 
-// ✅ ISR — 1 ঘন্টা পর পর refresh
+// ✅ ISR — 30 seconds পর পর refresh
 export async function getVerifications() {
   if (!BASE_URL) return [];
 
   try {
     const res = await fetch(`${BASE_URL}/api/verifications`, {
-      next: { revalidate: 3600 }, // ← ISR: 1 hour
+      next: { revalidate: 30 }, // ← ISR: 30 seconds
     });
 
     if (!res.ok) throw new Error('Failed to fetch verifications');

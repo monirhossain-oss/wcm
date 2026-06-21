@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import { Inter, Poppins, Roboto, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
@@ -84,6 +85,20 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} ${poppins.variable} ${roboto.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-W5EKQBJNVB"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-W5EKQBJNVB');
+          `}
+        </Script>
+
         <ListingsProvider>
           <AuthProvider>{children}</AuthProvider>
         </ListingsProvider>
