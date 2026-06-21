@@ -43,23 +43,24 @@ function Toast({ message, type, onClose }) {
     );
 }
 
+const isLikelyValidTag = (raw) => {
+    const trimmed = raw.trim();
+    return trimmed.startsWith('<meta') || trimmed.startsWith('<script');
+};
+
 export default function AdminVerificationPage() {
     const [verifications, setVerifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(null);
 
-    // Toast state
     const [toast, setToast] = useState(null);
 
-    // Form state
     const [formData, setFormData] = useState({
         name: '',
-        metaName: '',
-        content: '',
+        rawHtml: '',
         order: 0
     });
 
-    // Show toast helper
     const showToast = (message, type = 'success') => {
         setToast({ message, type });
     };
@@ -86,16 +87,27 @@ export default function AdminVerificationPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!isLikelyValidTag(formData.rawHtml)) {
+            showToast('Code "<meta" ba "<script" diye shuru hote hobe', 'error');
+            return;
+        }
+
+        const payload = {
+            name: formData.name,
+            rawHtml: formData.rawHtml,
+            order: formData.order
+        };
+
         try {
             if (editing) {
-                await updateVerification(editing._id, formData);
+                await updateVerification(editing._id, payload);
                 showToast('Verification tag updated successfully!', 'success');
             } else {
-                await createVerification(formData);
+                await createVerification(payload);
                 showToast('Verification tag created successfully!', 'success');
             }
 
-            setFormData({ name: '', metaName: '', content: '', order: 0 });
+            setFormData({ name: '', rawHtml: '', order: 0 });
             setEditing(null);
             loadVerifications();
         } catch (error) {
@@ -107,8 +119,7 @@ export default function AdminVerificationPage() {
         setEditing(v);
         setFormData({
             name: v.name,
-            metaName: v.metaName,
-            content: v.content,
+            rawHtml: v.rawHtml,
             order: v.order
         });
         showToast('Editing mode enabled', 'info');
@@ -128,27 +139,27 @@ export default function AdminVerificationPage() {
 
     const handleCancel = () => {
         setEditing(null);
-        setFormData({ name: '', metaName: '', content: '', order: 0 });
+        setFormData({ name: '', rawHtml: '', order: 0 });
         showToast('Editing cancelled', 'info');
     };
 
-    // Preset templates for common platforms
     const presets = [
-        { name: 'Google Search Console', metaName: 'google-site-verification' },
-        { name: 'Bing Webmaster', metaName: 'msvalidate.01' },
-        { name: 'Facebook Domain', metaName: 'facebook-domain-verification' },
-        { name: 'Pinterest', metaName: 'p:domain_verify' },
-        { name: 'Yandex', metaName: 'yandex-verification' },
-        { name: 'Norton Safe Web', metaName: 'norton-safeweb-site-verification' },
+        { name: 'Google Search Console', sample: '<meta name="google-site-verification" content="PASTE_CODE_HERE" />' },
+        { name: 'Bing Webmaster', sample: '<meta name="msvalidate.01" content="PASTE_CODE_HERE" />' },
+        { name: 'Facebook Domain', sample: '<meta name="facebook-domain-verification" content="PASTE_CODE_HERE" />' },
+        { name: 'Pinterest', sample: '<meta name="p:domain_verify" content="PASTE_CODE_HERE" />' },
+        { name: 'Yandex', sample: '<meta name="yandex-verification" content="PASTE_CODE_HERE" />' },
+        { name: 'Norton Safe Web', sample: '<meta name="norton-safeweb-site-verification" content="PASTE_CODE_HERE" />' },
+        { name: 'Custom Script', sample: '<script>\n  // paste your script code here\n</script>' },
     ];
 
     const applyPreset = (preset) => {
         setFormData(prev => ({
             ...prev,
             name: preset.name,
-            metaName: preset.metaName
+            rawHtml: preset.sample
         }));
-        showToast(`Preset "${preset.name}" applied`, 'info');
+        showToast(`"${preset.name}" template bosano hoyeche - code ta replace koro`, 'info');
     };
 
     if (loading) {
@@ -165,7 +176,6 @@ export default function AdminVerificationPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
 
-            {/* Toast Notification */}
             {toast && (
                 <Toast
                     message={toast.message}
@@ -176,23 +186,20 @@ export default function AdminVerificationPage() {
 
             <div className="max-w-6xl mx-auto">
 
-                {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                         Meta Verification Tags Manager
                     </h1>
                     <p className="mt-2 text-gray-600 dark:text-gray-400">
-                        Manage your website verification tags for various platforms
+                        Jekono &lt;meta&gt; ba &lt;script&gt; tag paste koro - eta direct &lt;head&gt; e bose jabe
                     </p>
                 </div>
 
-                {/* Add/Edit Form */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900/50 p-6 mb-8 transition-colors duration-300">
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                         {editing ? 'Edit Verification Tag' : 'Add New Verification Tag'}
                     </h2>
 
-                    {/* Quick Presets */}
                     {!editing && (
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -201,8 +208,9 @@ export default function AdminVerificationPage() {
                             <div className="flex flex-wrap gap-2">
                                 {presets.map(preset => (
                                     <button
-                                        key={preset.metaName}
+                                        key={preset.name}
                                         onClick={() => applyPreset(preset)}
+                                        type="button"
                                         className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors duration-200 border border-blue-200 dark:border-blue-800"
                                     >
                                         {preset.name}
@@ -213,51 +221,35 @@ export default function AdminVerificationPage() {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Display Name *
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="e.g., Google Search Console"
-                                    required
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Meta Name Attribute *
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.metaName}
-                                    onChange={(e) => setFormData({ ...formData, metaName: e.target.value })}
-                                    placeholder="e.g., google-site-verification"
-                                    required
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-                                />
-                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                    This goes in &lt;meta name="HERE" content="..."&gt;
-                                </p>
-                            </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Display Name *
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder="e.g., Bing Webmaster"
+                                required
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                            />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Verification Code (Content) *
+                                Paste &lt;meta&gt; or &lt;script&gt; Code *
                             </label>
-                            <input
-                                type="text"
-                                value={formData.content}
-                                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                                placeholder="Paste your verification code here"
+                            <textarea
+                                value={formData.rawHtml}
+                                onChange={(e) => setFormData({ ...formData, rawHtml: e.target.value })}
+                                placeholder='<meta name="msvalidate.01" content="A76F240F1906D79C8F6B095D8E5B5E0D" />'
                                 required
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                                rows={4}
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-mono text-sm"
                             />
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Eta exact jevabe likhbe, sevabei &lt;head&gt; e bose jabe.
+                            </p>
                         </div>
 
                         <div>
@@ -293,7 +285,6 @@ export default function AdminVerificationPage() {
                     </form>
                 </div>
 
-                {/* List of Existing Tags */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900/50 p-6 transition-colors duration-300">
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                         Existing Verification Tags
@@ -316,10 +307,7 @@ export default function AdminVerificationPage() {
                                             Name
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                            Meta Name
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                            Content
+                                            Code
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                             Order
@@ -336,14 +324,9 @@ export default function AdminVerificationPage() {
                                                 {v.name}
                                             </td>
                                             <td className="px-4 py-3">
-                                                <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-sm text-gray-700 dark:text-gray-300 font-mono">
-                                                    {v.metaName}
+                                                <code className="block max-w-md truncate bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs text-gray-700 dark:text-gray-300 font-mono" title={v.rawHtml}>
+                                                    {v.rawHtml}
                                                 </code>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className="block max-w-xs truncate text-gray-600 dark:text-gray-400" title={v.content}>
-                                                    {v.content}
-                                                </span>
                                             </td>
                                             <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
                                                 {v.order}
@@ -372,7 +355,6 @@ export default function AdminVerificationPage() {
                     )}
                 </div>
 
-                {/* HTML Preview Section */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900/50 p-6 mt-8 transition-colors duration-300">
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                         HTML Preview
@@ -380,10 +362,10 @@ export default function AdminVerificationPage() {
                     <div className="bg-gray-900 rounded-lg overflow-x-auto">
                         <pre className="p-4 text-green-400 text-sm font-mono leading-relaxed">
                             <code>{`<head>
-  <!-- Your other meta tags... />
-  
+  <!-- Your other meta tags... -->
+
 ${verifications.map(v => `  <!-- ${v.name} -->
-  <meta name="${v.metaName}" content="${v.content}" />`).join('\n\n')}
+  ${v.rawHtml}`).join('\n\n')}
 </head>`}</code>
                         </pre>
                     </div>

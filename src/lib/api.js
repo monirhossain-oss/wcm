@@ -6,7 +6,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export async function getCategories() {
   try {
     const res = await fetch(`${BASE_URL}/api/admin/categories`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 30 },
       cache: 'force-cache',
     });
 
@@ -26,7 +26,7 @@ export async function getCategories() {
 export async function getFooterData() {
   try {
     const res = await fetch(`${BASE_URL}/api/footer`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 30 },
       cache: 'force-cache',
     });
 
@@ -61,6 +61,8 @@ export async function getVerifications() {
 
 // Create verification
 export async function createVerification(data) {
+  if (!BASE_URL) throw new Error('API base URL is not configured');
+
   try {
     const res = await fetch(`${BASE_URL}/api/verifications`, {
       method: 'POST',
@@ -68,8 +70,14 @@ export async function createVerification(data) {
       body: JSON.stringify(data),
     });
 
-    if (!res.ok) throw new Error('Failed to create verification');
-    return res.json();
+    const result = await res.json();
+
+    if (!res.ok) {
+      // Backend error message ke actual reason hisheve use kora
+      throw new Error(result.error || 'Failed to create verification');
+    }
+
+    return result;
   } catch (error) {
     console.error('Error creating verification:', error);
     throw error;
@@ -78,6 +86,8 @@ export async function createVerification(data) {
 
 // Update verification
 export async function updateVerification(id, data) {
+  if (!BASE_URL) throw new Error('API base URL is not configured');
+
   try {
     const res = await fetch(`${BASE_URL}/api/verifications/${id}`, {
       method: 'PUT',
@@ -85,8 +95,13 @@ export async function updateVerification(id, data) {
       body: JSON.stringify(data),
     });
 
-    if (!res.ok) throw new Error('Failed to update verification');
-    return res.json();
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.error || 'Failed to update verification');
+    }
+
+    return result;
   } catch (error) {
     console.error('Error updating verification:', error);
     throw error;
@@ -95,13 +110,20 @@ export async function updateVerification(id, data) {
 
 // Delete verification
 export async function deleteVerification(id) {
+  if (!BASE_URL) throw new Error('API base URL is not configured');
+
   try {
     const res = await fetch(`${BASE_URL}/api/verifications/${id}`, {
       method: 'DELETE',
     });
 
-    if (!res.ok) throw new Error('Failed to delete verification');
-    return res.json();
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.error || 'Failed to delete verification');
+    }
+
+    return result;
   } catch (error) {
     console.error('Error deleting verification:', error);
     throw error;
