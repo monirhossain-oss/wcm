@@ -12,9 +12,6 @@ const AboutContent = ({ data }) => {
         "https://i.postimg.cc/wTTvL8sJ/Whats-App-Image-2026-03-18-at-2-41-26-PM.jpg"
     ];
 
-    // ডিবাগিং এর জন্য লগ (প্রয়োজন শেষে রিমুভ করে দিবেন)
-    console.log("Rendering with creatorCount:", socialProof?.creatorCountText);
-
     return (
         <section className="max-w-7xl mx-auto px-6 md:px-10 py-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-24 items-center">

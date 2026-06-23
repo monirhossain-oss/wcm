@@ -1,5 +1,17 @@
 import Link from 'next/link';
 import React from 'react';
+import { getSeoByPage } from '@/lib/api';
+
+
+export async function generateMetadata() {
+    const seoData = await getSeoByPage('terms');
+ 
+    return {
+        title: seoData?.title || 'Terms & Conditions | World Culture Marketplace',
+        description: seoData?.description || 'Read the terms and conditions for using World Culture Marketplace.',
+        keywords: seoData?.keywords?.length ? seoData.keywords : ['Terms', 'Conditions', 'WCM', 'Legal'],
+    };
+}
 
 /* ── Reusable Components ── */
 

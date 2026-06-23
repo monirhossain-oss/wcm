@@ -30,6 +30,9 @@ const geistMono = Geist_Mono({
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
 
+// ── Allowed tags only (valid <head> children) ──
+const ALLOWED_TAGS = ['meta', 'link', 'script', 'title', 'style', 'base'];
+
 // Raw HTML string (DB theke asha) ke <head> er moddhe valid child element e
 // convert kora hocche - kono wrapper <div> na, karon <head> er child hisheve
 // shudhu <meta>, <script>, <link>, <style>, <title>, <base> allowed.
@@ -37,40 +40,61 @@ function parseHeadTags(rawHtml) {
   if (!rawHtml) return [];
 
   const elements = [];
-  const tagRegex = /<script([^>]*)>([\s\S]*?)<\/script>|<(meta|link)([^>]*)\/?>/gi;
-
-  let match;
   let index = 0;
 
+  // Matches: <tag attrs>content</tag>  OR  <tag attrs/>  OR  <tag attrs>
+  const tagRegex = /<(meta|link|script|title|style|base)((?:\s+[a-zA-Z-]+(?:\s*=\s*(?:"[^"]*"|'[^']*'))?)*)\s*(\/?)>(?:([\s\S]*?)<\/\1>)?/gi;
+
+  let match;
   while ((match = tagRegex.exec(rawHtml)) !== null) {
-    if (match[1] !== undefined) {
-      const attrsString = match[1] || '';
-      const scriptContent = match[2] || '';
-      const attrs = parseAttributes(attrsString);
+    const tagName = match[1].toLowerCase();
+    const attrsString = match[2] || '';
+    const innerContent = match[4] || '';
 
-      if (attrs.src) {
-        elements.push(
-          <script key={`script-${index++}`} {...attrs} />
-        );
-      } else {
-        elements.push(
-          <script
-            key={`script-${index++}`}
-            {...attrs}
-            dangerouslySetInnerHTML={{ __html: scriptContent }}
-          />
-        );
-      }
-    } else if (match[3]) {
-      const tagName = match[3].toLowerCase();
-      const attrsString = match[4] || '';
-      const attrs = parseAttributes(attrsString);
+    if (!ALLOWED_TAGS.includes(tagName)) continue;
 
-      if (tagName === 'meta') {
-        elements.push(<meta key={`meta-${index++}`} {...attrs} />);
-      } else if (tagName === 'link') {
-        elements.push(<link key={`link-${index++}`} {...attrs} />);
-      }
+    const attrs = parseAttributes(attrsString);
+    const key = `${tagName}-${index++}`;
+
+    switch (tagName) {
+      case 'meta':
+        elements.push(<meta key={key} {...attrs} />);
+        break;
+
+      case 'link':
+        elements.push(<link key={key} {...attrs} />);
+        break;
+
+      case 'base':
+        elements.push(<base key={key} {...attrs} />);
+        break;
+
+      case 'title':
+        elements.push(<title key={key}>{innerContent}</title>);
+        break;
+
+      case 'style':
+        elements.push(
+          <style key={key} {...attrs} dangerouslySetInnerHTML={{ __html: innerContent }} />
+        );
+        break;
+
+      case 'script':
+        if (attrs.src) {
+          // External script — no inline content needed
+          elements.push(<script key={key} {...attrs} />);
+        } else if (innerContent.trim()) {
+          // Inline script with content
+          elements.push(
+            <script key={key} {...attrs} dangerouslySetInnerHTML={{ __html: innerContent }} />
+          );
+        } else {
+          elements.push(<script key={key} {...attrs} />);
+        }
+        break;
+
+      default:
+        break;
     }
   }
 
@@ -79,15 +103,19 @@ function parseHeadTags(rawHtml) {
 
 function parseAttributes(attrsString) {
   const attrs = {};
-  const attrRegex = /([a-zA-Z-]+)(?:\s*=\s*["']([^"']*)["'])?/g;
+  if (!attrsString) return attrs;
+
+  // Matches: key="value" | key='value' | key (boolean attr)
+  const attrRegex = /([a-zA-Z-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'))?/g;
   let attrMatch;
 
   while ((attrMatch = attrRegex.exec(attrsString)) !== null) {
     const key = attrMatch[1];
-    const value = attrMatch[2];
+    const value = attrMatch[2] !== undefined ? attrMatch[2] : attrMatch[3];
     if (!key) continue;
 
-    if (key === 'async' || key === 'defer') {
+    // React-style boolean attributes
+    if (key === 'async' || key === 'defer' || key === 'nomodule' || key === 'noModule') {
       attrs[key] = true;
     } else {
       attrs[key] = value !== undefined ? value : true;
@@ -134,7 +162,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <head>{headElements}</head>
+      <head suppressHydrationWarning>{headElements}</head>
       <body
         className={`${inter.variable} ${poppins.variable} ${roboto.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}

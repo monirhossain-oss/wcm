@@ -1,26 +1,17 @@
 import FaqContact from '@/components/faq/FaqContact';
 import FaqSection from '@/components/faq/FaqSection';
 import React from 'react';
+import { getSeoByPage } from '@/lib/api';
 
+// এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/faq) theke title/description/keywords
 export async function generateMetadata() {
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seo/faq`, {
-            // next: { revalidate: 3600 }
-        });
+    const seoData = await getSeoByPage('faq');
 
-        const data = await res.json();
-
-        return {
-            title: data?.title || 'Frequently Asked Questions | WCM',
-            description: data?.description || 'Find answers to common questions about World Culture Marketplace.',
-            keywords: data?.keywords || ['FAQ', 'WCM Help', 'Cultural Marketplace Questions'],
-        };
-    } catch (error) {
-        return {
-            title: 'FAQ | World Culture Marketplace',
-            description: 'Find answers to common questions about our platform.',
-        };
-    }
+    return {
+        title: seoData?.title || 'Frequently Asked Questions | WCM',
+        description: seoData?.description || 'Find answers to common questions about World Culture Marketplace.',
+        keywords: seoData?.keywords?.length ? seoData.keywords : ['FAQ', 'WCM Help', 'Cultural Marketplace Questions'],
+    };
 }
 
 const Page = () => {

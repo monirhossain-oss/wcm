@@ -38,6 +38,49 @@ export async function getFooterData() {
   }
 }
 
+// ==================== SEO API ====================
+
+// ✅ ISR — 60 seconds পর পর refresh। pageName diye specific page er SEO data fetch kore.
+// generateMetadata() er moddhe use korar jonno banano.
+export async function getSeoByPage(pageName) {
+  if (!BASE_URL) return null;
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/seo/${pageName}`, {
+      next: { revalidate: 10 },
+    });
+
+    // 404 mane shei page er jonno kono custom SEO set kora nai - eta error na
+    if (res.status === 404) return null;
+
+    if (!res.ok) throw new Error('Failed to fetch SEO data');
+
+    return res.json();
+  } catch (error) {
+    console.error(`Error fetching SEO data for page "${pageName}":`, error);
+    return null;
+  }
+}
+
+// Get all SEO settings (admin table er jonno)
+export async function getAllSeo() {
+  if (!BASE_URL) return [];
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/seo/all`, {
+      cache: 'no-store',
+    });
+
+    if (!res.ok) throw new Error('Failed to fetch all SEO settings');
+
+    const data = await res.json();
+    return Array.isArray(data) ? data : data.data || [];
+  } catch (error) {
+    console.error('Error fetching all SEO settings:', error);
+    return [];
+  }
+}
+
 // ==================== VERIFICATION API ====================
 
 // ✅ ISR — 30 seconds পর পর refresh

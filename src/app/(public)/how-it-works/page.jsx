@@ -1,43 +1,20 @@
 import React from "react";
+import { getSeoByPage } from '@/lib/api';
+
+// এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/how-it-works) theke title/description/keywords
+export async function generateMetadata() {
+    const seoData = await getSeoByPage('how-it-works');
+
+    return {
+        title: seoData?.title || 'How It Works | World Culture Marketplace',
+        description: seoData?.description || 'Learn how World Culture Marketplace connects creators and customers around the world.',
+        keywords: seoData?.keywords?.length ? seoData.keywords : ['How It Works', 'WCM', 'Guide', 'Process'],
+    };
+}
 
 export const revalidate = 60;
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-
-// ===== SEO METADATA (1 minute cache) =====
-export async function generateMetadata() {
-    try {
-        // Metadata fetch - 1 minute cache
-        const res = await fetch(`${API_BASE}/api/admin/how-it-works`, {
-            next: { revalidate: 60 },
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch");
-
-        const data = await res.json();
-        const content = data?.data;
-
-        return {
-            title: `${content?.headerTitle || "How It Works"} | World Cultural Marketplace`,
-            description:
-                content?.headerDescription ||
-                "World Cultural Marketplace (WCM) brings the world's finest artisans under one roof.",
-            keywords: "culture, marketplace, craftsmanship, artisan, global, how it works",
-            openGraph: {
-                title: content?.headerTitle || "How It Works | WCM",
-                description:
-                    content?.headerDescription ||
-                    "Discover how World Cultural Marketplace works.",
-            },
-        };
-    } catch (error) {
-        return {
-            title: "How It Works | World Cultural Marketplace",
-            description:
-                "World Cultural Marketplace (WCM) brings the world's finest artisans under one roof.",
-        };
-    }
-}
 
 // ===== DYNAMIC GRID CLASS =====
 const getGridClass = (count) => {

@@ -1,26 +1,18 @@
 import BlogCard from '@/components/blog/BlogCard';
 import React from 'react';
+import { getSeoByPage } from '@/lib/api';
 
-// এসইও মেটাডাটা জেনারেটর
 export async function generateMetadata() {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seo/blog`, {
-      next: { revalidate: 3600 },
-    });
-    const data = await res.json();
-    // console.log(data)
+  const seoData = await getSeoByPage('blog');
+  // console.log(seoData)
 
-    return {
-      title: data?.title || 'blog Stories | World Culture Marketplace',
-      description: data?.description || 'Explore traditions, craftsmanship, and cultural creativity from around the world.',
-      keywords: data?.keywords || ['Culture', 'Blog', 'Stories'],
-    };
-  } catch (error) {
-    return {
-      title: 'Blog | World Culture Marketplace',
-      description: 'Explore cultural stories from around the world.',
-    };
-  }
+  return {
+    title: seoData?.title || 'Blog Stories | World Culture Marketplace',
+    description:
+      seoData?.description ||
+      'Explore traditions, craftsmanship, and cultural creativity from around the world.',
+    keywords: seoData?.keywords?.length ? seoData.keywords : ['Culture', 'Blog', 'Stories'],
+  };
 }
 
 const page = () => {

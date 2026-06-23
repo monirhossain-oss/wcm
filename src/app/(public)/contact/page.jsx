@@ -1,24 +1,16 @@
 import ContactClient from "@/components/ContactClient";
+import { getSeoByPage } from "@/lib/api";
 
+// এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/contact) theke title/description/keywords
 export async function generateMetadata() {
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seo/contact`, {
-            next: { revalidate: 60 }
-        });
+    const seoData = await getSeoByPage('contact');
+    // console.log(seoData)
 
-        const data = await res.json();
-
-        return {
-            title: data?.title || 'Contact Us | World Culture Marketplace',
-            description: data?.description || 'Get in touch with us.',
-            keywords: data?.keywords || ['WCM', 'Contact', 'Support'],
-        };
-    } catch (error) {
-        return {
-            title: 'Contact Us | World Culture Marketplace',
-            description: 'Reach out to our support team.',
-        };
-    }
+    return {
+        title: seoData?.title || 'Contact Us | World Culture Marketplace',
+        description: seoData?.description || 'Get in touch with us.',
+        keywords: seoData?.keywords?.length ? seoData.keywords : ['WCM', 'Contact', 'Support'],
+    };
 }
 
 export default function Page() {

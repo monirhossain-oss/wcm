@@ -1,33 +1,24 @@
 import axios from 'axios';
 import CreatorsClient from './CreatorsClient';
+import { getSeoByPage } from '@/lib/api';
 
-// ১. ডাইনামিক মেটাডাটা ফাংশন (এপিআই থেকে ডাটা আনবে)
+// ১. ডাইনামিক মেটাডাটা ফাংশন — Admin panel (/api/seo/creators) theke title/description/keywords
 export async function generateMetadata() {
-  try {
-    // আপনার ব্যাকএন্ড এপিআই কল (pageName: creators)
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seo/creators`, {
-      // next: { revalidate: 60 } // প্রতি ৬০ সেকেন্ড পর পর ডাটা চেক করবে
-    });
+  const seoData = await getSeoByPage('creators');
 
-    const data = await res.json();
+  const title = seoData?.title || 'Discover Global Creators | WCM';
+  const description = seoData?.description || 'Explore talented creators from around the world showcased on World Culture Marketplace.';
 
-    return {
-      title: data?.title || 'Discover Global Creators | WCM',
-      description: data?.description || 'Explore talented creators from around the world showcased on World Culture Marketplace.',
-      keywords: data?.keywords || ['creators', 'culture', 'global artists', 'WCM'],
-      openGraph: {
-        title: data?.title || 'Discover Global Creators | WCM',
-        description: data?.description || 'Explore talented creators worldwide.',
-        images: [data?.ogImage || '/og-creators.jpg'], // ডাটাবেজে ইমেজ থাকলে সেটা নিবে
-      },
-    };
-  } catch (error) {
-    // এপিআই কাজ না করলে ব্যাকআপ ডিফল্ট মেটাডাটা
-    return {
-      title: 'Creators | World Culture Marketplace',
-      description: 'Discover our mission and global cultural heritage.',
-    };
-  }
+  return {
+    title,
+    description,
+    keywords: seoData?.keywords?.length ? seoData.keywords : ['creators', 'culture', 'global artists', 'WCM'],
+    openGraph: {
+      title,
+      description,
+      images: [seoData?.ogImage || '/og-creators.jpg'], // ডাটাবেজে ইমেজ থাকলে সেটা নিবে
+    },
+  };
 }
 
 // ২. ডাটা ফেচিং ফাংশন (Creators এবং Categories এর জন্য)

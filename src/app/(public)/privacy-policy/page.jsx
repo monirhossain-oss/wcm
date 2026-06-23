@@ -1,4 +1,16 @@
 import React from 'react';
+import { getSeoByPage } from '@/lib/api';
+
+// এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/privacy) theke title/description/keywords
+export async function generateMetadata() {
+    const seoData = await getSeoByPage('privacy');
+
+    return {
+        title: seoData?.title || 'Privacy Policy | World Culture Marketplace',
+        description: seoData?.description || 'Learn how World Culture Marketplace collects, uses, and protects your data.',
+        keywords: seoData?.keywords?.length ? seoData.keywords : ['Privacy', 'Policy', 'WCM', 'Data Protection'],
+    };
+}
 
 /* ─── Reusable section wrapper ─── */
 const Section = ({ number, title, children }) => (
