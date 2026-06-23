@@ -5,6 +5,7 @@ import { getImageUrl } from "@/lib/imageHelper";
 
 
 const DEFAULT_IMAGE = "/hero (2).png";
+// console.log(getImageUrl)
 
 // ১. Skeleton Component
 const SliderSkeleton = () => (
@@ -27,6 +28,7 @@ export default function HeroSlider({ initialSliders = [] }) {
     // ডাটা চেক করার জন্য ইফেক্ট
     useEffect(() => {
         if (initialSliders) {
+            
             // সামান্য ডিলে দেওয়া হয়েছে যাতে হুট করে চলে না আসে (Smooth Transition)
             const timer = setTimeout(() => setIsLoading(false), 500);
             return () => clearTimeout(timer);
@@ -54,11 +56,13 @@ export default function HeroSlider({ initialSliders = [] }) {
         return (
             <div className="absolute rounded-2xl inset-0 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-2xl">
                 <Image
-                    src={DEFAULT_IMAGE}
-                    alt="Welcome to WCM"
+                    src={getImageUrl(slide.imageUrl)}
+                    alt={slide.alt || slide.title || "Hero Slide"}  // ✅ slide.alt আগে check করবে
                     fill
-                    className="object-cover"
-                    priority={true}
+                    priority={index === 0}
+                    className={`object-cover transition-transform duration-[7000ms] ease-out ${index === current ? "scale-110" : "scale-100"
+                        }`}
+                    sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-black/30" />
             </div>

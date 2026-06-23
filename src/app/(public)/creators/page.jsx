@@ -8,6 +8,7 @@ export async function generateMetadata() {
 
   const title = seoData?.title || 'Discover Global Creators | WCM';
   const description = seoData?.description || 'Explore talented creators from around the world showcased on World Culture Marketplace.';
+  const image = seoData?.ogImage || '/og-creators.jpg';
 
   return {
     title,
@@ -16,7 +17,13 @@ export async function generateMetadata() {
     openGraph: {
       title,
       description,
-      images: [seoData?.ogImage || '/og-creators.jpg'], // ডাটাবেজে ইমেজ থাকলে সেটা নিবে
+      images: [image],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
     },
   };
 }

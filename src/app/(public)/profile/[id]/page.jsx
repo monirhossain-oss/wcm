@@ -24,14 +24,14 @@ export async function generateMetadata({ params }) {
       openGraph: {
         title: `${name} — World Culture Marketplace`,
         description: user?.profile?.bio,
-        images: [user?.profile?.profileImage || 'https://your-default-og-image.jpg'],
+        images: [user?.profile?.profileImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`],
         type: 'profile',
       },
       twitter: {
         card: 'summary_large_image',
         title: name,
         description: user?.profile?.bio,
-        images: [user?.profile?.profileImage],
+        images: [user?.profile?.profileImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`],
       },
       alternates: {
         canonical: `/profile/${id}`,
@@ -54,9 +54,7 @@ export default async function Page({ params }) {
       { cache: 'no-store' }
     );
 
-    if (!profileRes.ok) {
-      notFound();
-    }
+    if (!profileRes.ok) notFound();
 
     profileData = await profileRes.json();
 
@@ -67,7 +65,6 @@ export default async function Page({ params }) {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/public?creatorId=${creatorId}`,
         { cache: 'no-store' }
       );
-
       if (listingsRes.ok) {
         const data = await listingsRes.json();
         listings = data.listings || [];
@@ -78,15 +75,45 @@ export default async function Page({ params }) {
     notFound();
   }
 
-  if (!profileData || !profileData.user) {
-    notFound();
-  }
+  if (!profileData || !profileData.user) notFound();
+
+  const user = profileData.user;
+  const name = user?.profile?.displayName || `${user?.firstName} ${user?.lastName}`;
+
+  // ✅ Person Schema
+  const personSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: user?.profile?.displayName || `${user?.firstName} ${user?.lastName}`,
+    description: user?.profile?.bio || undefined,
+    image: user?.profile?.profileImage || undefined,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL}/creator/${user?.slug}`,
+    jobTitle: 'Cultural Creator',
+    worksFor: {
+      '@type': 'Organization',
+      name: user?.profile?.businessName || undefined,
+    },
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: user?.profile?.city || undefined,
+      addressCountry: user?.profile?.countryCode || undefined,
+    },
+    sameAs: [
+      user?.profile?.socialLink || undefined,
+      user?.profile?.websiteLink || undefined,
+    ].filter(Boolean),
+  };
 
   return (
     <>
+      {/* ✅ JSON-LD Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
+
       <h1 className="sr-only">
-        {profileData.user?.profile?.displayName || `${profileData.user?.firstName} ${profileData.user?.lastName}`} —
-        Cultural Creator Profile on World Culture Marketplace
+        {name} — Cultural Creator Profile on World Culture Marketplace
       </h1>
 
       <Suspense fallback={<LoadingFallback />}>

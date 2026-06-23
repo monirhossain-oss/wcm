@@ -148,7 +148,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                     blog.author?.image ||
                                     `https://ui-avatars.com/api/?name=Admin&background=f27b13&color=fff`
                                 }
-                                alt="Author"
+                                alt={blog.author?.name}
                                 fill
                                 className="object-cover"
                             />
@@ -284,7 +284,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                                 comment.user?.image ||
                                                 `https://ui-avatars.com/api/?name=${comment.user?.firstName}&background=random`
                                             }
-                                            alt="User"
+                                            alt={comment.user?.username}
                                             fill
                                             className="object-cover"
                                         />

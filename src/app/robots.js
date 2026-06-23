@@ -9,7 +9,6 @@ export default function robots() {
         disallow: [
           '/admin/',
           '/api/',
-          '/creator/',
           '*/search/*'
         ],
       },

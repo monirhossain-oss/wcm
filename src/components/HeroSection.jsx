@@ -4,7 +4,7 @@ import HeroActions from "./HeroActions";
 async function getSliders() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
   try {
-    const res = await fetch(`${API_BASE}/api/sliders`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_BASE}/api/sliders`, { next: { revalidate: 30 } });
     if (!res.ok) return [];
     return res.json();
   } catch (error) {

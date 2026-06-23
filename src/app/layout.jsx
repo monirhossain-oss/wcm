@@ -136,14 +136,31 @@ export async function generateMetadata() {
     metadataBase: new URL(siteUrl),
     alternates: {
       canonical: '/',
+      languages: {
+        'en': siteUrl,
+        'x-default': siteUrl,
+      },
     },
     robots: {
       index: true,
       follow: true,
     },
+    openGraph: {
+      title: 'World Culture Marketplace – Authentic Global Artisan Crafts & Cultural Goods',
+      description: 'Join a growing global community of artists and creators. WCM helps you gain visibility and connect with a global audience.',
+      url: siteUrl,
+      siteName: 'World Culture Marketplace',
+      images: [`${siteUrl}/og-image.jpg`],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'World Culture Marketplace – Authentic Global Artisan Crafts & Cultural Goods',
+      description: 'Join a growing global community of artists and creators. WCM helps you gain visibility and connect with a global audience.',
+      images: [`${siteUrl}/og-image.jpg`],
+    },
   };
 }
-
 export default async function RootLayout({ children }) {
   let verifications = [];
   try {
@@ -160,9 +177,43 @@ export default async function RootLayout({ children }) {
 
   const headElements = parseHeadTags(verificationHtml);
 
+  // ✅ Website Schema
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'World Culture Marketplace',
+    url: siteUrl,
+    description: 'Discover and explore global cultural products, craftsmanship, and heritage rituals.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${siteUrl}/explore/search/{search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  // ✅ Organization Schema
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'World Culture Marketplace',
+    url: siteUrl,
+    logo: `${siteUrl}/wc,-web-logo.png`,
+  };
+
   return (
     <html lang="en">
-      <head suppressHydrationWarning>{headElements}</head>
+      <head suppressHydrationWarning>
+        {headElements}
+        {/* ✅ JSON-LD Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+      </head>
       <body
         className={`${inter.variable} ${poppins.variable} ${roboto.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}

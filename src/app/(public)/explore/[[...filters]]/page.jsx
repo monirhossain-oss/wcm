@@ -87,6 +87,14 @@ export async function generateMetadata({ params }) {
         openGraph: {
             title: finalTitle,
             description: finalDescription,
+            images: [adminSeo?.ogImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`],
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: finalTitle,
+            description: finalDescription,
+            images: [adminSeo?.ogImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`],
         },
     };
 }

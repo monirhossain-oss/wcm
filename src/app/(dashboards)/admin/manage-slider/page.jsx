@@ -305,6 +305,7 @@ function AddSlidePanel({ onSuccess }) {
     const [preview, setPreview] = useState(null);
     const [rawSrc, setRawSrc] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [alt, setAlt] = useState('');
 
     const handleCropDone = (blob, url, raw) => {
         setCroppedBlob(blob);
@@ -325,7 +326,7 @@ function AddSlidePanel({ onSuccess }) {
         try {
             const imageData = await uploadToCloudinary(croppedBlob);
             await axios.post(`${API_BASE}/api/sliders/add`, {
-                title, subTitle, link,
+                title, subTitle, link, alt,
                 imageUrl: imageData.secure_url,
                 public_id: imageData.public_id,
             }, { withCredentials: true });
@@ -363,20 +364,17 @@ function AddSlidePanel({ onSuccess }) {
                     onRemove={handleRemove}
                 />
 
-                <FieldWrapper icon={<Type size={11} />} label="Main Title">
-                    <div className="relative w-full">
-                        <input
-                            type="text"
-                            placeholder="e.g. Discover Unique Handcrafted Items"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            maxLength={80}
-                            className="w-full bg-transparent text-sm outline-none py-3 pr-10 transition-colors text-black/80 placeholder:text-black/20 focus:placeholder:text-black/10 dark:text-white dark:placeholder:text-white/20 dark:focus:placeholder:text-white/10"
-                        />
-                        <CharCount value={title} max={80} />
-                    </div>
+                <FieldWrapper icon={<ImageIcon size={11} />} label="Image Alt Text">
+                    <input
+                        type="text"
+                        placeholder="e.g. Handcrafted Kashmiri shawl displayed on wooden rack"
+                        value={alt}
+                        onChange={(e) => setAlt(e.target.value)}
+                        maxLength={120}
+                        className="w-full bg-transparent text-sm outline-none py-3 pr-10 transition-colors text-black/80 placeholder:text-black/20 focus:placeholder:text-black/10 dark:text-white dark:placeholder:text-white/20 dark:focus:placeholder:text-white/10"
+                    />
+                    <CharCount value={alt} max={120} />
                 </FieldWrapper>
-
                 <FieldWrapper icon={<AlignLeft size={11} />} label="Subtitle / Description">
                     <textarea
                         placeholder="A short compelling description…"
@@ -584,7 +582,7 @@ function SlideCard({ slide, onEdit, onDelete }) {
     return (
         <div className="group relative bg-[#0f0f0f] border border-white/8 rounded-2xl overflow-hidden transition-all duration-300 hover:border-white/15 hover:shadow-xl hover:shadow-black/40">
             <div className="relative aspect-video overflow-hidden">
-                <img src={getImageUrl(slide.imageUrl)} alt={slide.title}
+                <img src={getImageUrl(slide.imageUrl)} alt={slide.alt || slide.title || 'Slider image'}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-3">
                     <a href={slide.link || '#'} target="_blank" rel="noreferrer"

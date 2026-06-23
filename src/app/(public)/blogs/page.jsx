@@ -4,14 +4,27 @@ import { getSeoByPage } from '@/lib/api';
 
 export async function generateMetadata() {
   const seoData = await getSeoByPage('blog');
-  // console.log(seoData)
+
+  const title = seoData?.title || 'Blog Stories | World Culture Marketplace';
+  const description = seoData?.description || 'Explore traditions, craftsmanship, and cultural creativity from around the world.';
+  const image = seoData?.ogImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`;
 
   return {
-    title: seoData?.title || 'Blog Stories | World Culture Marketplace',
-    description:
-      seoData?.description ||
-      'Explore traditions, craftsmanship, and cultural creativity from around the world.',
+    title,
+    description,
     keywords: seoData?.keywords?.length ? seoData.keywords : ['Culture', 'Blog', 'Stories'],
+    openGraph: {
+      title,
+      description,
+      images: [image],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
   };
 }
 

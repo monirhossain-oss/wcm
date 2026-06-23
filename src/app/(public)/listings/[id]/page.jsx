@@ -9,11 +9,21 @@ export async function generateMetadata({ params }) {
     const res = await axios.get(`${API_BASE_URL}/api/listings/${id}`);
     const product = res.data;
 
+    const image = product.image?.startsWith('http')
+      ? product.image
+      : `${API_BASE_URL}/${product.image}`;
+
     return {
       title: `${product.title} | World Culture Marketplace`,
       description: product.description,
       openGraph: {
-        images: [product.image.startsWith('http') ? product.image : `${API_BASE_URL}/${product.image}`],
+        images: [image],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${product.title} | World Culture Marketplace`,
+        description: product.description,
+        images: [image],
       },
     };
   } catch (error) {
@@ -44,9 +54,37 @@ export default async function Page({ params }) {
 
   if (!initialProduct) return <div className="p-20 text-center">Asset not found.</div>;
 
+  // ✅ CreativeWork Schema
+  const creativeWorkSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: initialProduct.title,
+    description: initialProduct.description,
+    image: initialProduct.image,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL}/listing/${initialProduct.slug}`,
+    creator: {
+      '@type': 'Person',
+      name: `${initialProduct.creatorId?.firstName} ${initialProduct.creatorId?.lastName}`,
+      url: initialProduct.creatorId?.username
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/creator/${initialProduct.creatorId.username}`
+        : undefined,
+    },
+    countryOfOrigin: initialProduct.country || undefined,
+    genre: initialProduct.tradition || undefined,
+    keywords: initialProduct.culturalTags?.join(', ') || undefined,
+    dateCreated: initialProduct.createdAt,
+    dateModified: initialProduct.updatedAt,
+  };
+
   return (
     <>
-      {/* SEO h1 — server-rendered */}
+      {/* ✅ JSON-LD Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(creativeWorkSchema) }}
+      />
+
+      {/* SEO h1 */}
       <h1 className="sr-only">
         {initialProduct.title} — {initialProduct.tradition} from {initialProduct.country} | World Culture Marketplace
       </h1>
