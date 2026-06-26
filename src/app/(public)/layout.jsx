@@ -2,7 +2,7 @@ import CookieConsent from '@/components/CookieConsent';
 import Footer from '@/components/Footer';
 import Analytics from '@/components/Analytics';
 import VisitorTracker from '@/components/VisitorTracker';
-import PublicNavbar from '@/components/PublicNavbar';
+import PublicNavbar from '@/components/navbar/PublicNavbar';
 
 export default function PublicLayout({ children }) {
   return (

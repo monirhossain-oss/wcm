@@ -14,66 +14,52 @@ export default function HeroActions() {
     const isCreator = user?.role === "creator";
     const isAdmin = user?.role === "admin";
 
-    // মোডাল সুইচিং লজিক
-    const openRegister = () => {
-        setIsLoginOpen(false);
-        setIsRegisterOpen(true);
-    };
-
-    const openLogin = () => {
-        setIsRegisterOpen(false);
-        setIsLoginOpen(true);
-    };
+    const openRegister = () => { setIsLoginOpen(false); setIsRegisterOpen(true); };
+    const openLogin = () => { setIsRegisterOpen(false); setIsLoginOpen(true); };
 
     const handleBecomeCreatorClick = (e) => {
         if (!user) {
-            e.preventDefault(); // লিংক এর ডিফল্ট কাজ বন্ধ করবে
-            setIsLoginOpen(true); // লগইন মোডাল ওপেন করবে
+            e.preventDefault();
+            setIsLoginOpen(true);
         }
     };
 
     return (
         <div className="mt-8 flex justify-center gap-3 sm:gap-4">
-            {/* Explore Button */}
-            <Link href="/explore">
-                <button className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-[#F57C00] text-white font-bold whitespace-nowrap">
-                    Discover Creations
-                </button>
+
+            {/* ✅ Fix 1: Link কে button এর মতো style করো, আলাদা button নয় */}
+            <Link
+                href="/explore"
+                className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-[#F57C00] text-white font-bold whitespace-nowrap"
+            >
+                Discover Creations
             </Link>
 
-            {/* Creator Button Logic */}
+            {/* ✅ Fix 2: user load হওয়ার আগে default state দেখাবে — hydration safe */}
             {isCreator || isAdmin ? (
-                <button
-                    disabled
-                    className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-400/50 text-black dark:text-white font-medium whitespace-nowrap"
-                >
+                <span className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-400/50 text-black dark:text-white font-medium whitespace-nowrap cursor-default">
                     {isAdmin ? "Admin Access Active" : "Creator Mode Active"}
-                </button>
+                </span>
             ) : (
                 <Link
                     href="/become-creator"
                     onClick={handleBecomeCreatorClick}
+                    className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg font-medium whitespace-nowrap
+            border border-[#F57C00] text-[#F57C00] bg-transparent
+            transition-all duration-300
+            hover:bg-[#F57C00] hover:text-white hover:shadow-md
+            dark:border-[#F57C00] dark:text-[#F57C00]
+            dark:hover:bg-[#F57C00] dark:hover:text-white"
                 >
-                    <button className="
-                        px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg font-medium whitespace-nowrap
-                        border border-[#F57C00] text-[#F57C00] bg-transparent
-                        transition-all duration-300 cursor-pointer
-                        hover:bg-[#F57C00] hover:text-white hover:shadow-md
-                        dark:border-[#F57C00] dark:text-[#F57C00]
-                        dark:hover:bg-[#F57C00] dark:hover:text-white
-                    ">
-                        Become a Creator
-                    </button>
+                    Become a Creator
                 </Link>
             )}
 
-            {/* Modals */}
             <LoginModal
                 isOpen={isLoginOpen}
                 onClose={() => setIsLoginOpen(false)}
                 onSwitchToRegister={openRegister}
             />
-
             <RegisterModal
                 isOpen={isRegisterOpen}
                 onClose={() => setIsRegisterOpen(false)}
