@@ -145,6 +145,11 @@ export async function generateMetadata() {
       index: true,
       follow: true,
     },
+    // ✅ fb:app_id added here — Facebook Sharing Debugger er
+    // "Missing Properties" warning fix korar jonno
+    other: {
+      'fb:app_id': '1697718924707801',
+    },
     openGraph: {
       title: 'World Culture Marketplace – Authentic Global Artisan Crafts & Cultural Goods',
       description: 'Join a growing global community of artists and creators. WCM helps you gain visibility and connect with a global audience.',
@@ -175,7 +180,15 @@ export default async function RootLayout({ children }) {
     .filter(Boolean)
     .join('\n');
 
-  const headElements = parseHeadTags(verificationHtml);
+  // ✅ try/catch wrap kora hoyeche - malformed/unexpected rawHtml
+  // ashle pure site crash na kore, just verification tags skip hobe
+  let headElements = [];
+  try {
+    headElements = parseHeadTags(verificationHtml);
+  } catch (error) {
+    console.error('parseHeadTags crashed:', error);
+    headElements = [];
+  }
 
   // ✅ Website Schema
   const websiteSchema = {
