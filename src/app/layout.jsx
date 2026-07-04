@@ -138,17 +138,13 @@ export async function generateMetadata() {
       canonical: '/',
       languages: {
         'en': siteUrl,
+        'fr': `${siteUrl}/fr`,
         'x-default': siteUrl,
       },
     },
     robots: {
       index: true,
       follow: true,
-    },
-    // ✅ fb:app_id added here — Facebook Sharing Debugger er
-    // "Missing Properties" warning fix korar jonno
-    other: {
-      'fb:app_id': '1697718924707801',
     },
     openGraph: {
       title: 'World Culture Marketplace – Authentic Global Artisan Crafts & Cultural Goods',
@@ -166,6 +162,7 @@ export async function generateMetadata() {
     },
   };
 }
+
 export default async function RootLayout({ children }) {
   let verifications = [];
   try {
@@ -213,10 +210,24 @@ export default async function RootLayout({ children }) {
     logo: `${siteUrl}/wc,-web-logo.png`,
   };
 
+  // ✅ Microsoft Clarity tracking script (project id: xgch337gyo)
+  const clarityScript = `
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xgch337gyo");
+  `;
+
   return (
     <html lang="en">
       <head suppressHydrationWarning>
         {headElements}
+
+        {/* ✅ fb:app_id fix — Facebook Sharing Debugger requires "property",
+            not "name". Set directly here instead of via metadata.other */}
+        <meta property="fb:app_id" content="1697718924707801" />
+
         {/* ✅ JSON-LD Schema */}
         <script
           type="application/ld+json"
@@ -225,6 +236,12 @@ export default async function RootLayout({ children }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+
+        {/* ✅ Microsoft Clarity — loads on every page */}
+        <script
+          type="text/javascript"
+          dangerouslySetInnerHTML={{ __html: clarityScript }}
         />
       </head>
       <body

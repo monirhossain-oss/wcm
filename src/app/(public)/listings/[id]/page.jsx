@@ -2,6 +2,43 @@ import axios from 'axios';
 import ListingDetailsClient from '../ListingDetailsClient';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+
+const MIN_DESCRIPTION_LENGTH = 40; 
+const MAX_META_LENGTH = 155; 
+function generateMetaDescription(product) {
+  const rawDescription = (product?.description || '').trim();
+
+  // URL/junk check — 
+  const isJunkOrUrl = /^https?:\/\//i.test(rawDescription) || rawDescription.length < MIN_DESCRIPTION_LENGTH;
+
+  if (rawDescription && !isJunkOrUrl) {
+    if (rawDescription.length <= MAX_META_LENGTH) return rawDescription;
+    const truncated = rawDescription.slice(0, MAX_META_LENGTH);
+    return truncated.slice(0, truncated.lastIndexOf(' ')) + '…';
+  }
+
+  const parts = [];
+
+  if (product?.title) parts.push(product.title);
+
+  const detailBits = [];
+  if (product?.tradition) detailBits.push(product.tradition);
+  if (product?.country) detailBits.push(`from ${product.country}`);
+  if (detailBits.length) parts.push(detailBits.join(' '));
+
+  if (Array.isArray(product?.culturalTags) && product.culturalTags.length) {
+    parts.push(`Explore ${product.culturalTags.join(', ')} on World Culture Marketplace.`);
+  } else {
+    parts.push('Discover authentic cultural craftsmanship on World Culture Marketplace.');
+  }
+
+  const generated = parts.join(' — ');
+  return generated.length <= MAX_META_LENGTH
+    ? generated
+    : generated.slice(0, MAX_META_LENGTH).slice(0, generated.lastIndexOf(' ')) + '…';
+}
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -13,16 +50,29 @@ export async function generateMetadata({ params }) {
       ? product.image
       : `${API_BASE_URL}/${product.image}`;
 
+    const canonicalUrl = `${siteUrl}/listing/${id}`;
+    const frUrl = `${siteUrl}/fr/listing/${id}`;
+
+    const metaDescription = generateMetaDescription(product);
+
     return {
       title: `${product.title} | World Culture Marketplace`,
-      description: product.description,
+      description: metaDescription,
+      alternates: {
+        canonical: canonicalUrl,
+        languages: {
+          'en': canonicalUrl,
+          'fr': frUrl,
+          'x-default': canonicalUrl,
+        },
+      },
       openGraph: {
         images: [image],
       },
       twitter: {
         card: 'summary_large_image',
         title: `${product.title} | World Culture Marketplace`,
-        description: product.description,
+        description: metaDescription,
         images: [image],
       },
     };
@@ -59,7 +109,7 @@ export default async function Page({ params }) {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
     name: initialProduct.title,
-    description: initialProduct.description,
+    description: generateMetaDescription(initialProduct),
     image: initialProduct.image,
     url: `${process.env.NEXT_PUBLIC_SITE_URL}/listing/${initialProduct.slug}`,
     creator: {
