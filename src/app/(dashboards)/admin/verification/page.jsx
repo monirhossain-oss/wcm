@@ -190,9 +190,6 @@ export default function AdminVerificationPage() {
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                         Meta Verification Tags Manager
                     </h1>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400">
-                        Jekono &lt;meta&gt; ba &lt;script&gt; tag paste koro - eta direct &lt;head&gt; e bose jabe
-                    </p>
                 </div>
 
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900/50 p-6 mb-8 transition-colors duration-300">

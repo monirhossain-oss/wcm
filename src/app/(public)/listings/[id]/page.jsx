@@ -5,8 +5,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
 
-const MIN_DESCRIPTION_LENGTH = 40; 
-const MAX_META_LENGTH = 155; 
+const MIN_DESCRIPTION_LENGTH = 40;
+const MAX_META_LENGTH = 155;
 function generateMetaDescription(product) {
   const rawDescription = (product?.description || '').trim();
 
@@ -51,7 +51,6 @@ export async function generateMetadata({ params }) {
       : `${API_BASE_URL}/${product.image}`;
 
     const canonicalUrl = `${siteUrl}/listing/${id}`;
-    const frUrl = `${siteUrl}/fr/listing/${id}`;
 
     const metaDescription = generateMetaDescription(product);
 
@@ -60,11 +59,6 @@ export async function generateMetadata({ params }) {
       description: metaDescription,
       alternates: {
         canonical: canonicalUrl,
-        languages: {
-          'en': canonicalUrl,
-          'fr': frUrl,
-          'x-default': canonicalUrl,
-        },
       },
       openGraph: {
         images: [image],
