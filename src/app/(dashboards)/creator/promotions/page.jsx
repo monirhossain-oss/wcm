@@ -17,6 +17,8 @@ import { usePathname } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
 import CreatorWallet from '@/components/creator/CreatorWallet';
+import { useAuth } from '@/context/AuthContext';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -94,6 +96,7 @@ function getListingStatus(listing) {
 }
 
 export default function PromotionsPage() {
+  const { isBusinessRestricted } = useAuth();
   const [listings, setListings] = useState([]);
   const [walletBalance, setWalletBalance] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -168,7 +171,7 @@ export default function PromotionsPage() {
       setListings(normalizedListings);
       setWalletBalance(userRes.data.walletBalance || 0);
     } catch (err) {
-      toast.error('Synchronization failed');
+      toast.error(getApiErrorMessage(err, 'Synchronization failed'));
     } finally {
       setLoading(false);
     }
@@ -182,6 +185,7 @@ export default function PromotionsPage() {
   }, [promoType]);
 
   const handlePurchase = async () => {
+    if (isBusinessRestricted) return toast.error('Account business actions are restricted');
     if (walletBalance < currentCost) return toast.error('Insufficient credits.');
     setActionLoading(true);
     const toastId = toast.loading('Executing Protocol...');
@@ -202,7 +206,7 @@ export default function PromotionsPage() {
       setSelectedListing(null);
       initData();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Transaction failed', { id: toastId });
+      toast.error(getApiErrorMessage(err, 'Transaction failed'), { id: toastId });
     } finally {
       setActionLoading(false);
     }
@@ -335,7 +339,7 @@ export default function PromotionsPage() {
                           </span>
                         </Link>
                         <button
-                          disabled={isFullyPromoted}
+                          disabled={isFullyPromoted || isBusinessRestricted}
                           onClick={() => setSelectedListing(item)}
                           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
                             isFullyPromoted
@@ -580,7 +584,11 @@ export default function PromotionsPage() {
               <button
                 onClick={handlePurchase}
                 disabled={
-                  actionLoading || walletBalance < currentCost || currentCost < 5 || !agreedToTerms
+                  actionLoading ||
+                  isBusinessRestricted ||
+                  walletBalance < currentCost ||
+                  currentCost < 5 ||
+                  !agreedToTerms
                 }
                 className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-md font-black uppercase text-[10px] tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20 disabled:hover:bg-zinc-900"
               >

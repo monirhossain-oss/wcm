@@ -211,7 +211,7 @@ const PublicNavbar = () => {
             {user ? (
               <div className="relative flex items-center space-x-2 md:space-x-3">
                 {/* "Become a Creator" — desktop only */}
-                {user.role === 'user' && (
+                {user.role === 'user' && user.status === 'active' && (
                   <Link href="/become-creator" className="hidden md:block px-4 py-2 rounded-lg bg-[#F57C00] text-white text-xs font-bold shadow-md hover:bg-[#e67600] transition-all">
                     Become a Creator
                   </Link>

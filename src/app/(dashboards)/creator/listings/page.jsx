@@ -20,6 +20,8 @@ import {
 import { getImageUrl } from '@/lib/imageHelper';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -30,6 +32,7 @@ const LISTINGS_CACHE_KEY = 'wcm_listings_cache';
 const CACHE_TIME = 1 * 60 * 1000;
 
 export default function MyListings() {
+  const { isBusinessRestricted } = useAuth();
   const [listings, setListings] = useState([]);
   const [metaData, setMetaData] = useState({ categories: [], tags: [] });
   const [loading, setLoading] = useState(true);
@@ -83,7 +86,7 @@ export default function MyListings() {
       if (isForce) toast.success('Inventory Synchronized');
     } catch (err) {
       console.error(err);
-      toast.error('Failed to fetch assets');
+      toast.error(getApiErrorMessage(err, 'Failed to fetch assets'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -118,6 +121,7 @@ export default function MyListings() {
   const currentItems = filteredListings.slice(indexOfFirstItem, indexOfLastItem);
 
   const openEditModal = (item) => {
+    if (isBusinessRestricted) return toast.error('Account business actions are restricted');
     setEditingItem(item);
     setEditFormData({
       title: item.title,
@@ -168,13 +172,14 @@ export default function MyListings() {
       setEditingItem(null);
       toast.success('Asset updated successfully');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Update failed');
+      toast.error(getApiErrorMessage(err, 'Update failed'));
     } finally {
       setUpdateLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
+    if (isBusinessRestricted) return toast.error('Account business actions are restricted');
     if (!window.confirm('Delete this node? All promotion data will be lost.')) return;
     try {
       await api.delete(`/api/listings/delete/${id}`);
@@ -186,7 +191,7 @@ export default function MyListings() {
       );
       toast.success('Node deleted');
     } catch (err) {
-      toast.error('Delete failed');
+      toast.error(getApiErrorMessage(err, 'Delete failed'));
     }
   };
 
@@ -355,7 +360,7 @@ export default function MyListings() {
                           </span>
                           {item.additionalReason && (
                             <p className="text-[8px] text-gray-400 italic truncate max-w-[150px]">
-                              "{item.additionalReason}"
+                              &quot;{item.additionalReason}&quot;
                             </p>
                           )}
                         </div>
@@ -375,7 +380,7 @@ export default function MyListings() {
                           label="View"
                         />
                         <ActionButton
-                          disabled={item.status === 'blocked'}
+                          disabled={item.status === 'blocked' || isBusinessRestricted}
                           icon={FiEdit2}
                           onClick={() => openEditModal(item)}
                           color={item.status === 'blocked' ? 'opacity-20' : 'hover:bg-orange-600'}
@@ -384,6 +389,7 @@ export default function MyListings() {
                         <ActionButton
                           icon={FiTrash2}
                           onClick={() => handleDelete(item._id)}
+                          disabled={isBusinessRestricted}
                           color="hover:bg-red-600"
                           isDelete
                           label="Delete"

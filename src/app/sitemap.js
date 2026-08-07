@@ -16,10 +16,16 @@ const staticPages = [
 
 export default async function sitemap() {
   try {
-    const [listingRes, creatorRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/api/listings/public?limit=500`, { next: { revalidate: 3600 } }),
-      fetch(`${API_BASE_URL}/api/users/creators`, { next: { revalidate: 3600 } }).catch(() => null),
+    const [listingResult, creatorResult] = await Promise.allSettled([
+      fetch(`${API_BASE_URL}/api/listings/public?limit=500&offset=0`, {
+        next: { revalidate: 3600 },
+      }),
+      fetch(`${API_BASE_URL}/api/users/famous-creators?limit=500&offset=0`, {
+        next: { revalidate: 3600 },
+      }),
     ]);
+    const listingRes = listingResult.status === 'fulfilled' ? listingResult.value : null;
+    const creatorRes = creatorResult.status === 'fulfilled' ? creatorResult.value : null;
 
     let listings = [];
     if (listingRes?.ok) {
@@ -30,13 +36,13 @@ export default async function sitemap() {
     let creators = [];
     if (creatorRes?.ok) {
       const creatorData = await creatorRes.json();
-      creators = creatorData.creators || creatorData.users || [];
+      creators = creatorData.data || [];
     }
 
     const listingUrls = listings
       .filter((item) => item && (item.slug || item._id))
       .map((item) => ({
-        url: `${SITE_URL}/listing/${item.slug || item._id}`,
+        url: `${SITE_URL}/listings/${item.slug || item._id}`,
         lastModified: new Date(item.updatedAt || item.createdAt || Date.now()),
         changeFrequency: 'weekly',
         priority: 0.7,
@@ -46,7 +52,7 @@ export default async function sitemap() {
       .filter((user) => user.username)
       .map((user) => ({
         url: `${SITE_URL}/profile/${user.username}`,
-        lastModified: new Date(),
+        lastModified: new Date(user.updatedAt || user.createdAt || Date.now()),
         changeFrequency: 'weekly',
         priority: 0.6,
       }));

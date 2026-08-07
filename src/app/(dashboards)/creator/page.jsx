@@ -26,6 +26,7 @@ import {
 } from 'recharts';
 import { Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { formatReportingTime, REPORTING_TIME_ZONE } from '@/lib/reportingTime';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -112,7 +113,8 @@ export default function CreatorDashboard() {
           </h2>
           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
             Last Sync:{' '}
-            {stats?.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : 'Just now'}
+            {stats?.lastUpdated ? formatReportingTime(stats.lastUpdated) : 'Just now'}{' '}
+            ({stats?.reportingTimeZone || REPORTING_TIME_ZONE})
           </p>
         </div>
         <button

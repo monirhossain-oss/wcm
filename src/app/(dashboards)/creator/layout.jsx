@@ -21,7 +21,7 @@ import { DollarSign } from 'lucide-react';
 export default function CreatorLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logoutUser } = useAuth();
+  const { user, loading, logoutUser, isBusinessRestricted } = useAuth();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -34,6 +34,12 @@ export default function CreatorLayout({ children }) {
       }
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!loading && isBusinessRestricted && pathname === '/creator/add') {
+      router.replace('/creator/listings');
+    }
+  }, [isBusinessRestricted, loading, pathname, router]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -66,13 +72,13 @@ export default function CreatorLayout({ children }) {
     { name: 'Transactions', path: '/creator/transactions', icon: DollarSign },
     { name: 'My Listings', path: '/creator/listings', icon: FiList },
     { name: 'Add Listing', path: '/creator/add', icon: FiPlus },
-  ];
+  ].filter((item) => !(isBusinessRestricted && item.path === '/creator/add'));
 
   const profileImage = user?.profile?.profileImage
     ? getImageUrl(user.profile.profileImage, 'avatar')
     : '/default-avatar.png';
 
-  const SidebarContent = () => (
+  const renderSidebarContent = () => (
     <>
       <div className="h-20 flex items-center px-8 border-b border-gray-100 dark:border-white/5">
         <Link href="/" className="cursor-pointer">
@@ -152,7 +158,7 @@ export default function CreatorLayout({ children }) {
     <div className="h-screen bg-white dark:bg-[#080808] flex overflow-hidden font-sans">
       {/* 🔹 Sidebar (Desktop) */}
       <aside className="w-64 bg-white dark:bg-[#0c0c0c] border-r border-gray-100 dark:border-white/5 hidden lg:flex flex-col z-50">
-        <SidebarContent />
+        {renderSidebarContent()}
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
@@ -223,6 +229,12 @@ export default function CreatorLayout({ children }) {
 
         {/* 🔹 Main Content Area */}
         <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[#080808] p-6 md:p-8 scrollbar-hide">
+          {isBusinessRestricted && (
+            <div className="max-w-7xl mx-auto mb-4 rounded-md border border-orange-500/30 bg-orange-500/10 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-orange-600">
+              Account {user.status.replace(/_/g, ' ')}: read and profile access remain available,
+              but listing, favorite, wallet and promotion actions are restricted.
+            </div>
+          )}
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
@@ -240,7 +252,7 @@ export default function CreatorLayout({ children }) {
                 <FiX size={24} />
               </button>
             </div>
-            <SidebarContent />
+            {renderSidebarContent()}
           </aside>
         </div>
       )}

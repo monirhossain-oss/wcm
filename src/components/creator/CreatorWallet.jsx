@@ -3,6 +3,8 @@ import { useState } from 'react';
 import axios from 'axios';
 import { FiPlus, FiCreditCard, FiInfo, FiX, FiLoader } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -10,12 +12,14 @@ const api = axios.create({
 });
 
 export default function CreatorWallet({ walletBalance }) {
+  const { isBusinessRestricted } = useAuth();
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState(20);
   const [topUpCurrency, setTopUpCurrency] = useState('EUR');
   const [actionLoading, setActionLoading] = useState(false);
 
   const handleTopUpSubmit = async () => {
+    if (isBusinessRestricted) return toast.error('Account business actions are restricted');
     if (topUpAmount < 5) return toast.error('Minimum top-up is 5 units');
 
     setActionLoading(true);
@@ -30,7 +34,7 @@ export default function CreatorWallet({ walletBalance }) {
         window.location.href = res.data.url;
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Checkout initiation failed');
+      toast.error(getApiErrorMessage(err, 'Checkout initiation failed'));
     } finally {
       setActionLoading(false);
     }
@@ -64,6 +68,7 @@ export default function CreatorWallet({ walletBalance }) {
 
         <button
           onClick={() => setShowTopUpModal(true)}
+          disabled={isBusinessRestricted}
           className="relative z-10 bg-orange-500 hover:bg-orange-600 px-8 py-4 rounded-md flex items-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest active:scale-95 whitespace-nowrap justify-center shadow-lg shadow-orange-500/20"
         >
           <FiPlus size={18} /> Add Credits
@@ -139,7 +144,7 @@ export default function CreatorWallet({ walletBalance }) {
 
               <button
                 onClick={handleTopUpSubmit}
-                disabled={actionLoading || topUpAmount < 5}
+                disabled={actionLoading || topUpAmount < 5 || isBusinessRestricted}
                 className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-md font-black uppercase text-[10px] tracking-[0.3em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] disabled:opacity-20 flex items-center justify-center gap-2"
               >
                 {actionLoading ? (

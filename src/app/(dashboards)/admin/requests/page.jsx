@@ -154,6 +154,28 @@ export default function CreatorRequestsPage() {
     }
   };
 
+  const handleVatReview = async (status) => {
+    const label = status === 'valid' ? 'valid' : 'invalid';
+    if (!confirm(`Mark this VAT number as ${label}?`)) return;
+
+    try {
+      setProcessingId(selectedUser._id);
+      const res = await api.put(`/api/admin/creator-requests/${selectedUser._id}/vat-review`, {
+        status,
+      });
+      const updatedUser = res.data.user;
+      setSelectedUser(updatedUser);
+      setRequests((current) =>
+        current.map((request) => (request._id === updatedUser._id ? updatedUser : request))
+      );
+      toast.success(`VAT marked as ${label}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'VAT review failed');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-6 pb-10 font-sans">
       <Toaster position="top-right" />
@@ -396,7 +418,8 @@ export default function CreatorRequestsPage() {
               </div>
 
               {selectedUser.profile?.customerType === 'business' && (
-                <div className="mb-8 p-4 bg-orange-500/5 border border-orange-500/10 rounded-md flex items-center justify-between">
+                <div className="mb-8 p-4 bg-orange-500/5 border border-orange-500/10 rounded-md">
+                  <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest mb-1">
                       VAT Information
@@ -407,10 +430,17 @@ export default function CreatorRequestsPage() {
                   </div>
                   <div className="text-right">
                     <span
-                      className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest ${selectedUser.profile?.isVatValid ? 'text-green-500' : 'text-red-500'}`}
+                      className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest ${selectedUser.profile?.vatVerificationStatus === 'valid' ? 'text-green-500' : selectedUser.profile?.vatVerificationStatus === 'verification_pending' ? 'text-orange-500' : 'text-red-500'}`}
                     >
-                      {selectedUser.profile?.isVatValid ? <FiCheckCircle /> : <FiAlertCircle />}{' '}
-                      {selectedUser.profile?.isVatValid ? 'Verified' : 'Unverified'}
+                      {selectedUser.profile?.vatVerificationStatus === 'valid' ? (
+                        <FiCheckCircle />
+                      ) : (
+                        <FiAlertCircle />
+                      )}{' '}
+                      {(selectedUser.profile?.vatVerificationStatus || 'not_applicable').replace(
+                        /_/g,
+                        ' '
+                      )}
                     </span>
                     <p className="text-[8px] text-gray-500 font-bold uppercase">
                       Checked:{' '}
@@ -419,6 +449,25 @@ export default function CreatorRequestsPage() {
                         : 'Never'}
                     </p>
                   </div>
+                  </div>
+                  {selectedUser.profile?.vatNumber && (
+                    <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-orange-500/10">
+                      <button
+                        onClick={() => handleVatReview('valid')}
+                        disabled={processingId === selectedUser._id}
+                        className="py-2.5 rounded-md bg-green-600 text-white text-[9px] font-black uppercase tracking-widest disabled:opacity-40"
+                      >
+                        Mark VAT Valid
+                      </button>
+                      <button
+                        onClick={() => handleVatReview('invalid')}
+                        disabled={processingId === selectedUser._id}
+                        className="py-2.5 rounded-md bg-red-500/10 text-red-500 border border-red-500/20 text-[9px] font-black uppercase tracking-widest disabled:opacity-40"
+                      >
+                        Mark VAT Invalid
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -472,7 +521,7 @@ export default function CreatorRequestsPage() {
                       <FiInfo size={12} /> Statement
                     </p>
                     <p className="text-[10px] md:text-[11px] font-medium leading-relaxed dark:text-gray-400 italic">
-                      "{selectedUser.profile?.bio || 'No bio provided.'}"
+                      &quot;{selectedUser.profile?.bio || 'No bio provided.'}&quot;
                     </p>
                   </div>
                 </div>

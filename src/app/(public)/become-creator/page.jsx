@@ -19,6 +19,7 @@ import { getImageUrl } from '@/lib/imageHelper';
 import { Country, City } from 'country-state-city';
 import { ChevronDown, Grid, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
@@ -27,7 +28,7 @@ const api = axios.create({
 
 export default function UserProfileForm() {
   const router = useRouter();
-  const { user, setUser } = useAuth();
+  const { user, setUser, isBusinessRestricted } = useAuth();
   const [serverError, setServerError] = useState('');
   const [mounted, setMounted] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -100,6 +101,10 @@ export default function UserProfileForm() {
 
   const onSubmit = async (data) => {
     if (isPending) return;
+    if (isBusinessRestricted) {
+      setServerError('Your account is currently restricted from business applications.');
+      return;
+    }
     try {
       setServerError('');
       const formData = new FormData();
@@ -134,7 +139,7 @@ export default function UserProfileForm() {
         router.push('/profile');
       }
     } catch (error) {
-      setServerError(error.response?.data?.message || 'Something went wrong');
+      setServerError(getApiErrorMessage(error, 'Something went wrong'));
     }
   };
 
@@ -481,10 +486,14 @@ export default function UserProfileForm() {
               {/* বাটনটি আপডেট করুন (disabled প্রপার্টি লক্ষ্য করুন) */}
               <button
                 type="submit"
-                disabled={isSubmitting || !agreeTerms} // এখানে !agreeTerms যোগ হয়েছে
+                disabled={isSubmitting || !agreeTerms || isBusinessRestricted}
                 className="w-full bg-orange-500 text-white py-5 rounded-md font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-orange-600 transition-all disabled:bg-gray-400"
               >
-                {isSubmitting ? 'Processing Node...' : 'Submit Application'}
+                {isBusinessRestricted
+                  ? 'Account Restricted'
+                  : isSubmitting
+                    ? 'Processing Node...'
+                    : 'Submit Application'}
               </button>
             </form>
           </div>

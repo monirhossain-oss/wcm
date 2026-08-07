@@ -4,7 +4,7 @@ import Link from 'next/link';
 async function getCuratedData() {
     try {
         const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/listings/curated`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/api/listings/curated`,
             {
                 next: { revalidate: 60 }
             }

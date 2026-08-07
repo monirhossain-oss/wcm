@@ -19,6 +19,7 @@ import {
 } from 'react-icons/fi';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
+import { formatReportingDate } from '@/lib/reportingTime';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -384,7 +385,7 @@ export default function PromotionInsightsPage() {
               {transactions.map((tx, idx) => (
                 <tr key={idx} className="hover:bg-zinc-50 dark:hover:bg-white/2 transition-all">
                   <td className="px-8 py-4 text-[10px] font-bold text-zinc-500">
-                    {new Date(tx.createdAt).toLocaleDateString()}
+                    {formatReportingDate(tx.createdAt)}
                   </td>
                   <td className="px-8 py-4">
                     <span
