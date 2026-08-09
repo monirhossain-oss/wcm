@@ -31,7 +31,7 @@ import {
   MdEmail,
   MdOutlineWebAssetOff,
 } from 'react-icons/md';
-import { TbLayoutBottombar, TbLayoutBottombarCollapse, TbSeo } from 'react-icons/tb';
+import { TbLanguage, TbLayoutBottombar, TbLayoutBottombarCollapse, TbSeo } from 'react-icons/tb';
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/imageHelper';
 import { DatabaseBackup, Sliders, TractorIcon } from 'lucide-react';
@@ -147,6 +147,7 @@ export default function AdminLayout({ children }) {
     { name: 'Promoted Assets', path: '/admin/listings/promoted', icon: FiTrendingUp },
     { name: 'All Transactions', path: '/admin/transactions', icon: FiDollarSign },
     { name: 'Audit Logs', path: '/admin/logs', icon: FiShield },
+    { name: 'Translation Centre', path: '/admin/translations', icon: TbLanguage },
     { name: 'Manage Tags', path: '/admin/tags', icon: FiTag },
     { name: 'Manage Culture', path: '/admin/region', icon: PiTrainRegional },
     { name: 'Manage Tradition', path: '/admin/tradition', icon: TractorIcon },
