@@ -18,6 +18,7 @@ const PAGE_OPTIONS = [
     { value: 'creators', label: '👤 Creators Page' },
     { value: 'terms', label: '📜 Terms & Conditions' },
     { value: 'privacy', label: '🛡️ Privacy Policy' },
+    { value: 'cookie', label: '🍪 Cookie Policy' },
     { value: 'how-it-works', label: '⚙️ How It Works' },
 ];
 
