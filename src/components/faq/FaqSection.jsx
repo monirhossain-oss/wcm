@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, Globe, Users, Rocket, Zap, ShieldQuestion, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
-const FaqSection = () => {
+const FaqSection = ({ language = 'en' }) => {
     const [activeCategory, setActiveCategory] = useState('General');
     const [openIndex, setOpenIndex] = useState(null);
     const [faqs, setFaqs] = useState([]);
@@ -12,18 +12,24 @@ const FaqSection = () => {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
     // ক্যাটাগরি আইডি এবং লেবেল ফিক্স করা হয়েছে
+    const copy = language === 'fr'
+        ? { categories: ['Général', 'Pour les créateurs et artistes', 'Pour les visiteurs et acheteurs', 'Règles de la plateforme', 'Questions techniques'], loading: 'Chargement des questions…', empty: 'Aucune question dans cette catégorie.' }
+        : { categories: ['General', 'For Creators and Artists', 'For Visitors and Buyers', 'Platform Policies', 'Technical Questions'], loading: 'Loading questions...', empty: 'No questions found for this category.' };
+
     const categories = [
-        { id: 'General', icon: <Globe size={16} />, label: 'General' },
-        { id: 'Artists', icon: <Users size={16} />, label: 'For Creators and Artists' },
-        { id: 'Visitors', icon: <Rocket size={16} />, label: 'For Visitors and Buyers' },
-        { id: 'Platform', icon: <Zap size={16} />, label: 'Platform Policies' },
-        { id: 'Technical', icon: <ShieldQuestion size={16} />, label: 'Technical Questions' },
+        { id: 'General', icon: <Globe size={16} />, label: copy.categories[0] },
+        { id: 'Artists', icon: <Users size={16} />, label: copy.categories[1] },
+        { id: 'Visitors', icon: <Rocket size={16} />, label: copy.categories[2] },
+        { id: 'Platform', icon: <Zap size={16} />, label: copy.categories[3] },
+        { id: 'Technical', icon: <ShieldQuestion size={16} />, label: copy.categories[4] },
     ];
 
     useEffect(() => {
         const fetchFaqs = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/api/faqs`);
+                const response = await axios.get(`${API_BASE_URL}/api/faqs`, {
+                    params: language === 'fr' ? { language: 'fr' } : undefined,
+                });
                 setFaqs(response.data);
             } catch (error) {
                 console.error("Error fetching FAQs:", error);
@@ -32,7 +38,7 @@ const FaqSection = () => {
             }
         };
         fetchFaqs();
-    }, [API_BASE_URL]);
+    }, [API_BASE_URL, language]);
 
     // অ্যাক্টিভ ক্যাটাগরি অনুযায়ী ফিল্টার
     const currentFaqs = faqs.filter(faq => faq.category === activeCategory);
@@ -66,7 +72,7 @@ const FaqSection = () => {
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 space-y-4">
                             <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
-                            <p className="text-gray-400 text-sm italic">Loading questions...</p>
+                            <p className="text-gray-400 text-sm italic">{copy.loading}</p>
                         </div>
                     ) : currentFaqs.length > 0 ? (
                         currentFaqs.map((faq, index) => (
@@ -100,7 +106,7 @@ const FaqSection = () => {
                         ))
                     ) : (
                         <div className="text-center py-20 border border-dashed border-gray-200 dark:border-zinc-800 rounded-xl">
-                            <p className="text-gray-400">No questions found for this category.</p>
+                            <p className="text-gray-400">{copy.empty}</p>
                         </div>
                     )}
                 </div>

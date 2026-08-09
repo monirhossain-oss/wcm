@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { getSeoByPage } from '@/lib/api';
 
 // এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/privacy) theke title/description/keywords

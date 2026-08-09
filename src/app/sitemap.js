@@ -8,10 +8,15 @@ const staticPages = [
   { url: `${SITE_URL}/blogs`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
   { url: `${SITE_URL}/about-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   { url: `${SITE_URL}/faqUs`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+  { url: `${SITE_URL}/fr/faq`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   { url: `${SITE_URL}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   { url: `${SITE_URL}/how-it-works`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   { url: `${SITE_URL}/privacy-policy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
   { url: `${SITE_URL}/terms-and-conditions`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+  { url: `${SITE_URL}/cookie-policy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+  { url: `${SITE_URL}/fr/privacy-policy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+  { url: `${SITE_URL}/fr/terms-and-conditions`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+  { url: `${SITE_URL}/fr/cookie-policy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
 ];
 
 export default async function sitemap() {
