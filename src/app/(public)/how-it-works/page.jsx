@@ -26,10 +26,10 @@ const getGridClass = (count) => {
 };
 
 // ===== FETCH DATA (10 seconds cache) =====
-const fetchHowItWorks = async () => {
+const fetchHowItWorks = async (locale = 'en') => {
     try {
         // ✅ Data fetch - 10 seconds cache
-        const res = await fetch(`${API_BASE}/api/admin/how-it-works`, {
+        const res = await fetch(`${API_BASE}/api/admin/how-it-works${locale === 'en' ? '' : `?language=${locale}`}`, {
             next: { revalidate: 10 },
         });
 
@@ -44,8 +44,8 @@ const fetchHowItWorks = async () => {
 };
 
 // ===== MAIN PAGE =====
-const HowItWorksPage = async () => {
-    const content = await fetchHowItWorks();
+const HowItWorksPage = async ({ locale = 'en' }) => {
+    const content = await fetchHowItWorks(locale);
 
     // Default fallback data
     const displayData = content || {

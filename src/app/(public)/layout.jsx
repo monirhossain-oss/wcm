@@ -3,10 +3,12 @@ import Footer from '@/components/Footer';
 import Analytics from '@/components/Analytics';
 import VisitorTracker from '@/components/VisitorTracker';
 import PublicNavbar from '@/components/navbar/PublicNavbar';
+import { LocaleProvider } from '@/context/LocaleContext';
+import LanguageSuggestion from '@/components/LanguageSuggestion';
 
 export default function PublicLayout({ children }) {
   return (
-    <>
+    <LocaleProvider>
       <Analytics />
       <VisitorTracker />
 
@@ -18,6 +20,7 @@ export default function PublicLayout({ children }) {
       <div className="mt-4">
         <Footer />
       </div>
-    </>
+      <LanguageSuggestion />
+    </LocaleProvider>
   );
 }

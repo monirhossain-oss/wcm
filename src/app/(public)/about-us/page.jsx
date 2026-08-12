@@ -45,11 +45,11 @@ export async function generateMetadata() {
 }
 
 // ২. মেইন পেজ কম্পোনেন্ট
-export default async function AboutPage() {
+export default async function AboutPage({ locale = 'en' }) {
     let aboutData = null;
 
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/about`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/about${locale === 'en' ? '' : `?language=${locale}`}`, {
             next: { revalidate: 60 }
         });
         const result = await res.json();

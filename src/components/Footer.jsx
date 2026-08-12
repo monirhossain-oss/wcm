@@ -5,8 +5,10 @@ import Image from 'next/image';
 import { FaInstagram, FaPinterestP, FaLinkedinIn, FaFacebook } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useLocale } from '@/context/LocaleContext';
 
 const Footer = () => {
+  const { locale, localize, t } = useLocale();
   const currentYear = new Date().getFullYear();
 
   const staticData = {
@@ -47,7 +49,7 @@ const Footer = () => {
   useEffect(() => {
     const fetchFooter = async () => {
       try {
-        const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/footer`, { next: { revalidate: 60 } });
+        const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/footer`, { params: locale === 'en' ? undefined : { language: locale } });
 
         if (data.success && data.data) {
           const db = data.data;
@@ -84,7 +86,9 @@ const Footer = () => {
       }
     };
     fetchFooter();
-  }, []);
+  // Static fallback content is immutable for the lifetime of this component.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -135,7 +139,7 @@ const Footer = () => {
 
           {/* Column 1 - Logo & About */}
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-            <Link href="/" className="flex items-center mb-6">
+            <Link href={localize('/')} className="flex items-center mb-6">
               <Image src="/wc,-web-logo.png" alt="Logo" width={120} height={40} className="dark:hidden brightness-110 h-auto w-auto" priority />
               <Image src="/wc,-web-white.png" alt="Logo" width={120} height={40} className="hidden dark:block brightness-110 h-auto w-auto" priority />
             </Link>
@@ -174,18 +178,18 @@ const Footer = () => {
           {/* Column 2 & 3 - Links */}
           <div className="grid grid-cols-2 gap-8 lg:col-span-2">
             <div className="text-center md:text-left">
-              <h4 className="text-black dark:text-white text-sm font-bold uppercase tracking-widest mb-6">Platform</h4>
+              <h4 className="text-black dark:text-white text-sm font-bold uppercase tracking-widest mb-6">{t('footer.platform')}</h4>
               <ul className="space-y-3 text-sm">
                 {footerData.platformLinks.map((link, idx) => (
-                  <li key={idx}><Link href={link.href} className="hover:text-[#F57C00] transition-colors">{link.label}</Link></li>
+                  <li key={idx}><Link href={localize(link.href)} className="hover:text-[#F57C00] transition-colors">{link.label}</Link></li>
                 ))}
               </ul>
             </div>
             <div className="text-center md:text-left">
-              <h4 className="text-black dark:text-white text-sm font-bold uppercase tracking-widest mb-6">Resources</h4>
+              <h4 className="text-black dark:text-white text-sm font-bold uppercase tracking-widest mb-6">{t('footer.resources')}</h4>
               <ul className="space-y-3 text-sm">
                 {footerData.resourceLinks.map((link, idx) => (
-                  <li key={idx}><Link href={link.href} className="hover:text-[#F57C00] transition-colors">{link.label}</Link></li>
+                  <li key={idx}><Link href={localize(link.href)} className="hover:text-[#F57C00] transition-colors">{link.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -198,11 +202,11 @@ const Footer = () => {
             <form onSubmit={handleSubscribe} className="w-full space-y-3">
               <input
                 type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email address"
+                placeholder={t('footer.email')}
                 className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-4 py-3 text-sm focus:outline-none focus:border-[#F57C00] transition-all rounded-md"
               />
               <button type="submit" disabled={status === "loading"} className="w-full bg-[#F57C00] hover:bg-[#e67600] text-white py-3 text-sm font-bold uppercase tracking-widest transition-all disabled:opacity-50 rounded-md shadow-md active:scale-95">
-                {status === "loading" ? "Subscribing..." : "Subscribe"}
+                {status === "loading" ? t('footer.subscribing') : t('footer.subscribe')}
               </button>
             </form>
           </div>
@@ -215,7 +219,7 @@ const Footer = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-6 order-1 md:order-2">
             {footerData.legalLinks.map((link, idx) => (
-              <Link key={idx} href={link.href} className="hover:text-[#F57C00] transition-colors">{link.label}</Link>
+              <Link key={idx} href={localize(link.href)} className="hover:text-[#F57C00] transition-colors">{link.label}</Link>
             ))}
           </div>
         </div>

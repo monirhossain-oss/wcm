@@ -3,9 +3,11 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useExploreQuery } from '@/hooks/useExploreQuery';
+import { useLocale } from '@/context/LocaleContext';
 import RegionDropdown from './RegionDropdown';
 
 export default function FilterBar() {
+    const { locale } = useLocale();
     const { updateQuery, category: currentCategory, continent: currentContinent, search } = useExploreQuery();
 
     const scrollRef = useRef(null);
@@ -31,7 +33,7 @@ export default function FilterBar() {
                 }
 
                 // ডাটা না থাকলে বা মেয়াদ শেষ হয়ে গেলে এপিআই কল
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/meta-data`);
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/meta-data${locale === 'en' ? '' : `?language=${locale}`}`);
                 const data = await res.json();
 
                 if (data.categories) {
@@ -51,7 +53,7 @@ export default function FilterBar() {
         };
 
         fetchCategoriesWithCache();
-    }, []);
+    }, [locale]);
 
     // ২. ইউআরএল-এর সার্চের সাথে ইনপুট বক্স সিঙ্ক রাখা
     useEffect(() => {

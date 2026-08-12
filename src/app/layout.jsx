@@ -134,14 +134,6 @@ export async function generateMetadata() {
     description:
       'Discover and explore global cultural products, craftsmanship, and heritage rituals.',
     metadataBase: new URL(siteUrl),
-    alternates: {
-      canonical: '/',
-      languages: {
-        'en': siteUrl,
-        'fr': `${siteUrl}/fr`,
-        'x-default': siteUrl,
-      },
-    },
     robots: {
       index: true,
       follow: true,

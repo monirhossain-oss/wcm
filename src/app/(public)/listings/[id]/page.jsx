@@ -1,10 +1,8 @@
 import axios from 'axios';
 import ListingDetailsClient from '../ListingDetailsClient';
+import { absoluteSiteUrl, buildLocalizedMetadata, getDynamicSeoContext, localizedPath } from '@/lib/localizedMetadata';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
-
 const MIN_DESCRIPTION_LENGTH = 40;
 const MAX_META_LENGTH = 155;
 function generateMetaDescription(product) {
@@ -40,53 +38,40 @@ function generateMetaDescription(product) {
     : generated.slice(0, MAX_META_LENGTH).slice(0, generated.lastIndexOf(' ')) + '…';
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, locale = 'en' }) {
   const { id } = await params;
   try {
-    const res = await axios.get(`${API_BASE_URL}/api/listings/${id}`);
+    const res = await axios.get(`${API_BASE_URL}/api/listings/${id}`, { params: locale === 'en' ? undefined : { language: locale } });
     const product = res.data;
 
     const image = product.image?.startsWith('http')
       ? product.image
       : `${API_BASE_URL}/${product.image}`;
 
-    const canonicalUrl = `${siteUrl}/listing/${id}`;
-
     const metaDescription = generateMetaDescription(product);
-
-    return {
-      title: `${product.title} | World Culture Marketplace`,
-      description: metaDescription,
-      alternates: {
-        canonical: canonicalUrl,
-      },
-      openGraph: {
-        images: [image],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: `${product.title} | World Culture Marketplace`,
-        description: metaDescription,
-        images: [image],
-      },
-    };
+    const seoContext = await getDynamicSeoContext({ objectType: 'listing', slug: id, locale });
+    return buildLocalizedMetadata({ locale, path: `/listings/${product.slug || id}`,
+      title: product._localizedSeo?.title || `${product.title} | World Culture Marketplace`,
+      description: product._localizedSeo?.description || metaDescription, image,
+      imageAlt: product._localizedSeo?.imageAlt || product.title,
+      languageUrls: seoContext?.metadata?.languages, canonicalUrl: seoContext?.metadata?.canonical });
   } catch (error) {
     return { title: 'Listing Details' };
   }
 }
 
-export default async function Page({ params }) {
+export default async function Page({ params, locale = 'en' }) {
   const { id } = await params;
   let initialProduct = null;
   let initialRelated = [];
 
   try {
-    const res = await axios.get(`${API_BASE_URL}/api/listings/${id}`);
+    const res = await axios.get(`${API_BASE_URL}/api/listings/${id}`, { params: locale === 'en' ? undefined : { language: locale } });
     initialProduct = res.data;
 
     if (initialProduct?.creatorId?._id) {
       const relatedRes = await axios.get(
-        `${API_BASE_URL}/api/listings/public?creatorId=${initialProduct.creatorId._id}&limit=5`
+        `${API_BASE_URL}/api/listings/public?creatorId=${initialProduct.creatorId._id}&limit=5${locale === 'en' ? '' : `&language=${locale}`}`
       );
       initialRelated = (relatedRes.data.listings || [])
         .filter((item) => item._id !== id)
@@ -104,13 +89,16 @@ export default async function Page({ params }) {
     '@type': 'CreativeWork',
     name: initialProduct.title,
     description: generateMetaDescription(initialProduct),
-    image: initialProduct.image,
-    url: `${process.env.NEXT_PUBLIC_SITE_URL}/listing/${initialProduct.slug}`,
+    image: initialProduct.image ? {
+      '@type': 'ImageObject', contentUrl: initialProduct.image,
+      name: initialProduct._localizedSeo?.imageAlt || initialProduct.title,
+    } : undefined,
+    url: absoluteSiteUrl(localizedPath(`/listings/${initialProduct.slug || id}`, locale)),
     creator: {
       '@type': 'Person',
       name: `${initialProduct.creatorId?.firstName} ${initialProduct.creatorId?.lastName}`,
       url: initialProduct.creatorId?.username
-        ? `${process.env.NEXT_PUBLIC_SITE_URL}/creator/${initialProduct.creatorId.username}`
+        ? absoluteSiteUrl(localizedPath(`/profile/${initialProduct.creatorId.slug || initialProduct.creatorId.username}`, locale))
         : undefined,
     },
     countryOfOrigin: initialProduct.country || undefined,

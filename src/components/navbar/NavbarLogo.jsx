@@ -1,13 +1,16 @@
+'use client';
 // src/components/navbar/NavbarLogo.jsx
 // ⚠️ NO 'use client' here — fully static, no hooks, no handlers.
 // Stays a Server Component; ships zero extra JS to the client.
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLocale } from '@/context/LocaleContext';
 
 const NavbarLogo = () => {
+    const { localize } = useLocale();
     return (
-        <Link href="/" className="cursor-pointer">
+        <Link href={localize('/')} className="cursor-pointer">
             <Image
                 src="/wc,-web-logo.png"
                 alt="Logo Light"

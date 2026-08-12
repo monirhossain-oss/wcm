@@ -1,0 +1,4 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { archiveMemory, getMemory } from '../_services/translationCentreApi';
+export default function MemoryPage() { const [entries, setEntries] = useState([]); const load = () => getMemory().then((r) => setEntries(r.data.data)); useEffect(() => { const timer = setTimeout(() => load().catch(() => setEntries([])), 0); return () => clearTimeout(timer); }, []); return <section className="space-y-4"><h1 className="text-2xl font-bold">Translation memory</h1>{entries.map((entry) => <div key={entry._id} className="flex gap-3 border p-3"><span>{entry.fieldName} · {entry.approvalLevel} · {entry.isArchived ? 'Archived' : 'Reusable'}</span>{!entry.isArchived && <button className="rounded border px-2" onClick={async () => { await archiveMemory(entry._id); load(); }}>Archive</button>}</div>)}</section>; }

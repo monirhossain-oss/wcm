@@ -4,8 +4,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Globe, Star } from 'lucide-react';
 import { getImageUrl } from '@/lib/imageHelper';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function CreatorCard({ creator, index }) {
+    const { localize } = useLocale();
     const isFeatured = creator.campaign?.role === 'premium';
 
     const categoryName =
@@ -119,7 +121,7 @@ export default function CreatorCard({ creator, index }) {
                 {/* 8. Action Buttons (Pushed to bottom) */}
                 <div className="mt-auto w-full flex flex-col gap-3">
                     <Link
-                        href={`/profile/${creator.username || creator.id}`}
+                        href={localize(`/profile/${creator.username || creator.id}`)}
                         className={`w-full text-[11px] font-black uppercase tracking-[0.2em] py-4 rounded-[16px] text-center
                             transition-all duration-300 shadow-sm
                             ${isFeatured

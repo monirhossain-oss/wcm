@@ -1,13 +1,16 @@
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
 import { Star } from 'lucide-react';
 import FavoriteButton from './FavoriteButton';
 import CreatorName from './CreatorName';
+import { useLocale } from '@/context/LocaleContext';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
 export default function ListingCard({ listing, item: propItem }) {
+  const { localize } = useLocale();
   const item = listing || propItem;
   const isPromoted = listing?.isPromoted ?? item?.isPromoted ?? false;
 
@@ -21,7 +24,7 @@ export default function ListingCard({ listing, item: propItem }) {
     <div className="group relative flex flex-col w-full transition-all duration-300">
       {/* IMAGE SECTION */}
       <div className="relative aspect-4/5 overflow-hidden rounded-sm bg-gray-100 dark:bg-zinc-900">
-        <Link href={`/listings/${item.slug}`} className="block w-full h-full relative">
+        <Link href={localize(`/listings/${item.slug}`)} className="block w-full h-full relative">
           <Image
             src={postImageSrc || 'https://placehold.co/600x400?text=No+Image'}
             alt={item.title || 'Listing'}

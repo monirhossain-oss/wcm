@@ -13,6 +13,7 @@ import { FiMenu, FiX, FiChevronDown, FiGrid, FiHeart, FiLogOut } from 'react-ico
 import { useAuth } from '@/context/AuthContext';
 import { createSlug } from './utils';
 import MobileAuthFallback from './MobileAuthFallback';
+import { useLocale } from '@/context/LocaleContext';
 
 const MobileDrawer = ({ categories, menuItems }) => {
     const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
@@ -20,6 +21,7 @@ const MobileDrawer = ({ categories, menuItems }) => {
 
     const { user, logoutUser } = useAuth();
     const pathname = usePathname();
+    const { locale, localize, t } = useLocale();
 
     const getDashboardLink = () => {
         if (user?.role === 'admin') return '/admin';
@@ -65,7 +67,7 @@ const MobileDrawer = ({ categories, menuItems }) => {
                                     >
                                         <span className="flex items-center gap-2.5">
                                             <FiGrid className={`w-4 h-4 ${isMobileCategoryOpen ? 'text-[#F57C00]' : 'text-gray-400'}`} />
-                                            Categories
+                                            {t('navigation.categories')}
                                         </span>
                                         <FiChevronDown className={`w-4 h-4 transition-transform duration-300 ${isMobileCategoryOpen ? 'rotate-180 text-[#F57C00]' : 'text-gray-400'}`} />
                                     </button>
@@ -76,11 +78,11 @@ const MobileDrawer = ({ categories, menuItems }) => {
                                             style={{ maxHeight: '360px', scrollbarWidth: 'thin', scrollbarColor: 'rgba(156,163,175,0.4) transparent' }}
                                         >
                                             <Link
-                                                href="/explore"
+                                                href={localize('/explore')}
                                                 onClick={closeAll}
                                                 className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800"
                                             >
-                                                <span className="text-xs font-bold text-[#F57C00]">Browse All Categories</span>
+                                                <span className="text-xs font-bold text-[#F57C00]">{t('navigation.browseAll')}</span>
                                                 <svg className="w-3.5 h-3.5 text-[#F57C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                                                 </svg>
@@ -90,13 +92,13 @@ const MobileDrawer = ({ categories, menuItems }) => {
                                                 {categories.map((cat) => (
                                                     <Link
                                                         key={cat._id || cat.id}
-                                                        href={`/explore/${createSlug(cat.title || cat.name)}`}
+                                                        href={localize(`/explore/${createSlug(locale === 'fr' ? cat.localizedTitle : cat.title || cat.name)}`)}
                                                         onClick={closeAll}
                                                         className="group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-[#F57C00]/40 hover:bg-orange-50 dark:hover:bg-orange-500/5 transition-all duration-150 cursor-pointer"
                                                     >
                                                         <span className="w-2 h-2 rounded-full bg-gray-200 dark:bg-gray-700 group-hover:bg-[#F57C00] flex-shrink-0 transition-colors duration-150" />
                                                         <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 group-hover:text-[#F57C00] truncate transition-colors duration-150 leading-tight">
-                                                            {cat.title || cat.name}
+                                                            {locale === 'fr' ? cat.localizedTitle : cat.title || cat.name}
                                                         </span>
                                                     </Link>
                                                 ))}
@@ -110,12 +112,12 @@ const MobileDrawer = ({ categories, menuItems }) => {
                         return (
                             <Link
                                 key={item.name}
-                                href={item.href}
+                                href={localize(item.href)}
                                 onClick={() => setIsMobileDrawerOpen(false)}
                                 className={`flex items-center px-3 py-3.5 text-[15px] font-semibold rounded-xl transition-colors
                   ${pathname === item.href ? 'text-[#F57C00] bg-orange-50 dark:bg-orange-500/10' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
                             >
-                                {item.name}
+                                {t(`common.${item.name.toLowerCase()}`, item.name)}
                             </Link>
                         );
                     })}

@@ -1,5 +1,12 @@
 ﻿import React from 'react';
 
+export const metadata = {
+    title: 'Cookie Policy | World Culture Marketplace',
+    description: 'Learn how World Culture Marketplace uses cookies.',
+    alternates: { canonical: '/cookie-policy', languages: { en: '/cookie-policy', fr: '/fr/cookie-policy', 'x-default': '/cookie-policy' } },
+    openGraph: { url: '/cookie-policy', locale: 'en_US', type: 'website' },
+};
+
 /* ── Reusable Components ── */
 
 const SectionBlock = ({ number, title, children }) => (

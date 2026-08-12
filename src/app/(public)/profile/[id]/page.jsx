@@ -1,13 +1,14 @@
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import PublicProfile from './PublicProfile';
+import { absoluteSiteUrl, getDynamicSeoContext, localizedPath } from '@/lib/localizedMetadata';
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, locale = 'en' }) {
   const { id } = await params;
 
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/profile/${id}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/profile/${id}${locale === 'en' ? '' : `?language=${locale}`}`,
       { cache: 'no-store' }
     );
 
@@ -16,9 +17,10 @@ export async function generateMetadata({ params }) {
     const data = await res.json();
     const user = data.user;
     const name = user?.profile?.displayName || `${user?.firstName} ${user?.lastName}`;
+    const seoContext = await getDynamicSeoContext({ objectType: 'creatorProfile', slug: id, locale });
 
     return {
-      title: `${name} | WCM Creator Profile`,
+      title: user._localizedSeo?.title || `${name} | WCM Creator Profile`,
       description: user?.profile?.bio || `${name} — Cultural Creator on WCM`,
       keywords: [user?.profile?.country, user?.profile?.tradition, 'WCM', 'creator', 'marketplace'],
       openGraph: {
@@ -34,7 +36,17 @@ export async function generateMetadata({ params }) {
         images: [user?.profile?.profileImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`],
       },
       alternates: {
-        canonical: `/profile/${id}`,
+        canonical: seoContext?.metadata?.canonical || absoluteSiteUrl(localizedPath(`/profile/${user.slug || id}`, locale)),
+        languages: seoContext?.metadata?.languages,
+      },
+      description: user._localizedSeo?.description || user?.profile?.bio || `${name} — Cultural Creator on WCM`,
+      openGraph: {
+        title: user._localizedSeo?.title || `${name} — World Culture Marketplace`,
+        description: user._localizedSeo?.description || user?.profile?.bio,
+        url: seoContext?.metadata?.canonical || absoluteSiteUrl(localizedPath(`/profile/${user.slug || id}`, locale)),
+        locale: locale === 'fr' ? 'fr_FR' : 'en_US',
+        images: [{ url: user?.profile?.profileImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`, alt: user._localizedSeo?.imageAlt || name }],
+        type: 'profile',
       },
     };
   } catch {
@@ -42,7 +54,7 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default async function Page({ params }) {
+export default async function Page({ params, locale = 'en' }) {
   const { id } = await params;
 
   let profileData = null;
@@ -50,7 +62,7 @@ export default async function Page({ params }) {
 
   try {
     const profileRes = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/profile/${id}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/profile/${id}${locale === 'en' ? '' : `?language=${locale}`}`,
       { cache: 'no-store' }
     );
 
@@ -62,7 +74,7 @@ export default async function Page({ params }) {
 
     if (creatorId) {
       const listingsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/public?creatorId=${creatorId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/public?creatorId=${creatorId}${locale === 'en' ? '' : `&language=${locale}`}`,
         { cache: 'no-store' }
       );
       if (listingsRes.ok) {
@@ -86,8 +98,11 @@ export default async function Page({ params }) {
     '@type': 'Person',
     name: user?.profile?.displayName || `${user?.firstName} ${user?.lastName}`,
     description: user?.profile?.bio || undefined,
-    image: user?.profile?.profileImage || undefined,
-    url: `${process.env.NEXT_PUBLIC_SITE_URL}/creator/${user?.slug}`,
+    image: user?.profile?.profileImage ? {
+      '@type': 'ImageObject', contentUrl: user.profile.profileImage,
+      name: user._localizedSeo?.imageAlt || name,
+    } : undefined,
+    url: absoluteSiteUrl(localizedPath(`/profile/${user?.slug || id}`, locale)),
     jobTitle: 'Cultural Creator',
     worksFor: {
       '@type': 'Organization',

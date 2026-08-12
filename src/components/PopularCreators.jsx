@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import CreatorSkeleton from "./creator/CreatorSkeleton";
 import CreatorDataWrapper from "./creator/CreatorDataWrapper";
 
-export default function PopularCreators() {
+export default function PopularCreators({ locale = 'en' }) {
     return (
         <section className="py-6 bg-white dark:bg-zinc-950">
             <div className="max-w-7xl mx-auto px-6 relative">
@@ -18,7 +18,7 @@ export default function PopularCreators() {
                     </div>
                     <div>
                         <Link
-                            href="/creators"
+                            href={locale === 'en' ? '/creators' : `/${locale}/creators`}
                             className="text-sm font-bold text-orange-500 hover:text-orange-600 transition-colors flex items-center gap-1 group"
                         >
                             View All
@@ -28,7 +28,7 @@ export default function PopularCreators() {
                 </div>
 
                 <Suspense fallback={<CreatorSkeleton />}>
-                    <CreatorDataWrapper />
+                    <CreatorDataWrapper locale={locale} />
                 </Suspense>
             </div>
         </section>

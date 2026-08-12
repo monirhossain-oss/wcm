@@ -10,11 +10,13 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { FiChevronDown } from 'react-icons/fi';
 import { createSlug } from './utils';
+import { useLocale } from '@/context/LocaleContext';
 
 const CategoryDropdown = ({ categories, menuItems }) => {
     const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
     const categoryRef = useRef(null);
     const pathname = usePathname();
+    const { locale, localize, t } = useLocale();
 
     // Listener is only attached while the dropdown is actually open —
     // avoids a permanently-live document listener doing nothing 99% of the time.
@@ -45,7 +47,7 @@ const CategoryDropdown = ({ categories, menuItems }) => {
                                 className={`text-sm font-medium transition-all duration-200 pb-1 border-b-2 flex items-center gap-1 outline-none
                   ${isCategoryDropdownOpen ? 'text-[#F57C00] border-[#F57C00]' : 'border-transparent hover:text-[#F57C00]'}`}
                             >
-                                Categories
+                                {t('navigation.categories')}
                                 <FiChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
 
@@ -59,13 +61,13 @@ const CategoryDropdown = ({ categories, menuItems }) => {
                                             {categories.map((cat) => (
                                                 <Link
                                                     key={cat._id || cat.id}
-                                                    href={`/explore/${createSlug(cat.title || cat.name)}`}
+                                                    href={localize(`/explore/${createSlug(locale === 'fr' ? cat.localizedTitle : cat.title || cat.name)}`)}
                                                     onClick={() => setIsCategoryDropdownOpen(false)}
                                                     className="group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-[#F57C00]/40 hover:bg-orange-50 dark:hover:bg-orange-500/5 transition-all duration-150 cursor-pointer"
                                                 >
                                                     <span className="w-2 h-2 rounded-full bg-gray-200 dark:bg-gray-700 group-hover:bg-[#F57C00] flex-shrink-0 transition-colors duration-150" />
                                                     <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 group-hover:text-[#F57C00] truncate transition-colors duration-150 leading-tight">
-                                                        {cat.title || cat.name}
+                                                        {locale === 'fr' ? cat.localizedTitle : cat.title || cat.name}
                                                     </span>
                                                 </Link>
                                             ))}
@@ -80,11 +82,11 @@ const CategoryDropdown = ({ categories, menuItems }) => {
                 return (
                     <Link
                         key={item.name}
-                        href={item.href}
+                        href={localize(item.href)}
                         className={`text-sm font-medium transition-all duration-200 pb-1 border-b-2
               ${isActive ? 'text-[#F57C00] border-[#F57C00]' : 'border-transparent hover:text-[#F57C00]'}`}
                     >
-                        {item.name}
+                        {t(`common.${item.name.toLowerCase()}`, item.name)}
                     </Link>
                 );
             })}

@@ -5,16 +5,20 @@ import ProfileMenu from './ProfileMenu';
 import AuthButtons from './AuthButtons';
 import WishlistIcon from './WishlistIcon';
 import { menuItems } from './utils';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 async function getCategories() {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
     try {
-        const res = await fetch(`${baseUrl}/api/admin/categories`, {
+        const [res, frenchRes] = await Promise.all([
+          fetch(`${baseUrl}/api/admin/categories`, {
             // Cache categories for 1 hour, revalidate in the background after that.
             // Tune this number based on how often categories actually change.
             next: { revalidate: 3600 },
-        });
+          }),
+          fetch(`${baseUrl}/api/admin/categories?language=fr`, { next: { revalidate: 3600 } }),
+        ]);
 
         if (!res.ok) {
             console.error('Failed to fetch categories:', res.status);
@@ -23,7 +27,10 @@ async function getCategories() {
 
         const data = await res.json();
         const fetchedData = Array.isArray(data) ? data : data.data;
-        return fetchedData || [];
+        const frenchPayload = frenchRes.ok ? await frenchRes.json() : [];
+        const frenchData = Array.isArray(frenchPayload) ? frenchPayload : frenchPayload.data || [];
+        const frenchById = new Map(frenchData.map((category) => [String(category._id), category.title]));
+        return (fetchedData || []).map((category) => ({ ...category, localizedTitle: frenchById.get(String(category._id)) || category.title }));
     } catch (error) {
         console.error('Error fetching categories:', error);
         return [];
@@ -53,6 +60,7 @@ const PublicNavbar = async () => {
                 {/* ── Right Side ── */}
                 <div className="flex items-center space-x-2 md:space-x-4">
                     <WishlistIcon />
+                    <LanguageSwitcher />
                     <ProfileMenu />
                     <AuthButtons />
                 </div>

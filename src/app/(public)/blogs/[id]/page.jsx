@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation';
 import BlogDetailsClient from './BlogDetailsClient';
+import { absoluteSiteUrl, buildLocalizedMetadata, getDynamicSeoContext, localizedPath } from '@/lib/localizedMetadata';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-async function fetchBlog(id) {
+async function fetchBlog(id, locale = 'en') {
   try {
-    const res = await fetch(`${BASE_URL}/api/blogs/${id}`, {
+    const res = await fetch(`${BASE_URL}/api/blogs/${id}${locale === 'en' ? '' : `?language=${locale}`}`, {
       next: { revalidate: 30 },
     });
     if (!res.ok) return null;
@@ -17,9 +18,9 @@ async function fetchBlog(id) {
   }
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, locale = 'en' }) {
   const { id } = await params;
-  const blog = await fetchBlog(id);
+  const blog = await fetchBlog(id, locale);
 
   if (!blog) {
     return { title: 'Story Not Found | World Culture Marketplace' };
@@ -28,28 +29,21 @@ export async function generateMetadata({ params }) {
   const firstParagraph = blog.content?.find((c) => c.type === 'paragraph')?.text || '';
   const description = blog.excerpt || firstParagraph.slice(0, 160) || 'Read this cultural story on World Culture Marketplace.';
 
+  const seoContext = await getDynamicSeoContext({ objectType: 'blog', slug: id, locale });
+  const localized = buildLocalizedMetadata({ locale, path: `/blogs/${blog.slug || id}`,
+    title: blog._localizedSeo?.title || `${blog.title} | World Culture Marketplace`,
+    description: blog._localizedSeo?.description || description, image: blog.image,
+    imageAlt: blog._localizedSeo?.imageAlt || blog.title, type: 'article',
+    languageUrls: seoContext?.metadata?.languages, canonicalUrl: seoContext?.metadata?.canonical });
   return {
-    title: `${blog.title} | World Culture Marketplace`,
-    description,
+    ...localized,
     keywords: blog.tags?.length ? blog.tags : [blog.category, 'Culture', 'WCM'].filter(Boolean),
-    openGraph: {
-      title: blog.title,
-      description,
-      images: blog.image ? [{ url: blog.image }] : [],
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: blog.title,
-      description,
-      images: blog.image ? [blog.image] : [`${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`],
-    },
   };
 }
 
-export default async function BlogDetailsPage({ params }) {
+export default async function BlogDetailsPage({ params, locale = 'en' }) {
   const { id } = await params;
-  const blog = await fetchBlog(id);
+  const blog = await fetchBlog(id, locale);
 
   if (!blog) notFound();
 
@@ -63,7 +57,10 @@ export default async function BlogDetailsPage({ params }) {
     '@type': 'Article',
     headline: blog.title,
     description: blog.description,
-    image: blog.image || undefined,
+    image: blog.image ? {
+      '@type': 'ImageObject', contentUrl: blog.image,
+      name: blog._localizedSeo?.imageAlt || blog.title,
+    } : undefined,
     author: {
       '@type': 'Person',
       name: blog.author?.name,
@@ -80,7 +77,7 @@ export default async function BlogDetailsPage({ params }) {
     },
     datePublished: blog.createdAt,
     dateModified: blog.updatedAt,
-    url: `${process.env.NEXT_PUBLIC_SITE_URL}/blogs/${blog.slug}`,
+    url: absoluteSiteUrl(localizedPath(`/blogs/${blog.slug || id}`, locale)),
     keywords: blog.tags?.join(', ') || blog.category || undefined,
     articleSection: blog.category || undefined,
   };

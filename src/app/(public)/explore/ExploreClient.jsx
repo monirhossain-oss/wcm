@@ -7,8 +7,10 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import FilterBar from '@/components/explore/FilterBar';
 import SkeletonLoader from '@/components/explore/SkeletonLoader';
 import ListingGrid from '@/components/ListingGrid';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function ExploreClient({ serverCategory, serverContinent, serverSearch }) {
+    const { locale, t } = useLocale();
     const { category, continent, search } = useExploreQuery();
 
     const [listings, setListings] = useState([]);
@@ -39,6 +41,7 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
                 ...(category !== 'All' && { category }),
                 ...(continent !== 'All Regions' && { continent }),
                 ...(search && { search })
+                ,...(locale !== 'en' && { language: locale })
             };
 
             const res = await axios.get(
@@ -65,7 +68,9 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
             setLoading(false);
             setFetchingMore(false);
         }
-    }, [category, continent, search]);
+    // loading flags only guard duplicate calls; query inputs define the request identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [category, continent, search, locale]);
 
     useEffect(() => {
         fetchListings(true);
@@ -100,7 +105,7 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
                             {fetchingMore && (
                                 <div className="flex items-center gap-2 text-orange-500 font-medium">
                                     <Loader2 className="animate-spin" size={20} />
-                                    Loading more...
+                                    {t('actions.loadMore')}
                                 </div>
                             )}
                             {!hasMore && total > 0 && (
@@ -115,7 +120,7 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
                         </div>
                         <h3 className="text-xl font-bold dark:text-white">No listings found</h3>
                         <p className="text-zinc-500 text-sm max-w-xs mx-auto mt-2">
-                            We couldn't find anything matching your current filters or search.
+                            We couldn&apos;t find anything matching your current filters or search.
                         </p>
                     </div>
                 )}

@@ -6,6 +6,8 @@ export async function generateMetadata() {
     const seoData = await getSeoByPage('privacy');
 
     return {
+        alternates: { canonical: '/privacy-policy', languages: { en: '/privacy-policy', fr: '/fr/privacy-policy', 'x-default': '/privacy-policy' } },
+        openGraph: { url: '/privacy-policy', locale: 'en_US', type: 'website' },
         title: seoData?.title || 'Privacy Policy | World Culture Marketplace',
         description: seoData?.description || 'Learn how World Culture Marketplace collects, uses, and protects your data.',
         keywords: seoData?.keywords?.length ? seoData.keywords : ['Privacy', 'Policy', 'WCM', 'Data Protection'],

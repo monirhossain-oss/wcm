@@ -2,10 +2,10 @@ import CreatorSlider from "./CreatorSlider";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
-export default async function CreatorDataWrapper() {
+export default async function CreatorDataWrapper({ locale = 'en' }) {
     try {
         const res = await fetch(
-            `${API_BASE_URL}/api/users/famous-creators?limit=12&offset=0`,
+            `${API_BASE_URL}/api/users/famous-creators?limit=12&offset=0${locale === 'en' ? '' : `&language=${locale}`}`,
             { next: { revalidate: 30 } } 
         );
 

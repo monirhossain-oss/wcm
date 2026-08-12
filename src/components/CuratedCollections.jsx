@@ -1,10 +1,10 @@
 import ListingCard from '@/components/ListingCard';
 import Link from 'next/link';
 
-async function getCuratedData() {
+async function getCuratedData(locale = 'en') {
     try {
         const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/api/listings/curated`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/api/listings/curated${locale === 'en' ? '' : `?language=${locale}`}`,
             {
                 next: { revalidate: 60 }
             }
@@ -25,8 +25,8 @@ async function getCuratedData() {
     }
 }
 
-export default async function CuratedCollections() {
-    const collections = await getCuratedData();
+export default async function CuratedCollections({ locale = 'en' }) {
+    const collections = await getCuratedData(locale);
 
     if (!collections.length) return null;
 
@@ -50,7 +50,7 @@ export default async function CuratedCollections() {
                             </h2>
 
                             <Link
-                                href={`/explore/${collection.categorySlug}`}
+                                href={`${locale === 'en' ? '' : `/${locale}`}/explore/${collection.categorySlug}`}
                                 className="text-xs md:text-sm font-semibold text-orange-600 hover:text-orange-700 transition"
                             >
                                 View All →

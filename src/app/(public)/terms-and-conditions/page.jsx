@@ -7,6 +7,8 @@ export async function generateMetadata() {
     const seoData = await getSeoByPage('terms');
  
     return {
+        alternates: { canonical: '/terms-and-conditions', languages: { en: '/terms-and-conditions', fr: '/fr/terms-and-conditions', 'x-default': '/terms-and-conditions' } },
+        openGraph: { url: '/terms-and-conditions', locale: 'en_US', type: 'website' },
         title: seoData?.title || 'Terms & Conditions | World Culture Marketplace',
         description: seoData?.description || 'Read the terms and conditions for using World Culture Marketplace.',
         keywords: seoData?.keywords?.length ? seoData.keywords : ['Terms', 'Conditions', 'WCM', 'Legal'],

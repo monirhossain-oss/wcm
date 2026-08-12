@@ -8,6 +8,7 @@ import { FiAlertCircle } from 'react-icons/fi';
 import emailjs from '@emailjs/browser';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
+import { useLocale } from '@/context/LocaleContext';
 
 // API instance
 const api = axios.create({
@@ -16,6 +17,7 @@ const api = axios.create({
 });
 
 const BlogCard = () => {
+  const { locale, localize } = useLocale();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadMoreLoading, setLoadMoreLoading] = useState(false);
@@ -33,7 +35,7 @@ const BlogCard = () => {
       if (isLoadMore) setLoadMoreLoading(true);
       else setLoading(true);
 
-      const res = await api.get(`/api/blogs?offset=${currentOffset}&limit=${limit}`);
+      const res = await api.get(`/api/blogs?offset=${currentOffset}&limit=${limit}${locale === 'en' ? '' : `&language=${locale}`}`);
 
       const newBlogs = res.data.blogs;
 
@@ -56,8 +58,11 @@ const BlogCard = () => {
 
   // মাউন্ট হওয়ার সময় প্রথমবার ডাটা লোড
   useEffect(() => {
+    setOffset(0);
     fetchBlogs(0, false);
-  }, []);
+  // fetchBlogs is intentionally recreated for the active locale.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
   // ২. Load More হ্যান্ডলার (Offset আপডেট)
   const handleLoadMore = () => {
@@ -108,7 +113,7 @@ const BlogCard = () => {
           {blogs.map((blog) => (
             <div key={blog._id} className="group flex flex-col cursor-pointer">
               <Link
-                href={`/blogs/${blog.slug}`}
+                href={localize(`/blogs/${blog.slug}`)}
                 className="relative aspect-4/3 overflow-hidden rounded-2xl mb-6 bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800"
               >
                 <Image
@@ -126,7 +131,7 @@ const BlogCard = () => {
               </Link>
 
               <div className="space-y-3 px-1">
-                <Link href={`/blogs/${blog.slug}`}>
+                <Link href={localize(`/blogs/${blog.slug}`)}>
                   <h3 className="text-2xl font-bold font-serif text-zinc-900 dark:text-white leading-tight transition-colors group-hover:text-orange-500 line-clamp-2">
                     {blog.title}
                   </h3>
@@ -136,7 +141,7 @@ const BlogCard = () => {
                 </p>
                 <div className="pt-2">
                   <Link
-                    href={`/blogs/${blog.slug}`}
+                    href={localize(`/blogs/${blog.slug}`)}
                     className="inline-flex items-center gap-1 text-orange-500 font-black text-[10px] uppercase tracking-widest group/link"
                   >
                     Read More
@@ -183,7 +188,7 @@ const BlogCard = () => {
             Stay Informed
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400 text-sm md:text-base leading-relaxed font-medium">
-            Receive our curated weekly blogs featuring the world's{' '}
+            Receive our curated weekly blogs featuring the world&apos;s{' '}
             <br className="hidden md:block" />
             most captivating cultural narratives.
           </p>

@@ -1,29 +1,47 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import api, { getDashboard, getRecords } from './_services/translationCentreApi';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import api, {
+  enqueueBulkOperation,
+  exportTranslationOperations,
+  getDashboard,
+  getOperationalAlerts,
+  getOperationalHealth,
+  getRecords,
+} from './_services/translationCentreApi';
 
 const TYPES = ['listing', 'creatorProfile', 'category', 'blog', 'faq', 'cms'];
 
 export default function TranslationCentrePage() {
+  const router = useRouter();
   const [dashboard, setDashboard] = useState(null);
+  const [health, setHealth] = useState(null);
+  const [alerts, setAlerts] = useState([]);
   const [result, setResult] = useState({ records: [], pagination: {} });
   const [filters, setFilters] = useState({ businessObjectType: '', languageCode: '', translationStatus: '', publicationStatus: '', creatorId: '', search: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [creatorSuggestions, setCreatorSuggestions] = useState([]);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const loadRef = useRef(null);
 
   const load = async (page = 1) => {
     setLoading(true); setError('');
     try {
       const params = Object.fromEntries(Object.entries({ ...filters, page, limit: 20 }).filter(([, value]) => value));
-      const [dashboardResponse, recordsResponse] = await Promise.all([getDashboard(), getRecords(params)]);
-      setDashboard(dashboardResponse.data.data); setResult(recordsResponse.data.data);
+      const [dashboardResponse, recordsResponse, healthResponse, alertsResponse] = await Promise.all([getDashboard(), getRecords(params), getOperationalHealth(), getOperationalAlerts()]);
+      setDashboard(dashboardResponse.data.data); setResult(recordsResponse.data.data); setHealth(healthResponse.data.data); setAlerts(alertsResponse.data.data || []);
     } catch (requestError) { setError(requestError.response?.data?.message || 'Unable to load Translation Centre.'); }
     finally { setLoading(false); }
   };
-  useEffect(() => { load(); }, []); // Initial dashboard and record list.
+  loadRef.current = load;
+  useEffect(() => {
+    const initial = setTimeout(() => loadRef.current?.(), 0);
+    return () => clearTimeout(initial);
+  }, []);
   useEffect(() => {
     const term = filters.creatorId.trim();
     if (term.length < 2 || /^[a-f\d]{24}$/i.test(term)) { setCreatorSuggestions([]); return; }
@@ -38,14 +56,43 @@ export default function TranslationCentrePage() {
   const submit = (event) => { event.preventDefault(); load(); };
   const set = (key, value) => setFilters((current) => ({ ...current, [key]: value }));
   const count = (items, name) => items?.find((item) => item._id === name)?.count || 0;
+  const activeFilters = () => Object.fromEntries(
+    Object.entries(filters).filter(([, value]) => value)
+  );
+  const startBulkRegeneration = async () => {
+    setBulkLoading(true); setError('');
+    try {
+      const response = await enqueueBulkOperation({ operation: 'regenerate', filters: activeFilters() });
+      router.push(`/admin/translations/bulk/${response.data.data.bulkOperationId}`);
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Unable to enqueue the bulk regeneration.');
+    } finally { setBulkLoading(false); }
+  };
+  const exportOperations = async () => {
+    setExporting(true); setError('');
+    try {
+      const response = await exportTranslationOperations(activeFilters());
+      const url = URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'WCM_Translation_Operations.xlsx';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Unable to export translation operations.');
+    } finally { setExporting(false); }
+  };
 
   return <section className="space-y-6 text-gray-900 dark:text-gray-100">
-    <div><h1 className="text-2xl font-bold">Translation Centre</h1><p className="text-sm text-gray-500">English-only operational view of multilingual records and jobs.</p></div>
+    <div className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-2xl font-bold">Translation Centre</h1><p className="text-sm text-gray-500">English-only operational view of multilingual records and jobs.</p></div><div className="flex flex-wrap gap-2"><Link href="/admin/translations/publishing-policies" className="rounded border px-3 py-2 text-sm">Publishing policies</Link><button onClick={exportOperations} disabled={exporting} className="rounded border px-3 py-2 text-sm disabled:opacity-50">{exporting ? 'Exporting…' : 'Export Excel'}</button><button onClick={startBulkRegeneration} disabled={bulkLoading} className="rounded bg-orange-500 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">{bulkLoading ? 'Queueing…' : 'Bulk regenerate current filters'}</button></div></div>
     <div className="grid gap-3 md:grid-cols-4">
       <Metric label="Published" value={count(dashboard?.records?.byPublication, 'published')} />
       <Metric label="Needs attention" value={count(dashboard?.records?.byStatus, 'outdated') + count(dashboard?.records?.byStatus, 'failed')} />
       <Metric label="Queued jobs" value={count(dashboard?.jobs, 'queued') + count(dashboard?.jobs, 'retry_scheduled')} />
       <Metric label="AI tokens" value={dashboard?.usage?.reduce((total, item) => total + (item.totalTokens || 0), 0) || 0} />
+      <Metric label="High confidence" value={count(dashboard?.records?.confidence, 0.8)} />
+      <Metric label="Provider" value={health?.provider?.available ? 'Available' : 'Unavailable'} />
+      <Metric label="Open alerts" value={alerts.filter((alert) => alert.status === 'open').length} />
     </div>
     <form onSubmit={submit} className="grid gap-3 rounded border bg-white p-4 dark:bg-black md:grid-cols-4">
       <input value={filters.search} onChange={(e) => set('search', e.target.value)} placeholder="Search text, record ID, or object ID" className="rounded border p-2 md:col-span-2" />

@@ -2,6 +2,8 @@ import React from 'react';
 import { privacyPolicy } from '@/content/legalPages';
 
 export const metadata = {
+  alternates: { canonical: '/fr/privacy-policy', languages: { en: '/privacy-policy', fr: '/fr/privacy-policy', 'x-default': '/privacy-policy' } },
+  openGraph: { url: '/fr/privacy-policy', locale: 'fr_FR', type: 'website' },
   title: 'Politique de confidentialité | World Culture Marketplace',
   description:
     'Consultez la politique de confidentialité (version française) de World Culture Marketplace.',
@@ -62,4 +64,3 @@ export default function PrivacyPolicyFrPage() {
     </div>
   );
 }
-

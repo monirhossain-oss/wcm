@@ -3,9 +3,9 @@ import ListingsProviderWrapper from './ListingsProviderWrapper';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
-export default async function TrendingDataWrapper() {
+export default async function TrendingDataWrapper({ locale = 'en' }) {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/listings/trending?limit=8&page=1`, {
+    const res = await fetch(`${API_BASE_URL}/api/listings/trending?limit=8&page=1${locale === 'en' ? '' : `&language=${locale}`}`, {
       next: { revalidate: 60 }, // 60 seconds revalidation
     });
 

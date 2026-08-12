@@ -3,7 +3,7 @@ import ListingSkeleton from './ListingSkeleton';
 import TrendingDataWrapper from './TrendingDataWrapper';
 import Link from 'next/link';
 
-export default function TrendingListings() {
+export default function TrendingListings({ locale = 'en' }) {
   return (
     <section className="w-full py-8 bg-white dark:bg-zinc-950">
       <div className="max-w-7xl mx-auto px-6">
@@ -21,13 +21,13 @@ export default function TrendingListings() {
 
         {/* Streaming Data */}
         <Suspense fallback={<ListingSkeleton />}>
-          <TrendingDataWrapper />
+          <TrendingDataWrapper locale={locale} />
         </Suspense>
 
         {/* View All Button */}
         <div className="mt-8 flex justify-center">
           <Link
-            href="/explore"
+            href={locale === 'en' ? '/explore' : `/${locale}/explore`}
             prefetch={true}
             className="group flex items-center gap-2 px-8 py-3 border-2 border-orange-500 text-orange-500 font-bold text-sm rounded-full hover:bg-orange-500 hover:text-white transition-all duration-300 shadow-md hover:shadow-orange-200"
           >
