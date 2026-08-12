@@ -1,8 +1,8 @@
 import React from 'react';
 
-const TableOfContents = ({ toc }) => (
+const TableOfContents = ({ toc, label = 'Table of Contents' }) => (
     <div className="bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#F57C00] mb-4">Table of Contents</p>
+        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#F57C00] mb-4">{label}</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5">
             {toc.map((item, i) => (
                 <div key={i} className="flex items-center gap-3 text-[13px] text-gray-500 dark:text-gray-500">

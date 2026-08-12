@@ -152,13 +152,14 @@ export default function TranslationRecordDetailsPage() {
     {notice && <p className="rounded bg-green-50 p-3 text-green-700">{notice}</p>}
     {isLockedByOther && <p className="rounded bg-amber-50 p-3 text-amber-800">Editing is currently locked by another administrator until {new Date(editLock.expiresAt).toLocaleTimeString()}.</p>}
     <div className="flex flex-wrap gap-2">
-      {canApprove && <button onClick={() => action('approve', 'post')} className="rounded bg-green-600 px-3 py-2 text-sm text-white">Approve</button>}
+      {canApprove && <button onClick={() => action('approve', 'post')} className="rounded bg-green-600 px-3 py-2 text-sm text-white">Approve &amp; Publish</button>}
       <button onClick={() => action('verify', 'patch')} className="rounded bg-blue-600 px-3 py-2 text-sm text-white">Verify</button>
       <button onClick={regenerate} className="rounded bg-violet-600 px-3 py-2 text-sm text-white">Generate AI proposal</button>
       <button onClick={() => action('unpublish', 'patch', { reason: 'Admin action from Translation Centre' })} className="rounded border px-3 py-2 text-sm">Unpublish</button>
       <button onClick={() => action('archive', 'patch')} className="rounded border px-3 py-2 text-sm">Archive</button>
     </div>
 
+    <Panel title="English / translation comparison"><div className="grid gap-3 lg:grid-cols-2"><Comparison title="English source" value={data.sourceContent} /><Comparison title={record.languageCode === 'fr' ? 'French translation' : 'Current translation'} value={record.content} /></div></Panel>
     <Panel title="Translation editing">
       {!editing ? <div className="flex flex-wrap items-center gap-3"><p className="text-sm text-gray-600">Content and SEO edits create an append-only version and preserve the current publication state.</p><button onClick={beginEditing} disabled={Boolean(isLockedByOther)} className="rounded bg-orange-500 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">Start editing</button></div> : <div className="space-y-4"><p className="text-sm text-green-700">Your edit lock expires at {new Date(lock.expiresAt).toLocaleTimeString()} and refreshes automatically.</p><label className="block text-sm font-medium">Translated content (JSON)<textarea value={contentText} onChange={(event) => setContentText(event.target.value)} className="mt-1 h-56 w-full rounded border p-3 font-mono text-xs" /></label><label className="block text-sm font-medium">Localized SEO (JSON)<textarea value={seoText} onChange={(event) => setSeoText(event.target.value)} className="mt-1 h-44 w-full rounded border p-3 font-mono text-xs" /></label><div className="flex gap-2"><button onClick={saveEdit} disabled={saving} className="rounded bg-orange-500 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">{saving ? 'Saving…' : 'Save edit'}</button><button onClick={stopEditing} className="rounded border px-3 py-2 text-sm">Cancel editing</button></div></div>}
     </Panel>

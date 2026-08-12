@@ -1,7 +1,8 @@
 import React from 'react';
+import { localizeValue } from '@/lib/staticPageLocalization';
 
-const PpcPromotion = () => {
-    return (
+const PpcPromotion = ({ translations }) => {
+    return localizeValue((
         <div className="relative overflow-hidden rounded-2xl">
             {/* Background Glow Effect */}
             {/* <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-orange-500 opacity-[0.06] blur-[80px] rounded-full translate-x-1/4 -translate-y-1/4" />
@@ -50,7 +51,7 @@ const PpcPromotion = () => {
                 {/* Summary Statement */}
                 <div className="mt-16 p-8 rounded-3xl border border-orange-100 dark:border-orange-500/10 bg-orange-50/30 dark:bg-orange-500/[0.01]">
                     <p className="text-zinc-700 dark:text-zinc-300 text-lg leading-relaxed text-center italic">
-                        "This allows creators to manage how much they spend while promoting their cultural creations."
+                        {'"This allows creators to manage how much they spend while promoting their cultural creations."'}
                     </p>
                 </div>
 
@@ -62,7 +63,7 @@ const PpcPromotion = () => {
                 </div>
             </div>
         </div>
-    );
+    ), translations);
 };
 
 export default PpcPromotion;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
 import Hero from '@/components/Advertising/Hero';
 import TableOfContents from '@/components/Advertising/TableOfContents';
 import ContactSection from '@/components/Advertising/ContactSection';
@@ -6,7 +7,28 @@ import { PolicySection } from '@/components/Advertising/PolicySection';
 import { PolicyCard } from '@/components/Advertising/PolicyCard';
 import { Ul, Divider, Sub } from '@/components/Advertising/SharedComponents';
 
-const AdvertisingPolicyPage = () => {
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+
+const getPublishedContent = async (languageCode) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/translations/static-pages/advertising-policy/${languageCode}`, { next: { revalidate: 60 } });
+        if (!response.ok) return null;
+        const payload = await response.json();
+        return payload.data?.content || null;
+    } catch {
+        return null;
+    }
+};
+
+const AdvertisingPolicyPage = async ({ locale = 'en' } = {}) => {
+    const englishContent = await getPublishedContent('en');
+    if (!englishContent) {
+        return <main className="mx-auto max-w-4xl px-6 py-20"><p>Advertising Policy is temporarily unavailable.</p></main>;
+    }
+    const localizedContent = !locale || locale === 'en'
+        ? englishContent
+        : (await getPublishedContent(locale)) || englishContent;
+    const translations = buildTranslationMap(englishContent, localizedContent);
     const toc = [
         'Scope of Advertising Services', 'Advertiser Eligibility', 'Advertising Content Requirements',
         'Approval & Review Process', 'Fees, Payments & Billing', 'Ad Delivery, Performance & Limitations',
@@ -15,22 +37,22 @@ const AdvertisingPolicyPage = () => {
         'No Exclusivity', 'Indemnification', 'Modifications', 'Contact Information', 'Governing Law'
     ];
 
-    return (
+    return localizeValue((
         <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0C0C0B]">
-            <Hero />
+            <Hero content={localizedContent.hero} />
 
             <div className="max-w-4xl mx-auto px-6 py-16 space-y-14">
 
                 {/* ── INTRO ── */}
                 <div className="bg-orange-50 dark:bg-orange-500/[0.07] border border-orange-100 dark:border-orange-500/20 rounded-2xl p-6 text-[14.5px] leading-relaxed text-gray-700 dark:text-gray-300 space-y-3">
                     <p>
-                        These Advertising & Sponsored Content Rules <strong className="text-gray-900 dark:text-white">("Advertising Terms")</strong> govern
+                        These Advertising & Sponsored Content Rules <strong className="text-gray-900 dark:text-white">{`("Advertising Terms")`}</strong> govern
                         the purchase, submission, display, and management of advertising and paid promotional content{' '}
-                        <strong className="text-gray-900 dark:text-white">("Ads")</strong> on the World Culture Marketplace platform{' '}
-                        <strong className="text-gray-900 dark:text-white">("WCM", "we", "our")</strong>.
+                        <strong className="text-gray-900 dark:text-white">{`("Ads")`}</strong> on the World Culture Marketplace platform{' '}
+                        <strong className="text-gray-900 dark:text-white">{`("WCM", "we", "our")`}</strong>.
                     </p>
                     <p>
-                        Advertisers <strong className="text-gray-900 dark:text-white">("You", "Advertiser", "Client")</strong> must comply with these Terms as well as:
+                        Advertisers <strong className="text-gray-900 dark:text-white">{`("You", "Advertiser", "Client")`}</strong> must comply with these Terms as well as:
                     </p>
                     <Ul items={[
                         'the WCM Terms & Conditions',
@@ -42,7 +64,7 @@ const AdvertisingPolicyPage = () => {
                     </p>
                 </div>
 
-                <TableOfContents toc={toc} />
+                <TableOfContents toc={toc} label={localizedContent.tableOfContentsLabel} />
 
                 <Divider />
 
@@ -309,7 +331,7 @@ const AdvertisingPolicyPage = () => {
                             </div>
 
                             <p className="text-[13.5px] leading-relaxed text-gray-500 dark:text-gray-400 border-t border-amber-100 dark:border-amber-900/20 pt-4 italic">
-                                WCM may adjust layout or formatting for editorial consistency to ensure all sponsored content blends seamlessly with the platform's visual standards.
+                                WCM may adjust layout or formatting for editorial consistency to ensure all sponsored content blends seamlessly with the platform&apos;s visual standards.
                             </p>
                         </div>
                     </div>
@@ -496,14 +518,14 @@ const AdvertisingPolicyPage = () => {
 
                 <Divider />
 
-                <ContactSection />
+                <ContactSection content={localizedContent.contact} />
                 {/* 15. Governing Law */}
                 <PolicySection number="Section 15" title="Governing Law">
                     <p>These Advertising Terms shall be governed by the laws of France.Any disputes shall be subject to the jurisdiction of the courts of Paris, France, unless otherwise required by applicable law.</p>
                 </PolicySection>
             </div>
         </div>
-    );
+    ), translations);
 };
 
 export default AdvertisingPolicyPage;

@@ -39,6 +39,11 @@ export const exportTranslationOperations = (params) =>
   api.get('/api/translations/admin/export.xlsx', { params, responseType: 'blob' });
 export const getTranslationPermissions = () => api.get('/api/translations/admin/permissions');
 export const getReviewQueue = (params) => api.get('/api/translations/admin/review-queue', { params });
+export const getStaticPages = () => api.get('/api/translations/admin/static-pages');
+export const getStaticPageEditor = (pageKey, languageCode = 'fr') =>
+  api.get(`/api/translations/admin/static-pages/${pageKey}/${languageCode}`);
+export const publishStaticPage = (pageKey, content, languageCode = 'fr') =>
+  api.put(`/api/translations/admin/static-pages/${pageKey}/${languageCode}/publish`, { content });
 export const assignReviewTask = (taskId, assigneeId) => api.post(`/api/translations/admin/review-tasks/${taskId}/assign`, { assigneeId });
 export const claimReviewTask = (taskId) => api.post(`/api/translations/admin/review-tasks/${taskId}/claim`);
 export const getTranslationRoles = () => api.get('/api/translations/admin/roles');

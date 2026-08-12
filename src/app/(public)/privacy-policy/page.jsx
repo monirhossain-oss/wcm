@@ -1,5 +1,19 @@
 ﻿import React from 'react';
 import { getSeoByPage } from '@/lib/api';
+import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
+
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+
+const getPublishedContent = async (languageCode) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/translations/static-pages/privacy-policy/${languageCode}`, { next: { revalidate: 60 } });
+        if (!response.ok) return null;
+        const payload = await response.json();
+        return payload.data?.content || null;
+    } catch {
+        return null;
+    }
+};
 
 // এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/privacy) theke title/description/keywords
 export async function generateMetadata() {
@@ -72,7 +86,7 @@ const Divider = () => (
     <div className="border-t border-dashed border-gray-200 dark:border-gray-800" />
 );
 
-const PrivacyPolicyPage = () => {
+const PrivacyPolicyContent = () => {
     return (
         <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0C0C0B]">
 
@@ -107,7 +121,7 @@ const PrivacyPolicyPage = () => {
                 {/* Intro block */}
                 <div className="bg-orange-50 dark:bg-orange-500/[0.07] border border-orange-100 dark:border-orange-500/20 rounded-2xl p-6 text-[14.5px] leading-relaxed text-gray-700 dark:text-gray-300 space-y-3">
                     <p>
-                        This Privacy Policy explains how <strong className="text-gray-900 dark:text-white">World Culture Marketplace ("WCM", "we", "us", "our")</strong> collects,
+                        This Privacy Policy explains how <strong className="text-gray-900 dark:text-white">{'World Culture Marketplace ("WCM", "we", "us", "our")'}</strong> collects,
                         stores, processes, and protects your personal data when you visit or use{' '}
                         <a
                             href="https://worldculturemarketplace.com"
@@ -115,7 +129,7 @@ const PrivacyPolicyPage = () => {
                         >
                             worldculturemarketplace.com
                         </a>{' '}
-                        (the "Platform").
+                        {'(the "Platform").'}
                     </p>
                     <div className="pt-1">
                         <p className="font-semibold text-gray-900 dark:text-white text-[13px] mb-2">We comply with:</p>
@@ -449,4 +463,13 @@ const PrivacyPolicyPage = () => {
     );
 };
 
-export default PrivacyPolicyPage;
+export default async function PrivacyPolicyPage({ locale = 'en' } = {}) {
+    const englishContent = await getPublishedContent('en');
+    if (!englishContent) {
+        return <main className="mx-auto max-w-4xl px-6 py-20"><p>Privacy Policy is temporarily unavailable.</p></main>;
+    }
+    const localizedContent = !locale || locale === 'en'
+        ? englishContent
+        : (await getPublishedContent(locale)) || englishContent;
+    return localizeValue(PrivacyPolicyContent(), buildTranslationMap(englishContent, localizedContent));
+}

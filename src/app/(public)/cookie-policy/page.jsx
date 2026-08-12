@@ -1,5 +1,19 @@
 ﻿import React from 'react';
 
+import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
+
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+const getPublishedContent = async (languageCode) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/translations/static-pages/cookie-policy/${languageCode}`, { next: { revalidate: 60 } });
+        if (!response.ok) return null;
+        const payload = await response.json();
+        return payload.data?.content || null;
+    } catch {
+        return null;
+    }
+};
+
 export const metadata = {
     title: 'Cookie Policy | World Culture Marketplace',
     description: 'Learn how World Culture Marketplace uses cookies.',
@@ -97,7 +111,7 @@ const CookieTypeCard = ({ title, tag, tagColor, items, note }) => {
 };
 
 /* ── Main Page ── */
-const CookiePolicy = () => {
+const CookiePolicyContent = () => {
     const toc = [
         'What Are Cookies?',
         'Types of Cookies We Use',
@@ -138,8 +152,7 @@ const CookiePolicy = () => {
 
                 {/* ── INTRO ── */}
                 <div className="mb-10 bg-orange-50 dark:bg-orange-500/[0.07] border-l-4 border-[#F57C00] px-5 py-4 rounded-r-2xl text-[14px] leading-relaxed text-gray-700 dark:text-gray-300">
-                    This Cookie Policy explains how World Culture Marketplace ("WCM", "we", "our") uses cookies and similar
-                    tracking technologies on{' '}
+                    {'This Cookie Policy explains how World Culture Marketplace ("WCM", "we", "our") uses cookies and similar tracking technologies on'}{' '}
                     <a href="https://worldculturemarketplace.com" className="text-[#F57C00] font-semibold underline underline-offset-2 hover:opacity-80 transition-opacity">
                         worldculturemarketplace.com
                     </a>.{' '}
@@ -295,7 +308,7 @@ const CookiePolicy = () => {
                             'Advertising networks',
                         ]} />
                         <NoteBox variant="warning">
-                            <strong>WCM does not control or govern third-party cookie behavior.</strong> These providers may use cookies independently. Users should review each provider's privacy policy for more details.
+                            <strong>WCM does not control or govern third-party cookie behavior.</strong> {"These providers may use cookies independently. Users should review each provider's privacy policy for more details."}
                         </NoteBox>
                     </SectionBlock>
 
@@ -364,7 +377,7 @@ const CookiePolicy = () => {
                     {/* 7 — Changes */}
                     <SectionBlock number="Section 07" title="Changes to This Cookie Policy">
                         <p>
-                            WCM may update this Policy without prior notice. Updates will be reflected with a new "Last updated" date at the top of this page.
+                            {'WCM may update this Policy without prior notice. Updates will be reflected with a new "Last updated" date at the top of this page.'}
                         </p>
                         <NoteBox>
                             We encourage you to review this Policy periodically to stay informed about how we use cookies.
@@ -469,4 +482,13 @@ const CookiePolicy = () => {
     );
 };
 
-export default CookiePolicy;
+export default async function CookiePolicy({ locale = 'en' } = {}) {
+    const englishContent = await getPublishedContent('en');
+    if (!englishContent) {
+        return <main className="mx-auto max-w-4xl px-6 py-20"><p>Cookie Policy is temporarily unavailable.</p></main>;
+    }
+    const localizedContent = !locale || locale === 'en'
+        ? englishContent
+        : (await getPublishedContent(locale)) || englishContent;
+    return localizeValue(CookiePolicyContent(), buildTranslationMap(englishContent, localizedContent));
+}

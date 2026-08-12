@@ -1,31 +1,32 @@
 import React from 'react';
+import { localizeValue } from '@/lib/staticPageLocalization';
 
-const BoostPricing = () => {
+const BoostPricing = ({ translations, businessValues }) => {
     const pricingData = [
         {
             type: "Starter Boost",
-            price: "€12",
-            duration: "7 days",
+            price: `€${businessValues.starter.priceEur}`,
+            duration: `${businessValues.starter.durationDays} days`,
             placement: "boosted search + category pages",
             highlight: false
         },
         {
             type: "Standard Boost",
-            price: "€29",
-            duration: "14 days",
+            price: `€${businessValues.standard.priceEur}`,
+            duration: `${businessValues.standard.durationDays} days`,
             placement: "search + category + explore sections",
             highlight: true
         },
         {
             type: "Premium Boost",
-            price: "€79",
-            duration: "30 days",
+            price: `€${businessValues.premium.priceEur}`,
+            duration: `${businessValues.premium.durationDays} days`,
             placement: "homepage + search + featured collections",
             highlight: false
         }
     ];
 
-    return (
+    return localizeValue((
         <div className="relative overflow-hidden border-b rounded-2xl border-gray-200 dark:border-zinc-800 bg-white dark:bg-[#0F0F0E] rounded-2xl">
             {/* Background Glow Effect */}
             {/* <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-orange-500 opacity-[0.06] blur-[80px] rounded-full translate-x-1/4 -translate-y-1/4" />
@@ -93,7 +94,7 @@ const BoostPricing = () => {
                 </div>
             </div>
         </div>
-    );
+    ), translations);
 };
 
 export default BoostPricing;

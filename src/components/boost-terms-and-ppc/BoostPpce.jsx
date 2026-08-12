@@ -1,7 +1,8 @@
 import React from 'react';
+import { localizeValue } from '@/lib/staticPageLocalization';
 
-const BoostPpce = () => {
-    return (
+const BoostPpce = ({ translations }) => {
+    return localizeValue((
         <div className="relative overflow-hidden border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-[#0F0F0E] rounded-2xl">
             {/* Background Glow Effect */}
             {/* <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-orange-500 opacity-[0.06] blur-[80px] rounded-full translate-x-1/4 -translate-y-1/4" />
@@ -76,7 +77,7 @@ const BoostPpce = () => {
                 </div>
             </div>
         </div>
-    );
+    ), translations);
 };
 
 export default BoostPpce;

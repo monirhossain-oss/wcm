@@ -1,7 +1,8 @@
 import React from 'react';
+import { localizeValue } from '@/lib/staticPageLocalization';
 
-const BoostPromotion = () => {
-    return (
+const BoostPromotion = ({ translations }) => {
+    return localizeValue((
         <div className="relative overflow-hidden  rounded-2xl">
             {/* Background Glow Effect */}
             {/* <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-orange-500 opacity-[0.06] blur-[80px] rounded-full translate-x-1/4 -translate-y-1/4" />
@@ -50,7 +51,7 @@ const BoostPromotion = () => {
                 {/* Conclusion/Summary */}
                 <div className="mt-16 p-8 rounded-3xl border border-orange-100 dark:border-orange-500/10 bg-orange-50/30 dark:bg-orange-500/[0.01]">
                     <p className="text-zinc-700 dark:text-zinc-300 text-lg leading-relaxed text-center italic">
-                        "Boosted listings are clearly designed to help creators gain more exposure within the marketplace environment."
+                        {'"Boosted listings are clearly designed to help creators gain more exposure within the marketplace environment."'}
                     </p>
                 </div>
 
@@ -62,7 +63,7 @@ const BoostPromotion = () => {
                 </div>
             </div>
         </div>
-    );
+    ), translations);
 };
 
 export default BoostPromotion;

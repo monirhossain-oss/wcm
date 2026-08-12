@@ -1,6 +1,19 @@
 ﻿import Link from 'next/link';
 import React from 'react';
 import { getSeoByPage } from '@/lib/api';
+import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
+
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+const getPublishedContent = async (languageCode) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/translations/static-pages/terms-and-conditions/${languageCode}`, { next: { revalidate: 60 } });
+        if (!response.ok) return null;
+        const payload = await response.json();
+        return payload.data?.content || null;
+    } catch {
+        return null;
+    }
+};
 
 
 export async function generateMetadata() {
@@ -80,7 +93,7 @@ const TwoColList = ({ items }) => (
 );
 
 /* ── Main Page ── */
-const TermsAndConditions = () => {
+const TermsAndConditionsContent = () => {
   const toc = [
     'Introduction', 'Definitions', 'About WCM', 'Eligibility',
     'Account Registration', 'Acceptable Use Policy', 'Platform Content',
@@ -137,12 +150,11 @@ const TermsAndConditions = () => {
           {/* 1 */}
           <SectionBlock number="Section 01" title="Introduction">
             <p>
-              Welcome to World Culture Marketplace ("WCM", "we", "us", "our"). These Terms & Conditions ("Terms")
-              govern your access to and use of the website{' '}
+              {'Welcome to World Culture Marketplace ("WCM", "we", "us", "our"). These Terms & Conditions ("Terms") govern your access to and use of the website'}{' '}
               <a href="https://worldculturemarketplace.com" className="text-[#F57C00] font-semibold underline underline-offset-2 hover:opacity-80 transition-opacity">
                 worldculturemarketplace.com
               </a>{' '}
-              (the "Platform").
+              {'(the "Platform").'}
             </p>
             <p>
               By accessing or using the Platform, you agree to be bound by these Terms. If you do not agree, please do not use the Platform.
@@ -253,7 +265,7 @@ const TermsAndConditions = () => {
 
             <SubHeading>7.2 — User-Generated Content</SubHeading>
             <p>Creators retain ownership of their submitted content.</p>
-            <p>By submitting content, you grant WCM a <strong className="text-gray-900 dark:text-white">non-exclusive, worldwide, royalty-free, transferable license</strong> to publish, display, host, distribute, adapt, and promote your content as part of the Platform's operations.</p>
+            <p>By submitting content, you grant WCM a <strong className="text-gray-900 dark:text-white">non-exclusive, worldwide, royalty-free, transferable license</strong> {"to publish, display, host, distribute, adapt, and promote your content as part of the Platform's operations."}</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
               {[
@@ -326,7 +338,7 @@ const TermsAndConditions = () => {
 
           {/* 11 */}
           <SectionBlock number="Section 11" title="Disclaimers">
-            <p>WCM provides the Platform <em>"as is"</em> without guarantees of:</p>
+            <p>WCM provides the Platform <em>{'"as is"'}</em> without guarantees of:</p>
             <TwoColList items={[
               'Uninterrupted operation', 'Accuracy of cultural information',
               'Error-free performance', 'Continuous availability',
@@ -334,7 +346,7 @@ const TermsAndConditions = () => {
             ]} />
             <div className="mt-4 bg-orange-50 dark:bg-orange-500/[0.06] border border-orange-100 dark:border-orange-500/15 rounded-xl p-4 text-right">
               <p className="text-[13.5px] italic text-gray-600 dark:text-gray-400 border-r-4 border-[#F57C00] pr-4">
-                "WCM does not provide academic or anthropological certification of cultural content."
+                {'"WCM does not provide academic or anthropological certification of cultural content."'}
               </p>
             </div>
           </SectionBlock>
@@ -484,4 +496,13 @@ const TermsAndConditions = () => {
   );
 };
 
-export default TermsAndConditions;
+export default async function TermsAndConditions({ locale = 'en' } = {}) {
+    const englishContent = await getPublishedContent('en');
+    if (!englishContent) {
+        return <main className="mx-auto max-w-4xl px-6 py-20"><p>Terms &amp; Conditions are temporarily unavailable.</p></main>;
+    }
+    const localizedContent = !locale || locale === 'en'
+        ? englishContent
+        : (await getPublishedContent(locale)) || englishContent;
+    return localizeValue(TermsAndConditionsContent(), buildTranslationMap(englishContent, localizedContent));
+}
