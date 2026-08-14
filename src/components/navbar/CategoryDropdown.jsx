@@ -17,6 +17,7 @@ const CategoryDropdown = ({ categories, menuItems }) => {
     const categoryRef = useRef(null);
     const pathname = usePathname();
     const { locale, localize, t } = useLocale();
+    const normalizedPathname = pathname.replace(/^\/fr(?=\/|$)/, '') || '/';
 
     // Listener is only attached while the dropdown is actually open —
     // avoids a permanently-live document listener doing nothing 99% of the time.
@@ -36,7 +37,7 @@ const CategoryDropdown = ({ categories, menuItems }) => {
     return (
         <>
             {menuItems.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = normalizedPathname === item.href;
 
                 if (item.name === 'Categories') {
                     return (
@@ -61,7 +62,7 @@ const CategoryDropdown = ({ categories, menuItems }) => {
                                             {categories.map((cat) => (
                                                 <Link
                                                     key={cat._id || cat.id}
-                                                    href={localize(`/explore/${createSlug(locale === 'fr' ? cat.localizedTitle : cat.title || cat.name)}`)}
+                                                    href={localize(`/explore/${createSlug(cat.title || cat.name)}`)}
                                                     onClick={() => setIsCategoryDropdownOpen(false)}
                                                     className="group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-[#F57C00]/40 hover:bg-orange-50 dark:hover:bg-orange-500/5 transition-all duration-150 cursor-pointer"
                                                 >
@@ -86,7 +87,7 @@ const CategoryDropdown = ({ categories, menuItems }) => {
                         className={`text-sm font-medium transition-all duration-200 pb-1 border-b-2
               ${isActive ? 'text-[#F57C00] border-[#F57C00]' : 'border-transparent hover:text-[#F57C00]'}`}
                     >
-                        {t(`common.${item.name.toLowerCase()}`, item.name)}
+                        {t(`navigation.${item.key}`, item.name)}
                     </Link>
                 );
             })}

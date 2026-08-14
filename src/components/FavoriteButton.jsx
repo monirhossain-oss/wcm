@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function FavoriteButton({ listingId, initialIsFavorited, API_BASE_URL }) {
   const { user, isBusinessRestricted } = useAuth();
+  const { t } = useLocale();
   const [isFavorited, setIsFavorited] = useState(Boolean(initialIsFavorited));
 
   useEffect(() => {
@@ -15,9 +17,9 @@ export default function FavoriteButton({ listingId, initialIsFavorited, API_BASE
   const handleToggle = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) return alert('Please login');
+    if (!user) return alert(t('favorites.login'));
     if (isBusinessRestricted) {
-      return alert('Your account can browse, but business actions are currently restricted.');
+      return alert(t('favorites.restricted'));
     }
 
     try {
@@ -34,10 +36,10 @@ export default function FavoriteButton({ listingId, initialIsFavorited, API_BASE
 
   return (
     <button
-      aria-label="favorite toggle"
+      aria-label={t('favorites.toggle')}
       onClick={handleToggle}
       disabled={isBusinessRestricted}
-      title={isBusinessRestricted ? 'Business actions are restricted for this account' : undefined}
+      title={isBusinessRestricted ? t('favorites.restrictedTitle') : undefined}
       className="absolute top-3 right-3 z-20 p-2 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-full shadow-lg opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 disabled:cursor-not-allowed disabled:grayscale"
     >
       {isFavorited ? (

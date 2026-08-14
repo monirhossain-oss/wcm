@@ -1,5 +1,6 @@
 import HeroSlider from "./HeroSlider";
 import HeroActions from "./HeroActions";
+import { translate } from "@/lib/i18n";
 
 async function getSliders() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
@@ -15,7 +16,7 @@ async function getSliders() {
   }
 }
 
-export default async function HeroSection() {
+export default async function HeroSection({ locale = 'en' }) {
   const initialSliders = await getSliders();
 
   return (
@@ -23,15 +24,15 @@ export default async function HeroSection() {
       <div className="relative z-10 w-full md:w-1/2 flex flex-col justify-center text-center md:text-left pt-10 md:pt-0">
         {/* ✅ এই H1 static — সাথে সাথে render হবে, LCP ঠিক হবে */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold leading-tight text-gray-900 dark:text-white">
-          Join a{" "}
+          {translate(locale, 'homeHero.headingLead')}{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F57C00] to-[#FFB347]">
-            growing global community
+            {translate(locale, 'homeHero.headingAccent')}
           </span>
-          <br className="hidden lg:block" /> of{" "}
-          <span className="text-[#F57C00]">artists & creators</span>
+          <br className="hidden lg:block" /> {translate(locale, 'homeHero.headingJoin')}
+          <span className="text-[#F57C00]">{translate(locale, 'homeHero.headingAudience')}</span>
         </h1>
         <p className="text-base sm:text-lg md:text-xl mt-2 max-w-lg text-gray-700 dark:text-gray-300 mx-auto md:mx-0">
-          WCM helps you gain visibility and connect with a global audience.
+          {translate(locale, 'homeHero.description')}
         </p>
         <div className="md:mt-8 z-[50] flex flex-wrap gap-4 justify-center md:justify-start">
           <HeroActions />

@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import LoginForm from './LoginForm';
+import { useLocale } from '@/context/LocaleContext';
 
-export default function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
-    const [mounted, setMounted] = useState(false);
+export default function LoginModal({ isOpen, onClose, onSwitchToRegister, onLoginSuccess }) {
+    const mounted = typeof document !== 'undefined';
+    const { t } = useLocale();
 
     useEffect(() => {
-        setMounted(true);
         if (isOpen) {
             document.body.style.overflow = 'hidden';
         } else {
@@ -33,13 +34,13 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
                 <button
                     onClick={onClose}
                     className="absolute right-5 top-5 p-2 rounded-full bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors z-20 group"
-                    aria-label="Close modal"
+                    aria-label={t('auth.close')}
                 >
                     <X size={20} className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200" />
                 </button>
 
                 <div className="max-h-[90vh] overflow-y-auto scrollbar-hide">
-                    <LoginForm onClose={onClose} onSwitchToRegister={onSwitchToRegister} />
+                    <LoginForm onClose={onClose} onSwitchToRegister={onSwitchToRegister} onLoginSuccess={onLoginSuccess} />
                 </div>
             </div>
         </div>,

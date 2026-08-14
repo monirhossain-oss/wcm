@@ -7,7 +7,7 @@ import { getImageUrl } from '@/lib/imageHelper';
 import { useLocale } from '@/context/LocaleContext';
 
 export default function CreatorCard({ creator, index }) {
-    const { localize } = useLocale();
+    const { localize, t } = useLocale();
     const isFeatured = creator.campaign?.role === 'premium';
 
     const categoryName =
@@ -21,7 +21,7 @@ export default function CreatorCard({ creator, index }) {
 
     const location = creator.profile?.city
         ? `${creator.profile.city}, ${creator.profile.country || ''}`
-        : creator.profile?.country || 'World';
+        : creator.profile?.country || t('creators.world');
 
     const websiteUrl = creator.profile?.website
         ? (creator.profile.website.startsWith('http') ? creator.profile.website : `https://${creator.profile.website}`)
@@ -55,7 +55,7 @@ export default function CreatorCard({ creator, index }) {
                 {isFeatured && (
                     <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-[8px] font-black uppercase tracking-[0.1em] px-2.5 py-1.5 rounded-full">
                         <Star size={8} fill="#fbbf24" className="text-amber-400" />
-                        Featured
+                        {t('creators.featured')}
                     </div>
                 )}
             </div>
@@ -100,13 +100,13 @@ export default function CreatorCard({ creator, index }) {
 
                 {/* 6. Bio/Description */}
                 <p className="text-[12px] text-zinc-500 dark:text-zinc-400 text-center leading-relaxed mt-4 line-clamp-2 min-h-[36px]">
-                    {creator.profile?.bio || 'Crafting stories through traditional artistry and heritage techniques.'}
+                    {creator.profile?.bio || t('creators.fallbackBio')}
                 </p>
 
                 {/* 7. Tags (Categories/Country) */}
                 <div className="flex flex-wrap justify-center gap-2 mt-5">
                     <span className="text-[9px] font-extrabold uppercase tracking-[0.1em] text-zinc-500 dark:text-zinc-300 bg-zinc-100 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-black/5 dark:border-white/10">
-                        Handcrafted
+                        {t('creators.handcrafted')}
                     </span>
                     {creator.profile?.country && (
                         <span className="text-[9px] font-extrabold uppercase tracking-[0.1em] text-orange-600 dark:text-orange-400 bg-orange-500/10 dark:bg-orange-500/10 px-3 py-1.5 rounded-lg border border-orange-500/20">
@@ -128,7 +128,7 @@ export default function CreatorCard({ creator, index }) {
                                 ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/25'
                                 : 'bg-zinc-900 dark:bg-white hover:bg-orange-500 dark:hover:bg-orange-500 text-white dark:text-zinc-900 dark:hover:text-white shadow-lg'}`}
                     >
-                        View Creator
+                        {t('creators.viewCreator')}
                     </Link>
 
                     {websiteUrl && (
@@ -138,7 +138,7 @@ export default function CreatorCard({ creator, index }) {
                             rel="noopener noreferrer"
                             className="w-full flex items-center justify-center gap-2 bg-transparent text-zinc-400 dark:text-zinc-500 text-[10px] font-bold uppercase tracking-[0.15em] py-3 rounded-[16px] border border-black/10 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all"
                         >
-                            <Globe size={12} /> Website
+                            <Globe size={12} /> {t('creators.website')}
                         </a>
                     )}
                 </div>

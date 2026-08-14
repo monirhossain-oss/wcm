@@ -7,10 +7,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import FavoriteButton from '@/components/FavoriteButton'; // আপনার প্রজেক্ট পাথ অনুযায়ী
 import CreatorName from '@/components/CreatorName';     // আপনার প্রজেক্ট পাথ অনুযায়ী
+import { useLocale } from '@/context/LocaleContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
 export default function FavoritesPage() {
+    const { localize, t } = useLocale();
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -41,7 +43,7 @@ export default function FavoritesPage() {
     // লোডিং স্টেট
     if (loading) {
         return (
-            <div className="min-h-[70vh] flex items-center justify-center">
+            <div className="min-h-[70vh] flex items-center justify-center" role="status" aria-label={t('favorites.loading')}>
                 <Loader2 className="animate-spin text-orange-500" size={32} />
             </div>
         );
@@ -53,10 +55,10 @@ export default function FavoritesPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-10">
                     <h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-orange-500 to-pink-600 bg-clip-text text-transparent">
-                        Favorite Listings ❤️
+                        {t('favorites.heading')}
                     </h1>
                     <span className="text-zinc-400 text-sm font-medium">
-                        {favorites.length} {favorites.length === 1 ? 'item' : 'items'} saved
+                        {favorites.length} {t(favorites.length === 1 ? 'favorites.savedSingular' : 'favorites.savedPlural')}
                     </span>
                 </div>
 
@@ -64,10 +66,10 @@ export default function FavoritesPage() {
                 {favorites.length === 0 ? (
                     <div className="text-center py-32 flex flex-col items-center justify-center border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[40px]">
                         <HeartOff size={48} className="text-zinc-300 mb-4" />
-                        <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">No favorites yet</h2>
-                        <p className="text-zinc-500 text-sm mb-8">Start exploring and save the items that inspire you.</p>
-                        <Link href="/explore" className="bg-[#1a1a1a] dark:bg-white text-white dark:text-black px-8 py-3 rounded-full text-sm font-bold uppercase tracking-wider hover:opacity-90 transition">
-                            Explore Marketplace
+                        <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">{t('favorites.emptyTitle')}</h2>
+                        <p className="text-zinc-500 text-sm mb-8">{t('favorites.emptyDescription')}</p>
+                        <Link href={localize('/explore')} className="bg-[#1a1a1a] dark:bg-white text-white dark:text-black px-8 py-3 rounded-full text-sm font-bold uppercase tracking-wider hover:opacity-90 transition">
+                            {t('favorites.explore')}
                         </Link>
                     </div>
                 ) : (
@@ -75,19 +77,19 @@ export default function FavoritesPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                         {favorites.map((item) => {
                             // console.log(item)
-                            const postImageSrc = item.image?.startsWith('http')
-                                ? item.image
-                                : `${API_BASE}${item.image?.startsWith('/') ? '' : '/'}${item.image}`;
+                            const postImageSrc = item.image
+                                ? (item.image.startsWith('http') ? item.image : `${API_BASE}${item.image.startsWith('/') ? '' : '/'}${item.image}`)
+                                : `https://placehold.co/600x400?text=${encodeURIComponent(t('favorites.noImage'))}`;
 
                             return (
                                 <div key={item._id} className="group relative flex flex-col w-full transition-all duration-300">
 
                                     {/* IMAGE SECTION */}
                                     <div className="relative aspect-[4/5] overflow-hidden bg-gray-100 dark:bg-zinc-900">
-                                        <Link href={`/listings/${item._id}`} className="block w-full h-full relative">
+                                        <Link href={localize(`/listings/${item.slug || item._id}`)} className="block w-full h-full relative">
                                             <Image
-                                                src={postImageSrc || 'https://placehold.co/600x400?text=No+Image'}
-                                                alt={item.title}
+                                                src={postImageSrc}
+                                                alt={item.title || t('favorites.noImage')}
                                                 fill
                                                 sizes="(max-width:768px) 50vw, 25vw"
                                                 className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -107,7 +109,7 @@ export default function FavoritesPage() {
 
                                         {item.isPromoted && (
                                             <div className="absolute top-2 left-2 z-20 text-[9px] font-bold text-white bg-orange-600/60 px-2 py-0.5 rounded flex items-center gap-1">
-                                                <Star size={12} /> <span>FEATURED</span>
+                                                <Star size={12} /> <span>{t('favorites.featured')}</span>
                                             </div>
                                         )}
                                     </div>
@@ -125,10 +127,10 @@ export default function FavoritesPage() {
 
                                             <div className="flex gap-2">
                                                 <div className="font-bold hidden md:flex text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded">
-                                                    {item.tradition || 'Heritage'}
+                                                    {item.tradition || t('favorites.heritage')}
                                                 </div>
                                                 <div className="flex items-center text-[10px] gap-1 font-medium text-zinc-500 dark:text-zinc-400">
-                                                    <HiOutlineLocationMarker size={12} /> {item.region || 'Global'}
+                                                    <HiOutlineLocationMarker size={12} /> {item.region || t('favorites.global')}
                                                 </div>
                                             </div>
                                         </div>

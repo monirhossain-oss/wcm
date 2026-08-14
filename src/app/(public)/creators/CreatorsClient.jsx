@@ -4,8 +4,10 @@ import { useState, useMemo } from 'react';
 import { Search, Globe, LayoutGrid, X } from 'lucide-react';
 import CustomDropdown from './CustomDropdown';
 import CreatorCard from './CreatorCard';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function CreatorsClient({ initialCreators, categories }) {
+    const { t } = useLocale();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCulture, setSelectedCulture] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
@@ -55,37 +57,37 @@ export default function CreatorsClient({ initialCreators, categories }) {
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/10 dark:bg-orange-500/15 rounded-full border border-orange-500/20 mb-8">
                         <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
                         <span className="text-[10px] font-black uppercase tracking-[0.25em] text-orange-600 dark:text-orange-400">
-                            Global Creator Network
+                            {t('creators.badge')}
                         </span>
                     </div>
 
                     <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-zinc-900 dark:text-white leading-[0.9] mb-6">
-                        Discover
+                        {t('creators.headingLead')}
                         <br />
-                        <span className="text-orange-500 italic">Creators</span>
+                        <span className="text-orange-500 italic">{t('creators.headingAccent')}</span>
                         <br />
-                        <span className="text-zinc-400 dark:text-zinc-600 text-4xl md:text-5xl">Around the World</span>
+                        <span className="text-zinc-400 dark:text-zinc-600 text-4xl md:text-5xl">{t('creators.headingTail')}</span>
                     </h1>
 
                     <p className="text-zinc-500 dark:text-zinc-400 text-base md:text-lg max-w-xl mx-auto font-medium leading-relaxed">
-                        Explore creators inspired by cultures and traditions worldwide
+                        {t('creators.intro')}
                     </p>
 
                     {/* Stats */}
                     <div className="flex items-center justify-center gap-8 mt-10">
                         <div className="text-center">
                             <p className="text-2xl font-black text-zinc-900 dark:text-white">{initialCreators.length}+</p>
-                            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Creators</p>
+                            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">{t('creators.stats.creators')}</p>
                         </div>
                         <div className="w-px h-10 bg-zinc-200 dark:bg-white/10" />
                         <div className="text-center">
                             <p className="text-2xl font-black text-zinc-900 dark:text-white">{cultures.length}+</p>
-                            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Cultures</p>
+                            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">{t('creators.stats.cultures')}</p>
                         </div>
                         <div className="w-px h-10 bg-zinc-200 dark:bg-white/10" />
                         <div className="text-center">
                             <p className="text-2xl font-black text-zinc-900 dark:text-white">{categories.length}+</p>
-                            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Categories</p>
+                            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">{t('creators.stats.categories')}</p>
                         </div>
                     </div>
                 </div>
@@ -98,7 +100,7 @@ export default function CreatorsClient({ initialCreators, categories }) {
                         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
                         <input
                             type="text"
-                            placeholder="Search by name, country or bio..."
+                            placeholder={t('creators.searchPlaceholder')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-11 pr-10 py-3.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500/50 transition-all"
@@ -113,17 +115,17 @@ export default function CreatorsClient({ initialCreators, categories }) {
                     <div className="flex items-center justify-between gap-3">
                         <CustomDropdown
                             icon={Globe}
-                            placeholder="All Countries"
+                            placeholder={t('creators.allCountries')}
                             value={selectedCulture}
                             onChange={setSelectedCulture}
-                            options={[{ value: '', label: 'All Countries' }, ...cultures.map((c) => ({ value: c, label: c }))]}
+                            options={[{ value: '', label: t('creators.allCountries') }, ...cultures.map((c) => ({ value: c, label: c }))]}
                         />
                         <CustomDropdown
                             icon={LayoutGrid}
-                            placeholder="All Categories"
+                            placeholder={t('creators.allCategories')}
                             value={selectedCategory}
                             onChange={setSelectedCategory}
-                            options={[{ value: '', label: 'All Categories' }, ...categories.map((cat) => ({ value: cat._id, label: cat.title }))]}
+                            options={[{ value: '', label: t('creators.allCategories') }, ...categories.map((cat) => ({ value: cat._id, label: cat.title }))]}
                         />
                     </div>
 
@@ -132,14 +134,14 @@ export default function CreatorsClient({ initialCreators, categories }) {
                             onClick={clearFilters}
                             className="flex items-center gap-2 px-5 py-3.5 bg-zinc-100 dark:bg-white/10 text-zinc-600 dark:text-zinc-300 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all whitespace-nowrap"
                         >
-                            <X size={13} /> Clear
+                            <X size={13} /> {t('creators.clear')}
                         </button>
                     )}
                 </div>
 
                 {hasActiveFilter && (
                     <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mt-4 ml-1">
-                        {filteredCreators.length} creator{filteredCreators.length !== 1 ? 's' : ''} found
+                        {filteredCreators.length} {t(filteredCreators.length === 1 ? 'creators.resultSingular' : 'creators.resultPlural')}
                     </p>
                 )}
             </div>
@@ -157,10 +159,10 @@ export default function CreatorsClient({ initialCreators, categories }) {
                         <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-5">
                             <Search size={24} className="text-zinc-300 dark:text-zinc-600" />
                         </div>
-                        <p className="text-zinc-500 dark:text-zinc-400 text-sm font-semibold mb-1">No creators found</p>
-                        <p className="text-zinc-400 dark:text-zinc-600 text-xs mb-6">Try adjusting your search or filters</p>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-sm font-semibold mb-1">{t('creators.emptyTitle')}</p>
+                        <p className="text-zinc-400 dark:text-zinc-600 text-xs mb-6">{t('creators.emptyDescription')}</p>
                         <button onClick={clearFilters} className="text-orange-500 text-xs font-black uppercase tracking-widest hover:underline">
-                            Clear all filters
+                            {t('creators.clearAll')}
                         </button>
                     </div>
                 )}

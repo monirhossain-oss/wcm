@@ -1,9 +1,11 @@
 'use client';
 import { useState, useRef } from 'react';
 import CreatorPopover from './CreatorPopover';
+import { useLocale } from '@/context/LocaleContext';
  
 export default function CreatorName({ creator, item, region, API_BASE_URL }) {
   const [showCreator, setShowCreator] = useState(false);
+  const { t } = useLocale();
   const hoverTimeout = useRef(null);
  
   // FIX: creator বা creator.profile যেকোনোটা null/undefined হলে crash করত
@@ -11,13 +13,13 @@ export default function CreatorName({ creator, item, region, API_BASE_URL }) {
   const name =
     creator?.profile?.displayName ||
     creator?.username ||
-    'Unknown';
+    t('favorites.unknown');
  
   // creator না থাকলে শুধু নাম দেখাও, popover দেখাবে না
   if (!creator) {
     return (
       <span className="font-bold dark:text-white text-xs sm:text-sm text-zinc-400">
-        Unknown
+        {t('favorites.unknown')}
       </span>
     );
   }

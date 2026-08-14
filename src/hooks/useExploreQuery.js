@@ -1,11 +1,15 @@
 import { useRouter, useParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 import { continentMapping } from '@/constants/continentData';
+import { useLocale } from '@/context/LocaleContext';
 
 export const useExploreQuery = () => {
     const router = useRouter();
     const params = useParams();
-    const filters = params?.filters || [];
+    const { localize } = useLocale();
+    const routeFilters = params?.filters
+        ?? (Array.isArray(params?.segments) && params.segments[0] === 'explore' ? params.segments.slice(1) : []);
+    const filters = Array.isArray(routeFilters) ? routeFilters : [routeFilters];
 
     // এখন কিগুলো সরাসরি ড্যাশসহ আছে: ["asia", "middle-east", "north-america"...]
     const continentsKeys = useMemo(() => Object.keys(continentMapping), []);
@@ -17,14 +21,14 @@ export const useExploreQuery = () => {
     };
 
     // টেক্সট থেকে ইউআরএল স্লাগ
-    const textToSlug = (text) => {
+    const textToSlug = useCallback((text) => {
         if (!text || text.toLowerCase() === 'all' || text.toLowerCase() === 'all regions') return null;
         return text.toString().toLowerCase().trim()
             .replace(/&/g, 'and')
             .replace(/\s+/g, '-')
             .replace(/[^-a-z0-9]/g, '')
             .replace(/-+/g, '-');
-    };
+    }, []);
 
     let category = 'All';
     let continent = 'All Regions';
@@ -76,8 +80,8 @@ export const useExploreQuery = () => {
             pathParts.push('search', textToSlug(finalSearch));
         }
 
-        router.push(`/${pathParts.join('/')}`, { scroll: false });
-    }, [router, category, continent, search, continentsKeys]);
+        router.push(localize(`/${pathParts.join('/')}`), { scroll: false });
+    }, [router, localize, category, continent, search, continentsKeys, textToSlug]);
 
     return { updateQuery, category, continent, search };
 };

@@ -9,18 +9,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FiHeart } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 
 const WishlistIcon = () => {
     const { user } = useAuth();
     const pathname = usePathname();
+    const { localize, t } = useLocale();
+    const normalizedPathname = pathname.replace(/^\/fr(?=\/|$)/, '') || '/';
     const wishlistCount = 0; // TODO: connect to real wishlist state/source
 
     if (!user) return null;
 
     return (
-        <Link href="/favorites" className="relative p-2 group transition-all duration-200" title="My Wishlist">
+        <Link href={localize('/favorites')} className="relative p-2 group transition-all duration-200" title={t('navigation.wishlistTitle')}>
             <FiHeart
-                className={`h-6 w-6 transition-colors ${pathname === '/favorites' ? 'text-red-500 fill-red-500' : 'text-gray-600 dark:text-gray-300 group-hover:text-red-500'
+                className={`h-6 w-6 transition-colors ${normalizedPathname === '/favorites' ? 'text-red-500 fill-red-500' : 'text-gray-600 dark:text-gray-300 group-hover:text-red-500'
                     }`}
             />
             {wishlistCount > 0 && (

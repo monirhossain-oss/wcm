@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import ListingSkeleton from './ListingSkeleton';
 import TrendingDataWrapper from './TrendingDataWrapper';
 import Link from 'next/link';
+import { localePath, translate } from '@/lib/i18n';
 
 export default function TrendingListings({ locale = 'en' }) {
   return (
@@ -11,10 +12,10 @@ export default function TrendingListings({ locale = 'en' }) {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl  font-bold text-[#1F1F1F] dark:text-[#ededed]">
-              Trending Listings
+              {translate(locale, 'homeTrending.heading')}
             </h2>
             <p className="text-sm text-zinc-500">
-              Handpicked traditions for you.
+              {translate(locale, 'homeTrending.description')}
             </p>
           </div>
         </div>
@@ -27,11 +28,11 @@ export default function TrendingListings({ locale = 'en' }) {
         {/* View All Button */}
         <div className="mt-8 flex justify-center">
           <Link
-            href={locale === 'en' ? '/explore' : `/${locale}/explore`}
+            href={localePath(locale, '/explore')}
             prefetch={true}
             className="group flex items-center gap-2 px-8 py-3 border-2 border-orange-500 text-orange-500 font-bold text-sm rounded-full hover:bg-orange-500 hover:text-white transition-all duration-300 shadow-md hover:shadow-orange-200"
           >
-            Explore All Listings
+            {translate(locale, 'homeTrending.exploreAll')}
             <span className="transform group-hover:translate-x-1 transition-transform duration-200">
               →
             </span>

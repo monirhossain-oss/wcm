@@ -1,30 +1,27 @@
 import axios from 'axios';
 import CreatorsClient from './CreatorsClient';
 import { getSeoByPage } from '@/lib/api';
+import { translate } from '@/lib/i18n';
+import { buildLocalizedMetadata, getPublishedLanguageCodes } from '@/lib/localizedMetadata';
 
 // ১. ডাইনামিক মেটাডাটা ফাংশন — Admin panel (/api/seo/creators) theke title/description/keywords
-export async function generateMetadata() {
+export async function generateMetadata({ locale = 'en' } = {}) {
   const seoData = await getSeoByPage('creators');
 
-  const title = seoData?.title || 'Discover Global Creators | WCM';
-  const description = seoData?.description || 'Explore talented creators from around the world showcased on World Culture Marketplace.';
+  const title = locale === 'en' && seoData?.title ? seoData.title : translate(locale, 'creators.metaTitle');
+  const description = locale === 'en' && seoData?.description ? seoData.description : translate(locale, 'creators.metaDescription');
   const image = seoData?.ogImage || '/og-creators.jpg';
 
   return {
-    title,
-    description,
+    ...buildLocalizedMetadata({
+      locale,
+      path: '/creators',
+      title,
+      description,
+      image,
+      languages: await getPublishedLanguageCodes(),
+    }),
     keywords: seoData?.keywords?.length ? seoData.keywords : ['creators', 'culture', 'global artists', 'WCM'],
-    openGraph: {
-      title,
-      description,
-      images: [image],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [image],
-    },
   };
 }
 

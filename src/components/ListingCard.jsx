@@ -10,7 +10,7 @@ import { useLocale } from '@/context/LocaleContext';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
 export default function ListingCard({ listing, item: propItem }) {
-  const { localize } = useLocale();
+  const { localize, t } = useLocale();
   const item = listing || propItem;
   const isPromoted = listing?.isPromoted ?? item?.isPromoted ?? false;
 
@@ -27,7 +27,7 @@ export default function ListingCard({ listing, item: propItem }) {
         <Link href={localize(`/listings/${item.slug}`)} className="block w-full h-full relative">
           <Image
             src={postImageSrc || 'https://placehold.co/600x400?text=No+Image'}
-            alt={item.title || 'Listing'}
+            alt={item.title || t('explore.listingAlt')}
             fill
             sizes="(max-width:768px) 50vw, 25vw"
             className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -46,7 +46,7 @@ export default function ListingCard({ listing, item: propItem }) {
 
         {isPromoted && (
           <div className="absolute top-2 left-2 z-20 text-[9px] font-bold text-white bg-orange-600/60 px-2 py-0.5 rounded flex items-center gap-1">
-            <Star size={12} /> <span>Promoted</span>
+            <Star size={12} /> <span>{t('explore.promoted')}</span>
           </div>
         )}
       </div>
@@ -64,10 +64,10 @@ export default function ListingCard({ listing, item: propItem }) {
 
           <div className="flex gap-2">
             <div className="hidden md:flex font-bold text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded">
-              {item.tradition || 'Heritage'}
+              {item.tradition || t('explore.heritage')}
             </div>
             <div className="flex items-center text-[10px] gap-1 font-medium text-zinc-500 dark:text-zinc-400">
-              <HiOutlineLocationMarker size={12} /> {item.region || 'Global'}
+              <HiOutlineLocationMarker size={12} /> {item.region || t('explore.global')}
             </div>
           </div>
         </div>

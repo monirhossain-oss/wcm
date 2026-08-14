@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import RegisterForm from './RegisterForm';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
-    const [mounted, setMounted] = useState(false);
+    const mounted = typeof document !== 'undefined';
+    const { t } = useLocale();
 
     useEffect(() => {
-        setMounted(true);
         if (isOpen) {
             document.body.style.overflow = 'hidden';
         } else {
@@ -32,6 +33,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
             <div className="relative w-full max-w-[480px] my-auto bg-white dark:bg-[#0a0a0a] rounded-[28px] shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-200 overflow-hidden">
                 <button
                     onClick={onClose}
+                    aria-label={t('auth.close')}
                     className="absolute right-5 top-5 p-2 rounded-full bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors z-20 group"
                 >
                     <X size={20} className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200" />

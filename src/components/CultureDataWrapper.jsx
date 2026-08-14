@@ -1,18 +1,19 @@
 import CultureSlider from './CultureSlider';
+import { localePath, translate } from '@/lib/i18n';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
 const continentsSliderData = [
-    { title: "Asia", slug: "asia", image: "/asia.png" },
-    { title: "Middle East", slug: "middle-east", image: "/Middle-East.png" },
-    { title: "Europe", slug: "europe", image: "/europe.png" },
-    { title: "Africa", slug: "africa", image: "/africa.png" },
-    { title: "North America", slug: "north-america", image: "/North America.png" },
-    { title: "Latin America", slug: "latin-america", image: "/Latin America.png" },
-    { title: "Oceania", slug: "oceania", image: "/Oceania.png" }
+    { slug: "asia", image: "/asia.png" },
+    { slug: "middle-east", image: "/Middle-East.png" },
+    { slug: "europe", image: "/europe.png" },
+    { slug: "africa", image: "/africa.png" },
+    { slug: "north-america", image: "/North America.png" },
+    { slug: "latin-america", image: "/Latin America.png" },
+    { slug: "oceania", image: "/Oceania.png" }
 ];
 
-export default async function CultureDataWrapper() {
+export default async function CultureDataWrapper({ locale = 'en' }) {
     try {
         const res = await fetch(`${API_BASE_URL}/api/listings/public?limit=250`, {
             next: { revalidate: 60 }
@@ -31,27 +32,28 @@ export default async function CultureDataWrapper() {
 
             return {
                 _id: continent.slug,
-                title: continent.title,
+                title: translate(locale, `homeDiscovery.regions.${continent.slug}`),
                 image: continent.image,
                 listingCount: count,
-                link: `/explore/${continent.slug}`
+                link: localePath(locale, `/explore/${continent.slug}`)
             };
         });
 
         finalData.sort((a, b) => b.listingCount - a.listingCount);
 
-        return <CultureSlider items={finalData} />;
+        return <CultureSlider items={finalData} listingsLabel={translate(locale, 'homeDiscovery.listings')} />;
 
     } catch (error) {
         console.error("Culture Fetch Error:", error);
 
         const fallbackData = continentsSliderData.map(c => ({
             _id: c.slug,
-            title: c.title,
+            title: translate(locale, `homeDiscovery.regions.${c.slug}`),
             image: c.image,
-            listingCount: 0
+            listingCount: 0,
+            link: localePath(locale, `/explore/${c.slug}`)
         }));
 
-        return <CultureSlider items={fallbackData} />;
+        return <CultureSlider items={fallbackData} listingsLabel={translate(locale, 'homeDiscovery.listings')} />;
     }
 }

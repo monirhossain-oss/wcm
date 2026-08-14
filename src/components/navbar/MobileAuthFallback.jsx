@@ -1,6 +1,8 @@
 'use client';
+import { useLocale } from '@/context/LocaleContext';
 
 const MobileAuthFallback = ({ onClose }) => {
+    const { t } = useLocale();
     return (
         <div className="flex flex-col gap-3 pt-2 px-1">
             <button
@@ -10,7 +12,7 @@ const MobileAuthFallback = ({ onClose }) => {
                 }}
                 className="px-6 py-3 border-2 border-[#F57C00] text-[#F57C00] font-bold rounded-xl text-center"
             >
-                Sign In
+                {t('navigation.signIn')}
             </button>
             <button
                 onClick={() => {
@@ -19,7 +21,7 @@ const MobileAuthFallback = ({ onClose }) => {
                 }}
                 className="bg-[#F57C00] text-white px-6 py-3 rounded-xl text-center font-bold shadow-md"
             >
-                Sign Up
+                {t('navigation.signUp')}
             </button>
         </div>
     );

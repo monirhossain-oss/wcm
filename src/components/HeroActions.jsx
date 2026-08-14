@@ -5,9 +5,11 @@ import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import LoginModal from "./LoginModal";
 import RegisterModal from "./RegistationModal";
+import { useLocale } from "@/context/LocaleContext";
 
 export default function HeroActions() {
     const { user } = useAuth();
+    const { localize, t } = useLocale();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
@@ -29,16 +31,16 @@ export default function HeroActions() {
 
             {/* ✅ Fix 1: Link কে button এর মতো style করো, আলাদা button নয় */}
             <Link
-                href="/explore"
+                href={localize('/explore')}
                 className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-[#F57C00] text-white font-bold whitespace-nowrap"
             >
-                Discover Creations
+                {t('homeHero.discover')}
             </Link>
 
             {/* ✅ Fix 2: user load হওয়ার আগে default state দেখাবে — hydration safe */}
             {isCreator || isAdmin ? (
                 <span className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-400/50 text-black dark:text-white font-medium whitespace-nowrap cursor-default">
-                    {isAdmin ? "Admin Access Active" : "Creator Mode Active"}
+                    {isAdmin ? t('homeHero.adminActive') : t('homeHero.creatorActive')}
                 </span>
             ) : (
                 <Link
@@ -51,7 +53,7 @@ export default function HeroActions() {
             dark:border-[#F57C00] dark:text-[#F57C00]
             dark:hover:bg-[#F57C00] dark:hover:text-white"
                 >
-                    Become a Creator
+                    {t('homeHero.becomeCreator')}
                 </Link>
             )}
 

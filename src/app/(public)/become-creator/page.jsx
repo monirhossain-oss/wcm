@@ -20,6 +20,9 @@ import { Country, City } from 'country-state-city';
 import { ChevronDown, Grid, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { useLocale } from '@/context/LocaleContext';
+import LoginModal from '@/components/LoginModal';
+import RegisterModal from '@/components/RegistationModal';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
@@ -29,6 +32,9 @@ const api = axios.create({
 export default function UserProfileForm() {
   const router = useRouter();
   const { user, setUser, isBusinessRestricted } = useAuth();
+  const { locale, localize } = useLocale();
+  const L = (english, french) => locale === 'fr' ? french : english;
+  const [authModal, setAuthModal] = useState('login');
   const [serverError, setServerError] = useState('');
   const [mounted, setMounted] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -58,7 +64,7 @@ export default function UserProfileForm() {
     setMounted(true);
     const fetchCategories = async () => {
       try {
-        const res = await api.get('/api/admin/categories');
+        const res = await api.get('/api/admin/categories', { params: { language: locale } });
         setCategories(res.data);
       } catch (err) {
         console.error('Failed to load categories');
@@ -67,13 +73,13 @@ export default function UserProfileForm() {
       }
     };
     fetchCategories();
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     if (user) {
       // যদি অলরেডি ক্রিয়েটর হয় তবে প্রোফাইলে পাঠিয়ে দাও
       if (user.role === 'creator' || user.role === 'admin') {
-        router.push('/profile');
+        router.push(localize('/profile'));
       }
 
       setPreviews({
@@ -95,14 +101,14 @@ export default function UserProfileForm() {
         social_link: user.profile?.socialLink || '',
       });
     }
-  }, [user, reset, router]);
+  }, [user, reset, router, localize]);
 
   const isPending = user?.creatorRequest?.status === 'pending' && user?.creatorRequest?.isApplied;
 
   const onSubmit = async (data) => {
     if (isPending) return;
     if (isBusinessRestricted) {
-      setServerError('Your account is currently restricted from business applications.');
+      setServerError(L('Your account is currently restricted from business applications.', 'Votre compte ne peut actuellement pas soumettre de demande professionnelle.'));
       return;
     }
     try {
@@ -136,14 +142,29 @@ export default function UserProfileForm() {
 
       if (res.status === 200) {
         setUser(res.data.user);
-        router.push('/profile');
+        router.push(localize('/profile'));
       }
     } catch (error) {
-      setServerError(getApiErrorMessage(error, 'Something went wrong'));
+      setServerError(locale === 'fr' ? 'Impossible dâ€™envoyer la demande. Veuillez rÃ©essayer.' : getApiErrorMessage(error, 'Something went wrong'));
     }
   };
 
-  if (!mounted || !user) return null;
+  if (!mounted) return null;
+  if (!user) return (
+    <>
+      <LoginModal
+        isOpen={authModal === 'login'}
+        onClose={() => router.push(localize('/'))}
+        onSwitchToRegister={() => setAuthModal('register')}
+        onLoginSuccess={() => setAuthModal(null)}
+      />
+      <RegisterModal
+        isOpen={authModal === 'register'}
+        onClose={() => router.push(localize('/'))}
+        onSwitchToLogin={() => setAuthModal('login')}
+      />
+    </>
+  );
 
   // --- PENDING STATE VIEW ---
   if (isPending) {
@@ -154,17 +175,16 @@ export default function UserProfileForm() {
             <FiClock size={40} className="text-orange-500 animate-pulse" />
           </div>
           <h2 className="text-2xl font-black uppercase tracking-tighter text-gray-900 dark:text-white mb-2">
-            Request Under Review
+            {L('Request Under Review', 'Demande en cours dâ€™examen')}
           </h2>
           <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-            Your application is being processed by our admins. <br /> You will be notified once
-            approved.
+            {L('Your application is being processed by our admins. You will be notified once approved.', 'Votre demande est examinÃ©e par notre Ã©quipe. Vous serez informÃ© aprÃ¨s son approbation.')}
           </p>
           <button
-            onClick={() => router.push('/profile')}
+            onClick={() => router.push(localize('/profile'))}
             className="mt-8 w-full py-4 bg-orange-500 text-white text-[10px] font-black uppercase rounded-md shadow-lg shadow-orange-500/20 hover:bg-orange-600 transition-all"
           >
-            Go to Dashboard
+            {L('Go to Dashboard', 'AccÃ©der au profil')}
           </button>
         </div>
       </div>
@@ -188,10 +208,10 @@ export default function UserProfileForm() {
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
             <div className="relative z-10 text-white px-10 text-center">
               <h1 className="text-3xl font-black uppercase tracking-tighter text-gray-900 dark:text-white mb-6">
-                Become a <span className="text-orange-500">Creator</span>
+                {L('Become a', 'Devenir')} <span className="text-orange-500">{L('Creator', 'crÃ©ateur')}</span>
               </h1>
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
-                Unlock your professional node
+                {L('Unlock your professional node', 'DÃ©veloppez votre prÃ©sence professionnelle')}
               </p>
             </div>
           </div>
@@ -211,36 +231,36 @@ export default function UserProfileForm() {
                   onClick={() => setValue('customerType', 'individual')}
                   className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${customerType === 'individual' ? 'bg-white dark:bg-white/10 shadow-sm text-orange-500' : 'text-gray-400'}`}
                 >
-                  Individual
+                  {L('Individual', 'Particulier')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setValue('customerType', 'business')}
                   className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${customerType === 'business' ? 'bg-white dark:bg-white/10 shadow-sm text-orange-500' : 'text-gray-400'}`}
                 >
-                  Business / Agency
+                  {L('Business / Agency', 'Entreprise / Agence')}
                 </button>
               </div>
 
               {/* Names */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className={labelStyle}>Display Name</label>
+                  <label className={labelStyle}>{L('Display Name', 'Nom affichÃ©')}</label>
                   <input
                     {...register('display_name', { required: true })}
                     className={inputStyle}
-                    placeholder="Your public name"
+                    placeholder={L('Your public name', 'Votre nom public')}
                   />
                 </div>
                 <div>
                   <label className={labelStyle}>
                     <FiBriefcase size={10} />{' '}
-                    {customerType === 'business' ? 'Business Name' : 'Legal Name'}
+                    {customerType === 'business' ? L('Business Name', 'Nom de lâ€™entreprise') : L('Legal Name', 'Nom lÃ©gal')}
                   </label>
                   <input
                     {...register('business_name', { required: true })}
                     className={inputStyle}
-                    placeholder="Agency or Brand Name"
+                    placeholder={L('Agency or Brand Name', 'Nom de lâ€™agence ou de la marque')}
                   />
                 </div>
               </div>
@@ -249,7 +269,7 @@ export default function UserProfileForm() {
               {customerType === 'business' && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                   <label className={labelStyle}>
-                    <FiCheckCircle size={10} />Business Number (Optional)
+                    <FiCheckCircle size={10} />{L('Business Number (Optional)', 'NumÃ©ro dâ€™entreprise (facultatif)')}
                   </label>
                   <input
                     {...register('vatNumber')}
@@ -257,7 +277,7 @@ export default function UserProfileForm() {
                     placeholder="e.g. FR123456789"
                   />
                   <p className="text-[9px] text-gray-400 mt-2 ml-1 uppercase font-bold tracking-tight">
-                    Needed for EU Reverse Charge (0% Tax)
+                    {L('Needed for EU Reverse Charge (0% Tax)', 'NÃ©cessaire pour lâ€™autoliquidation de TVA dans lâ€™UE')}
                   </p>
                 </div>
               )}
@@ -265,7 +285,7 @@ export default function UserProfileForm() {
               {/* Category */}
               <div>
                 <label className={labelStyle}>
-                  <Grid size={14} className="inline mr-2" /> Expertise Category
+                  <Grid size={14} className="inline mr-2" /> {L('Expertise Category', 'CatÃ©gorie dâ€™expertise')}
                 </label>
                 <div className="relative">
                   <select
@@ -274,7 +294,7 @@ export default function UserProfileForm() {
                     disabled={catLoading}
                   >
                     <option value="" className="bg-white dark:bg-zinc-900 text-gray-500">
-                      {catLoading ? 'Loading Categories...' : 'Select your primary field'}
+                      {catLoading ? L('Loading Categories...', 'Chargement des catÃ©gories...') : L('Select your primary field', 'SÃ©lectionnez votre domaine principal')}
                     </option>
 
                     {categories.map((cat) => (
@@ -301,11 +321,11 @@ export default function UserProfileForm() {
 
               {/* Bio */}
               <div>
-                <label className={labelStyle}>Professional Bio</label>
+                <label className={labelStyle}>{L('Professional Bio', 'Biographie professionnelle')}</label>
                 <textarea
                   {...register('bio')}
                   rows={2}
-                  placeholder="Briefly describe your services..."
+                  placeholder={L('Briefly describe your services...', 'DÃ©crivez briÃ¨vement vos services...')}
                   className={`${inputStyle} resize-none`}
                 />
               </div>
@@ -322,7 +342,7 @@ export default function UserProfileForm() {
                   <div className="relative z-10 flex flex-col items-center opacity-0 group-hover:opacity-100 transition-all">
                     <FiCamera size={20} className="text-gray-900 dark:text-white mb-1" />
                     <span className="text-[8px] font-black uppercase text-gray-900 dark:text-white">
-                      Change Avatar
+                      {L('Change Avatar', 'Modifier lâ€™avatar')}
                     </span>
                   </div>
                   <input
@@ -350,7 +370,7 @@ export default function UserProfileForm() {
                   <div className="relative z-10 flex flex-col items-center opacity-0 group-hover:opacity-100 transition-all">
                     <FiUpload size={20} className="text-gray-900 dark:text-white mb-1" />
                     <span className="text-[8px] font-black uppercase text-gray-900 dark:text-white">
-                      Update Cover
+                      {L('Update Cover', 'Modifier la couverture')}
                     </span>
                   </div>
                   <input
@@ -370,25 +390,25 @@ export default function UserProfileForm() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className={labelStyle}>
-                    <FiGlobe size={10} /> Country
+                    <FiGlobe size={10} /> {L('Country', 'Pays')}
                   </label>
                   <select {...register('countryCode', { required: true })} className={inputStyle}>
-                    <option value="">Select Country</option>
+                    <option value="">{L('Select Country', 'SÃ©lectionnez un pays')}</option>
                     {Country.getAllCountries().map((c) => (
                       <option className="dark:bg-gray-800" key={c.isoCode} value={c.isoCode}>
-                        {c.name}
+                        {locale === 'fr' ? (new Intl.DisplayNames(['fr'], { type: 'region' }).of(c.isoCode) || c.name) : c.name}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className={labelStyle}>City</label>
+                  <label className={labelStyle}>{L('City', 'Ville')}</label>
                   <select
                     {...register('city', { required: true })}
                     className={inputStyle}
                     disabled={!selectedCountryCode}
                   >
-                    <option value="">Select City</option>
+                    <option value="">{L('Select City', 'SÃ©lectionnez une ville')}</option>
                     {cities.map((c, index) => (
                       <option
                         className="dark:bg-gray-800"
@@ -402,7 +422,7 @@ export default function UserProfileForm() {
                 </div>
                 <div className="flex flex-col">
                   <label className={`${labelStyle} text-black dark:text-white`}>
-                    Language
+                    {L('Language', 'Langue')}
                   </label>
 
                   <select
@@ -416,21 +436,21 @@ export default function UserProfileForm() {
                       value=""
                       className="bg-white text-black dark:bg-black dark:text-white"
                     >
-                      Select Language
+                      {L('Select Language', 'SÃ©lectionnez une langue')}
                     </option>
 
                     <option
                       value="English"
                       className="bg-white text-black dark:bg-black dark:text-white"
                     >
-                      English
+                      {L('English', 'Anglais')}
                     </option>
 
                     <option
                       value="French"
                       className="bg-white text-black dark:bg-black dark:text-white"
                     >
-                      French
+                      {L('French', 'FranÃ§ais')}
                     </option>
                   </select>
                 </div>
@@ -439,15 +459,15 @@ export default function UserProfileForm() {
               {/* Links */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className={labelStyle}>Social URL</label>
+                  <label className={labelStyle}>{L('Social URL', 'Lien social')}</label>
                   <input
                     {...register('social_link')}
-                    placeholder="Portfolio or Profile link"
+                    placeholder={L('Portfolio or Profile link', 'Lien du portfolio ou du profil')}
                     className={inputStyle}
                   />
                 </div>
                 <div>
-                  <label className={labelStyle}>Website URL</label>
+                  <label className={labelStyle}>{L('Website URL', 'Site web')}</label>
                   <input
                     {...register('website_link')}
                     placeholder="https://yourbrand.com"
@@ -470,16 +490,16 @@ export default function UserProfileForm() {
                   htmlFor="agreeTerms"
                   className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 cursor-pointer leading-relaxed flex items-center gap-1"
                 >
-                  I agree to the{' '}
+                  {L('I agree to the', 'Jâ€™accepte les')}{' '}
                   <Link
-                    href="https://worldculturemarketplace.com/creator-terms-and-conditions"
+                    href={localize('/creator-terms-and-conditions')}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-orange-500 underline hover:text-orange-600"
                   >
-                    Terms and Conditions
+                    {L('Terms and Conditions', 'conditions gÃ©nÃ©rales')}
                   </Link>{' '}
-                  and confirm that all provided information is accurate.
+                  {L('and confirm that all provided information is accurate.', 'et je confirme lâ€™exactitude des informations fournies.')}
                 </label>
               </div>
 
@@ -490,10 +510,10 @@ export default function UserProfileForm() {
                 className="w-full bg-orange-500 text-white py-5 rounded-md font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-orange-600 transition-all disabled:bg-gray-400"
               >
                 {isBusinessRestricted
-                  ? 'Account Restricted'
+                  ? L('Account Restricted', 'Compte restreint')
                   : isSubmitting
-                    ? 'Processing Node...'
-                    : 'Submit Application'}
+                    ? L('Processing Node...', 'Envoi en cours...')
+                    : L('Submit Application', 'Envoyer la demande')}
               </button>
             </form>
           </div>

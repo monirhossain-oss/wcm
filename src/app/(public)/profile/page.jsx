@@ -24,6 +24,7 @@ import {
 import { Globe, Languages, Box, Info } from 'lucide-react';
 import { getImageUrl } from '@/lib/imageHelper';
 import ListingCard from '@/components/ListingCard';
+import { useLocale } from '@/context/LocaleContext';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
@@ -33,7 +34,7 @@ const api = axios.create({
 // ─────────────────────────────────────────────
 // SIMPLE USER PROFILE (role === 'user')
 // ─────────────────────────────────────────────
-function UserProfileView({ user, router, onDelete }) {
+function UserProfileView({ user, router, onDelete, fr }) {
   const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
   const initials = `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || ''}`.toUpperCase();
 
@@ -46,7 +47,7 @@ function UserProfileView({ user, router, onDelete }) {
           onClick={() => router.back()}
           className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black dark:hover:text-white transition-colors"
         >
-          <FiArrowLeft size={13} /> Back
+          <FiArrowLeft size={13} /> {fr ? 'Retour' : 'Back'}
         </button>
       </div>
 
@@ -72,14 +73,14 @@ function UserProfileView({ user, router, onDelete }) {
 
             {/* Role badge */}
             <div className="absolute -bottom-1 -right-1 bg-gray-800 dark:bg-white text-white dark:text-black px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow">
-              User
+              {fr ? 'Utilisateur' : 'User'}
             </div>
           </div>
 
           {/* Name */}
           <div className="space-y-1">
             <h1 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">
-              {fullName || 'Anonymous'}
+              {fullName || (fr ? 'Anonyme' : 'Anonymous')}
             </h1>
             <p className="text-[10px] font-bold text-orange-500 lowercase tracking-widest">
               @{user?.username}
@@ -91,36 +92,36 @@ function UserProfileView({ user, router, onDelete }) {
 
           {/* Meta info */}
           <div className="w-full space-y-3">
-            <MetaRow icon={FiUser} label="Full Name" value={fullName} />
+            <MetaRow icon={FiUser} label={fr ? 'Nom complet' : 'Full Name'} value={fullName} />
             {(user?.profile?.city || user?.profile?.country) && (
               <MetaRow
                 icon={FiMapPin}
-                label="Location"
+                label={fr ? 'Localisation' : 'Location'}
                 value={[user?.profile?.city, user?.profile?.country].filter(Boolean).join(', ')}
               />
             )}
             {user?.profile?.language && (
-              <MetaRow icon={FiGlobe} label="Language" value={user.profile.language} />
+              <MetaRow icon={FiGlobe} label={fr ? 'Langue' : 'Language'} value={user.profile.language} />
             )}
           </div>
 
           {/* Bottom note */}
           <p className="text-[9px] text-gray-300 dark:text-white/20 uppercase tracking-widest font-bold mt-2">
-            Member Account
+            {fr ? 'Compte membre' : 'Member Account'}
           </p>
 
           {/* Critical Actions */}
           <div className="w-full pt-6 border-t border-gray-100 dark:border-white/10">
             <p className="text-[8px] font-black text-red-400/60 uppercase tracking-[0.3em] mb-3 text-left">
-              Critical Actions
+              {fr ? 'Actions critiques' : 'Critical Actions'}
             </p>
             <div className="flex items-center justify-between px-4 py-3 bg-red-500/5 border border-red-500/10 rounded-xl">
-              <p className="text-[9px] font-bold text-gray-500 uppercase">Account Termination</p>
+              <p className="text-[9px] font-bold text-gray-500 uppercase">{fr ? 'Suppression du compte' : 'Account Termination'}</p>
               <button
                 onClick={onDelete}
                 className="text-[9px] font-black text-red-500 uppercase hover:underline"
               >
-                Delete Account
+                {fr ? 'Supprimer le compte' : 'Delete Account'}
               </button>
             </div>
           </div>
@@ -149,6 +150,9 @@ const MetaRow = ({ icon: Icon, label, value }) => (
 export default function ProfilePage() {
   const router = useRouter();
   const { user, setUser, loading } = useAuth();
+  const { locale, localize } = useLocale();
+  const fr = locale === 'fr';
+  const L = (english, french) => fr ? french : english;
   const [isEditing, setIsEditing] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [previews, setPreviews] = useState({ profile: null, cover: null });
@@ -157,16 +161,16 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace('/');
+      router.replace(localize('/'));
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, localize]);
 
   useEffect(() => {
     const fetchListings = async () => {
       if (!user?._id || user?.role !== 'creator') return;
       try {
         setListingsLoading(true);
-        const res = await api.get(`/api/listings/public?creatorId=${user._id}`);
+        const res = await api.get('/api/listings/public', { params: { creatorId: user._id, language: locale } });
         setListings(res.data.listings || res.data || []);
       } catch (err) {
         console.error('Listings fetch error:', err);
@@ -175,7 +179,7 @@ export default function ProfilePage() {
       }
     };
     fetchListings();
-  }, [user]);
+  }, [user, locale]);
 
   const {
     register,
@@ -208,13 +212,13 @@ export default function ProfilePage() {
   };
 
   const handleDelete = async () => {
-    if (confirm('Are you sure you want to terminate this account? This action is irreversible.')) {
+    if (confirm(fr ? 'Voulez-vous vraiment supprimer ce compte ? Cette action est irrÃ©versible.' : 'Are you sure you want to terminate this account? This action is irreversible.')) {
       try {
         await api.delete('/api/users/delete-account');
         setUser(null);
-        router.push('/auth/signup');
+        router.push(localize('/'));
       } catch (error) {
-        setMessage({ type: 'error', text: error.response?.data?.message || 'Delete failed' });
+        setMessage({ type: 'error', text: fr ? 'La suppression a Ã©chouÃ©.' : (error.response?.data?.message || 'Delete failed') });
       }
     }
   };
@@ -239,12 +243,12 @@ export default function ProfilePage() {
       });
 
       setUser(res.data.user);
-      setMessage({ type: 'success', text: 'SYSTEM IDENTITY UPDATED' });
+      setMessage({ type: 'success', text: fr ? 'PROFIL MIS Ã€ JOUR' : 'SYSTEM IDENTITY UPDATED' });
       setIsEditing(false);
       setPreviews({ profile: null, cover: null });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);
     } catch (error) {
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Update failed' });
+      setMessage({ type: 'error', text: fr ? 'La mise Ã  jour a Ã©chouÃ©.' : (error.response?.data?.message || 'Update failed') });
     }
   };
 
@@ -258,7 +262,7 @@ export default function ProfilePage() {
 
   // ── ROLE: user → simple design ──
   if (user?.role === 'user') {
-    return <UserProfileView user={user} router={router} onDelete={handleDelete} />;
+    return <UserProfileView user={user} router={router} onDelete={handleDelete} fr={fr} />;
   }
 
   // ── ROLE: creator / admin → original full design ──
@@ -286,7 +290,7 @@ export default function ProfilePage() {
             onClick={() => router.back()}
             className="flex items-center gap-2 px-5 py-2.5 bg-black/20 backdrop-blur-xl border border-white/10 rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all"
           >
-            <FiArrowLeft size={14} /> Return
+            <FiArrowLeft size={14} /> {L('Return', 'Retour')}
           </button>
         </div>
 
@@ -294,7 +298,7 @@ export default function ProfilePage() {
           <label className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/40 backdrop-blur-sm transition-all hover:bg-black/50">
             <div className="flex flex-col items-center gap-2 text-white">
               <FiCamera size={28} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Change Cover</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">{L('Change Cover', 'Modifier la couverture')}</span>
             </div>
             <input
               type="file"
@@ -332,7 +336,7 @@ export default function ProfilePage() {
             {isEditing && (
               <label className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-all rounded-[2.5rem]">
                 <FiCamera className="text-white" size={22} />
-                <span className="text-white text-[9px] font-black uppercase tracking-widest mt-1">Change</span>
+                <span className="text-white text-[9px] font-black uppercase tracking-widest mt-1">{L('Change', 'Modifier')}</span>
                 <input
                   type="file"
                   name="profileImageCustom"
@@ -380,7 +384,7 @@ export default function ProfilePage() {
                 : 'bg-black text-white dark:bg-white dark:text-black hover:bg-orange-500 dark:hover:bg-orange-500 shadow-lg shadow-black/5'
               }`}
           >
-            {isEditing ? <><FiX /> CANCEL</> : <><FiEdit3 /> Edit Profile</>}
+            {isEditing ? <><FiX /> {L('CANCEL', 'ANNULER')}</> : <><FiEdit3 /> {L('Edit Profile', 'Modifier le profil')}</>}
           </button>
         </div>
 
@@ -398,13 +402,13 @@ export default function ProfilePage() {
         {user?.creatorRequest?.status === 'rejected' && (
           <div className="mt-8 p-5 bg-red-500/5 border border-red-500/20 rounded-2xl">
             <p className="text-[9px] font-black text-red-500 uppercase flex items-center gap-2 tracking-widest mb-3">
-              <FiAlertCircle /> REJECTION NOTICE
+              <FiAlertCircle /> {L('REJECTION NOTICE', 'AVIS DE REFUS')}
             </p>
             <p className="text-[10px] text-gray-400 italic font-medium leading-relaxed">
-              "{user.creatorRequest.rejectionReason}"
+              &ldquo;{user.creatorRequest.rejectionReason}&rdquo;
             </p>
             <p className="text-[10px] mt-2 text-gray-400 italic font-medium leading-relaxed">
-              <span className="font-bold">Additional Details:</span> "{user.creatorRequest.additionalReason}"
+              <span className="font-bold">{L('Additional Details:', 'DÃ©tails supplÃ©mentaires :')}</span> &ldquo;{user.creatorRequest.additionalReason}&rdquo;
             </p>
           </div>
         )}
@@ -416,17 +420,17 @@ export default function ProfilePage() {
           <div className="lg:col-span-4 space-y-8">
             <div className="space-y-4">
               <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400 flex items-center gap-2">
-                <FiLink className="text-orange-500" /> Links
+                <FiLink className="text-orange-500" /> {L('Links', 'Liens')}
               </h3>
               <div className="grid gap-3">
                 {user?.profile?.websiteLink && (
-                  <SocialLink icon={Globe} label="Official Website" url={user.profile.websiteLink} />
+                  <SocialLink icon={Globe} label={L('Official Website', 'Site officiel')} url={user.profile.websiteLink} />
                 )}
                 {user?.profile?.socialLink && (
-                  <SocialLink icon={FiExternalLink} label="Portfolio / Social" url={user.profile.socialLink} />
+                  <SocialLink icon={FiExternalLink} label={L('Portfolio / Social', 'Portfolio / RÃ©seaux sociaux')} url={user.profile.socialLink} />
                 )}
                 {!user?.profile?.websiteLink && !user?.profile?.socialLink && (
-                  <p className="text-[10px] text-gray-400 italic font-bold">No links added yet.</p>
+                  <p className="text-[10px] text-gray-400 italic font-bold">{L('No links added yet.', 'Aucun lien ajoutÃ©.')}</p>
                 )}
               </div>
             </div>
@@ -449,11 +453,11 @@ export default function ProfilePage() {
             {!isEditing ? (
               <div className="space-y-4 animate-in fade-in duration-500">
                 <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400 flex items-center gap-2">
-                  <Info className="text-orange-500" size={14} /> Biography
+                  <Info className="text-orange-500" size={14} /> {L('Biography', 'Biographie')}
                 </h3>
                 <div className="p-8 bg-gray-50 dark:bg-white/5 rounded-[2rem] border border-gray-100 dark:border-white/5">
                   <p className="text-sm md:text-base leading-relaxed font-medium text-gray-600 dark:text-gray-400 italic whitespace-pre-wrap">
-                    {user?.profile?.bio || "This profile's biography has not been initialized."}
+                    {user?.profile?.bio || L("This profile's biography has not been initialized.", "La biographie de ce profil nâ€™a pas encore Ã©tÃ© renseignÃ©e.")}
                   </p>
                 </div>
 
@@ -516,7 +520,7 @@ export default function ProfilePage() {
                     disabled={isSubmitting}
                     className="w-full cursor-pointer px-12 py-4 bg-orange-500 text-white font-black text-[10px] tracking-[0.3em] hover:bg-orange-600 transition-all disabled:bg-gray-700 uppercase shadow-lg shadow-orange-500/20 rounded-xl"
                   >
-                    {isSubmitting ? 'Updating...' : 'Update Profile'}
+                    {isSubmitting ? L('Updating...', 'Mise Ã  jour...') : L('Update Profile', 'Mettre Ã  jour le profil')}
                   </button>
                 </div>
               </form>
@@ -529,10 +533,10 @@ export default function ProfilePage() {
           <div className="mt-12">
             <div className="flex items-center justify-between mb-10 pb-6 border-b border-gray-100 dark:border-white/5">
               <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400">
-                My Listings / {listings.length} Units
+                {L('My Listings', 'Mes annonces')} / {listings.length} {L('Units', 'Ã©lÃ©ments')}
               </h3>
               <span className="px-4 py-1.5 bg-gray-100 dark:bg-white/5 rounded-full text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                Active Listings
+                {L('Active Listings', 'Annonces actives')}
               </span>
             </div>
 
@@ -549,7 +553,7 @@ export default function ProfilePage() {
                 ) : (
                   <div className="col-span-full py-24 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] flex flex-col items-center justify-center text-gray-400">
                     <Box size={48} strokeWidth={1} className="opacity-20 mb-4" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em]">No active listings found</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em]">{L('No active listings found', 'Aucune annonce active')}</p>
                   </div>
                 )}
               </div>

@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import BlogDetailsClient from './BlogDetailsClient';
 import { absoluteSiteUrl, buildLocalizedMetadata, getDynamicSeoContext, localizedPath } from '@/lib/localizedMetadata';
+import { translate } from '@/lib/i18n';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -23,11 +24,11 @@ export async function generateMetadata({ params, locale = 'en' }) {
   const blog = await fetchBlog(id, locale);
 
   if (!blog) {
-    return { title: 'Story Not Found | World Culture Marketplace' };
+    return { title: translate(locale, 'blog.details.notFoundTitle') };
   }
 
   const firstParagraph = blog.content?.find((c) => c.type === 'paragraph')?.text || '';
-  const description = blog.excerpt || firstParagraph.slice(0, 160) || 'Read this cultural story on World Culture Marketplace.';
+  const description = blog.excerpt || firstParagraph.slice(0, 160) || translate(locale, 'blog.details.metaDescription');
 
   const seoContext = await getDynamicSeoContext({ objectType: 'blog', slug: id, locale });
   const localized = buildLocalizedMetadata({ locale, path: `/blogs/${blog.slug || id}`,

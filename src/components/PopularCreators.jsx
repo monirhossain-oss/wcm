@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import CreatorSkeleton from "./creator/CreatorSkeleton";
 import CreatorDataWrapper from "./creator/CreatorDataWrapper";
+import { localePath, translate } from '@/lib/i18n';
 
 export default function PopularCreators({ locale = 'en' }) {
     return (
@@ -10,18 +11,18 @@ export default function PopularCreators({ locale = 'en' }) {
                 <div className="mb-8 flex items-center justify-between border-b border-gray-50 dark:border-zinc-900 pb-4">
                     <div className="max-w-[70%]">
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                            Featured Creators
+                            {translate(locale, 'homeDiscovery.popularCreators.heading')}
                         </h2>
                         <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm font-normal">
-                            Verified artists & craftsmen.
+                            {translate(locale, 'homeDiscovery.popularCreators.description')}
                         </p>
                     </div>
                     <div>
                         <Link
-                            href={locale === 'en' ? '/creators' : `/${locale}/creators`}
+                            href={localePath(locale, '/creators')}
                             className="text-sm font-bold text-orange-500 hover:text-orange-600 transition-colors flex items-center gap-1 group"
                         >
-                            View All
+                            {translate(locale, 'homeDiscovery.viewAll')}
                             <span className="group-hover:translate-x-1 transition-transform">→</span>
                         </Link>
                     </div>

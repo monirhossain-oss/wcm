@@ -1,5 +1,6 @@
 import ListingCard from './ListingCard';
 import ListingsProviderWrapper from './ListingsProviderWrapper';
+import { translate } from '@/lib/i18n';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -25,7 +26,7 @@ export default async function TrendingDataWrapper({ locale = 'en' }) {
     if (listings.length === 0) {
       return (
         <div className="text-sm text-zinc-400 text-center py-8">
-          No trending listings found.
+          {translate(locale, 'homeTrending.empty')}
         </div>
       );
     }
@@ -46,12 +47,12 @@ export default async function TrendingDataWrapper({ locale = 'en' }) {
     // User-friendly error message
     return (
       <div className="text-sm text-red-400 text-center py-8">
-        Failed to load trending listings.
+        {translate(locale, 'homeTrending.failure')}
         <button
           onClick={() => window.location.reload()}
           className="ml-2 underline hover:text-red-300"
         >
-          Retry
+          {translate(locale, 'homeTrending.retry')}
         </button>
       </div>
     );

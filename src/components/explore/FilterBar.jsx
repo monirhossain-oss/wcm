@@ -7,18 +7,18 @@ import { useLocale } from '@/context/LocaleContext';
 import RegionDropdown from './RegionDropdown';
 
 export default function FilterBar() {
-    const { locale } = useLocale();
+    const { locale, t } = useLocale();
     const { updateQuery, category: currentCategory, continent: currentContinent, search } = useExploreQuery();
 
     const scrollRef = useRef(null);
-    const [categories, setCategories] = useState(['All']);
+    const [categories, setCategories] = useState([{ value: 'All', label: t('homeDiscovery.allCategories') }]);
     const [searchValue, setSearchValue] = useState(search);
 
     // ১. লোকাল স্টোরেজ থেকে ক্যাটাগরি লোড এবং ১ ঘণ্টার ক্যাশিং লজিক
     useEffect(() => {
         const fetchCategoriesWithCache = async () => {
-            const CACHE_KEY = 'wcm_categories_cache';
-            const TIMESTAMP_KEY = 'wcm_categories_time';
+            const CACHE_KEY = `wcm_categories_cache_${locale}`;
+            const TIMESTAMP_KEY = `wcm_categories_time_${locale}`;
             const CACHE_DURATION = 3600000; // ১ ঘণ্টা (মিলিসেকেন্ডে)
 
             try {
@@ -33,11 +33,24 @@ export default function FilterBar() {
                 }
 
                 // ডাটা না থাকলে বা মেয়াদ শেষ হয়ে গেলে এপিআই কল
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/meta-data${locale === 'en' ? '' : `?language=${locale}`}`);
-                const data = await res.json();
+                const [masterRes, localizedRes] = await Promise.all([
+                    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/meta-data`),
+                    locale === 'en'
+                        ? Promise.resolve(null)
+                        : fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/listings/meta-data?language=${locale}`),
+                ]);
+                const data = await masterRes.json();
+                const localizedData = localizedRes?.ok ? await localizedRes.json() : data;
 
                 if (data.categories) {
-                    const catList = ['All', ...data.categories.map(c => c.title)];
+                    const localizedById = new Map((localizedData.categories || []).map((category) => [String(category._id), category.title]));
+                    const catList = [
+                        { value: 'All', label: t('homeDiscovery.allCategories') },
+                        ...data.categories.map((category) => ({
+                            value: category.title,
+                            label: localizedById.get(String(category._id)) || category.title,
+                        })),
+                    ];
                     setCategories(catList);
 
                     // লোকাল স্টোরেজে সেভ করা
@@ -53,7 +66,7 @@ export default function FilterBar() {
         };
 
         fetchCategoriesWithCache();
-    }, [locale]);
+    }, [locale, t]);
 
     // ২. ইউআরএল-এর সার্চের সাথে ইনপুট বক্স সিঙ্ক রাখা
     useEffect(() => {
@@ -92,7 +105,7 @@ export default function FilterBar() {
                         <Search className="text-zinc-400 shrink-0" size={18} />
                         <input
                             type="text"
-                            placeholder="Search culture, art, traditions..."
+                            placeholder={t('explore.searchPlaceholder')}
                             value={searchValue}
                             onChange={(e) => setSearchValue(e.target.value)}
                             className="w-full bg-transparent border-none px-3 py-2 text-sm outline-none dark:text-white placeholder:text-zinc-500"
@@ -110,6 +123,8 @@ export default function FilterBar() {
                 {/* ক্যাটাগরি স্লাইডার সেকশন */}
                 <div className="flex items-center group/slider relative">
                     <button
+                        type="button"
+                        aria-label={t('explore.scrollLeft')}
                         onClick={() => slide('left')}
                         className="p-1 text-zinc-400 hover:text-orange-500 transition-colors shrink-0 bg-white dark:bg-[#0a0a0a] z-10"
                     >
@@ -122,19 +137,21 @@ export default function FilterBar() {
                     >
                         {categories.map((cat) => (
                             <button
-                                key={cat}
-                                onClick={() => updateQuery({ category: cat })}
-                                className={`px-5 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all uppercase tracking-wider ${currentCategory.toLowerCase() === cat.toLowerCase()
+                                key={cat.value}
+                                onClick={() => updateQuery({ category: cat.value })}
+                                className={`px-5 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all uppercase tracking-wider ${currentCategory.toLowerCase() === cat.value.toLowerCase()
                                         ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
                                         : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10'
                                     }`}
                             >
-                                {cat}
+                                {cat.label}
                             </button>
                         ))}
                     </div>
 
                     <button
+                        type="button"
+                        aria-label={t('explore.scrollRight')}
                         onClick={() => slide('right')}
                         className="p-1 text-zinc-400 hover:text-orange-500 transition-colors shrink-0 bg-white dark:bg-[#0a0a0a] z-10"
                     >

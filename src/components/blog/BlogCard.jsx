@@ -17,7 +17,7 @@ const api = axios.create({
 });
 
 const BlogCard = () => {
-  const { locale, localize } = useLocale();
+  const { locale, localize, t } = useLocale();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadMoreLoading, setLoadMoreLoading] = useState(false);
@@ -49,7 +49,7 @@ const BlogCard = () => {
       setHasMore(res.data.pagination.hasMore);
     } catch (error) {
       console.error('Fetch Error:', error);
-      toast.error('Failed to load stories.');
+      toast.error(t('blog.loadFailure'));
     } finally {
       setLoading(false);
       setLoadMoreLoading(false);
@@ -74,7 +74,7 @@ const BlogCard = () => {
   // ৩. ইমেইল সাবস্ক্রিপশন লজিক
   const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (!email) return toast.error('Please enter your email!');
+    if (!email) return toast.error(t('blog.newsletterEmailRequired'));
 
     setSubmitting(true);
     try {
@@ -88,10 +88,10 @@ const BlogCard = () => {
         templateParams,
         'qDIfmsvflZvMxTk9S'
       );
-      toast.success('Thank you for subscribing!');
+      toast.success(t('blog.newsletterSuccess'));
       setEmail('');
     } catch (error) {
-      toast.error('Something went wrong.');
+      toast.error(t('blog.newsletterError'));
     } finally {
       setSubmitting(false);
     }
@@ -105,7 +105,7 @@ const BlogCard = () => {
         <div className="flex flex-col items-center py-20">
           <Loader2 className="animate-spin text-orange-500 mb-4" size={40} />
           <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-            Loading blogss...
+            {t('blog.loading')}
           </p>
         </div>
       ) : blogs.length > 0 ? (
@@ -144,7 +144,7 @@ const BlogCard = () => {
                     href={localize(`/blogs/${blog.slug}`)}
                     className="inline-flex items-center gap-1 text-orange-500 font-black text-[10px] uppercase tracking-widest group/link"
                   >
-                    Read More
+                    {t('blog.readMore')}
                     <ChevronRight
                       size={14}
                       className="transition-transform group-hover/link:translate-x-1"
@@ -159,7 +159,7 @@ const BlogCard = () => {
         <div className="text-center py-20 border-2 border-dashed border-zinc-100 dark:border-zinc-900 rounded-3xl mb-20">
           <FiAlertCircle className="mx-auto text-zinc-300 mb-4" size={40} />
           <p className="text-sm font-bold text-zinc-400 uppercase tracking-tighter">
-            No stories found in the archives.
+            {t('blog.archiveEmpty')}
           </p>
         </div>
       )}
@@ -175,7 +175,7 @@ const BlogCard = () => {
             {loadMoreLoading ? (
               <Loader2 className="animate-spin" size={16} />
             ) : (
-              'Load More Insights'
+              t('blog.loadMore')
             )}
           </button>
         </div>
@@ -185,12 +185,10 @@ const BlogCard = () => {
       <div className="max-w-3xl mx-auto py-20 border-t border-zinc-100 dark:border-zinc-900">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-zinc-900 dark:text-white mb-4">
-            Stay Informed
+            {t('blog.newsletterTitle')}
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400 text-sm md:text-base leading-relaxed font-medium">
-            Receive our curated weekly blogs featuring the world&apos;s{' '}
-            <br className="hidden md:block" />
-            most captivating cultural narratives.
+            {t('blog.newsletterDescription')}
           </p>
         </div>
 
@@ -211,7 +209,7 @@ const BlogCard = () => {
             disabled={submitting}
             className="px-8 py-4 bg-[#f27b13] hover:bg-[#d96a0d] disabled:bg-zinc-400 text-white font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-orange-500/20 active:scale-95 text-[11px] flex items-center justify-center gap-2"
           >
-            {submitting ? <Loader2 className="animate-spin" size={18} /> : 'Subscribe'}
+            {submitting ? <Loader2 className="animate-spin" size={18} /> : t('blog.subscribe')}
           </button>
         </form>
       </div>

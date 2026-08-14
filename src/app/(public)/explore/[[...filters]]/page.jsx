@@ -1,6 +1,7 @@
 import ExploreClient from '../ExploreClient';
 import { continentMapping } from '@/constants/continentData';
 import { getSeoByPage } from '@/lib/api';
+import { translate } from '@/lib/i18n';
 
 // ── Shared helper: slug ke readable text e convert kora ──
 function formatText(slug) {
@@ -49,7 +50,7 @@ function resolveExploreFilters(filters = []) {
 }
 
 // ১. ডাইনামিক মেটাডাটা জেনারেটর
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, locale = 'en' }) {
     const resolvedParams = await params;
     const filters = resolvedParams?.filters || [];
 
@@ -59,22 +60,26 @@ export async function generateMetadata({ params }) {
     const adminSeo = await getSeoByPage('explore');
     // console.log('🔍 [Explore Page] Base SEO from panel:', adminSeo); // 👈 terminal e dekhabe
 
-    let finalTitle = adminSeo?.title || 'Explore World Culture';
-    let finalDescription = adminSeo?.description || 'Discover unique global heritage.';
+    let finalTitle = locale === 'en' && adminSeo?.title ? adminSeo.title : translate(locale, 'explore.metaTitle');
+    let finalDescription = locale === 'en' && adminSeo?.description ? adminSeo.description : translate(locale, 'explore.metaDescription');
     let finalKeywords = adminSeo?.keywords?.length ? adminSeo.keywords : ['Culture', 'WCM'];
 
     const isFiltered = category !== 'All' || continent !== 'All Regions';
+    const localizedContinent = continent === 'All Regions'
+        ? translate(locale, 'homeDiscovery.allRegions')
+        : translate(locale, `homeDiscovery.regions.${continent}`, continent);
+    const baseTitle = locale === 'en' && adminSeo?.title ? adminSeo.title : translate(locale, 'explore.metaTitle');
 
     if (isFiltered) {
         if (category !== 'All' && continent !== 'All Regions') {
-            finalTitle = `${category} from ${continent} | ${adminSeo?.title || 'WCM'}`;
+            finalTitle = `${category} ${translate(locale, 'explore.from')} ${localizedContinent} | ${baseTitle}`;
         } else if (category !== 'All') {
-            finalTitle = `${category} Collections | ${adminSeo?.title || 'WCM'}`;
+            finalTitle = `${translate(locale, 'explore.categoryCollections')} : ${category} | ${baseTitle}`;
         } else if (continent !== 'All Regions') {
-            finalTitle = `Cultural Heritage of ${continent} | ${adminSeo?.title || 'WCM'}`;
+            finalTitle = `${translate(locale, 'explore.culturalHeritage')} ${localizedContinent} | ${baseTitle}`;
         }
 
-        finalDescription = `Explore the best ${category} from ${continent}. ${finalDescription}`;
+        finalDescription = `${translate(locale, 'explore.filteredDescription')} ${finalDescription}`;
         finalKeywords = [category, continent, ...finalKeywords];
     }
 
@@ -100,20 +105,20 @@ export async function generateMetadata({ params }) {
 }
 
 // ২. মেইন পেজ কম্পোনেন্ট
-export default async function ExplorePage({ params }) {
+export default async function ExplorePage({ params, locale = 'en' }) {
     const resolvedParams = await params;
     const filters = resolvedParams?.filters || [];
 
     const { category, continent, search } = resolveExploreFilters(filters);
 
     // h1-এর জন্য ডাইনামিক টেক্সট বানানো
-    let pageHeading = 'Explore World Culture';
+    let pageHeading = translate(locale, 'explore.heading');
     if (category !== 'All' && continent !== 'All Regions') {
-        pageHeading = `${category} from ${continent}`;
+        pageHeading = `${category} ${translate(locale, 'explore.from')} ${continent}`;
     } else if (category !== 'All') {
-        pageHeading = `${category} Collections`;
+        pageHeading = `${translate(locale, 'explore.categoryCollections')} : ${category}`;
     } else if (continent !== 'All Regions') {
-        pageHeading = `Cultural Heritage of ${continent}`;
+        pageHeading = `${translate(locale, 'explore.culturalHeritage')} ${translate(locale, `homeDiscovery.regions.${continent}`, continent)}`;
     }
 
     return (

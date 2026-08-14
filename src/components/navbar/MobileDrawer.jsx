@@ -22,6 +22,7 @@ const MobileDrawer = ({ categories, menuItems }) => {
     const { user, logoutUser } = useAuth();
     const pathname = usePathname();
     const { locale, localize, t } = useLocale();
+    const normalizedPathname = pathname.replace(/^\/fr(?=\/|$)/, '') || '/';
 
     const getDashboardLink = () => {
         if (user?.role === 'admin') return '/admin';
@@ -92,7 +93,7 @@ const MobileDrawer = ({ categories, menuItems }) => {
                                                 {categories.map((cat) => (
                                                     <Link
                                                         key={cat._id || cat.id}
-                                                        href={localize(`/explore/${createSlug(locale === 'fr' ? cat.localizedTitle : cat.title || cat.name)}`)}
+                                                        href={localize(`/explore/${createSlug(cat.title || cat.name)}`)}
                                                         onClick={closeAll}
                                                         className="group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-[#F57C00]/40 hover:bg-orange-50 dark:hover:bg-orange-500/5 transition-all duration-150 cursor-pointer"
                                                     >
@@ -115,22 +116,22 @@ const MobileDrawer = ({ categories, menuItems }) => {
                                 href={localize(item.href)}
                                 onClick={() => setIsMobileDrawerOpen(false)}
                                 className={`flex items-center px-3 py-3.5 text-[15px] font-semibold rounded-xl transition-colors
-                  ${pathname === item.href ? 'text-[#F57C00] bg-orange-50 dark:bg-orange-500/10' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                  ${normalizedPathname === item.href ? 'text-[#F57C00] bg-orange-50 dark:bg-orange-500/10' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
                             >
-                                {t(`common.${item.name.toLowerCase()}`, item.name)}
+                                {t(`navigation.${item.key}`, item.name)}
                             </Link>
                         );
                     })}
 
                     {user && (
                         <Link
-                            href="/favorites"
+                            href={localize('/favorites')}
                             onClick={() => setIsMobileDrawerOpen(false)}
                             className={`flex items-center gap-2.5 px-3 py-3.5 text-[15px] font-semibold rounded-xl transition-colors
-                ${pathname === '/favorites' ? 'text-red-500 bg-red-50 dark:bg-red-500/10' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                ${normalizedPathname === '/favorites' ? 'text-red-500 bg-red-50 dark:bg-red-500/10' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
                         >
                             <FiHeart className="w-4 h-4" />
-                            Wishlist
+                            {t('navigation.wishlist')}
                         </Link>
                     )}
 
@@ -143,13 +144,13 @@ const MobileDrawer = ({ categories, menuItems }) => {
                                 onClick={() => setIsMobileDrawerOpen(false)}
                                 className="flex items-center px-3 py-3.5 text-[15px] font-semibold text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5"
                             >
-                                Dashboard
+                                {user?.role === 'admin' ? t('navigation.adminDashboard') : user?.role === 'creator' ? t('navigation.creatorDashboard') : t('navigation.profile')}
                             </Link>
                             <button
                                 onClick={() => { logoutUser(); setIsMobileDrawerOpen(false); }}
                                 className="flex items-center gap-2 px-3 py-3.5 text-[15px] font-bold text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-left w-full"
                             >
-                                <FiLogOut className="w-4 h-4" /> Logout
+                                <FiLogOut className="w-4 h-4" /> {t('navigation.logout')}
                             </button>
                         </>
                     ) : (

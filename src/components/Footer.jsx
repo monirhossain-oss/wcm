@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaInstagram, FaPinterestP, FaLinkedinIn, FaFacebook } from 'react-icons/fa';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useLocale } from '@/context/LocaleContext';
 
@@ -11,8 +11,8 @@ const Footer = () => {
   const { locale, localize, t } = useLocale();
   const currentYear = new Date().getFullYear();
 
-  const staticData = {
-    aboutText: "Connecting the world through authentic culture, one story at a time.",
+  const staticData = useMemo(() => ({
+    aboutText: t('footer.about'),
     socialLinks: {
       instagram: "",
       pinterest: "",
@@ -20,26 +20,25 @@ const Footer = () => {
       facebook: ""
     },
     platformLinks: [
-      { label: "About Us", href: "/about-us" },
-      { label: "How It Works", href: "/how-it-works" },
-      { label: "FAQ", href: "/faqUs" }
+      { label: t('footer.platformLinks.about'), href: "/about-us" },
+      { label: t('footer.platformLinks.howItWorks'), href: "/how-it-works" },
+      { label: t('footer.platformLinks.faq'), href: "/faqUs" }
     ],
     resourceLinks: [
-      { label: "Blogs", href: "/blogs" },
-      { label: "Contact", href: "/contact" },
-      { label: "Creators", href: "/creators" }
+      { label: t('footer.resourceLinks.blogs'), href: "/blogs" },
+      { label: t('footer.resourceLinks.contact'), href: "/contact" },
+      { label: t('footer.resourceLinks.creators'), href: "/creators" }
     ],
     legalLinks: [
-      { label: "Boost & PPC terms & condition", href: "/boost-terms-and-ppc" },
-      { label: "Creator Terms & Condition", href: "/creator-terms-and-conditions" },
-      { label: "Advertising Policy", href: "/advertising-policy" },
-      { label: "Privacy Policy", href: "/privacy-policy" },
-      { label: "Terms & Conditions", href: "/terms-and-conditions" },
-      { label: "Cookie Policy", href: "/cookie-policy" }
+      { label: t('footer.legalLinks.boost'), href: "/boost-terms-and-ppc" },
+      { label: t('footer.legalLinks.creator'), href: "/creator-terms-and-conditions" },
+      { label: t('footer.legalLinks.advertising'), href: "/advertising-policy" },
+      { label: t('footer.legalLinks.privacy'), href: "/privacy-policy" },
+      { label: t('footer.legalLinks.terms'), href: "/terms-and-conditions" },
+      { label: t('footer.legalLinks.cookie'), href: "/cookie-policy" }
     ],
-    newsletterTitle: "Stay Connected",
-    newsletterDescription: "Stay informed about cultural stories and discoveries. More to come."
-  };
+    newsletterTitle: t('footer.newsletterTitle'), newsletterDescription: t('footer.newsletterDescription')
+  }), [t]);
 
   const [footerData, setFooterData] = useState(staticData);
   const [email, setEmail] = useState("");
@@ -48,37 +47,48 @@ const Footer = () => {
 
   useEffect(() => {
     const fetchFooter = async () => {
+      setFooterData(staticData);
       try {
-        const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/footer`, { params: locale === 'en' ? undefined : { language: locale } });
+        const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/footer`;
+        const [{ data }, sourceResponse] = await Promise.all([
+          axios.get(endpoint, { params: locale === 'en' ? undefined : { language: locale } }),
+          locale === 'en' ? Promise.resolve(null) : axios.get(endpoint),
+        ]);
 
         if (data.success && data.data) {
           const db = data.data;
+          const source = sourceResponse?.data?.data;
+          const localizedValue = (value, sourceValue, fallback) =>
+            value && (locale === 'en' || value !== sourceValue) ? value : fallback;
 
-          const getMergedLinks = (staticLinks, dbLinks) => {
+          const getMergedLinks = (staticLinks, dbLinks, sourceLinks) => {
             const merged = staticLinks.map(sLink => {
-              const foundInDb = dbLinks?.find(dLink => dLink.label.toLowerCase() === sLink.label.toLowerCase());
-              return foundInDb ? foundInDb : sLink;
+              const foundInDb = dbLinks?.find(dLink => dLink.href === sLink.href);
+              const foundInSource = sourceLinks?.find(link => link.href === sLink.href);
+              return foundInDb
+                ? { ...foundInDb, label: localizedValue(foundInDb.label, foundInSource?.label, sLink.label) }
+                : sLink;
             });
 
-            const staticLabels = staticLinks.map(l => l.label.toLowerCase());
-            const extraLinks = dbLinks?.filter(dLink => !staticLabels.includes(dLink.label.toLowerCase())) || [];
+            const staticHrefs = new Set(staticLinks.map(link => link.href));
+            const extraLinks = dbLinks?.filter(dLink => !staticHrefs.has(dLink.href)) || [];
 
             return [...merged, ...extraLinks];
           };
 
           setFooterData({
-            aboutText: db.aboutText || staticData.aboutText,
-            newsletterTitle: db.newsletterTitle || staticData.newsletterTitle,
-            newsletterDescription: db.newsletterDescription || staticData.newsletterDescription,
+            aboutText: localizedValue(db.aboutText, source?.aboutText, staticData.aboutText),
+            newsletterTitle: localizedValue(db.newsletterTitle, source?.newsletterTitle, staticData.newsletterTitle),
+            newsletterDescription: localizedValue(db.newsletterDescription, source?.newsletterDescription, staticData.newsletterDescription),
             socialLinks: {
               instagram: db.socialLinks?.instagram || "",
               pinterest: db.socialLinks?.pinterest || "",
               linkedin: db.socialLinks?.linkedin || "",
               facebook: db.socialLinks?.facebook || "",
             },
-            platformLinks: getMergedLinks(staticData.platformLinks, db.platformLinks),
-            resourceLinks: getMergedLinks(staticData.resourceLinks, db.resourceLinks),
-            legalLinks: getMergedLinks(staticData.legalLinks, db.legalLinks),
+            platformLinks: getMergedLinks(staticData.platformLinks, db.platformLinks, source?.platformLinks),
+            resourceLinks: getMergedLinks(staticData.resourceLinks, db.resourceLinks, source?.resourceLinks),
+            legalLinks: getMergedLinks(staticData.legalLinks, db.legalLinks, source?.legalLinks),
           });
         }
       } catch (error) {
@@ -86,9 +96,7 @@ const Footer = () => {
       }
     };
     fetchFooter();
-  // Static fallback content is immutable for the lifetime of this component.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locale]);
+  }, [locale, staticData]);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -103,16 +111,16 @@ const Footer = () => {
       if (response.status === 201 || response.status === 200) {
         setStatus("success");
         setEmail("");
-        alert("Subscription Successful! Thank you for staying connected.");
+        alert(t('footer.subscriptionSuccess'));
       }
     } catch (error) {
       console.error("Subscription Error:", error);
       setStatus("error");
 
       if (error.response && error.response.status === 400) {
-        alert("This email is already subscribed!");
+        alert(t('footer.alreadySubscribed'));
       } else {
-        alert("Something went wrong. Please try again later.");
+        alert(t('footer.subscriptionError'));
       }
     } finally {
 
@@ -166,7 +174,7 @@ const Footer = () => {
                   <span
                     key={key}
                     className="text-gray-300 dark:text-gray-700 cursor-not-allowed"
-                    title={`${label} - Not configured`}
+                    title={`${label} - ${t('footer.notConfigured')}`}
                   >
                     <Icon />
                   </span>
@@ -215,11 +223,11 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-200 dark:border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-6 text-[12px] font-medium">
           <p className="text-center md:text-left order-2 md:order-1">
-            © {currentYear} <span className="text-[#F57C00]">World Culture Marketplace</span><sup className="ml-0.5">&reg;</sup>. All rights reserved.
+            © {currentYear} <span className="text-[#F57C00]">World Culture Marketplace</span><sup className="ml-0.5">&reg;</sup>. {t('footer.rights')}
           </p>
           <div className="flex flex-wrap justify-center gap-6 order-1 md:order-2">
             {footerData.legalLinks.map((link, idx) => (
-              <Link key={idx} href={localize(link.href)} className="hover:text-[#F57C00] transition-colors">{link.label}</Link>
+              <Link key={link.href || idx} href={localize(link.href)} className="hover:text-[#F57C00] transition-colors">{link.label}</Link>
             ))}
           </div>
         </div>

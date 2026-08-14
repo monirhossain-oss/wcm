@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 import AboutPage from '../../about-us/page';
-import BlogsPage from '../../blogs/page';
+import BlogsPage, { generateMetadata as generateBlogsMetadata } from '../../blogs/page';
 import BlogDetailsPage, { generateMetadata as generateBlogMetadata } from '../../blogs/[id]/page';
-import CreatorsPage from '../../creators/page';
-import ExplorePage from '../../explore/[[...filters]]/page';
+import CreatorsPage, { generateMetadata as generateCreatorsMetadata } from '../../creators/page';
+import ExplorePage, { generateMetadata as generateExploreMetadata } from '../../explore/[[...filters]]/page';
 import FaqPage from '../../faqUs/page';
 import HowItWorksPage from '../../how-it-works/page';
 import ListingPage, { generateMetadata as generateListingMetadata } from '../../listings/[id]/page';
@@ -16,7 +16,11 @@ import ContactPage from '../../contact/page';
 import AdvertisingPolicyPage from '../../advertising-policy/page';
 import BoostTermsPage from '../../boost-terms-and-ppc/page';
 import CreatorTermsPage from '../../creator-terms-and-conditions/page';
+import BecomeCreatorPage from '../../become-creator/page';
+import OwnProfilePage from '../../profile/page';
+import FavoritesPage from '../../favorites/page';
 import { buildLocalizedMetadata, getPublishedLanguageCodes } from '@/lib/localizedMetadata';
+import { translate } from '@/lib/i18n';
 
 const staticPages = {
   'about-us': AboutPage,
@@ -33,6 +37,9 @@ const staticPages = {
   'advertising-policy': AdvertisingPolicyPage,
   'boost-terms-and-ppc': BoostTermsPage,
   'creator-terms-and-conditions': CreatorTermsPage,
+  'become-creator': BecomeCreatorPage,
+  profile: OwnProfilePage,
+  favorites: FavoritesPage,
 };
 
 export async function generateMetadata({ params }) {
@@ -41,7 +48,21 @@ export async function generateMetadata({ params }) {
   const childParams = Promise.resolve({ id });
   if (section === 'listings' && id) return generateListingMetadata({ params: childParams, locale: resolved.locale });
   if (section === 'blogs' && id) return generateBlogMetadata({ params: childParams, locale: resolved.locale });
+  if (section === 'blogs' && !id) return generateBlogsMetadata({ locale: resolved.locale });
   if (section === 'profile' && id) return generateProfileMetadata({ params: childParams, locale: resolved.locale });
+  if (section === 'creators' && !id) return generateCreatorsMetadata({ locale: resolved.locale });
+  if (section === 'explore') {
+    return generateExploreMetadata({
+      params: Promise.resolve({ filters: [id, ...resolved.segments.slice(2)].filter(Boolean) }),
+      locale: resolved.locale,
+    });
+  }
+  if (section === 'favorites' && !id) {
+    return buildLocalizedMetadata({
+      locale: resolved.locale, path: '/favorites', title: translate(resolved.locale, 'favorites.metaTitle'),
+      description: translate(resolved.locale, 'favorites.metaDescription'), languages: await getPublishedLanguageCodes(),
+    });
+  }
   const path = section ? `/${resolved.segments.join('/')}` : '/';
   return buildLocalizedMetadata({
     locale: resolved.locale,

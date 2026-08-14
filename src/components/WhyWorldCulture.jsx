@@ -1,21 +1,23 @@
 import React from 'react';
 import Image from 'next/image';
+import { translate } from '@/lib/i18n';
 
-const WhyWorldCulture = () => {
+const WhyWorldCulture = ({ locale = 'en' }) => {
+    const benefits = translate(locale, 'homeWhy.benefits');
     const points = [
         {
             id: 1,
-            title: "Discover authentic cultural creations",
+            title: benefits[0],
             images: ["/African-attire.jpeg", "/artisan-hand-made-pottery.jpeg"],
         },
         {
             id: 2,
-            title: "Support global creators",
+            title: benefits[1],
             images: ["/artisan-weaving-textile-loom.jpeg", "/asian-kimono-silk-garment.jpeg"],
         },
         {
             id: 3,
-            title: "Explore traditions from around the world",
+            title: benefits[2],
             images: ["/Artisan-jewelry.png", "/why.png"],
         },
     ];
@@ -24,7 +26,7 @@ const WhyWorldCulture = () => {
         <section className="py-6 px-4 max-w-7xl mx-auto bg-white dark:bg-[#0a0a0a]">
             {/* Heading */}
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800 dark:text-white">
-                Why World Culture Marketplace?
+                {translate(locale, 'homeWhy.heading')}
             </h2>
 
             <div className="flex flex-col gap-10 items-center">
@@ -42,7 +44,7 @@ const WhyWorldCulture = () => {
                                 >
                                     <Image
                                         src={img}
-                                        alt="Cultural representation"
+                                        alt={translate(locale, 'homeWhy.imageAlt')}
                                         fill
                                         className="object-cover transition-transform duration-300 hover:scale-110"
                                         sizes="(max-width: 768px) 64px, 80px"

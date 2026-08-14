@@ -10,17 +10,18 @@ import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import Masonry from 'react-masonry-css';
+import { useLocale } from '@/context/LocaleContext';
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
     withCredentials: true,
 });
 
-const MasonryImage = ({ src }) => (
+const MasonryImage = ({ src, alt }) => (
     <div className="w-full rounded-3xl overflow-hidden shadow-lg group bg-zinc-50 dark:bg-zinc-900 mb-0">
         <img
             src={src}
-            alt="Insight"
+            alt={alt}
             className="w-full h-auto object-cover transition-transform duration-1000 group-hover:scale-105 block"
             loading="lazy"
         />
@@ -31,6 +32,7 @@ const MasonryImage = ({ src }) => (
 // ar comments shudhu client-side e fetch hoy (login-dependent, dynamic data)
 const BlogDetailsClient = ({ initialBlog }) => {
     const router = useRouter();
+    const { locale, localize, t } = useLocale();
     const { user } = useAuth();
     const isAdmin = user?.role === 'admin';
 
@@ -58,7 +60,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
 
     const handleCommentSubmit = async (e) => {
         e.preventDefault();
-        if (!user) return toast.error('Please login to comment');
+        if (!user) return toast.error(t('blog.details.loginRequired'));
         if (!commentText.trim()) return;
 
         setSubmittingComment(true);
@@ -69,9 +71,9 @@ const BlogDetailsClient = ({ initialBlog }) => {
             });
             setCommentText('');
             await fetchComments();
-            toast.success('Comment added!');
+            toast.success(t('blog.details.commentAdded'));
         } catch (err) {
-            toast.error('Failed to post comment');
+            toast.error(t('blog.details.commentFailure'));
         } finally {
             setSubmittingComment(false);
         }
@@ -88,20 +90,20 @@ const BlogDetailsClient = ({ initialBlog }) => {
             setReplyText('');
             setReplyingTo(null);
             await fetchComments();
-            toast.success('Reply sent!');
+            toast.success(t('blog.details.replySent'));
         } catch (err) {
-            toast.error('Failed to send reply');
+            toast.error(t('blog.details.replyFailure'));
         }
     };
 
     const handleDeleteComment = async (commentId) => {
-        if (!window.confirm('Delete this comment?')) return;
+        if (!window.confirm(t('blog.details.deleteConfirm'))) return;
         try {
             await api.delete(`/api/blogs/comments/${commentId}`);
             setComments((prev) => prev.filter((c) => c._id !== commentId));
-            toast.success('Comment removed');
+            toast.success(t('blog.details.commentRemoved'));
         } catch (err) {
-            toast.error('Unauthorized or error occurred');
+            toast.error(t('blog.details.deleteFailure'));
         }
     };
 
@@ -110,7 +112,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
             navigator.share({ title: blog?.title, url: window.location.href }).catch(console.error);
         } else {
             navigator.clipboard.writeText(window.location.href);
-            toast.success('Link copied!');
+            toast.success(t('blog.details.linkCopied'));
         }
     };
 
@@ -127,7 +129,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                     className="inline-flex items-center gap-2 text-zinc-500 hover:text-orange-500 transition-colors mb-8 text-xs font-bold uppercase tracking-widest group"
                 >
                     <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                    Back to Blogs
+                    {t('blog.details.back')}
                 </button>
 
                 <div className="mb-4">
@@ -155,10 +157,10 @@ const BlogDetailsClient = ({ initialBlog }) => {
                         </div>
                         <div>
                             <p className="font-black text-zinc-900 dark:text-zinc-100 text-[13px] uppercase tracking-tight">
-                                {blog.author?.name || 'Editorial Team'}
+                                {blog.author?.name || t('blog.details.editorialTeam')}
                             </p>
                             <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                                {new Date(blog.createdAt).toLocaleDateString('en-US', {
+                                {new Date(blog.createdAt).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', {
                                     month: 'long',
                                     day: 'numeric',
                                     year: 'numeric',
@@ -170,6 +172,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                         size={18}
                         className="text-zinc-400 hover:text-orange-500 cursor-pointer transition-all active:scale-90"
                         onClick={handleShare}
+                        aria-label={t('blog.details.share')}
                     />
                 </div>
             </div>
@@ -201,7 +204,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                             {item.type === 'quote' && (
                                 <div className="pl-8 my-12 border-l-4 border-orange-500 py-2">
                                     <p className="text-2xl md:text-3xl font-serif font-black dark:text-zinc-100 italic">
-                                        "{item.text}"
+                                        &ldquo;{item.text}&rdquo;
                                     </p>
                                 </div>
                             )}
@@ -219,7 +222,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                     >
                                         {item.images?.map((img, i) => (
                                             <div key={i} className="mb-4 md:mb-6">
-                                                <MasonryImage src={img} />
+                                                <MasonryImage src={img} alt={t('blog.details.insightAlt')} />
                                             </div>
                                         ))}
                                     </Masonry>
@@ -234,7 +237,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                     <div className="flex items-center gap-3 mb-10">
                         <FiMessageSquare className="text-orange-500" size={24} />
                         <h3 className="text-2xl font-serif font-black dark:text-white">
-                            Discussions ({comments.length})
+                            {t('blog.details.discussions')} ({comments.length})
                         </h3>
                     </div>
 
@@ -244,11 +247,12 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                 <textarea
                                     value={commentText}
                                     onChange={(e) => setCommentText(e.target.value)}
-                                    placeholder="Share your thoughts..."
+                                    placeholder={t('blog.details.commentPlaceholder')}
                                     className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-2xl p-6 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all min-h-[120px] resize-none"
                                 />
                                 <button
                                     type="submit"
+                                    aria-label={t('blog.details.submitComment')}
                                     disabled={submittingComment || !commentText.trim()}
                                     className="absolute bottom-4 right-4 bg-orange-600 text-white p-3 rounded-xl hover:bg-orange-700 disabled:opacity-50"
                                 >
@@ -263,10 +267,10 @@ const BlogDetailsClient = ({ initialBlog }) => {
                     ) : (
                         <div className="bg-zinc-50 dark:bg-white/5 rounded-2xl p-8 text-center mb-16 border border-dashed dark:border-white/10">
                             <Link
-                                href="/login"
+                                href={localize('/login')}
                                 className="px-8 py-3 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-orange-600"
                             >
-                                Sign in to Comment
+                                {t('blog.details.signInToComment')}
                             </Link>
                         </div>
                     )}
@@ -297,7 +301,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                                 </span>
                                                 {comment.isAdminReply && (
                                                     <span className="bg-orange-500/10 text-orange-500 text-[8px] font-black px-2 py-0.5 rounded-full uppercase">
-                                                        Admin
+                                                        {t('blog.details.admin')}
                                                     </span>
                                                 )}
                                             </div>
@@ -308,6 +312,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                                             setReplyingTo(replyingTo === comment._id ? null : comment._id)
                                                         }
                                                         className="text-zinc-400 hover:text-orange-500"
+                                                        aria-label={t('blog.details.reply')}
                                                     >
                                                         <Reply size={14} />
                                                     </button>
@@ -316,6 +321,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                                     <button
                                                         onClick={() => handleDeleteComment(comment._id)}
                                                         className="text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        aria-label={t('blog.details.delete')}
                                                     >
                                                         <Trash2 size={14} />
                                                     </button>
@@ -326,7 +332,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                             {comment.text}
                                         </p>
                                         <span className="text-[9px] text-zinc-400 font-bold uppercase mt-2 block">
-                                            {new Date(comment.createdAt).toLocaleDateString()}
+                                            {new Date(comment.createdAt).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')}
                                         </span>
 
                                         {/* Admin Reply Input */}
@@ -336,14 +342,14 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                                     autoFocus
                                                     value={replyText}
                                                     onChange={(e) => setReplyText(e.target.value)}
-                                                    placeholder="Write a staff reply..."
+                                                    placeholder={t('blog.details.staffReplyPlaceholder')}
                                                     className="flex-1 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-orange-500"
                                                 />
                                                 <button
                                                     onClick={() => handleReplySubmit(comment._id)}
                                                     className="bg-zinc-900 dark:bg-white text-white dark:text-black px-4 rounded-xl text-[10px] font-black uppercase"
                                                 >
-                                                    Send
+                                                    {t('blog.details.send')}
                                                 </button>
                                             </div>
                                         )}
@@ -362,7 +368,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                                         </span>
                                                         {reply.isAdminReply && (
                                                             <span className="bg-orange-500/10 text-orange-500 text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase">
-                                                                Admin
+                                                                {t('blog.details.admin')}
                                                             </span>
                                                         )}
                                                     </div>

@@ -12,18 +12,9 @@ import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
 
-export default function CultureSlider({ items }) {
+export default function CultureSlider({ items, listingsLabel = 'Listings' }) {
     const prevRef = useRef(null);
     const nextRef = useRef(null);
-
-    const textToSlug = (text) => {
-        if (!text) return '';
-        return text.toString().toLowerCase().trim()
-            .replace(/&/g, 'and')
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-');
-    };
 
     if (!items || items.length === 0) return null;
 
@@ -49,8 +40,8 @@ export default function CultureSlider({ items }) {
                 spaceBetween={16}
                 freeMode={true}
                 navigation={{
-                    prevEl: prevRef.current,
-                    nextEl: nextRef.current
+                    prevEl: null,
+                    nextEl: null
                 }}
                 onBeforeInit={(swiper) => {
                     swiper.params.navigation.prevEl = prevRef.current;
@@ -64,12 +55,10 @@ export default function CultureSlider({ items }) {
                 className="!overflow-visible"
             >
                 {items.map((item) => {
-                    const slug = textToSlug(item.title);
-
                     return (
                         <SwiperSlide key={item._id}>
                             <Link
-                                href={`/explore/${slug}`}
+                                href={item.link}
                                 className="relative block aspect-square w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500 rounded-sm"
                             >
                                 <Image
@@ -89,7 +78,7 @@ export default function CultureSlider({ items }) {
                                         {item.title}
                                     </h3>
                                     <p className="text-[10px] text-gray-300 mt-1 font-medium tracking-widest uppercase">
-                                        {item.listingCount || 0} Listings
+                                        {item.listingCount || 0} {listingsLabel}
                                     </p>
                                 </div>
                             </Link>

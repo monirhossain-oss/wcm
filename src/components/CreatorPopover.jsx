@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { FaExternalLinkAlt, FaLayerGroup } from 'react-icons/fa';
 import Image from 'next/image';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
+import { useLocale } from '@/context/LocaleContext';
 
 const CreatorPopover = ({ creator, item, creatorLocation }) => {
-  const creatorName = creator?.profile?.displayName || 'Anonymous';
+  const { localize, t } = useLocale();
+  const creatorName = creator?.profile?.displayName || t('favorites.anonymous');
   const listingCount = item?.creatorStats?.totalApprovedListings || 0;
 
   const avatarSrc = creator?.profile?.profileImage || '/default-avatar.png';
@@ -17,7 +19,7 @@ const CreatorPopover = ({ creator, item, creatorLocation }) => {
 
       {/* Cover & Avatar */}
       <div className="relative h-20 w-full bg-zinc-800">
-        <Image src={coverSrc} alt="Cover" fill className="object-cover opacity-70" />
+        <Image src={coverSrc} alt={t('favorites.coverAlt')} fill className="object-cover opacity-70" />
         <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full border-4 border-white dark:border-zinc-900 overflow-hidden bg-white">
           <Image src={avatarSrc} alt={creatorName} fill className="object-cover" />
         </div>
@@ -28,27 +30,27 @@ const CreatorPopover = ({ creator, item, creatorLocation }) => {
         <h4 className="text-sm font-black dark:text-white uppercase tracking-tight">{creatorName}</h4>
         <div className="flex items-center gap-1 text-gray-500 text-[10px] uppercase font-bold">
           <HiOutlineLocationMarker />
-          <span>{creatorLocation || creator?.profile?.city || 'Global'}</span>
+          <span>{creatorLocation || creator?.profile?.city || t('favorites.global')}</span>
         </div>
 
         {/* Listing Count */}
         <div className="flex items-center gap-2 text-xs font-bold text-zinc-600 dark:text-zinc-300 py-1">
           <FaLayerGroup className="text-orange-500" />
-          <span>{listingCount} Listings</span>
+          <span>{listingCount} {t('favorites.listings')}</span>
         </div>
 
         {/* Buttons */}
         <div className="flex items-center justify-center gap-2 w-full mt-2">
           <Link
-            href={`/profile/${creator?.username || creator?.id}`}
+            href={localize(`/profile/${creator?.username || creator?.id}`)}
             className="w-full py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase rounded-full text-center transition-colors"
           >
-            Profile
+            {t('favorites.profile')}
           </Link>
 
           {item?.websiteLink && (
             <a href={item.websiteLink} target="_blank" rel="noopener noreferrer" className="w-full py-1.5 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white text-[10px] font-black uppercase rounded-full text-center flex items-center justify-center gap-2">
-              Website <FaExternalLinkAlt size={10} />
+              {t('favorites.website')} <FaExternalLinkAlt size={10} />
             </a>
           )}
         </div>

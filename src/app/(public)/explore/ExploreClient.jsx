@@ -109,7 +109,7 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
                                 </div>
                             )}
                             {!hasMore && total > 0 && (
-                                <p className="text-zinc-400 text-sm italic">End of results.</p>
+                                <p className="text-zinc-400 text-sm italic">{t('explore.endResults')}</p>
                             )}
                         </div>
                     </>
@@ -118,9 +118,9 @@ export default function ExploreClient({ serverCategory, serverContinent, serverS
                         <div className="w-20 h-20 bg-zinc-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
                             <AlertCircle size={32} className="text-zinc-300" />
                         </div>
-                        <h3 className="text-xl font-bold dark:text-white">No listings found</h3>
+                        <h3 className="text-xl font-bold dark:text-white">{t('explore.noListings')}</h3>
                         <p className="text-zinc-500 text-sm max-w-xs mx-auto mt-2">
-                            We couldn&apos;t find anything matching your current filters or search.
+                            {t('explore.noListingsDescription')}
                         </p>
                     </div>
                 )}

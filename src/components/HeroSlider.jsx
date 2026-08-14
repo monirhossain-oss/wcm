@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/imageHelper";
+import { useLocale } from "@/context/LocaleContext";
 
 const DEFAULT_IMAGE = "/hero (2).png";
 
@@ -14,6 +15,7 @@ const SliderSkeleton = () => (
 );
 
 export default function HeroSlider({ initialSliders = [] }) {
+    const { t } = useLocale();
     const [current, setCurrent] = useState(0);
 
     // ✅ Fix 1: কোনো artificial delay নেই
@@ -36,7 +38,7 @@ export default function HeroSlider({ initialSliders = [] }) {
             <div className="absolute rounded-2xl inset-0 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-2xl">
                 <Image
                     src={DEFAULT_IMAGE}
-                    alt="World Culture Marketplace"
+                    alt={t('homeHero.fallbackImageAlt')}
                     fill
                     priority
                     className="object-cover"
@@ -57,7 +59,7 @@ export default function HeroSlider({ initialSliders = [] }) {
                 >
                     <Image
                         src={getImageUrl(slide.imageUrl)}
-                        alt={slide.alt || slide.title || "Hero Slide"}
+                        alt={slide.alt || slide.title || t('homeHero.slideAlt')}
                         fill
                         // ✅ Fix 4: শুধু প্রথম image priority, বাকিগুলো lazy
                         priority={index === 0}
@@ -88,7 +90,7 @@ export default function HeroSlider({ initialSliders = [] }) {
                         <button
                             key={i}
                             onClick={() => setCurrent(i)}
-                            aria-label={`Slide ${i + 1}`}
+                            aria-label={`${t('homeHero.slideLabel')} ${i + 1}`}
                             // ✅ Fix 5: div → button, clickable dots
                             className={`h-1.5 rounded-full transition-all duration-500 ${i === current ? "bg-white w-8" : "bg-white/30 w-3"
                                 }`}

@@ -10,12 +10,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import LoginModal from '../LoginModal';
 import RegisterModal from '../RegistationModal';
+import { useLocale } from '@/context/LocaleContext';
 
 const AuthButtons = () => {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
     const { user } = useAuth();
+    const { t } = useLocale();
 
     const openLogin = () => { setIsRegisterOpen(false); setIsLoginOpen(true); };
     const openRegister = () => { setIsLoginOpen(false); setIsRegisterOpen(true); };
@@ -40,13 +42,13 @@ const AuthButtons = () => {
                     onClick={() => setIsLoginOpen(true)}
                     className="px-3 py-1.5 md:px-5 md:py-2 border-2 border-[#F57C00] text-[#F57C00] font-bold text-xs md:text-sm rounded-xl hover:bg-[#F57C00] hover:text-white transition-all duration-300 whitespace-nowrap"
                 >
-                    Sign In
+                    {t('navigation.signIn')}
                 </button>
                 <button
                     onClick={() => setIsRegisterOpen(true)}
                     className="px-3 py-1.5 md:px-5 md:py-2 rounded-lg bg-[#F57C00] text-white text-xs md:text-sm font-bold hover:bg-[#e67600] transition-all shadow-md active:scale-95 whitespace-nowrap"
                 >
-                    Sign Up
+                    {t('navigation.signUp')}
                 </button>
             </div>
 

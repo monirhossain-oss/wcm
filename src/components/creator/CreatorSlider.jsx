@@ -4,10 +4,11 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import Image from "next/image";
 import Link from "next/link";
+import { localePath } from '@/lib/i18n';
 
 import "swiper/css";
 
-const CreatorSlider = ({ creators }) => {
+const CreatorSlider = ({ creators, locale = 'en', labels = {} }) => {
     const prevRef = useRef(null);
     const nextRef = useRef(null);
 
@@ -18,8 +19,8 @@ const CreatorSlider = ({ creators }) => {
                 spaceBetween={12}
                 slidesPerView={1.4}
                 navigation={{
-                    prevEl: prevRef.current,
-                    nextEl: nextRef.current,
+                    prevEl: null,
+                    nextEl: null,
                 }}
                 onBeforeInit={(swiper) => {
                     swiper.params.navigation.prevEl = prevRef.current;
@@ -53,20 +54,20 @@ const CreatorSlider = ({ creators }) => {
 
                             {/* Location */}
                             <p className="text-[10px] md:text-xs text-gray-500 mb-2 md:mb-3 italic">
-                                {creator.profile?.city || "Unknown"}, {creator.profile?.country || "World"}
+                                {creator.profile?.city || labels.unknown || "Unknown"}, {creator.profile?.country || labels.world || "World"}
                             </p>
 
                             {/* Listings Badge */}
                             <div className="text-[9px] md:text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-900/20 py-1 px-3 rounded-full mb-4 uppercase">
-                                {creator.totalListings || 0} Listings
+                                {creator.totalListings || 0} {labels.listings || "Listings"}
                             </div>
 
                             {/* এই লিংকটা mt-auto দিয়ে নিচে চলে আসবে */}
                             <Link
-                                href={`/profile/${creator.username || creator._id}`}
+                                href={localePath(locale, `/profile/${creator.username || creator._id}`)}
                                 className="w-full py-2 md:py-2.5 text-[10px] md:text-xs font-bold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-all uppercase mt-auto shadow-sm active:scale-95 text-center"
                             >
-                                View Profile
+                                {labels.viewProfile || "View Profile"}
                             </Link>
                         </div>
                     </SwiperSlide>

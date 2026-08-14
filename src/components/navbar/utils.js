@@ -5,11 +5,11 @@
 
 // Static nav config — defined once at module load, not recreated on every render.
 export const menuItems = [
-    { name: 'Explore', href: '/explore' },
-    { name: 'Categories', href: null },
-    { name: 'Creators', href: '/creators' },
-    { name: 'About', href: '/about-us' },
-    { name: 'Blogs', href: '/blogs' },
+    { name: 'Explore', key: 'explore', href: '/explore' },
+    { name: 'Categories', key: 'categories', href: null },
+    { name: 'Creators', key: 'creators', href: '/creators' },
+    { name: 'About', key: 'about', href: '/about-us' },
+    { name: 'Blogs', key: 'blogs', href: '/blogs' },
 ];
 
 // Pure function — safe to hoist out of any component body.

@@ -32,12 +32,12 @@ export async function generateMetadata() {
 export default function HomePage({ locale = 'en' }) {
   return (
     <main className="min-h-screen overflow-hidden bg-white dark:bg-zinc-950">
-      <HeroSection />
-      <FeaturesSection />
+      <HeroSection locale={locale} />
+      <FeaturesSection locale={locale} />
       <PopularCreators locale={locale} />
       <CuratedCollections locale={locale} />
       <TrendingListings locale={locale} />
-      <WhyWorldCulture />
+      <WhyWorldCulture locale={locale} />
     </main>
   );
 }

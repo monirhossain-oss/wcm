@@ -8,10 +8,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { FiUser, FiLogOut } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 
 const ProfileMenu = () => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const { user, logoutUser } = useAuth();
+    const { localize, t } = useLocale();
 
     if (!user) return null;
 
@@ -26,10 +28,10 @@ const ProfileMenu = () => {
             {/* "Become a Creator" — desktop only */}
             {user.role === 'user' && (
                 <Link
-                    href="/become-creator"
+                    href={localize('/become-creator')}
                     className="hidden md:block px-4 py-2 rounded-lg bg-[#F57C00] text-white text-xs font-bold shadow-md hover:bg-[#e67600] transition-all"
                 >
-                    Become a Creator
+                    {t('navigation.becomeCreator')}
                 </Link>
             )}
 
@@ -52,13 +54,13 @@ const ProfileMenu = () => {
                                 className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                                 onClick={() => setIsProfileOpen(false)}
                             >
-                                {user?.role === 'admin' ? 'Admin Dashboard' : user?.role === 'creator' ? 'Creator Dashboard' : 'Profile'}
+                                {user?.role === 'admin' ? t('navigation.adminDashboard') : user?.role === 'creator' ? t('navigation.creatorDashboard') : t('navigation.profile')}
                             </Link>
                             <button
                                 onClick={() => { logoutUser(); setIsProfileOpen(false); }}
                                 className="w-full text-left flex items-center space-x-2 px-4 py-2 text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
-                                <FiLogOut /><span>Logout</span>
+                                <FiLogOut /><span>{t('navigation.logout')}</span>
                             </button>
                         </div>
 

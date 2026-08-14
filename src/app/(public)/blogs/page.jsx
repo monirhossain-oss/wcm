@@ -3,11 +3,11 @@ import React from 'react';
 import { getSeoByPage } from '@/lib/api';
 import { translate } from '@/lib/i18n';
 
-export async function generateMetadata() {
+export async function generateMetadata({ locale = 'en' } = {}) {
   const seoData = await getSeoByPage('blog');
 
-  const title = seoData?.title || 'Blog Stories | World Culture Marketplace';
-  const description = seoData?.description || 'Explore traditions, craftsmanship, and cultural creativity from around the world.';
+  const title = seoData?.title || translate(locale, 'blog.metaTitle');
+  const description = seoData?.description || translate(locale, 'blog.metaDescription');
   const image = seoData?.ogImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`;
 
   return {
