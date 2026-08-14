@@ -23,6 +23,25 @@ const en = {
     fallbackBio: 'Crafting stories through traditional artistry and heritage techniques.', handcrafted: 'Handcrafted',
     viewCreator: 'View Creator', website: 'Website',
   },
+  publicProfile: {
+    metaNotFound: 'Profile Not Found | WCM', metaTitleSuffix: 'WCM Creator Profile', metaDescriptionSuffix: 'Cultural Creator on WCM', metaFallback: 'Creator Profile | WCM', metaKeywords: ['WCM', 'creator', 'marketplace'],
+    back: 'Back', creator: 'Creator', unknown: 'Unknown', earth: 'Earth', global: 'Global', creatorLinks: 'Creator Links', officialWebsite: 'Official Website', portfolioSocial: 'Portfolio/Social', noLinks: 'No links shared by creator',
+    biography: 'Creator Biography', biographyFallback: "This creator's biography is currently unavailable.", showcase: 'Work Showcase', units: 'Units', activeListings: 'Active Listings', noListings: 'No active listings found',
+    coverAlt: 'cover image', profileAlt: 'profile picture', screenReaderSuffix: 'Cultural Creator Profile on World Culture Marketplace', jobTitle: 'Cultural Creator',
+  },
+  contact: {
+    metaTitle: 'Contact Us | World Culture Marketplace', metaDescription: 'Get in touch with us.', metaKeywords: ['WCM', 'Contact', 'Support'],
+    back: 'Back', heading: 'Get in touch', intro: 'Our support team will get in touch with you shortly.', fullName: 'Full Name', namePlaceholder: 'Your Name', email: 'Email Address', emailPlaceholder: 'example@mail.com', subject: 'Subject', subjectPlaceholder: 'What is this regarding?', message: 'Message Details', messagePlaceholder: 'How can we help you?', attachments: 'Attachments (Optional)', addFiles: 'Add screenshot or files', previewAlt: 'Attachment preview', removeAttachment: 'Remove attachment', sending: 'Sending...', send: 'Send Message', success: 'Message Sent Successfully!', error: 'Something went wrong. Please try again.',
+  },
+  howItWorks: {
+    metaTitle: 'How It Works | World Culture Marketplace', metaDescription: 'Learn how World Culture Marketplace connects creators and customers around the world.', metaKeywords: ['How It Works', 'WCM', 'Guide', 'Process'], process: 'Our Process',
+    fallback: { title: 'Empowering Global Craftsmanship', description: "World Cultural Marketplace (WCM) brings the world's finest artisans under one roof. Follow these simple steps to start your journey with us.", steps: [
+      { id: 1, title: 'Create Your Profile', description: 'Sign up as a creator and tell the world about your craft, culture, and story.' },
+      { id: 2, title: 'Upload Listings', description: 'Add your creations with photos, descriptions, and cultural tags that connect visitors to your traditions.' },
+      { id: 3, title: 'Review & Approval', description: 'Our team reviews listings for authenticity and cultural relevance before publishing.' },
+      { id: 4, title: 'Get Discovered', description: 'Your listings appear in our discovery feed. Boost visibility with optional featured placements.' },
+    ] },
+  },
   homeHero: {
     headingLead: 'Join a', headingAccent: 'growing global community', headingJoin: 'of ', headingAudience: 'artists & creators',
     description: 'WCM helps you gain visibility and connect with a global audience.',
@@ -34,6 +53,9 @@ const en = {
     cultures: { heading: 'Explore Cultures', description: 'Craftsmanship & heritage rituals.' },
     popularCreators: { heading: 'Featured Creators', description: 'Verified artists & craftsmen.', failure: 'Failed to load creators.' },
     regions: { asia: 'Asia', africa: 'Africa', europe: 'Europe', 'north-america': 'North America', 'latin-america': 'Latin America', 'middle-east': 'Middle East', oceania: 'Oceania' },
+  },
+  homeCurated: {
+    heading: 'Curated Collections', description: 'Handpicked treasures from top-ranked global creators', viewAll: 'View All',
   },
   homeTrending: {
     heading: 'Trending Listings', description: 'Handpicked traditions for you.', exploreAll: 'Explore All Listings',

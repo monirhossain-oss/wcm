@@ -5,9 +5,11 @@ import { HiCloudUpload, HiArrowLeft, HiX } from 'react-icons/hi';
 import emailjs from '@emailjs/browser';
 import Lottie from "lottie-react";
 import contactAnim from '../../public/animation/contact.json';
+import { useLocale } from '@/context/LocaleContext';
 
 const ContactClient = () => {
     const router = useRouter();
+    const { t } = useLocale();
     const formRef = useRef();
     const [fileName, setFileName] = useState('');
     const [previewUrl, setPreviewUrl] = useState(null);
@@ -42,14 +44,14 @@ const ContactClient = () => {
 
         emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, PUBLIC_KEY)
             .then(() => {
-                alert("Message Sent Successfully!");
+                alert(t('contact.success'));
                 setLoading(false);
                 formRef.current.reset();
                 setFileName('');
                 setPreviewUrl(null);
             }, (error) => {
                 console.log("Error:", error.text);
-                alert("Something went wrong. Please try again.");
+                alert(t('contact.error'));
                 setLoading(false);
             });
     };
@@ -61,7 +63,7 @@ const ContactClient = () => {
                     onClick={() => router.back()}
                     className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all font-semibold uppercase text-[10px] tracking-[0.2em] group"
                 >
-                    <HiArrowLeft className="text-lg transition-transform group-hover:-translate-x-1" /> Back
+                    <HiArrowLeft className="text-lg transition-transform group-hover:-translate-x-1" /> {t('contact.back')}
                 </button>
             </div>
 
@@ -77,48 +79,50 @@ const ContactClient = () => {
                 {/* --- Form (Right Side) --- */}
                 <div className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-2xl lg:rounded-l-none lg:rounded-r-2xl shadow-xl border border-gray-100 dark:border-slate-800 flex flex-col justify-center">
                     <div className="mb-8">
-                        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Get in touch</h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">Our support team will get in touch with you shortly.</p>
+                        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">{t('contact.heading')}</h1>
+                        <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">{t('contact.intro')}</p>
                     </div>
 
                     <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="block text-gray-700 dark:text-gray-300 uppercase tracking-widest text-[10px] font-bold">Full Name</label>
-                                <input name="user_name" type="text" required placeholder="Your Name" className="w-full p-4 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white outline-none" />
+                                <label className="block text-gray-700 dark:text-gray-300 uppercase tracking-widest text-[10px] font-bold">{t('contact.fullName')}</label>
+                                <input name="user_name" type="text" required placeholder={t('contact.namePlaceholder')} className="w-full p-4 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white outline-none" />
                             </div>
                             <div className="space-y-2">
-                                <label className="block text-gray-700 dark:text-gray-300 uppercase tracking-widest text-[10px] font-bold">Email Address</label>
-                                <input name="user_email" type="email" required placeholder="example@mail.com" className="w-full p-4 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white outline-none" />
+                                <label className="block text-gray-700 dark:text-gray-300 uppercase tracking-widest text-[10px] font-bold">{t('contact.email')}</label>
+                                <input name="user_email" type="email" required placeholder={t('contact.emailPlaceholder')} className="w-full p-4 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white outline-none" />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="block text-gray-700 dark:text-gray-300 uppercase tracking-widest text-[10px] font-bold">Subject</label>
-                            <input name="subject" type="text" required placeholder="What is this regarding?" className="w-full p-4 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white outline-none" />
+                            <label className="block text-gray-700 dark:text-gray-300 uppercase tracking-widest text-[10px] font-bold">{t('contact.subject')}</label>
+                            <input name="subject" type="text" required placeholder={t('contact.subjectPlaceholder')} className="w-full p-4 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white outline-none" />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="block text-gray-700 dark:text-gray-300 uppercase tracking-widest text-[10px] font-bold">Message Details</label>
-                            <textarea name="message" required rows="3" placeholder="How can we help you?" className="w-full p-4 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white outline-none resize-none"></textarea>
+                            <label className="block text-gray-700 dark:text-gray-300 uppercase tracking-widest text-[10px] font-bold">{t('contact.message')}</label>
+                            <textarea name="message" required rows="3" placeholder={t('contact.messagePlaceholder')} className="w-full p-4 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white outline-none resize-none"></textarea>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="block text-gray-700 dark:text-gray-300 uppercase tracking-widest text-[10px] font-bold">Attachments (Optional)</label>
+                            <label className="block text-gray-700 dark:text-gray-300 uppercase tracking-widest text-[10px] font-bold">{t('contact.attachments')}</label>
 
                             {!previewUrl ? (
                                 <div className="relative border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl p-4 text-center bg-gray-50 dark:bg-slate-800/30 hover:border-blue-400 transition-all group cursor-pointer">
                                     <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                                     <div className="flex items-center justify-center gap-3">
                                         <HiCloudUpload className="text-2xl text-gray-400 group-hover:text-blue-500 transition-colors" />
-                                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Add screenshot or files</span>
+                                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{fileName || t('contact.addFiles')}</span>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 group">
-                                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={previewUrl} alt={t('contact.previewAlt')} className="w-full h-full object-cover" />
                                     <button
                                         type="button"
+                                        aria-label={t('contact.removeAttachment')}
                                         onClick={removeFile}
                                         className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
@@ -133,7 +137,7 @@ const ContactClient = () => {
                             disabled={loading}
                             className={`w-full py-4 rounded-xl font-bold text-white transition-all transform active:scale-[0.98] ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#F57C00] hover:bg-[#E65100]'}`}
                         >
-                            {loading ? "Sending..." : "Send Message"}
+                            {loading ? t('contact.sending') : t('contact.send')}
                         </button>
                     </form>
                 </div>

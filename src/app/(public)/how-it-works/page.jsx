@@ -1,14 +1,16 @@
 import React from "react";
 import { getSeoByPage } from '@/lib/api';
+import { buildLocalizedMetadata, getPublishedLanguageCodes } from '@/lib/localizedMetadata';
+import { translate } from '@/lib/i18n';
 
 // এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/how-it-works) theke title/description/keywords
-export async function generateMetadata() {
-    const seoData = await getSeoByPage('how-it-works');
-
+export async function generateMetadata({ locale = 'en' } = {}) {
+    const seoData = locale === 'en' ? await getSeoByPage('how-it-works') : null;
+    const title = seoData?.title || translate(locale, 'howItWorks.metaTitle');
+    const description = seoData?.description || translate(locale, 'howItWorks.metaDescription');
     return {
-        title: seoData?.title || 'How It Works | World Culture Marketplace',
-        description: seoData?.description || 'Learn how World Culture Marketplace connects creators and customers around the world.',
-        keywords: seoData?.keywords?.length ? seoData.keywords : ['How It Works', 'WCM', 'Guide', 'Process'],
+        ...buildLocalizedMetadata({ locale, path: '/how-it-works', title, description, languages: await getPublishedLanguageCodes() }),
+        keywords: seoData?.keywords?.length ? seoData.keywords : translate(locale, 'howItWorks.metaKeywords'),
     };
 }
 
@@ -48,37 +50,7 @@ const HowItWorksPage = async ({ locale = 'en' }) => {
     const content = await fetchHowItWorks(locale);
 
     // Default fallback data
-    const displayData = content || {
-        headerTitle: "Empowering Global Craftsmanship",
-        headerDescription:
-            "World Cultural Marketplace (WCM) brings the world's finest artisans under one roof. Follow these simple steps to start your journey with us.",
-        steps: [
-            {
-                id: 1,
-                title: "Create Your Profile",
-                description:
-                    "Sign up as a creator and tell the world about your craft, culture, and story.",
-            },
-            {
-                id: 2,
-                title: "Upload Listings",
-                description:
-                    "Add your creations with photos, descriptions, and cultural tags that connect visitors to your traditions.",
-            },
-            {
-                id: 3,
-                title: "Review & Approval",
-                description:
-                    "Our team reviews listings for authenticity and cultural relevance before publishing.",
-            },
-            {
-                id: 4,
-                title: "Get Discovered",
-                description:
-                    "Your listings appear in our discovery feed. Boost visibility with optional featured placements.",
-            },
-        ],
-    };
+    const displayData = content || translate(locale, 'howItWorks.fallback');
 
     const stepsCount = displayData.steps?.length || 0;
 
@@ -115,7 +87,7 @@ const HowItWorksPage = async ({ locale = 'en' }) => {
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-8">
                         <span className="inline-block px-4 py-1 bg-orange-100 dark:bg-orange-900/20 text-[#F57C00] text-sm font-semibold rounded-full uppercase tracking-wider">
-                            Our Process
+                            {translate(locale, 'howItWorks.process')}
                         </span>
                     </div>
 

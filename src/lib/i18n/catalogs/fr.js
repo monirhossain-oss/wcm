@@ -23,6 +23,25 @@ const fr = {
     fallbackBio: 'Des récits façonnés par l’art traditionnel et les techniques du patrimoine.', handcrafted: 'Fait main',
     viewCreator: 'Voir le créateur', website: 'Site web',
   },
+  publicProfile: {
+    metaNotFound: 'Profil introuvable | WCM', metaTitleSuffix: 'Profil de créateur WCM', metaDescriptionSuffix: 'Créateur culturel sur WCM', metaFallback: 'Profil de créateur | WCM', metaKeywords: ['WCM', 'créateur', 'marketplace'],
+    back: 'Retour', creator: 'Créateur', unknown: 'Inconnu', earth: 'Monde', global: 'International', creatorLinks: 'Liens du créateur', officialWebsite: 'Site officiel', portfolioSocial: 'Portfolio/Réseaux sociaux', noLinks: 'Aucun lien partagé par le créateur',
+    biography: 'Biographie du créateur', biographyFallback: 'La biographie de ce créateur est actuellement indisponible.', showcase: 'Créations', units: 'éléments', activeListings: 'Créations actives', noListings: 'Aucune création active',
+    coverAlt: 'image de couverture', profileAlt: 'photo de profil', screenReaderSuffix: 'Profil de créateur culturel sur World Culture Marketplace', jobTitle: 'Créateur culturel',
+  },
+  contact: {
+    metaTitle: 'Nous contacter | World Culture Marketplace', metaDescription: 'Contactez notre équipe.', metaKeywords: ['WCM', 'Contact', 'Assistance'],
+    back: 'Retour', heading: 'Contactez-nous', intro: 'Notre équipe d’assistance vous répondra dans les plus brefs délais.', fullName: 'Nom complet', namePlaceholder: 'Votre nom', email: 'Adresse e-mail', emailPlaceholder: 'exemple@mail.com', subject: 'Objet', subjectPlaceholder: 'Quel est l’objet de votre demande ?', message: 'Votre message', messagePlaceholder: 'Comment pouvons-nous vous aider ?', attachments: 'Pièces jointes (facultatif)', addFiles: 'Ajouter une capture d’écran ou des fichiers', previewAlt: 'Aperçu de la pièce jointe', removeAttachment: 'Supprimer la pièce jointe', sending: 'Envoi...', send: 'Envoyer le message', success: 'Message envoyé avec succès !', error: 'Une erreur est survenue. Veuillez réessayer.',
+  },
+  howItWorks: {
+    metaTitle: 'Comment ça marche | World Culture Marketplace', metaDescription: 'Découvrez comment World Culture Marketplace met en relation les créateurs et les visiteurs du monde entier.', metaKeywords: ['Comment ça marche', 'WCM', 'Guide', 'Processus'], process: 'Notre processus',
+    fallback: { title: 'Valoriser l’artisanat mondial', description: 'World Culture Marketplace (WCM) réunit les meilleurs artisans du monde. Suivez ces étapes simples pour commencer votre aventure avec nous.', steps: [
+      { id: 1, title: 'Créez votre profil', description: 'Inscrivez-vous comme créateur et présentez au monde votre savoir-faire, votre culture et votre histoire.' },
+      { id: 2, title: 'Publiez vos créations', description: 'Ajoutez vos créations avec des photos, des descriptions et des tags culturels qui relient les visiteurs à vos traditions.' },
+      { id: 3, title: 'Examen et approbation', description: 'Notre équipe examine les créations pour vérifier leur authenticité et leur pertinence culturelle avant publication.' },
+      { id: 4, title: 'Faites-vous découvrir', description: 'Vos créations apparaissent dans notre espace de découverte. Augmentez leur visibilité grâce aux placements à la une facultatifs.' },
+    ] },
+  },
   homeHero: {
     headingLead: 'Rejoignez une', headingAccent: 'communauté mondiale grandissante', headingJoin: 'd’', headingAudience: 'artistes et de créateurs',
     description: 'WCM vous aide à gagner en visibilité et à vous connecter avec un public mondial.',
@@ -34,6 +53,9 @@ const fr = {
     cultures: { heading: 'Explorer les cultures', description: 'Artisanat et rituels du patrimoine.' },
     popularCreators: { heading: 'Créateurs à la une', description: 'Artistes et artisans vérifiés.', failure: 'Impossible de charger les créateurs.' },
     regions: { asia: 'Asie', africa: 'Afrique', europe: 'Europe', 'north-america': 'Amérique du Nord', 'latin-america': 'Amérique latine', 'middle-east': 'Moyen-Orient', oceania: 'Océanie' },
+  },
+  homeCurated: {
+    heading: 'Collections sélectionnées', description: 'Des trésors sélectionnés parmi les meilleurs créateurs du monde', viewAll: 'Voir tout',
   },
   homeTrending: {
     heading: 'Créations tendance', description: 'Des traditions sélectionnées pour vous.', exploreAll: 'Explorer toutes les créations',

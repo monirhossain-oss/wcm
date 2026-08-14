@@ -1,5 +1,6 @@
 import ListingCard from '@/components/ListingCard';
 import Link from 'next/link';
+import { translate } from '@/lib/i18n';
 
 async function getCuratedData(locale = 'en') {
     try {
@@ -34,10 +35,10 @@ export default async function CuratedCollections({ locale = 'en' }) {
         <section className="max-w-7xl mx-auto px-6 py-12">
             <div className="mb-4">
                 <h2 className="text-2xl md:text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">
-                    Curated Collections
+                    {translate(locale, 'homeCurated.heading')}
                 </h2>
                 <p className="text-sm md:text-base text-zinc-500 mt-2">
-                    Handpicked treasures from top-ranked global creators
+                    {translate(locale, 'homeCurated.description')}
                 </p>
             </div>
 
@@ -53,7 +54,7 @@ export default async function CuratedCollections({ locale = 'en' }) {
                                 href={`${locale === 'en' ? '' : `/${locale}`}/explore/${collection.categorySlug}`}
                                 className="text-xs md:text-sm font-semibold text-orange-600 hover:text-orange-700 transition"
                             >
-                                View All →
+                                {translate(locale, 'homeCurated.viewAll')} <span aria-hidden="true">→</span>
                             </Link>
                         </div>
 

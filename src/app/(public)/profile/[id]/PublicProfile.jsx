@@ -7,9 +7,11 @@ import { FiMapPin, FiLink, FiArrowLeft, FiCheckCircle, FiExternalLink } from 're
 import { Globe, Languages, Box, Info } from 'lucide-react';
 import { getImageUrl } from '@/lib/imageHelper';
 import ListingCard from '@/components/ListingCard';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function PublicProfile({ initialData, initialListings }) {
     const router = useRouter();
+    const { t } = useLocale();
 
     const [profileData] = useState(initialData);
     const [listings] = useState(initialListings || []);
@@ -26,7 +28,7 @@ export default function PublicProfile({ initialData, initialListings }) {
                         getImageUrl(user?.profile?.coverImage) ||
                         'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000'
                     }
-                    alt={`${user?.profile?.displayName || 'Creator'} cover image`}
+                    alt={`${user?.profile?.displayName || t('publicProfile.creator')} ${t('publicProfile.coverAlt')}`}
                     fill
                     priority
                     className="object-cover grayscale-[20%]"
@@ -39,7 +41,7 @@ export default function PublicProfile({ initialData, initialListings }) {
                         onClick={() => router.back()}
                         className="flex items-center gap-2 px-5 py-2.5 bg-black/20 backdrop-blur-xl border border-white/10 rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all"
                     >
-                        <FiArrowLeft size={14} /> Back
+                        <FiArrowLeft size={14} /> {t('publicProfile.back')}
                     </button>
                 </div>
             </div>
@@ -52,7 +54,7 @@ export default function PublicProfile({ initialData, initialListings }) {
                         <div className="h-44 w-44 relative rounded-[2.5rem] border-[8px] border-white dark:border-[#0f0f0f] bg-gray-100 overflow-hidden shadow-2xl transition-all duration-500 group-hover:rounded-3xl">
                             <Image
                                 src={getImageUrl(user?.profile?.profileImage, 'avatar')}
-                                alt={`${user?.profile?.displayName || 'Creator'} profile picture`}
+                                alt={`${user?.profile?.displayName || t('publicProfile.creator')} ${t('publicProfile.profileAlt')}`}
                                 fill
                                 sizes="176px"
                                 className="object-cover"
@@ -72,18 +74,18 @@ export default function PublicProfile({ initialData, initialListings }) {
                                 {user?.profile?.displayName || `${user?.firstName} ${user?.lastName}`}
                             </h2>
                             <div className="px-3 py-1 bg-orange-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">
-                                {user?.role}
+                                {user?.role === 'creator' ? t('publicProfile.creator') : user?.role}
                             </div>
                         </div>
 
                         <div className="flex flex-wrap items-center gap-6 text-gray-500 dark:text-gray-400 font-bold uppercase text-[10px] tracking-widest">
                             <span className="flex items-center gap-2">
                                 <FiMapPin className="text-orange-500" />
-                                {user?.profile?.city || 'Unknown'}, {user?.profile?.country || 'Earth'}
+                                {user?.profile?.city || t('publicProfile.unknown')}, {user?.profile?.country || t('publicProfile.earth')}
                             </span>
                             <span className="flex items-center gap-2">
                                 <Languages className="text-orange-500" size={14} />
-                                {user?.profile?.language || 'Global'}
+                                {user?.profile?.language || t('publicProfile.global')}
                             </span>
                             <span className="text-orange-500 italic lowercase">@{user?.username}</span>
                         </div>
@@ -95,26 +97,26 @@ export default function PublicProfile({ initialData, initialListings }) {
                     <div className="lg:col-span-4 space-y-8">
                         <div className="space-y-4">
                             <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400 flex items-center gap-2">
-                                <FiLink className="text-orange-500" /> Creator Links
+                                <FiLink className="text-orange-500" /> {t('publicProfile.creatorLinks')}
                             </h3>
                             <div className="grid gap-3">
                                 {user?.profile?.websiteLink && (
                                     <SocialLink
                                         icon={Globe}
-                                        label="Official Website"
+                                        label={t('publicProfile.officialWebsite')}
                                         url={user.profile.websiteLink}
                                     />
                                 )}
                                 {user?.profile?.socialLink && (
                                     <SocialLink
                                         icon={FiExternalLink}
-                                        label="Portfolio/Social"
+                                        label={t('publicProfile.portfolioSocial')}
                                         url={user.profile.socialLink}
                                     />
                                 )}
                                 {!user?.profile?.websiteLink && !user?.profile?.socialLink && (
                                     <p className="text-[10px] text-gray-400 italic font-bold">
-                                        No links shared by creator
+                                        {t('publicProfile.noLinks')}
                                     </p>
                                 )}
                             </div>
@@ -123,12 +125,12 @@ export default function PublicProfile({ initialData, initialListings }) {
 
                     <div className="lg:col-span-8 space-y-4">
                         <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400 flex items-center gap-2">
-                            <Info className="text-orange-500" size={14} /> Creator Biography
+                            <Info className="text-orange-500" size={14} /> {t('publicProfile.biography')}
                         </h3>
                         <div className="p-8 bg-gray-50 dark:bg-white/5 rounded-[2rem] border border-gray-100 dark:border-white/5">
                             <p className="text-sm md:text-base leading-relaxed font-medium text-gray-600 dark:text-gray-400 italic whitespace-pre-wrap">
                                 {user?.profile?.bio ||
-                                    "This creator's biography is currently encrypted or has not been initialized."}
+                                    t('publicProfile.biographyFallback')}
                             </p>
                         </div>
                     </div>
@@ -138,11 +140,11 @@ export default function PublicProfile({ initialData, initialListings }) {
                 <div className="mt-12">
                     <div className="flex items-center justify-between mb-10 pb-6">
                         <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400">
-                            Work Showcase / {listings.length} Units
+                            {t('publicProfile.showcase')} / {listings.length} {t('publicProfile.units')}
                         </h3>
                         <div className="flex items-center gap-3">
                             <span className="px-4 py-1.5 bg-gray-100 dark:bg-white/5 rounded-full text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                Active Listings
+                                {t('publicProfile.activeListings')}
                             </span>
                         </div>
                     </div>
@@ -153,7 +155,7 @@ export default function PublicProfile({ initialData, initialListings }) {
                             <div className="col-span-full py-24 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] flex flex-col items-center justify-center text-gray-400">
                                 <Box size={48} strokeWidth={1} className="opacity-20 mb-4" />
                                 <p className="text-[10px] font-black uppercase tracking-[0.3em]">
-                                    No active listings found
+                                    {t('publicProfile.noListings')}
                                 </p>
                             </div>
                         )}

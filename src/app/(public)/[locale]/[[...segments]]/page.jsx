@@ -5,14 +5,14 @@ import BlogDetailsPage, { generateMetadata as generateBlogMetadata } from '../..
 import CreatorsPage, { generateMetadata as generateCreatorsMetadata } from '../../creators/page';
 import ExplorePage, { generateMetadata as generateExploreMetadata } from '../../explore/[[...filters]]/page';
 import FaqPage from '../../faqUs/page';
-import HowItWorksPage from '../../how-it-works/page';
+import HowItWorksPage, { generateMetadata as generateHowItWorksMetadata } from '../../how-it-works/page';
 import ListingPage, { generateMetadata as generateListingMetadata } from '../../listings/[id]/page';
 import ProfilePage, { generateMetadata as generateProfileMetadata } from '../../profile/[id]/page';
 import PrivacyPage from '../../privacy-policy/page';
 import TermsPage from '../../terms-and-conditions/page';
 import CookiePage from '../../cookie-policy/page';
 import HomePage from '../../page';
-import ContactPage from '../../contact/page';
+import ContactPage, { generateMetadata as generateContactMetadata } from '../../contact/page';
 import AdvertisingPolicyPage from '../../advertising-policy/page';
 import BoostTermsPage from '../../boost-terms-and-ppc/page';
 import CreatorTermsPage from '../../creator-terms-and-conditions/page';
@@ -51,6 +51,8 @@ export async function generateMetadata({ params }) {
   if (section === 'blogs' && !id) return generateBlogsMetadata({ locale: resolved.locale });
   if (section === 'profile' && id) return generateProfileMetadata({ params: childParams, locale: resolved.locale });
   if (section === 'creators' && !id) return generateCreatorsMetadata({ locale: resolved.locale });
+  if (section === 'contact' && !id) return generateContactMetadata({ locale: resolved.locale });
+  if (section === 'how-it-works' && !id) return generateHowItWorksMetadata({ locale: resolved.locale });
   if (section === 'explore') {
     return generateExploreMetadata({
       params: Promise.resolve({ filters: [id, ...resolved.segments.slice(2)].filter(Boolean) }),
