@@ -31,7 +31,7 @@ const AboutPrincpals = ({ data }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {principles.length > 0 ? principles.map((item, index) => (
                         <div
-                            key={item._id || index}
+                           key={`${item.title || "principle"}-${index}`}
                             onClick={() => setActiveIndex(index)}
                             className={`cursor-pointer p-10 rounded-[2rem] border transition-all duration-500 transform ${activeIndex === index
                                     ? 'bg-white dark:bg-zinc-900 border-[#F57C00] shadow-2xl shadow-orange-500/10 scale-[1.05]'

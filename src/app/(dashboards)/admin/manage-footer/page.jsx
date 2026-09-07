@@ -7,6 +7,9 @@ import { toast } from 'react-hot-toast';
 export default function ManageFooter() {
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
+    const [language, setLanguage] = useState('en');
+    const [sourceFooter, setSourceFooter] = useState(null);
+    const [translationVersion, setTranslationVersion] = useState(0);
 
     // Initial State - Full structure according to Backend Schema
     const [footer, setFooter] = useState({
@@ -37,6 +40,30 @@ export default function ManageFooter() {
         fetchFooterData();
     }, []);
 
+    const switchLanguage = async (code) => {
+        setFetching(true);
+        try {
+            if (code === 'fr') {
+                const { data } = await axios.get(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/footer/translation/fr`,
+                    { withCredentials: true }
+                );
+                setSourceFooter(data.data.sourceContent);
+                setFooter(data.data.translatedContent);
+                setTranslationVersion(data.data.versionNumber);
+            } else {
+                const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/footer`);
+                setSourceFooter(null);
+                if (data.success && data.data) setFooter(data.data);
+            }
+            setLanguage(code);
+        } catch (err) {
+            toast.error(err.response?.data?.message || `Could not load ${code.toUpperCase()} footer data`);
+        } finally {
+            setFetching(false);
+        }
+    };
+
     // ২. নতুন লিঙ্ক যোগ করা (Create logic for Arrays)
     const handleAddLink = (section) => {
         setFooter({
@@ -62,6 +89,18 @@ export default function ManageFooter() {
     const handleSave = async () => {
         setLoading(true);
         try {
+            if (language === 'fr') {
+                const { data } = await axios.put(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/footer/translation/fr`,
+                    { ...footer, expectedVersion: translationVersion },
+                    { withCredentials: true }
+                );
+                setFooter(data.data.translatedContent);
+                setSourceFooter(data.data.sourceContent);
+                setTranslationVersion(data.data.versionNumber);
+                toast.success('French Footer content published successfully!');
+                return;
+            }
             const { data } = await axios.put(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/footer`,
                 footer,
@@ -93,14 +132,23 @@ export default function ManageFooter() {
                     <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Footer Management</h1>
                     <p className="text-zinc-500 text-sm">Control every text and link of your website footer from here.</p>
                 </div>
-                <button
-                    onClick={handleSave}
-                    disabled={loading}
-                    className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-bold transition-all active:scale-95 disabled:opacity-50"
-                >
-                    {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
-                    Update Footer
-                </button>
+                <div className="flex flex-wrap gap-3">
+                    <div className="flex rounded-xl border border-zinc-200 dark:border-zinc-800 p-1">
+                        {['en', 'fr'].map((code) => (
+                            <button key={code} type="button" onClick={() => switchLanguage(code)} className={`rounded-lg px-4 py-2 font-bold uppercase ${language === code ? 'bg-orange-600 text-white' : 'text-zinc-500'}`}>
+                                {code}
+                            </button>
+                        ))}
+                    </div>
+                    <button
+                        onClick={handleSave}
+                        disabled={loading}
+                        className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-bold transition-all active:scale-95 disabled:opacity-50"
+                    >
+                        {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+                        {language === 'fr' ? 'Publish French' : 'Update Footer'}
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -111,6 +159,7 @@ export default function ManageFooter() {
                         <div className="flex items-center gap-2 text-orange-600 font-bold uppercase text-xs tracking-wider">
                             <Info size={16} /> About Section
                         </div>
+                        {language === 'fr' && <p className="text-xs text-zinc-500">English: {sourceFooter?.aboutText}</p>}
                         <textarea
                             className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 text-sm focus:ring-2 focus:ring-orange-500 outline-none"
                             rows="4"
@@ -120,7 +169,7 @@ export default function ManageFooter() {
                         />
                     </section>
 
-                    <section className="p-6 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl space-y-4">
+                    {language === 'en' && <section className="p-6 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl space-y-4">
                         <div className="flex items-center gap-2 text-orange-600 font-bold uppercase text-xs tracking-wider">
                             <Globe size={16} /> Social Media Links
                         </div>
@@ -141,7 +190,7 @@ export default function ManageFooter() {
                                 </div>
                             ))}
                         </div>
-                    </section>
+                    </section>}
                 </div>
 
                 {/* Right Side: Dynamic Links (Platform, Resources, Legal) */}
@@ -152,12 +201,12 @@ export default function ManageFooter() {
                                 <h3 className="font-bold text-zinc-800 dark:text-zinc-200 capitalize">
                                     {sectionName.replace('Links', ' Links')}
                                 </h3>
-                                <button
+                                {language === 'en' && <button
                                     onClick={() => handleAddLink(sectionName)}
                                     className="p-1 hover:bg-orange-50 dark:hover:bg-orange-950 text-orange-600 rounded-md transition-colors"
                                 >
                                     <Plus size={20} />
-                                </button>
+                                </button>}
                             </div>
 
                             <div className="space-y-3">
@@ -166,7 +215,7 @@ export default function ManageFooter() {
                                         <div className="flex flex-1 gap-2 bg-zinc-50 dark:bg-zinc-900 p-2 rounded-xl border border-zinc-100 dark:border-zinc-800">
                                             <input
                                                 type="text"
-                                                placeholder="Label"
+                                                placeholder={language === 'fr' ? `English: ${sourceFooter?.[sectionName]?.[idx]?.label || ''}` : 'Label'}
                                                 className="w-1/3 bg-transparent border-r dark:border-zinc-800 pr-2 text-xs font-bold outline-none"
                                                 value={link.label}
                                                 onChange={(e) => handleLinkEdit(sectionName, idx, 'label', e.target.value)}
@@ -177,14 +226,15 @@ export default function ManageFooter() {
                                                 className="flex-1 bg-transparent text-xs outline-none"
                                                 value={link.href}
                                                 onChange={(e) => handleLinkEdit(sectionName, idx, 'href', e.target.value)}
+                                                readOnly={language === 'fr'}
                                             />
                                         </div>
-                                        <button
+                                        {language === 'en' && <button
                                             onClick={() => handleRemoveLink(sectionName, idx)}
                                             className="text-zinc-400 hover:text-red-500 transition-colors"
                                         >
                                             <Trash2 size={16} />
-                                        </button>
+                                        </button>}
                                     </div>
                                 ))}
                                 {footer[sectionName].length === 0 && (
@@ -210,6 +260,7 @@ export default function ManageFooter() {
                         <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 ml-1">
                             Title
                         </label>
+                        {language === 'fr' && <p className="text-xs text-zinc-500">English: {sourceFooter?.newsletterTitle}</p>}
                         <input
                             type="text"
                             placeholder="Stay Connected"
@@ -224,6 +275,7 @@ export default function ManageFooter() {
                         <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 ml-1">
                             Description
                         </label>
+                        {language === 'fr' && <p className="text-xs text-zinc-500">English: {sourceFooter?.newsletterDescription}</p>}
                         <input
                             type="text"
                             placeholder="Stay informed about cultural stories..."

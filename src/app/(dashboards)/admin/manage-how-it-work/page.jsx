@@ -1,6 +1,6 @@
     "use client";
 
-    import React, { useState, useEffect } from "react";
+    import React, { useState, useEffect, useCallback } from "react";
     import axios from "axios";
     import { toast } from "react-hot-toast";
     import {
@@ -20,6 +20,9 @@
         // ===== STATES =====
         const [loading, setLoading] = useState(false);
         const [fetching, setFetching] = useState(true);
+        const [language, setLanguage] = useState("en");
+        const [sourceContent, setSourceContent] = useState(null);
+        const [translationVersion, setTranslationVersion] = useState(0);
 
         // Main content state
         const [content, setContent] = useState({
@@ -45,18 +48,20 @@
         });
 
         // ===== FETCH DATA =====
-        const fetchContent = async () => {
+        const fetchContent = useCallback(async () => {
             try {
                 setFetching(true);
-                const res = await axios.get(`${API_BASE}/api/admin/how-it-works`);
+                const endpoint = language === "fr"
+                    ? `${API_BASE}/api/admin/how-it-works/translation/fr`
+                    : `${API_BASE}/api/admin/how-it-works`;
+                const res = await axios.get(endpoint, { withCredentials: language === "fr" });
                 if (res.data?.success && res.data.data) {
                     const data = res.data.data;
-                    setContent({
-                        headerTitle: data.headerTitle || "",
-                        headerDescription: data.headerDescription || "",
-                        steps: data.steps || [],
-                    });
-                    setOriginalContent(JSON.parse(JSON.stringify(data)));
+                    const nextContent = language === "fr" ? data.translatedContent : data;
+                    setContent({ headerTitle: nextContent.headerTitle || "", headerDescription: nextContent.headerDescription || "", steps: nextContent.steps || [] });
+                    setOriginalContent(JSON.parse(JSON.stringify(nextContent)));
+                    setSourceContent(language === "fr" ? data.sourceContent : null);
+                    setTranslationVersion(language === "fr" ? data.versionNumber : 0);
                 }
             } catch (error) {
                 console.error("Fetch error:", error);
@@ -64,11 +69,32 @@
             } finally {
                 setFetching(false);
             }
-        };
+        }, [language]);
 
         useEffect(() => {
             fetchContent();
-        }, []);
+        }, [fetchContent]);
+
+        const switchLanguage = (nextLanguage) => {
+            if (nextLanguage === language) return;
+            setEditMode({ header: false, steps: {} });
+            setShowAddForm(false);
+            setLanguage(nextLanguage);
+        };
+
+        const saveFrenchContent = async () => {
+            const res = await axios.put(
+                `${API_BASE}/api/admin/how-it-works/translation/fr`,
+                { ...content, expectedVersion: translationVersion },
+                { withCredentials: true }
+            );
+            const data = res.data.data;
+            setContent(data.translatedContent);
+            setOriginalContent(JSON.parse(JSON.stringify(data.translatedContent)));
+            setSourceContent(data.sourceContent);
+            setTranslationVersion(data.versionNumber);
+            return data;
+        };
 
         // ===== HEADER HANDLERS =====
         const toggleHeaderEdit = () => {
@@ -88,34 +114,29 @@
         };
 
         const saveHeader = async () => {
-            if (!content.headerTitle.trim()) {
+            if (language === "en" && !content.headerTitle.trim()) {
                 toast.error("Header title is required");
                 return;
             }
-            if (!content.headerDescription.trim()) {
+            if (language === "en" && !content.headerDescription.trim()) {
                 toast.error("Header description is required");
                 return;
             }
 
             setLoading(true);
             try {
-                await axios.put(
-                    `${API_BASE}/api/admin/how-it-works`,
-                    {
-                        headerTitle: content.headerTitle,
-                        headerDescription: content.headerDescription,
-                        steps: content.steps,
-                    },
-                    { withCredentials: true }
-                );
+                if (language === "fr") await saveFrenchContent();
+                else await axios.put(`${API_BASE}/api/admin/how-it-works`, content, { withCredentials: true });
 
                 toast.success("Header saved successfully!");
                 setEditMode((prev) => ({ ...prev, header: false }));
-                setOriginalContent((prev) => ({
-                    ...prev,
-                    headerTitle: content.headerTitle,
-                    headerDescription: content.headerDescription,
-                }));
+                if (language === "en") {
+                    setOriginalContent((prev) => ({
+                        ...prev,
+                        headerTitle: content.headerTitle,
+                        headerDescription: content.headerDescription,
+                    }));
+                }
             } catch (error) {
                 console.error("Save error:", error);
                 toast.error(error.response?.data?.message || "Failed to save");
@@ -155,25 +176,19 @@
 
         const saveStep = async (stepId) => {
             const step = content.steps.find((s) => s.id === stepId);
-            if (!step.title.trim()) {
+            if (language === "en" && !step.title.trim()) {
                 toast.error("Step title is required");
                 return;
             }
-            if (!step.description.trim()) {
+            if (language === "en" && !step.description.trim()) {
                 toast.error("Step description is required");
                 return;
             }
 
             setLoading(true);
             try {
-                await axios.put(
-                    `${API_BASE}/api/admin/how-it-works/steps/${stepId}`,
-                    {
-                        title: step.title,
-                        description: step.description,
-                    },
-                    { withCredentials: true }
-                );
+                if (language === "fr") await saveFrenchContent();
+                else await axios.put(`${API_BASE}/api/admin/how-it-works/steps/${stepId}`, { title: step.title, description: step.description }, { withCredentials: true });
 
                 toast.success(`Step ${stepId} saved!`);
                 setEditMode((prev) => ({
@@ -182,10 +197,12 @@
                 }));
 
                 // Update original
-                setOriginalContent((prev) => ({
-                    ...prev,
-                    steps: prev.steps.map((s) => (s.id === stepId ? { ...step } : s)),
-                }));
+                if (language === "en") {
+                    setOriginalContent((prev) => ({
+                        ...prev,
+                        steps: prev.steps.map((s) => (s.id === stepId ? { ...step } : s)),
+                    }));
+                }
             } catch (error) {
                 console.error("Save step error:", error);
                 toast.error(error.response?.data?.message || "Failed to save step");
@@ -267,11 +284,11 @@
 
         // ===== SAVE ALL =====
         const saveAll = async () => {
-            if (!content.headerTitle.trim()) {
+            if (language === "en" && !content.headerTitle.trim()) {
                 toast.error("Header title is required");
                 return;
             }
-            if (!content.headerDescription.trim()) {
+            if (language === "en" && !content.headerDescription.trim()) {
                 toast.error("Header description is required");
                 return;
             }
@@ -282,19 +299,13 @@
 
             setLoading(true);
             try {
-                const res = await axios.put(
-                    `${API_BASE}/api/admin/how-it-works`,
-                    {
-                        headerTitle: content.headerTitle,
-                        headerDescription: content.headerDescription,
-                        steps: content.steps,
-                    },
-                    { withCredentials: true }
-                );
+                const res = language === "fr"
+                    ? { data: { success: Boolean(await saveFrenchContent()) } }
+                    : await axios.put(`${API_BASE}/api/admin/how-it-works`, content, { withCredentials: true });
 
                 if (res.data?.success) {
-                    toast.success("All content saved!");
-                    setOriginalContent(JSON.parse(JSON.stringify(content)));
+                    toast.success(language === "fr" ? "French content published!" : "All content saved!");
+                    if (language === "en") setOriginalContent(JSON.parse(JSON.stringify(content)));
                     // Exit all edit modes
                     setEditMode({ header: false, steps: {} });
                 }
@@ -325,19 +336,29 @@
                                 <FiEye /> Manage How It Works
                             </h1>
                             <p className="text-gray-400 mt-2 text-sm">
-                                Manage your How It Works page content
+                                {language === "fr" ? "Edit and publish the French page content" : "Manage your How It Works page content"}
                             </p>
                         </div>
-                        <button
-                            onClick={saveAll}
-                            disabled={loading}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold tracking-wider transition-all ${loading
-                                    ? "bg-gray-800 text-gray-500 cursor-not-allowed"
-                                    : "bg-[#F57C00] hover:bg-orange-600 text-white shadow-lg shadow-orange-900/30"
-                                }`}
-                        >
-                            <FiSave /> {loading ? "Saving..." : "Save All Changes"}
-                        </button>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex rounded-xl border border-gray-700 bg-[#111] p-1">
+                                {["en", "fr"].map((code) => (
+                                    <button key={code} type="button" onClick={() => switchLanguage(code)}
+                                        className={`rounded-lg px-4 py-2 text-xs font-bold uppercase transition-all ${language === code ? "bg-[#F57C00] text-white" : "text-gray-400 hover:text-white"}`}>
+                                        {code}
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={saveAll}
+                                disabled={loading}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold tracking-wider transition-all ${loading
+                                        ? "bg-gray-800 text-gray-500 cursor-not-allowed"
+                                        : "bg-[#F57C00] hover:bg-orange-600 text-white shadow-lg shadow-orange-900/30"
+                                    }`}
+                            >
+                                <FiSave /> {loading ? "Saving..." : language === "fr" ? "Publish French" : "Save All Changes"}
+                            </button>
+                        </div>
                     </div>
 
                     {/* ===== HEADER SECTION ===== */}
@@ -394,6 +415,7 @@
                                         }`}
                                     placeholder="Enter header title..."
                                 />
+                                {language === "fr" && <p className="mt-2 text-xs text-gray-500">English: {sourceContent?.headerTitle}</p>}
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
@@ -410,6 +432,7 @@
                                         }`}
                                     placeholder="Enter header description..."
                                 />
+                                {language === "fr" && <p className="mt-2 text-xs text-gray-500">English: {sourceContent?.headerDescription}</p>}
                             </div>
                         </div>
                     </section>
@@ -420,12 +443,14 @@
                             <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
                             Steps ({content.steps.length})
                         </h2>
-                        <button
-                            onClick={() => setShowAddForm(!showAddForm)}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-orange-400 rounded-lg hover:bg-orange-600 hover:text-white transition-all"
-                        >
-                            <FiPlus /> {showAddForm ? "Close" : "Add New Step"}
-                        </button>
+                        {language === "en" && (
+                            <button
+                                onClick={() => setShowAddForm(!showAddForm)}
+                                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-orange-400 rounded-lg hover:bg-orange-600 hover:text-white transition-all"
+                            >
+                                <FiPlus /> {showAddForm ? "Close" : "Add New Step"}
+                            </button>
+                        )}
                     </div>
 
                     {/* ===== ADD NEW STEP FORM ===== */}
@@ -525,14 +550,16 @@
                                             >
                                                 <FiEdit3 size={16} />
                                             </button>
-                                            <button
-                                                onClick={() => deleteStep(step.id)}
-                                                disabled={loading}
-                                                className="p-2 bg-gray-800 text-red-400 rounded-lg hover:bg-red-600 hover:text-white transition-all"
-                                                title="Delete"
-                                            >
-                                                <FiTrash2 size={16} />
-                                            </button>
+                                            {language === "en" && (
+                                                <button
+                                                    onClick={() => deleteStep(step.id)}
+                                                    disabled={loading}
+                                                    className="p-2 bg-gray-800 text-red-400 rounded-lg hover:bg-red-600 hover:text-white transition-all"
+                                                    title="Delete"
+                                                >
+                                                    <FiTrash2 size={16} />
+                                                </button>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -553,6 +580,7 @@
                                                     : "border-gray-700 opacity-70 cursor-not-allowed"
                                                 }`}
                                         />
+                                        {language === "fr" && <p className="mt-2 text-xs text-gray-500">English: {sourceContent?.steps?.find((item) => item.id === step.id)?.title}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
@@ -568,6 +596,7 @@
                                                     : "border-gray-700 opacity-70 cursor-not-allowed"
                                                 }`}
                                         />
+                                        {language === "fr" && <p className="mt-2 text-xs text-gray-500">English: {sourceContent?.steps?.find((item) => item.id === step.id)?.description}</p>}
                                     </div>
                                 </div>
                             </div>

@@ -41,7 +41,7 @@ const AboutExplore = ({ data }) => {
                 {/* Steps Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
                     {steps.length > 0 ? steps.map((step, index) => (
-                        <div key={step._id || index} className="group relative p-8 bg-gray-50 dark:bg-[#121212] rounded-[2rem] border border-transparent hover:border-[#E65100]/20 hover:bg-white dark:hover:bg-zinc-900 shadow-xl shadow-gray-200/50 dark:shadow-none transition-all duration-500">
+                        <div key={`${step.stepNumber || "step"}-${index}`} className="group relative p-8 bg-gray-50 dark:bg-[#121212] rounded-[2rem] border border-transparent hover:border-[#E65100]/20 hover:bg-white dark:hover:bg-zinc-900 shadow-xl shadow-gray-200/50 dark:shadow-none transition-all duration-500">
 
                             {/* Decorative Step Number */}
                             <div className="absolute top-6 right-8 text-6xl font-black text-gray-200/50 dark:text-zinc-800/50 group-hover:text-[#E65100]/10 transition-colors">

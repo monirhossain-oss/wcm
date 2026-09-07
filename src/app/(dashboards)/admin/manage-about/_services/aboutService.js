@@ -6,6 +6,8 @@ const API_URL = `${API_BASE_URL}/api/about`;
 const aboutService = {
     // ১. পুরো পেজের ডেটা
     getAboutPage: () => axios.get(`${API_URL}/`, { withCredentials: true }),
+    getFrenchTranslation: () => axios.get(`${API_URL}/translation/fr`, { withCredentials: true }),
+    updateFrenchTranslation: (data) => axios.put(`${API_URL}/translation/fr`, data, { withCredentials: true }),
 
     // ২. পেজ রিসেট
     resetAboutPage: () => axios.delete(`${API_URL}/reset`, { withCredentials: true }),

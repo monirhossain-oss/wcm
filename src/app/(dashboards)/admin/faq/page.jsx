@@ -1,15 +1,18 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Pencil, Trash2, Save, X, Loader2, Eye } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { createFaq, deleteFaq, updateFaq, getAllFaqs } from '@/services/faqService';
+import { createFaq, deleteFaq, updateFaq, getAllFaqs, getFaqFrenchTranslation, updateFaqFrenchTranslation } from '@/services/faqService';
 
 const AdminFaqPage = () => {
     const [faqs, setFaqs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(null);
     const [viewData, setViewData] = useState(null);
+    const [language, setLanguage] = useState('en');
+    const [sourceFaq, setSourceFaq] = useState(null);
+    const [translationVersion, setTranslationVersion] = useState(0);
 
     const [formData, setFormData] = useState({
         question: '',
@@ -26,21 +29,21 @@ const AdminFaqPage = () => {
         { id: 'Technical', label: 'Technical Questions' },
     ];
 
-    useEffect(() => {
-        loadFaqs();
-    }, []);
-
-    const loadFaqs = async () => {
+    const loadFaqs = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getAllFaqs();
+            const res = await getAllFaqs(language === 'fr' ? 'fr' : undefined);
             setFaqs(res.data);
         } catch (err) {
             toast.error("Failed to load FAQs");
         } finally {
             setLoading(false);
         }
-    };
+    }, [language]);
+
+    useEffect(() => {
+        loadFaqs();
+    }, [loadFaqs]);
 
     const handleDelete = async (id) => {
         Swal.fire({
@@ -77,6 +80,22 @@ const AdminFaqPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (language === 'fr') {
+            try {
+                const res = await updateFaqFrenchTranslation(isEditing, {
+                    question: formData.question,
+                    answer: formData.answer,
+                    expectedVersion: translationVersion,
+                });
+                setTranslationVersion(res.data.data.versionNumber);
+                toast.success('French FAQ Published Successfully!');
+                loadFaqs();
+            } catch (err) {
+                toast.error(err.response?.data?.message || 'French publish failed');
+            }
+            return;
+        }
+
         Swal.fire({
             title: isEditing ? 'Update FAQ?' : 'Add New FAQ?',
             text: isEditing ? "Do you want to save the changes?" : "Do you want to publish this FAQ?",
@@ -108,7 +127,25 @@ const AdminFaqPage = () => {
         });
     };
 
-    const handleEdit = (faq) => {
+    const handleEdit = async (faq) => {
+        if (language === 'fr') {
+            try {
+                const res = await getFaqFrenchTranslation(faq._id);
+                const editor = res.data.data;
+                setSourceFaq(editor.sourceFaq);
+                setTranslationVersion(editor.versionNumber);
+                setFormData({
+                    question: editor.translatedContent.question,
+                    answer: editor.translatedContent.answer,
+                    category: editor.sourceFaq.category,
+                });
+                setIsEditing(faq._id);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                toast.error(err.response?.data?.message || 'Failed to load French FAQ');
+            }
+            return;
+        }
         setFormData({ question: faq.question, answer: faq.answer, category: faq.category });
         setIsEditing(faq._id);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -116,14 +153,35 @@ const AdminFaqPage = () => {
 
     return (
         <div className="p-6 bg-white dark:bg-[#0a0a0a] min-h-screen text-gray-900 dark:text-white">
-            <h1 className="text-3xl font-bold mb-8 text-orange-600">FAQ Management</h1>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+                <h1 className="text-3xl font-bold text-orange-600">FAQ Management</h1>
+                <div className="flex rounded-lg border border-gray-200 dark:border-zinc-700 p-1">
+                    {['en', 'fr'].map((code) => (
+                        <button key={code} type="button" onClick={() => {
+                            setLanguage(code);
+                            setIsEditing(null);
+                            setSourceFaq(null);
+                            setTranslationVersion(0);
+                            setFormData({ question: '', answer: '', category: 'General' });
+                        }} className={`px-4 py-2 rounded-md font-bold uppercase ${language === code ? 'bg-orange-600 text-white' : 'text-gray-500'}`}>
+                            {code}
+                        </button>
+                    ))}
+                </div>
+            </div>
 
             {/* --- ADD / EDIT FORM --- */}
-            <div className="bg-gray-50 dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 mb-10 shadow-sm">
+            {(language === 'en' || isEditing) ? <div className="bg-gray-50 dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 mb-10 shadow-sm">
                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     {isEditing ? <Pencil size={20} className="text-blue-500" /> : <Plus size={20} className="text-orange-500" />}
-                    {isEditing ? "Edit FAQ" : "Add New FAQ"}
+                    {language === 'fr' ? 'Edit French FAQ' : (isEditing ? "Edit FAQ" : "Add New FAQ")}
                 </h2>
+                {language === 'fr' && sourceFaq && (
+                    <div className="mb-5 rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/30 p-4 text-sm">
+                        <p className="font-semibold mb-1">English question: {sourceFaq.question}</p>
+                        <div className="text-gray-600 dark:text-gray-400" dangerouslySetInnerHTML={{ __html: sourceFaq.answer }} />
+                    </div>
+                )}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input
@@ -132,12 +190,13 @@ const AdminFaqPage = () => {
                             className="w-full p-3 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 outline-none focus:border-orange-500 transition-all"
                             value={formData.question}
                             onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-                            required
+                            required={language === 'en'}
                         />
                         <select
                             className="w-full p-3 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 outline-none focus:border-orange-500"
                             value={formData.category}
                             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                            disabled={language === 'fr'}
                         >
                             {categories.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                         </select>
@@ -148,16 +207,16 @@ const AdminFaqPage = () => {
                         className="w-full p-3 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 outline-none focus:border-orange-500 transition-all"
                         value={formData.answer}
                         onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
-                        required
+                        required={language === 'en'}
                     />
                     <div className="flex gap-3">
                         <button type="submit" className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-8 py-2.5 rounded-lg font-bold shadow-lg transition-all">
-                            <Save size={18} /> {isEditing ? "Update FAQ" : "Save FAQ"}
+                            <Save size={18} /> {language === 'fr' ? 'Publish French' : (isEditing ? "Update FAQ" : "Save FAQ")}
                         </button>
                         {isEditing && (
                             <button
                                 type="button"
-                                onClick={() => { setIsEditing(null); setFormData({ question: '', answer: '', category: 'General' }) }}
+                                onClick={() => { setIsEditing(null); setSourceFaq(null); setFormData({ question: '', answer: '', category: 'General' }) }}
                                 className="flex items-center gap-2 bg-gray-200 dark:bg-zinc-700 px-6 py-2.5 rounded-lg font-bold transition-all"
                             >
                                 <X size={18} /> Cancel
@@ -165,7 +224,11 @@ const AdminFaqPage = () => {
                         )}
                     </div>
                 </form>
-            </div>
+            </div> : (
+                <div className="mb-10 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 p-6 text-center text-gray-500">
+                    Select an FAQ below to add or edit its French question and answer.
+                </div>
+            )}
 
             {/* --- FAQ LIST TABLE --- */}
             <div className="overflow-x-auto bg-white dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-sm">
@@ -198,7 +261,7 @@ const AdminFaqPage = () => {
                                             <div className="flex justify-end gap-3">
                                                 <button onClick={() => setViewData(faq)} className="p-2 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-500 rounded-lg transition-all" title="View Detail"><Eye size={18} /></button>
                                                 <button onClick={() => handleEdit(faq)} className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-500 rounded-lg transition-all" title="Edit"><Pencil size={18} /></button>
-                                                <button onClick={() => handleDelete(faq._id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-lg transition-all" title="Delete"><Trash2 size={18} /></button>
+                                                {language === 'en' && <button onClick={() => handleDelete(faq._id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-lg transition-all" title="Delete"><Trash2 size={18} /></button>}
                                             </div>
                                         </td>
                                     </tr>

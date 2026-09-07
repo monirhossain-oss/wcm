@@ -59,7 +59,7 @@ const Footer = () => {
           const db = data.data;
           const source = sourceResponse?.data?.data;
           const localizedValue = (value, sourceValue, fallback) =>
-            value && (locale === 'en' || value !== sourceValue) ? value : fallback;
+            value || sourceValue || fallback;
 
           const getMergedLinks = (staticLinks, dbLinks, sourceLinks) => {
             const merged = staticLinks.map(sLink => {

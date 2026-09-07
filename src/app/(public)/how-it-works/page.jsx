@@ -14,7 +14,7 @@ export async function generateMetadata({ locale = 'en' } = {}) {
     };
 }
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
@@ -27,12 +27,11 @@ const getGridClass = (count) => {
     return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 };
 
-// ===== FETCH DATA (10 seconds cache) =====
+// ===== FETCH DATA (request-time so Admin publishes are immediately visible) =====
 const fetchHowItWorks = async (locale = 'en') => {
     try {
-        // ✅ Data fetch - 10 seconds cache
         const res = await fetch(`${API_BASE}/api/admin/how-it-works${locale === 'en' ? '' : `?language=${locale}`}`, {
-            next: { revalidate: 10 },
+            cache: 'no-store',
         });
 
         if (!res.ok) throw new Error("Failed to fetch");

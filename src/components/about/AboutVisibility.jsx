@@ -2,9 +2,11 @@
 
 import { Heart } from 'lucide-react';
 import Link from 'next/link';
+import { useLocale } from '@/context/LocaleContext';
 import React from 'react';
 
 const AboutVisibility = ({ data }) => {
+    const { localize } = useLocale();
     // Data destructuring with fallbacks
     const header = data?.headline || {};
     const founder = data?.founderText || {};
@@ -63,7 +65,7 @@ const AboutVisibility = ({ data }) => {
             </div>
 
             {/* Explore Button */}
-            <Link href="/creators" className="inline-block">
+            <Link href={localize('/creators')} className="inline-block">
                 <button className="px-10 py-4 cursor-pointer rounded-2xl bg-[#F57C00] text-white font-black hover:bg-[#e67600] transition-all shadow-2xl shadow-orange-500/20 hover:scale-105 active:scale-95 uppercase tracking-wider">
                     Explore Our Creators
                 </button>
