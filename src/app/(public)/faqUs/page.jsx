@@ -1,17 +1,11 @@
 import FaqContact from '@/components/faq/FaqContact';
 import FaqSection from '@/components/faq/FaqSection';
 import React from 'react';
-import { getSeoByPage } from '@/lib/api';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 
-// এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/faq) theke title/description/keywords
-export async function generateMetadata() {
-    const seoData = await getSeoByPage('faq');
-
-    return {
-        title: seoData?.title || 'Frequently Asked Questions | WCM',
-        description: seoData?.description || 'Find answers to common questions about World Culture Marketplace.',
-        keywords: seoData?.keywords?.length ? seoData.keywords : ['FAQ', 'WCM Help', 'Cultural Marketplace Questions'],
-    };
+// এসইও মেটাডাটা জেনারেটর — English /faqUs; French counterpart is /fr/faq (registry-mapped)
+export async function generateMetadata({ locale = 'en' } = {}) {
+    return buildPageMetadata({ pageId: 'faq', locale });
 }
 
 const Page = ({ locale = 'en' }) => {

@@ -1,12 +1,11 @@
 import FaqContact from '@/components/faq/FaqContact';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 import FaqSection from '@/components/faq/FaqSection';
 import React from 'react';
 
-export const metadata = {
-  title: 'Questions fréquentes | World Culture Marketplace',
-  description: 'Retrouvez les réponses aux questions fréquentes sur World Culture Marketplace.',
-  keywords: ['FAQ', 'aide WCM', 'questions marketplace culturel'],
-};
+export async function generateMetadata() {
+  return buildPageMetadata({ pageId: 'faq', locale: 'fr' });
+}
 
 export default function FaqFrPage() {
   return (

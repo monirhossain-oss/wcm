@@ -1,6 +1,8 @@
 import ExploreClient from '../ExploreClient';
 import { continentMapping } from '@/constants/continentData';
-import { getSeoByPage } from '@/lib/api';
+import { getCategories } from '@/lib/api';
+import { buildPageMetadata, resolvePageSeo } from '@/lib/seo/pageMetadata';
+import { resolveExploreIndexing } from '@/lib/seo/indexing';
 import { translate } from '@/lib/i18n';
 
 // ── Shared helper: slug ke readable text e convert kora ──
@@ -56,52 +58,45 @@ export async function generateMetadata({ params, locale = 'en' }) {
 
     const { category, continent } = resolveExploreFilters(filters);
 
-    // Admin panel (/api/seo/explore) theke base SEO data ana — getSeoByPage 404 nijei handle kore
-    const adminSeo = await getSeoByPage('explore');
-    // console.log('🔍 [Explore Page] Base SEO from panel:', adminSeo); // 👈 terminal e dekhabe
+    // Language-specific SEO record (/api/seo/explore?languageCode=…) with catalog fallback
+    const base = await resolvePageSeo({ pageId: 'explore', locale });
 
-    let finalTitle = locale === 'en' && adminSeo?.title ? adminSeo.title : translate(locale, 'explore.metaTitle');
-    let finalDescription = locale === 'en' && adminSeo?.description ? adminSeo.description : translate(locale, 'explore.metaDescription');
-    let finalKeywords = adminSeo?.keywords?.length ? adminSeo.keywords : ['Culture', 'WCM'];
+    // Stage 5: only a valid category/region combination is indexable. Explore URLs carry master
+    // category slugs in both languages, so one master list validates English and French alike.
+    const { indexable } = resolveExploreIndexing(filters, await getCategories());
+
+    let finalTitle = base.title;
+    let finalDescription = base.description;
+    let finalKeywords = base.keywords;
 
     const isFiltered = category !== 'All' || continent !== 'All Regions';
     const localizedContinent = continent === 'All Regions'
         ? translate(locale, 'homeDiscovery.allRegions')
         : translate(locale, `homeDiscovery.regions.${continent}`, continent);
-    const baseTitle = locale === 'en' && adminSeo?.title ? adminSeo.title : translate(locale, 'explore.metaTitle');
 
     if (isFiltered) {
         if (category !== 'All' && continent !== 'All Regions') {
-            finalTitle = `${category} ${translate(locale, 'explore.from')} ${localizedContinent} | ${baseTitle}`;
+            finalTitle = `${category} ${translate(locale, 'explore.from')} ${localizedContinent} | ${base.title}`;
         } else if (category !== 'All') {
-            finalTitle = `${translate(locale, 'explore.categoryCollections')} : ${category} | ${baseTitle}`;
+            finalTitle = `${translate(locale, 'explore.categoryCollections')} : ${category} | ${base.title}`;
         } else if (continent !== 'All Regions') {
-            finalTitle = `${translate(locale, 'explore.culturalHeritage')} ${localizedContinent} | ${baseTitle}`;
+            finalTitle = `${translate(locale, 'explore.culturalHeritage')} ${localizedContinent} | ${base.title}`;
         }
 
         finalDescription = `${translate(locale, 'explore.filteredDescription')} ${finalDescription}`;
         finalKeywords = [category, continent, ...finalKeywords];
     }
 
-    // console.log('✅ [Explore Page] Final metadata:', { finalTitle, finalDescription, isFiltered }); // 👈 terminal e dekhabe
-
-    return {
+    return buildPageMetadata({
+        pageId: 'explore',
+        locale,
+        resolved: base,
+        path: filters.length ? `/explore/${filters.join('/')}` : '/explore',
         title: finalTitle,
         description: finalDescription,
         keywords: finalKeywords,
-        openGraph: {
-            title: finalTitle,
-            description: finalDescription,
-            images: [adminSeo?.ogImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`],
-            type: 'website',
-        },
-        twitter: {
-            card: 'summary_large_image',
-            title: finalTitle,
-            description: finalDescription,
-            images: [adminSeo?.ogImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`],
-        },
-    };
+        indexable,
+    });
 }
 
 // ২. মেইন পেজ কম্পোনেন্ট

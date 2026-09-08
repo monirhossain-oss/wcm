@@ -1,28 +1,10 @@
 import axios from 'axios';
 import CreatorsClient from './CreatorsClient';
-import { getSeoByPage } from '@/lib/api';
-import { translate } from '@/lib/i18n';
-import { buildLocalizedMetadata, getPublishedLanguageCodes } from '@/lib/localizedMetadata';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 
-// ১. ডাইনামিক মেটাডাটা ফাংশন — Admin panel (/api/seo/creators) theke title/description/keywords
+// ১. ডাইনামিক মেটাডাটা ফাংশন — current language er SEO record + oi language er catalog fallback
 export async function generateMetadata({ locale = 'en' } = {}) {
-  const seoData = await getSeoByPage('creators');
-
-  const title = locale === 'en' && seoData?.title ? seoData.title : translate(locale, 'creators.metaTitle');
-  const description = locale === 'en' && seoData?.description ? seoData.description : translate(locale, 'creators.metaDescription');
-  const image = seoData?.ogImage || '/og-creators.jpg';
-
-  return {
-    ...buildLocalizedMetadata({
-      locale,
-      path: '/creators',
-      title,
-      description,
-      image,
-      languages: await getPublishedLanguageCodes(),
-    }),
-    keywords: seoData?.keywords?.length ? seoData.keywords : ['creators', 'culture', 'global artists', 'WCM'],
-  };
+  return buildPageMetadata({ pageId: 'creators', locale });
 }
 
 // ২. ডাটা ফেচিং ফাংশন (Creators এবং Categories এর জন্য)

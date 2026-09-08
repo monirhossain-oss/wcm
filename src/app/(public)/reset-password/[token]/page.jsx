@@ -6,11 +6,14 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import axios from 'axios';
+import { useLocale } from '@/context/LocaleContext';
+import { recoveryError } from '@/lib/accountRecovery';
 
 // ============================================
 // 🔔 CUSTOM TOAST COMPONENT
 // ============================================
 function Toast({ message, type = 'success', onClose, duration = 3000 }) {
+  const { t } = useLocale();
   useEffect(() => {
     const timer = setTimeout(() => { onClose(); }, duration);
     return () => clearTimeout(timer);
@@ -33,7 +36,7 @@ function Toast({ message, type = 'success', onClose, duration = 3000 }) {
       <div className={`flex items-center gap-3 px-5 py-3 rounded-xl border shadow-lg min-w-[300px] ${bgColors[type]}`}>
         {icons[type]}
         <span className="text-sm font-medium">{message}</span>
-        <button onClick={onClose} className="ml-auto text-gray-400 hover:text-gray-600">✕</button>
+        <button onClick={onClose} aria-label={t('accountRecovery.close')} className="ml-auto text-gray-400 hover:text-gray-600">✕</button>
       </div>
     </div>
   );
@@ -61,8 +64,10 @@ const validatePassword = (password) => {
   return { isValid: errors.length === 0, errors, checks };
 };
 
-export default function ResetPasswordPage() {
-  const { token } = useParams();
+export default function ResetPasswordPage({ token: suppliedToken } = {}) {
+  const params = useParams();
+  const token = suppliedToken ?? params.token;
+  const { t, localize } = useLocale();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
@@ -90,27 +95,27 @@ export default function ResetPasswordPage() {
     // 🔒 পাসওয়ার্ড ভ্যালিডেশন চেক
     const passwordValidation = validatePassword(data.password);
     if (!passwordValidation.isValid) {
-      setServerError(`Password must contain ${passwordValidation.errors.join(', ')}`);
+      setServerError(t('accountRecovery.passwordInvalid'));
       return;
     }
 
     try {
       const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/reset-password/${token}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/reset-password/${encodeURIComponent(token)}`,
         { password: data.password }
       );
 
       if (response.data.success) {
         // ✅ SweetAlert2-র বদলে Custom Toast
-        showToast('Your password has been reset successfully!', 'success');
+        showToast(t('accountRecovery.resetSuccess'), 'success');
 
         setTimeout(() => {
-          window.location.href = '/';
+          window.location.href = localize('/');
         }, 2000);
       }
     } catch (error) {
       setServerError(
-        error.response?.data?.message || 'Something went wrong. Link might be expired.'
+        recoveryError({ ...error.response, retryAfter: error.response?.headers?.['retry-after'] }, t, 'resetError')
       );
     }
   };
@@ -122,11 +127,11 @@ export default function ResetPasswordPage() {
 
       {/* Back Button */}
       <button
-        onClick={() => router.push('/')}
+        onClick={() => router.push(localize('/'))}
         className="fixed top-8 left-8 flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-[#F57C00] transition-colors uppercase tracking-widest group"
       >
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-        Back to Home
+        {t('accountRecovery.back')}
       </button>
 
       <div className="w-full max-w-[450px] bg-white dark:bg-[#111] border border-gray-100 dark:border-white/10 rounded-[40px] shadow-2xl shadow-orange-500/10 overflow-hidden my-auto">
@@ -142,10 +147,10 @@ export default function ResetPasswordPage() {
               <ShieldCheck size={28} />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-serif uppercase tracking-tight">
-              Set New Password
+              {t('accountRecovery.title')}
             </h1>
             <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
-              Secure your account with a new strong password
+              {t('accountRecovery.subtitle')}
             </p>
           </div>
 
@@ -159,18 +164,19 @@ export default function ResetPasswordPage() {
             {/* New Password with Real-time Validation */}
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-wider">
-                New Password
+                {t('accountRecovery.password')}
               </label>
               <div className="relative">
                 <input
                   placeholder="••••••••"
                   type={showPassword ? 'text' : 'password'}
-                  {...register('password', { required: 'Password is required' })}
+                  {...register('password', { required: t('accountRecovery.required') })}
                   className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-[#F57C00]/50 focus:border-[#F57C00] transition-all text-sm text-gray-800 dark:text-gray-200"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={t(`accountRecovery.${showPassword ? 'hidePassword' : 'showPassword'}`)}
                   className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -185,36 +191,36 @@ export default function ResetPasswordPage() {
               {/* 🔒 REAL-TIME PASSWORD REQUIREMENTS */}
               {passwordValue.length > 0 && (
                 <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg space-y-1.5">
-                  <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Password Requirements:</p>
+                  <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{t('accountRecovery.requirements')}</p>
                   <div className="flex items-center gap-2">
                     <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold ${passwordCheck.checks.minLength ? 'bg-green-500 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-500'}`}>
                       {passwordCheck.checks.minLength ? '✓' : '•'}
                     </div>
-                    <span className={`text-[11px] ${passwordCheck.checks.minLength ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>At least 8 characters</span>
+                    <span className={`text-[11px] ${passwordCheck.checks.minLength ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>{t('accountRecovery.minLength')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold ${passwordCheck.checks.uppercase ? 'bg-green-500 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-500'}`}>
                       {passwordCheck.checks.uppercase ? '✓' : '•'}
                     </div>
-                    <span className={`text-[11px] ${passwordCheck.checks.uppercase ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>One uppercase letter (A-Z)</span>
+                    <span className={`text-[11px] ${passwordCheck.checks.uppercase ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>{t('accountRecovery.uppercase')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold ${passwordCheck.checks.lowercase ? 'bg-green-500 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-500'}`}>
                       {passwordCheck.checks.lowercase ? '✓' : '•'}
                     </div>
-                    <span className={`text-[11px] ${passwordCheck.checks.lowercase ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>One lowercase letter (a-z)</span>
+                    <span className={`text-[11px] ${passwordCheck.checks.lowercase ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>{t('accountRecovery.lowercase')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold ${passwordCheck.checks.number ? 'bg-green-500 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-500'}`}>
                       {passwordCheck.checks.number ? '✓' : '•'}
                     </div>
-                    <span className={`text-[11px] ${passwordCheck.checks.number ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>One number (0-9)</span>
+                    <span className={`text-[11px] ${passwordCheck.checks.number ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>{t('accountRecovery.number')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold ${passwordCheck.checks.symbol ? 'bg-green-500 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-500'}`}>
                       {passwordCheck.checks.symbol ? '✓' : '•'}
                     </div>
-                    <span className={`text-[11px] ${passwordCheck.checks.symbol ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>One special symbol (!@#$%^&*)</span>
+                    <span className={`text-[11px] ${passwordCheck.checks.symbol ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>{t('accountRecovery.symbol')}</span>
                   </div>
                 </div>
               )}
@@ -223,14 +229,14 @@ export default function ResetPasswordPage() {
             {/* Confirm Password */}
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-wider">
-                Confirm Password
+                {t('accountRecovery.confirm')}
               </label>
               <input
                 placeholder="••••••••"
                 type="password"
                 {...register('confirmPassword', {
-                  required: 'Please confirm your password',
-                  validate: (value) => value === newPassword || 'Passwords do not match',
+                  required: t('accountRecovery.confirmRequired'),
+                  validate: (value) => value === newPassword || t('accountRecovery.mismatch'),
                 })}
                 className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-[#F57C00]/50 focus:border-[#F57C00] transition-all text-sm text-gray-800 dark:text-gray-200"
               />
@@ -246,13 +252,13 @@ export default function ResetPasswordPage() {
               disabled={isSubmitting}
               className="w-full py-4 mt-4 rounded-full bg-[#1a1a1a] dark:bg-[#F57C00] text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:opacity-90 transition transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : 'Update Password'}
+              {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : t('accountRecovery.update')}
             </button>
           </form>
 
           <div className="text-center mt-10">
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-              Safe & Secure Environment
+              {t('accountRecovery.secure')}
             </p>
           </div>
         </div>

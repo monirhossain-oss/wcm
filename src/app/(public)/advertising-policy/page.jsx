@@ -1,4 +1,5 @@
 import React from 'react';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
 import Hero from '@/components/Advertising/Hero';
 import TableOfContents from '@/components/Advertising/TableOfContents';
@@ -6,6 +7,10 @@ import ContactSection from '@/components/Advertising/ContactSection';
 import { PolicySection } from '@/components/Advertising/PolicySection';
 import { PolicyCard } from '@/components/Advertising/PolicyCard';
 import { Ul, Divider, Sub } from '@/components/Advertising/SharedComponents';
+
+export async function generateMetadata({ locale = 'en' } = {}) {
+    return buildPageMetadata({ pageId: 'advertising-policy', locale });
+}
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
 

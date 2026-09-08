@@ -1,12 +1,9 @@
 import CookiePolicy from '../../cookie-policy/page';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 
-export const metadata = {
-  alternates: { canonical: '/fr/cookie-policy', languages: { en: '/cookie-policy', fr: '/fr/cookie-policy', 'x-default': '/cookie-policy' } },
-  openGraph: { url: '/fr/cookie-policy', locale: 'fr_FR', type: 'website' },
-  title: 'Politique relative aux cookies | World Culture Marketplace',
-  description: 'Consultez la politique relative aux cookies de World Culture Marketplace.',
-  keywords: ['Cookies', 'Politique', 'WCM'],
-};
+export async function generateMetadata() {
+  return buildPageMetadata({ pageId: 'cookie-policy', locale: 'fr' });
+}
 
 export default function CookiePolicyFrPage() {
   return <CookiePolicy locale="fr" />;

@@ -1,4 +1,5 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+import { ROBOTS_DISALLOW } from '@/lib/seo/indexing';
+import { SITE_URL } from '@/lib/seo/siteConfig';
 
 export default function robots() {
   return {
@@ -6,11 +7,7 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        disallow: [
-          '/admin/',
-          '/api/',
-          '*/search/*'
-        ],
+        disallow: [...ROBOTS_DISALLOW],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

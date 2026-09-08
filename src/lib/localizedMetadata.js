@@ -1,4 +1,4 @@
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '');
+import { SITE_URL } from '@/lib/seo/siteConfig';
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
 
 export const absoluteSiteUrl = (path = '/') => `${SITE_URL}${path === '/' ? '' : path}`;
@@ -27,10 +27,10 @@ export const buildLocalizedMetadata = ({
     description,
     alternates: { canonical, languages: { ...resolvedLanguageUrls, 'x-default': resolvedLanguageUrls.en || englishUrl } },
     openGraph: {
-      title, description, url: canonical, locale: locale === 'fr' ? 'fr_FR' : 'en_US', type,
+      title, description, url: canonical, siteName: 'World Culture Marketplace', locale: locale === 'fr' ? 'fr_FR' : 'en_US', type,
       images: image ? [{ url: image, alt: imageAlt || title }] : [],
     },
-    twitter: { card: 'summary_large_image', title, description, images: image ? [image] : [] },
+    twitter: { card: 'summary_large_image', title, description, images: image ? [{ url: image, alt: imageAlt || title }] : [] },
   };
 };
 

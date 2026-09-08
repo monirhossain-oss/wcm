@@ -11,7 +11,12 @@ import PayPerClick from '@/components/boost-terms-and-ppc/PayPerClick'
 import PpcPromotion from '@/components/boost-terms-and-ppc/PpcPromotion'
 import PromotionBudget from '@/components/boost-terms-and-ppc/PromotionBudget'
 import React from 'react'
+import { buildPageMetadata } from '@/lib/seo/pageMetadata'
 import { buildTranslationMap } from '@/lib/staticPageLocalization'
+
+export async function generateMetadata({ locale = 'en' } = {}) {
+  return buildPageMetadata({ pageId: 'boost-terms-and-ppc', locale })
+}
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '')
 

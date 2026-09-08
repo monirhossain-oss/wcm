@@ -18,6 +18,11 @@ import ModificationSection from '@/components/creators-terms/ModificationSection
 import ContactSection from '@/components/creators-terms/ContactSection'
 import GoverningLawSection from '@/components/creators-terms/GoverningLawSection'
 import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization'
+import { buildPageMetadata } from '@/lib/seo/pageMetadata'
+
+export async function generateMetadata({ locale = 'en' } = {}) {
+  return buildPageMetadata({ pageId: 'creator-terms-and-conditions', locale })
+}
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '')
 

@@ -1,32 +1,10 @@
 import BlogCard from '@/components/blog/BlogCard';
 import React from 'react';
-import { getSeoByPage } from '@/lib/api';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 import { translate } from '@/lib/i18n';
 
 export async function generateMetadata({ locale = 'en' } = {}) {
-  const seoData = await getSeoByPage('blog');
-
-  const title = seoData?.title || translate(locale, 'blog.metaTitle');
-  const description = seoData?.description || translate(locale, 'blog.metaDescription');
-  const image = seoData?.ogImage || `${process.env.NEXT_PUBLIC_SITE_URL}/og-image.jpg`;
-
-  return {
-    title,
-    description,
-    keywords: seoData?.keywords?.length ? seoData.keywords : ['Culture', 'Blog', 'Stories'],
-    openGraph: {
-      title,
-      description,
-      images: [image],
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [image],
-    },
-  };
+  return buildPageMetadata({ pageId: 'blogs', locale });
 }
 
 const page = ({ locale = 'en' }) => {

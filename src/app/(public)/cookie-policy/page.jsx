@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 
 import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
 
@@ -14,12 +15,9 @@ const getPublishedContent = async (languageCode) => {
     }
 };
 
-export const metadata = {
-    title: 'Cookie Policy | World Culture Marketplace',
-    description: 'Learn how World Culture Marketplace uses cookies.',
-    alternates: { canonical: '/cookie-policy', languages: { en: '/cookie-policy', fr: '/fr/cookie-policy', 'x-default': '/cookie-policy' } },
-    openGraph: { url: '/cookie-policy', locale: 'en_US', type: 'website' },
-};
+export async function generateMetadata({ locale = 'en' } = {}) {
+    return buildPageMetadata({ pageId: 'cookie-policy', locale });
+}
 
 /* ── Reusable Components ── */
 

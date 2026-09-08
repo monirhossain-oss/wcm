@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { getSeoByPage } from '@/lib/api';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
@@ -15,17 +15,9 @@ const getPublishedContent = async (languageCode) => {
     }
 };
 
-// এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/privacy) theke title/description/keywords
-export async function generateMetadata() {
-    const seoData = await getSeoByPage('privacy');
-
-    return {
-        alternates: { canonical: '/privacy-policy', languages: { en: '/privacy-policy', fr: '/fr/privacy-policy', 'x-default': '/privacy-policy' } },
-        openGraph: { url: '/privacy-policy', locale: 'en_US', type: 'website' },
-        title: seoData?.title || 'Privacy Policy | World Culture Marketplace',
-        description: seoData?.description || 'Learn how World Culture Marketplace collects, uses, and protects your data.',
-        keywords: seoData?.keywords?.length ? seoData.keywords : ['Privacy', 'Policy', 'WCM', 'Data Protection'],
-    };
+// এসইও মেটাডাটা জেনারেটর — current language er SEO record + oi language er catalog fallback
+export async function generateMetadata({ locale = 'en' } = {}) {
+    return buildPageMetadata({ pageId: 'privacy-policy', locale });
 }
 
 /* ─── Reusable section wrapper ─── */

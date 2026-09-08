@@ -1,6 +1,6 @@
 ﻿import Link from 'next/link';
 import React from 'react';
-import { getSeoByPage } from '@/lib/api';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
@@ -16,16 +16,8 @@ const getPublishedContent = async (languageCode) => {
 };
 
 
-export async function generateMetadata() {
-    const seoData = await getSeoByPage('terms');
- 
-    return {
-        alternates: { canonical: '/terms-and-conditions', languages: { en: '/terms-and-conditions', fr: '/fr/terms-and-conditions', 'x-default': '/terms-and-conditions' } },
-        openGraph: { url: '/terms-and-conditions', locale: 'en_US', type: 'website' },
-        title: seoData?.title || 'Terms & Conditions | World Culture Marketplace',
-        description: seoData?.description || 'Read the terms and conditions for using World Culture Marketplace.',
-        keywords: seoData?.keywords?.length ? seoData.keywords : ['Terms', 'Conditions', 'WCM', 'Legal'],
-    };
+export async function generateMetadata({ locale = 'en' } = {}) {
+    return buildPageMetadata({ pageId: 'terms-and-conditions', locale });
 }
 
 /* ── Reusable Components ── */

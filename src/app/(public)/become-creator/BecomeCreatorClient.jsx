@@ -1,0 +1,524 @@
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useAuth } from '@/context/AuthContext';
+import {
+  FiUpload,
+  FiClock,
+  FiCamera,
+  FiBriefcase,
+  FiGrid,
+  FiLoader,
+  FiGlobe,
+  FiCheckCircle,
+} from 'react-icons/fi';
+import { getImageUrl } from '@/lib/imageHelper';
+import { Country, City } from 'country-state-city';
+import { ChevronDown, Grid, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { getApiErrorMessage } from '@/lib/apiError';
+import { useLocale } from '@/context/LocaleContext';
+import LoginModal from '@/components/LoginModal';
+import RegisterModal from '@/components/RegistationModal';
+
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
+  withCredentials: true,
+});
+
+export default function UserProfileForm() {
+  const router = useRouter();
+  const { user, setUser, isBusinessRestricted } = useAuth();
+  const { locale, localize } = useLocale();
+  const L = (english, french) => locale === 'fr' ? french : english;
+  const [authModal, setAuthModal] = useState('login');
+  const [serverError, setServerError] = useState('');
+  const [mounted, setMounted] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [catLoading, setCatLoading] = useState(true);
+  const [previews, setPreviews] = useState({ profile: null, cover: null });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { isSubmitting },
+  } = useForm({
+    defaultValues: {
+      customerType: 'individual',
+    },
+  });
+  const [agreeTerms, setAgreeTerms] = useState(false);
+
+  // Watch fields for conditional logic
+  const selectedCountryCode = watch('countryCode');
+  const customerType = watch('customerType');
+  const cities = selectedCountryCode ? City.getCitiesOfCountry(selectedCountryCode) : [];
+
+  useEffect(() => {
+    setMounted(true);
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get('/api/admin/categories', { params: { language: locale } });
+        setCategories(res.data);
+      } catch (err) {
+        console.error('Failed to load categories');
+      } finally {
+        setCatLoading(false);
+      }
+    };
+    fetchCategories();
+  }, [locale]);
+
+  useEffect(() => {
+    if (user) {
+      // যদি অলরেডি ক্রিয়েটর হয় তবে প্রোফাইলে পাঠিয়ে দাও
+      if (user.role === 'creator' || user.role === 'admin') {
+        router.push(localize('/profile'));
+      }
+
+      setPreviews({
+        profile: getImageUrl(user.profile?.profileImage, 'avatar'),
+        cover: getImageUrl(user.profile?.coverImage),
+      });
+
+      reset({
+        display_name: user.profile?.displayName || `${user?.firstName} ${user?.lastName}`,
+        business_name: user.profile?.businessName || '',
+        category: user.profile?.category || '',
+        bio: user.profile?.bio || '',
+        countryCode: user.profile?.countryCode || '',
+        city: user.profile?.city || '',
+        customerType: user.profile?.customerType || 'individual',
+        vatNumber: user.profile?.vatNumber || '',
+        language: user.profile?.language || '',
+        website_link: user.profile?.websiteLink || '',
+        social_link: user.profile?.socialLink || '',
+      });
+    }
+  }, [user, reset, router, localize]);
+
+  const isPending = user?.creatorRequest?.status === 'pending' && user?.creatorRequest?.isApplied;
+
+  const onSubmit = async (data) => {
+    if (isPending) return;
+    if (isBusinessRestricted) {
+      setServerError(L('Your account is currently restricted from business applications.', 'Votre compte ne peut actuellement pas soumettre de demande professionnelle.'));
+      return;
+    }
+    try {
+      setServerError('');
+      const formData = new FormData();
+
+      const countryObj = Country.getCountryByCode(data.countryCode);
+
+      formData.append('displayName', data.display_name);
+      formData.append('businessName', data.business_name);
+      formData.append('category', data.category);
+      formData.append('bio', data.bio);
+      formData.append('country', countryObj?.name || '');
+      formData.append('countryCode', data.countryCode);
+      formData.append('city', data.city);
+      formData.append('customerType', data.customerType);
+      formData.append('vatNumber', data.customerType === 'business' ? data.vatNumber : '');
+      formData.append('language', data.language);
+      formData.append('websiteLink', data.website_link);
+      formData.append('socialLink', data.social_link);
+
+      const profileFile = document.querySelector('input[name="profileImageReq"]')?.files[0];
+      const coverFile = document.querySelector('input[name="coverImageReq"]')?.files[0];
+
+      if (profileFile) formData.append('profileImage', profileFile);
+      if (coverFile) formData.append('coverImage', coverFile);
+
+      const res = await api.post('/api/users/become-creator', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (res.status === 200) {
+        setUser(res.data.user);
+        router.push(localize('/profile'));
+      }
+    } catch (error) {
+      setServerError(locale === 'fr' ? 'Impossible dâ€™envoyer la demande. Veuillez rÃ©essayer.' : getApiErrorMessage(error, 'Something went wrong'));
+    }
+  };
+
+  if (!mounted) return null;
+  if (!user) return (
+    <>
+      <LoginModal
+        isOpen={authModal === 'login'}
+        onClose={() => router.push(localize('/'))}
+        onSwitchToRegister={() => setAuthModal('register')}
+        onLoginSuccess={() => setAuthModal(null)}
+      />
+      <RegisterModal
+        isOpen={authModal === 'register'}
+        onClose={() => router.push(localize('/'))}
+        onSwitchToLogin={() => setAuthModal('login')}
+      />
+    </>
+  );
+
+  // --- PENDING STATE VIEW ---
+  if (isPending) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6 bg-[#fafafa] dark:bg-[#050505]">
+        <div className="max-w-md w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-10 rounded-lg text-center shadow-2xl backdrop-blur-xl">
+          <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FiClock size={40} className="text-orange-500 animate-pulse" />
+          </div>
+          <h2 className="text-2xl font-black uppercase tracking-tighter text-gray-900 dark:text-white mb-2">
+            {L('Request Under Review', 'Demande en cours dâ€™examen')}
+          </h2>
+          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+            {L('Your application is being processed by our admins. You will be notified once approved.', 'Votre demande est examinÃ©e par notre Ã©quipe. Vous serez informÃ© aprÃ¨s son approbation.')}
+          </p>
+          <button
+            onClick={() => router.push(localize('/profile'))}
+            className="mt-8 w-full py-4 bg-orange-500 text-white text-[10px] font-black uppercase rounded-md shadow-lg shadow-orange-500/20 hover:bg-orange-600 transition-all"
+          >
+            {L('Go to Dashboard', 'AccÃ©der au profil')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const inputStyle =
+    'w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder:text-gray-400 rounded-md px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none transition-all text-xs font-bold';
+  const labelStyle =
+    'text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 tracking-widest ml-1 mb-1 flex items-center gap-1';
+
+  return (
+    <div className="min-h-screen mt-10 relative pb-20 bg-[#fafafa] dark:bg-[#050505]">
+      <div className="relative max-w-7xl mx-auto pt-16 px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-hidden rounded-lg border border-gray-200 dark:border-white/10 shadow-2xl bg-white dark:bg-[#0a0a0a]">
+          {/* Hero Side */}
+          <div
+            className="lg:col-span-4 hidden lg:flex items-center justify-center bg-cover bg-center relative"
+            style={{ backgroundImage: "url('/register.jpg')" }}
+          >
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+            <div className="relative z-10 text-white px-10 text-center">
+              <h1 className="text-3xl font-black uppercase tracking-tighter text-gray-900 dark:text-white mb-6">
+                {L('Become a', 'Devenir')} <span className="text-orange-500">{L('Creator', 'crÃ©ateur')}</span>
+              </h1>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
+                {L('Unlock your professional node', 'DÃ©veloppez votre prÃ©sence professionnelle')}
+              </p>
+            </div>
+          </div>
+
+          <div className="lg:col-span-8 p-8 lg:p-14">
+            {serverError && (
+              <p className="bg-red-500/10 text-red-500 p-4 rounded-md mb-6 text-center text-[10px] font-black uppercase border border-red-500/20">
+                {serverError}
+              </p>
+            )}
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Account Type Selector */}
+              <div className="p-1 bg-gray-100 dark:bg-white/5 rounded-md flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => setValue('customerType', 'individual')}
+                  className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${customerType === 'individual' ? 'bg-white dark:bg-white/10 shadow-sm text-orange-500' : 'text-gray-400'}`}
+                >
+                  {L('Individual', 'Particulier')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue('customerType', 'business')}
+                  className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${customerType === 'business' ? 'bg-white dark:bg-white/10 shadow-sm text-orange-500' : 'text-gray-400'}`}
+                >
+                  {L('Business / Agency', 'Entreprise / Agence')}
+                </button>
+              </div>
+
+              {/* Names */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelStyle}>{L('Display Name', 'Nom affichÃ©')}</label>
+                  <input
+                    {...register('display_name', { required: true })}
+                    className={inputStyle}
+                    placeholder={L('Your public name', 'Votre nom public')}
+                  />
+                </div>
+                <div>
+                  <label className={labelStyle}>
+                    <FiBriefcase size={10} />{' '}
+                    {customerType === 'business' ? L('Business Name', 'Nom de lâ€™entreprise') : L('Legal Name', 'Nom lÃ©gal')}
+                  </label>
+                  <input
+                    {...register('business_name', { required: true })}
+                    className={inputStyle}
+                    placeholder={L('Agency or Brand Name', 'Nom de lâ€™agence ou de la marque')}
+                  />
+                </div>
+              </div>
+
+              {/* VAT (Dynamic) */}
+              {customerType === 'business' && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className={labelStyle}>
+                    <FiCheckCircle size={10} />{L('Business Number (Optional)', 'NumÃ©ro dâ€™entreprise (facultatif)')}
+                  </label>
+                  <input
+                    {...register('vatNumber')}
+                    className={inputStyle}
+                    placeholder="e.g. FR123456789"
+                  />
+                  <p className="text-[9px] text-gray-400 mt-2 ml-1 uppercase font-bold tracking-tight">
+                    {L('Needed for EU Reverse Charge (0% Tax)', 'NÃ©cessaire pour lâ€™autoliquidation de TVA dans lâ€™UE')}
+                  </p>
+                </div>
+              )}
+
+              {/* Category */}
+              <div>
+                <label className={labelStyle}>
+                  <Grid size={14} className="inline mr-2" /> {L('Expertise Category', 'CatÃ©gorie dâ€™expertise')}
+                </label>
+                <div className="relative">
+                  <select
+                    {...register('category', { required: true })}
+                    className={`${inputStyle} appearance-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-white border-gray-200 dark:border-zinc-700 focus:ring-orange-500 pr-10`}
+                    disabled={catLoading}
+                  >
+                    <option value="" className="bg-white dark:bg-zinc-900 text-gray-500">
+                      {catLoading ? L('Loading Categories...', 'Chargement des catÃ©gories...') : L('Select your primary field', 'SÃ©lectionnez votre domaine principal')}
+                    </option>
+
+                    {categories.map((cat) => (
+                      <option
+                        key={cat._id}
+                        value={cat._id}
+                        className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100"
+                      >
+                        {cat.title}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* লোডার অথবা লুসিড অ্যারো আইকন */}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center">
+                    {catLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-gray-400 dark:text-zinc-500" />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio */}
+              <div>
+                <label className={labelStyle}>{L('Professional Bio', 'Biographie professionnelle')}</label>
+                <textarea
+                  {...register('bio')}
+                  rows={2}
+                  placeholder={L('Briefly describe your services...', 'DÃ©crivez briÃ¨vement vos services...')}
+                  className={`${inputStyle} resize-none`}
+                />
+              </div>
+
+              {/* Images */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* PROFILE IMAGE - Square (1:1) */}
+                <label className="relative aspect-square flex flex-col items-center justify-center border border-dashed border-gray-300 dark:border-white/10 rounded-md overflow-hidden bg-gray-50 dark:bg-white/5 cursor-pointer group">
+                  <img
+                    src={previews.profile}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:opacity-20 transition-all"
+                    alt="profile"
+                  />
+                  <div className="relative z-10 flex flex-col items-center opacity-0 group-hover:opacity-100 transition-all">
+                    <FiCamera size={20} className="text-gray-900 dark:text-white mb-1" />
+                    <span className="text-[8px] font-black uppercase text-gray-900 dark:text-white">
+                      {L('Change Avatar', 'Modifier lâ€™avatar')}
+                    </span>
+                  </div>
+                  <input
+                    type="file"
+                    name="profileImageReq"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) setPreviews((p) => ({ ...p, profile: URL.createObjectURL(file) }));
+                    }}
+                  />
+                </label>
+
+                {/* COVER PHOTO - Square (1:1) ✅ Same as profile */}
+                <label className="relative aspect-square flex flex-col items-center justify-center border border-dashed border-gray-300 dark:border-white/10 rounded-md overflow-hidden bg-gray-50 dark:bg-white/5 cursor-pointer group">
+                  <img
+                    src={
+                      previews.cover ||
+                      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'
+                    }
+                    className="absolute inset-0 w-full h-full object-cover group-hover:opacity-20 transition-all"
+                    alt="cover"
+                  />
+                  <div className="relative z-10 flex flex-col items-center opacity-0 group-hover:opacity-100 transition-all">
+                    <FiUpload size={20} className="text-gray-900 dark:text-white mb-1" />
+                    <span className="text-[8px] font-black uppercase text-gray-900 dark:text-white">
+                      {L('Update Cover', 'Modifier la couverture')}
+                    </span>
+                  </div>
+                  <input
+                    type="file"
+                    name="coverImageReq"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) setPreviews((p) => ({ ...p, cover: URL.createObjectURL(file) }));
+                    }}
+                  />
+                </label>
+              </div>
+
+              {/* Location */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className={labelStyle}>
+                    <FiGlobe size={10} /> {L('Country', 'Pays')}
+                  </label>
+                  <select {...register('countryCode', { required: true })} className={inputStyle}>
+                    <option value="">{L('Select Country', 'SÃ©lectionnez un pays')}</option>
+                    {Country.getAllCountries().map((c) => (
+                      <option className="dark:bg-gray-800" key={c.isoCode} value={c.isoCode}>
+                        {locale === 'fr' ? (new Intl.DisplayNames(['fr'], { type: 'region' }).of(c.isoCode) || c.name) : c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelStyle}>{L('City', 'Ville')}</label>
+                  <select
+                    {...register('city', { required: true })}
+                    className={inputStyle}
+                    disabled={!selectedCountryCode}
+                  >
+                    <option value="">{L('Select City', 'SÃ©lectionnez une ville')}</option>
+                    {cities.map((c, index) => (
+                      <option
+                        className="dark:bg-gray-800"
+                        key={`${c.name}-${index}`}
+                        value={c.name}
+                      >
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col">
+                  <label className={`${labelStyle} text-black dark:text-white`}>
+                    {L('Language', 'Langue')}
+                  </label>
+
+                  <select
+                    {...register('language', { required: true })}
+                    className={`${inputStyle} 
+      bg-white text-black border border-gray-300 
+      dark:bg-black dark:text-white dark:border-gray-600 
+      focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  >
+                    <option
+                      value=""
+                      className="bg-white text-black dark:bg-black dark:text-white"
+                    >
+                      {L('Select Language', 'SÃ©lectionnez une langue')}
+                    </option>
+
+                    <option
+                      value="English"
+                      className="bg-white text-black dark:bg-black dark:text-white"
+                    >
+                      {L('English', 'Anglais')}
+                    </option>
+
+                    <option
+                      value="French"
+                      className="bg-white text-black dark:bg-black dark:text-white"
+                    >
+                      {L('French', 'FranÃ§ais')}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Links */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelStyle}>{L('Social URL', 'Lien social')}</label>
+                  <input
+                    {...register('social_link')}
+                    placeholder={L('Portfolio or Profile link', 'Lien du portfolio ou du profil')}
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className={labelStyle}>{L('Website URL', 'Site web')}</label>
+                  <input
+                    {...register('website_link')}
+                    placeholder="https://yourbrand.com"
+                    className={inputStyle}
+                  />
+                </div>
+              </div>
+
+              {/* Terms and Conditions Checkbox */}
+              <div className="flex items-center gap-3 py-4 border-t border-gray-100 dark:border-white/5 mt-4">
+                <input
+                  type="checkbox"
+                  id="agreeTerms"
+                  checked={agreeTerms}
+                  onChange={(e) => setAgreeTerms(e.target.checked)}
+                  className="w-4 h-4 accent-orange-500 cursor-pointer"
+                />
+
+                <label
+                  htmlFor="agreeTerms"
+                  className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 cursor-pointer leading-relaxed flex items-center gap-1"
+                >
+                  {L('I agree to the', 'Jâ€™accepte les')}{' '}
+                  <Link
+                    href={localize('/creator-terms-and-conditions')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-orange-500 underline hover:text-orange-600"
+                  >
+                    {L('Terms and Conditions', 'conditions gÃ©nÃ©rales')}
+                  </Link>{' '}
+                  {L('and confirm that all provided information is accurate.', 'et je confirme lâ€™exactitude des informations fournies.')}
+                </label>
+              </div>
+
+              {/* বাটনটি আপডেট করুন (disabled প্রপার্টি লক্ষ্য করুন) */}
+              <button
+                type="submit"
+                disabled={isSubmitting || !agreeTerms || isBusinessRestricted}
+                className="w-full bg-orange-500 text-white py-5 rounded-md font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-orange-600 transition-all disabled:bg-gray-400"
+              >
+                {isBusinessRestricted
+                  ? L('Account Restricted', 'Compte restreint')
+                  : isSubmitting
+                    ? L('Processing Node...', 'Envoi en cours...')
+                    : L('Submit Application', 'Envoyer la demande')}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

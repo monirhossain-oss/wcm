@@ -1,5 +1,6 @@
 import en from './catalogs/en';
 import fr from './catalogs/fr';
+import { localizedRoutePath } from '@/lib/seo/publicPageRegistry';
 
 export const SOURCE_LOCALE = 'en';
 export const catalogs = Object.freeze({ en, fr });
@@ -10,9 +11,13 @@ export const translate = (locale, key, fallback) =>
 
 export const localePath = (locale, path = '/') => {
   const normalized = path.startsWith('/') ? path : `/${path}`;
-  if (!locale || locale === SOURCE_LOCALE) return normalized;
-  if (normalized === '/') return `/${locale}`;
-  return `/${locale}${normalized}`;
+  const target = !locale ? SOURCE_LOCALE : locale;
+  // Routes whose two languages are not a simple prefix apart (FAQ: /faqUs ↔ /fr/faq) come from the registry.
+  const mapped = localizedRoutePath(normalized, target);
+  if (mapped) return mapped;
+  if (target === SOURCE_LOCALE) return normalized;
+  if (normalized === '/') return `/${target}`;
+  return `/${target}${normalized}`;
 };
 
 export const stripLocale = (path, publishedLocales = []) => {

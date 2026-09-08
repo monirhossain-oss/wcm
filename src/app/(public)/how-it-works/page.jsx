@@ -1,17 +1,10 @@
 import React from "react";
-import { getSeoByPage } from '@/lib/api';
-import { buildLocalizedMetadata, getPublishedLanguageCodes } from '@/lib/localizedMetadata';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 import { translate } from '@/lib/i18n';
 
-// এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/how-it-works) theke title/description/keywords
+// এসইও মেটাডাটা জেনারেটর — current language er SEO record + oi language er catalog fallback
 export async function generateMetadata({ locale = 'en' } = {}) {
-    const seoData = locale === 'en' ? await getSeoByPage('how-it-works') : null;
-    const title = seoData?.title || translate(locale, 'howItWorks.metaTitle');
-    const description = seoData?.description || translate(locale, 'howItWorks.metaDescription');
-    return {
-        ...buildLocalizedMetadata({ locale, path: '/how-it-works', title, description, languages: await getPublishedLanguageCodes() }),
-        keywords: seoData?.keywords?.length ? seoData.keywords : translate(locale, 'howItWorks.metaKeywords'),
-    };
+    return buildPageMetadata({ pageId: 'how-it-works', locale });
 }
 
 export const dynamic = 'force-dynamic';

@@ -2,6 +2,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 import { continentMapping } from '@/constants/continentData';
 import { useLocale } from '@/context/LocaleContext';
+import { toRouteSlug } from '@/lib/exploreSlug';
 
 export const useExploreQuery = () => {
     const router = useRouter();
@@ -20,15 +21,9 @@ export const useExploreQuery = () => {
         return decodeURIComponent(slug).replace(/-/g, ' ').trim();
     };
 
-    // টেক্সট থেকে ইউআরএল স্লাগ
-    const textToSlug = useCallback((text) => {
-        if (!text || text.toLowerCase() === 'all' || text.toLowerCase() === 'all regions') return null;
-        return text.toString().toLowerCase().trim()
-            .replace(/&/g, 'and')
-            .replace(/\s+/g, '-')
-            .replace(/[^-a-z0-9]/g, '')
-            .replace(/-+/g, '-');
-    }, []);
+    // টেক্সট থেকে ইউআরএল স্লাগ — server-side indexing policy একই helper ব্যবহার করে, তাই তৈরি করা
+    // URL আর যাচাই করা URL সবসময় একই নিয়মে চলে
+    const textToSlug = useCallback((text) => toRouteSlug(text), []);
 
     let category = 'All';
     let continent = 'All Regions';

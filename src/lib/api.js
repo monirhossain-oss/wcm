@@ -42,11 +42,11 @@ export async function getFooterData() {
 
 // ✅ ISR — 60 seconds পর পর refresh। pageName diye specific page er SEO data fetch kore.
 // generateMetadata() er moddhe use korar jonno banano.
-export async function getSeoByPage(pageName) {
+export async function getSeoByPage(pageName, languageCode = 'en') {
   if (!BASE_URL) return null;
 
   try {
-    const res = await fetch(`${BASE_URL}/api/seo/${pageName}`, {
+    const res = await fetch(`${BASE_URL}/api/seo/${encodeURIComponent(pageName)}?languageCode=${encodeURIComponent(languageCode)}`, {
       next: { revalidate: 10 },
     });
 
@@ -63,11 +63,11 @@ export async function getSeoByPage(pageName) {
 }
 
 // Get all SEO settings (admin table er jonno)
-export async function getAllSeo() {
+export async function getAllSeo(languageCode = 'en') {
   if (!BASE_URL) return [];
 
   try {
-    const res = await fetch(`${BASE_URL}/api/seo/all`, {
+    const res = await fetch(`${BASE_URL}/api/seo/all?languageCode=${encodeURIComponent(languageCode)}`, {
       cache: 'no-store',
     });
 

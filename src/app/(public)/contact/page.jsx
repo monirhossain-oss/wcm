@@ -1,17 +1,9 @@
 import ContactClient from "@/components/ContactClient";
-import { getSeoByPage } from "@/lib/api";
-import { buildLocalizedMetadata, getPublishedLanguageCodes } from '@/lib/localizedMetadata';
-import { translate } from '@/lib/i18n';
+import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 
-// এসইও মেটাডাটা জেনারেটর — Admin panel (/api/seo/contact) theke title/description/keywords
+// এসইও মেটাডাটা জেনারেটর — current language er SEO record + oi language er catalog fallback
 export async function generateMetadata({ locale = 'en' } = {}) {
-    const seoData = locale === 'en' ? await getSeoByPage('contact') : null;
-    const title = seoData?.title || translate(locale, 'contact.metaTitle');
-    const description = seoData?.description || translate(locale, 'contact.metaDescription');
-    return {
-        ...buildLocalizedMetadata({ locale, path: '/contact', title, description, languages: await getPublishedLanguageCodes() }),
-        keywords: seoData?.keywords?.length ? seoData.keywords : translate(locale, 'contact.metaKeywords'),
-    };
+    return buildPageMetadata({ pageId: 'contact', locale });
 }
 
 export default function Page() {

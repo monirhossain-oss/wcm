@@ -5,14 +5,18 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import LoginModal from '@/components/LoginModal';
 import RegisterModal from '@/components/RegistationModal';
+import { useLocale } from '@/context/LocaleContext';
+import { createEmailVerifier, recoveryError } from '@/lib/accountRecovery';
+
+const verifyEmail = createEmailVerifier();
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
+  const { t, localize } = useLocale();
 
-  const [status, setStatus] = useState('loading');
-  const [message, setMessage] = useState('');
+  const [result, setResult] = useState(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
@@ -27,35 +31,23 @@ function VerifyEmailContent() {
   };
 
   useEffect(() => {
-    if (!token) {
-      setStatus('error');
-      setMessage('No verification token found.');
-      return;
-    }
-
-    const verify = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/verify-email?token=${token}`
-        );
-        const data = await res.json();
-
-        if (res.ok) {
-          setStatus('success');
-          setMessage(data.message || 'Email verified successfully!');
-          setIsLoginOpen(true);
-        } else {
-          setStatus('error');
-          setMessage(data.message || 'Verification failed.');
-        }
-      } catch (err) {
-        setStatus('error');
-        setMessage(err.message || 'Something went wrong. Please try again.');
-      }
-    };
-
-    verify();
+    if (!token) return;
+    let active = true;
+    verifyEmail(token, process.env.NEXT_PUBLIC_API_BASE_URL)
+      .then((response) => {
+        if (!active) return;
+        setResult({ token, response });
+        if (response.ok) setIsLoginOpen(true);
+      })
+      .catch(() => { if (active) setResult({ token, networkError: true }); });
+    return () => { active = false; };
   }, [token]);
+
+  const current = result?.token === token ? result : null;
+  const status = !token ? 'error' : !current ? 'loading' : current.response?.ok ? 'success' : 'error';
+  const message = !token ? t('accountRecovery.missingToken')
+    : status === 'success' ? t('accountRecovery.verificationSuccess')
+    : recoveryError(current?.response, t, current?.networkError ? 'networkError' : 'verificationError');
 
   return (
     <>
@@ -76,28 +68,28 @@ function VerifyEmailContent() {
           <>
             <Loader2 size={48} className="mx-auto text-[#F57C00] animate-spin mb-4" />
             <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-              Verifying your email...
+              {t('accountRecovery.verifying')}
             </h2>
-            <p className="text-gray-500 text-sm mt-2">Please wait a moment.</p>
+            <p className="text-gray-500 text-sm mt-2">{t('accountRecovery.wait')}</p>
           </>
         )}
 
         {status === 'success' && (
           <>
             <CheckCircle size={48} className="mx-auto text-green-500 mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Email Verified!</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white">{t('accountRecovery.verified')}</h2>
             <p className="text-gray-500 text-sm mt-2">{message}</p>
             <button
               onClick={openLogin}
               className="mt-6 px-6 py-3 bg-[#F57C00] text-white rounded-full font-bold text-sm hover:opacity-90 transition"
             >
-              Login Now
+              {t('accountRecovery.login')}
             </button>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push(localize('/'))}
               className="mt-3 block w-full text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
             >
-              Go to Homepage
+              {t('accountRecovery.home')}
             </button>
           </>
         )}
@@ -105,13 +97,13 @@ function VerifyEmailContent() {
         {status === 'error' && (
           <>
             <XCircle size={48} className="mx-auto text-red-500 mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Verification Failed</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white">{t('accountRecovery.verificationFailed')}</h2>
             <p className="text-gray-500 text-sm mt-2">{message}</p>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push(localize('/'))}
               className="mt-6 px-6 py-3 bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white rounded-full font-bold text-sm hover:opacity-90 transition"
             >
-              Go to Homepage
+              {t('accountRecovery.home')}
             </button>
           </>
         )}
@@ -121,13 +113,14 @@ function VerifyEmailContent() {
 }
 
 export default function VerifyEmailPage() {
+  const { t } = useLocale();
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0a0a0a] px-4">
       <Suspense
         fallback={
           <div className="text-center">
             <Loader2 size={48} className="mx-auto text-[#F57C00] animate-spin mb-4" />
-            <p className="dark:text-white">Loading...</p>
+            <p className="dark:text-white">{t('accountRecovery.loading')}</p>
           </div>
         }
       >

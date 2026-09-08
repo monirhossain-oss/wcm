@@ -3,6 +3,9 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ListingsProvider } from '@/context/ListingsContext';
 import { getVerifications } from '@/lib/api';
+import { headers } from 'next/headers';
+import { SITE_URL as siteUrl, DEFAULT_SOCIAL_IMAGE, REQUEST_LOCALE_HEADER, REQUEST_PATH_HEADER, getDocumentLanguage } from '@/lib/seo/siteConfig';
+import { buildOrganizationSchema, buildWebSiteSchema, resolvePageStructuredData } from '@/lib/seo/structuredData';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -26,9 +29,6 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
   variable: '--font-geist-mono',
 });
-
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
 
 // ── Allowed tags only (valid <head> children) ──
 const ALLOWED_TAGS = ['meta', 'link', 'script', 'title', 'style', 'base'];
@@ -143,19 +143,21 @@ export async function generateMetadata() {
       description: 'Join a growing global community of artists and creators. WCM helps you gain visibility and connect with a global audience.',
       url: siteUrl,
       siteName: 'World Culture Marketplace',
-      images: [`${siteUrl}/og-image.jpg`],
+      images: [DEFAULT_SOCIAL_IMAGE],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
       title: 'World Culture Marketplace – Authentic Global Artisan Crafts & Cultural Goods',
       description: 'Join a growing global community of artists and creators. WCM helps you gain visibility and connect with a global audience.',
-      images: [`${siteUrl}/og-image.jpg`],
+      images: [DEFAULT_SOCIAL_IMAGE],
     },
   };
 }
 
 export default async function RootLayout({ children }) {
+  const requestHeaders = await headers();
+  const documentLanguage = getDocumentLanguage(requestHeaders.get(REQUEST_LOCALE_HEADER));
   let verifications = [];
   try {
     verifications = await getVerifications();
@@ -179,28 +181,21 @@ export default async function RootLayout({ children }) {
     headElements = [];
   }
 
-  // ✅ Website Schema
-  const websiteSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'World Culture Marketplace',
-    url: siteUrl,
-    description: 'Discover and explore global cultural products, craftsmanship, and heritage rituals.',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${siteUrl}/explore/search/{search_term_string}`,
-      'query-input': 'required name=search_term_string',
-    },
-  };
+  // ✅ Website Schema — language-scoped: a French request describes the French site URL.
+  const websiteSchema = buildWebSiteSchema(documentLanguage.lang);
 
-  // ✅ Organization Schema
-  const organizationSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'World Culture Marketplace',
-    url: siteUrl,
-    logo: `${siteUrl}/wc,-web-logo.png`,
-  };
+  // ✅ Organization Schema — the site's single identity node, emitted only here.
+  const organizationSchema = buildOrganizationSchema();
+
+  // ✅ WebPage Schema — only for an indexable public base page, using that page's own localized
+  // URL and its current-language title/description. Detail pages keep their own JSON-LD.
+  let webPageSchema = null;
+  try {
+    webPageSchema = await resolvePageStructuredData(requestHeaders.get(REQUEST_PATH_HEADER));
+  } catch (error) {
+    console.error('Page structured data error:', error);
+    webPageSchema = null;
+  }
 
   // ✅ Microsoft Clarity tracking script (project id: xgch337gyo)
   const clarityScript = `
@@ -212,7 +207,7 @@ export default async function RootLayout({ children }) {
   `;
 
   return (
-    <html lang="en">
+    <html lang={documentLanguage.lang} dir={documentLanguage.dir}>
       <head suppressHydrationWarning>
         {headElements}
 
@@ -229,6 +224,12 @@ export default async function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
+        {webPageSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+          />
+        )}
 
         {/* ✅ Microsoft Clarity — loads on every page */}
         <script

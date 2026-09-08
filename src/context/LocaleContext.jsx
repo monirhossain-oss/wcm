@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { usePathname, useRouter } from 'next/navigation';
 import en from '@/lib/i18n/catalogs/en';
 import fr from '@/lib/i18n/catalogs/fr';
+import { localizedRoutePath } from '@/lib/seo/publicPageRegistry';
 
 const catalogs = { en, fr };
 const LocaleContext = createContext(null);
@@ -26,6 +27,10 @@ export function LocaleProvider({ children }) {
   useEffect(() => { document.documentElement.lang = locale; document.documentElement.dir = languages.find(({ code }) => code === locale)?.direction || 'ltr'; }, [locale, languages]);
   const localize = useCallback((path, target = locale) => {
     if (!path || /^(https?:|mailto:|tel:|#)/.test(path)) return path;
+    // Registry routes whose languages differ by more than a prefix (FAQ: /faqUs ↔ /fr/faq) map directly,
+    // so internal links point at the canonical URL instead of relying on a redirect.
+    const mapped = localizedRoutePath(path.split(/[?#]/)[0], target);
+    if (mapped) return `${mapped}${path.slice(path.split(/[?#]/)[0].length)}`;
     const clean = path.replace(/^\/(?:fr|en)(?=\/|$)/, '') || '/';
     return target === 'en' ? clean : `/${target}${clean === '/' ? '' : clean}`;
   }, [locale]);
@@ -42,7 +47,7 @@ export function LocaleProvider({ children }) {
         if (equivalent) return router.push(new URL(equivalent, window.location.origin).pathname);
       } catch { /* fall through to the equivalent structural path */ }
     }
-    router.push(localize(pathname, target));
+    router.push(`${localize(pathname, target)}${window.location.search}${window.location.hash}`);
   }, [locale, localize, pathname, router]);
   useEffect(() => {
     if (preferenceApplied.current || languages.length === 0) return;
