@@ -2,6 +2,7 @@
 import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 
 import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
+import { translate } from '@/lib/i18n';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
 const getPublishedContent = async (languageCode) => {
@@ -109,7 +110,9 @@ const CookieTypeCard = ({ title, tag, tagColor, items, note }) => {
 };
 
 /* ── Main Page ── */
-const CookiePolicyContent = () => {
+// `locale` is needed for the card notes: they are page markup, not part of the stored record, so
+// they come from the UI catalog instead of the translation map.
+const CookiePolicyContent = ({ locale = 'en' } = {}) => {
     const toc = [
         'What Are Cookies?',
         'Types of Cookies We Use',
@@ -222,7 +225,7 @@ const CookiePolicyContent = () => {
                                     'Load balancing',
                                     'Preventing fraud or abuse',
                                 ]}
-                                note="You cannot disable these cookies because the Platform cannot function without them. Examples include: authentication cookies, security and anti-bot cookies, and cookie consent preferences."
+                                note={translate(locale, 'staticPage.cookieNotes.essential')}
                             />
 
                             <CookieTypeCard
@@ -234,7 +237,7 @@ const CookiePolicyContent = () => {
                                     'Session duration and device types',
                                     'Traffic sources',
                                 ]}
-                                note="We use tools such as Google Analytics, Meta Pixel, and server log analysis. Data is aggregated and anonymized wherever possible."
+                                note={translate(locale, 'staticPage.cookieNotes.analytics')}
                             />
 
                             <CookieTypeCard
@@ -246,7 +249,7 @@ const CookiePolicyContent = () => {
                                     'Display choices',
                                     'Saved settings',
                                 ]}
-                                note="Disabling them may reduce usability but will not block site access."
+                                note={translate(locale, 'staticPage.cookieNotes.preference')}
                             />
 
                             <CookieTypeCard
@@ -260,7 +263,7 @@ const CookiePolicyContent = () => {
                                     'Personalize visibility',
                                     'Enable retargeting',
                                 ]}
-                                note="Third-party advertising cookies may include: Google Ads, Meta Ads, TikTok Pixel, and other ad networks. These cookies operate only if WCM activates advertising tools."
+                                note={translate(locale, 'staticPage.cookieNotes.advertising')}
                             />
                         </div>
 
@@ -483,10 +486,10 @@ const CookiePolicyContent = () => {
 export default async function CookiePolicy({ locale = 'en' } = {}) {
     const englishContent = await getPublishedContent('en');
     if (!englishContent) {
-        return <main className="mx-auto max-w-4xl px-6 py-20"><p>Cookie Policy is temporarily unavailable.</p></main>;
+        return <main className="mx-auto max-w-4xl px-6 py-20"><p>{translate(locale, 'staticPage.unavailable.cookie-policy')}</p></main>;
     }
     const localizedContent = !locale || locale === 'en'
         ? englishContent
         : (await getPublishedContent(locale)) || englishContent;
-    return localizeValue(CookiePolicyContent(), buildTranslationMap(englishContent, localizedContent));
+    return localizeValue(CookiePolicyContent({ locale }), buildTranslationMap(englishContent, localizedContent));
 }

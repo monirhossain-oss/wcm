@@ -1,8 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { FiShield, FiInfo } from 'react-icons/fi';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function CookieConsent() {
+  const { localize, t } = useLocale();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -35,13 +38,13 @@ export default function CookieConsent() {
           </div>
           <div className="space-y-2">
             <h4 className="text-[12px] font-black uppercase tracking-[0.3em] text-orange-500 italic flex items-center gap-2">
-              <FiInfo className="md:hidden" /> Privacy Protocol
+              <FiInfo className="md:hidden" /> {t('cookieConsent.heading')}
             </h4>
             <p className="text-[10px] md:text-[12px] text-gray-500 dark:text-gray-400 font-bold leading-relaxed max-w-2xl uppercase italic">
-              We use analytics cookies for a superior asset discovery experience. Review our{' '}
-              <a href="/privacy-policy" className="text-orange-500 underline underline-offset-4">
-                Privacy Policy
-              </a>
+              {t('cookieConsent.text')}{' '}
+              <Link href={localize('/privacy-policy')} className="text-orange-500 underline underline-offset-4">
+                {t('cookieConsent.policy')}
+              </Link>
               .
             </p>
           </div>
@@ -52,13 +55,13 @@ export default function CookieConsent() {
             onClick={handleReject}
             className="w-full sm:w-auto px-8 py-4 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer"
           >
-            Reject
+            {t('cookieConsent.reject')}
           </button>
           <button
             onClick={handleAccept}
             className="w-full sm:w-auto px-10 py-4 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-orange-500/30 active:scale-95 whitespace-nowrap cursor-pointer"
           >
-            Accept All
+            {t('cookieConsent.accept')}
           </button>
         </div>
       </div>

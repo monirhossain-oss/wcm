@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
+import { translate } from '@/lib/i18n';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
 
@@ -458,7 +459,7 @@ const PrivacyPolicyContent = () => {
 export default async function PrivacyPolicyPage({ locale = 'en' } = {}) {
     const englishContent = await getPublishedContent('en');
     if (!englishContent) {
-        return <main className="mx-auto max-w-4xl px-6 py-20"><p>Privacy Policy is temporarily unavailable.</p></main>;
+        return <main className="mx-auto max-w-4xl px-6 py-20"><p>{translate(locale, 'staticPage.unavailable.privacy-policy')}</p></main>;
     }
     const localizedContent = !locale || locale === 'en'
         ? englishContent

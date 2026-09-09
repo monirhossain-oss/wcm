@@ -1,6 +1,7 @@
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import { localePath } from '@/lib/i18n';
 
 const FaqContact = ({ language = 'en' }) => {
     const copy = language === 'fr'
@@ -27,7 +28,7 @@ const FaqContact = ({ language = 'en' }) => {
 
                     <div className="flex flex-col sm:flex-row items-center gap-6">
 
-                        <Link href="/contact">
+                        <Link href={localePath(language, '/contact')}>
                             <button className="bg-[#F57C00] dark:bg-transparent border border-[#F57C00] text-white dark:text-white dark:border-zinc-700 px-8 py-3.5 rounded-lg text-sm font-bold hover:bg-white hover:text-black dark:hover:bg-white dark:hover:text-black transition-all duration-300 shadow-sm">
                                 {copy.contact}
                             </button>

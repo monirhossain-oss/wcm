@@ -1,11 +1,27 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { AlertTriangle, CheckCircle2, FileText, Languages, Send } from 'lucide-react';
 import {
   getStaticPageEditor,
   getStaticPages,
   publishStaticPage,
 } from '../_services/translationCentreApi';
+import {
+  Badge,
+  Banner,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Field,
+  PageHeader,
+  Spinner,
+  StatusBadge,
+  formatDateTime,
+  selectClass,
+  textareaClass,
+} from '../_components/ui';
 
 const collectTextFields = (value, path = [], fields = []) => {
   if (typeof value === 'string') fields.push({ path, english: value });
@@ -39,6 +55,7 @@ export default function StaticPageReviewPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [publishing, setPublishing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getStaticPages()
@@ -46,27 +63,33 @@ export default function StaticPageReviewPage() {
         setPages(response.data);
         setPageKey(response.data[0]?.pageKey || '');
       })
-      .catch((requestError) => setError(requestError.response?.data?.message || 'Unable to load static pages.'));
+      .catch((requestError) => setError(requestError.response?.data?.message || 'Unable to load static pages.'))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     if (!pageKey) return;
-    setError(''); setNotice(''); setData(null);
+    setError(''); setNotice(''); setData(null); setLoading(true);
     getStaticPageEditor(pageKey)
       .then(({ data: response }) => {
         setData(response.data);
         setFrench(structuredClone(response.data.translatedContent || response.data.sourceContent));
       })
-      .catch((requestError) => setError(requestError.response?.data?.message || 'Unable to load this static page.'));
+      .catch((requestError) => setError(requestError.response?.data?.message || 'Unable to load this static page.'))
+      .finally(() => setLoading(false));
   }, [pageKey]);
 
   const fields = useMemo(() => collectTextFields(data?.sourceContent || {}), [data]);
+  const untranslated = useMemo(
+    () => fields.filter((field) => valueAt(french, field.path) === field.english).length,
+    [fields, french]
+  );
 
   const publish = async () => {
     try {
       setPublishing(true); setError(''); setNotice('');
       await publishStaticPage(pageKey, french);
-      setNotice('French page published successfully.');
+      setNotice('French page published. The public route serves it immediately.');
       const response = await getStaticPageEditor(pageKey);
       setData(response.data.data);
       setFrench(structuredClone(response.data.data.translatedContent));
@@ -77,48 +100,82 @@ export default function StaticPageReviewPage() {
     }
   };
 
-  return <section className="space-y-5">
-    <div>
-      <h1 className="text-2xl font-bold">Static Page Translation</h1>
-      <p className="text-sm text-gray-500">Compare English with French, correct the French text, then publish.</p>
-    </div>
+  return (
+    <section className="space-y-6">
+      <PageHeader
+        icon={FileText}
+        title="Static page translation"
+        description="Legal and information pages are translated here, paragraph by paragraph. They never enter the AI queue."
+        actions={data && <StatusBadge value={data.status} />}
+      />
 
-    <label className="block max-w-md text-sm font-medium">Static page
-      <select value={pageKey} onChange={(event) => setPageKey(event.target.value)} className="mt-1 w-full rounded border bg-white px-3 py-2 dark:bg-black">
-        {pages.map((page) => <option key={page.pageKey} value={page.pageKey}>{page.label}</option>)}
-      </select>
-    </label>
+      <Banner tone="error" icon={AlertTriangle}>{error}</Banner>
+      <Banner tone="success" icon={CheckCircle2}>{notice}</Banner>
 
-    {error && <p className="rounded bg-red-50 p-3 text-red-700">{error}</p>}
-    {notice && <p className="rounded bg-green-50 p-3 text-green-700">{notice}</p>}
+      <Card>
+        <CardHeader
+          icon={Languages}
+          title="Choose a page"
+          description={data?.updatedAt ? `French copy last published ${formatDateTime(data.updatedAt)}` : 'No French copy published yet for this page.'}
+          actions={fields.length > 0 && (
+            <Badge tone={untranslated ? 'warning' : 'success'}>
+              {untranslated ? `${untranslated} of ${fields.length} still English` : `${fields.length} fields translated`}
+            </Badge>
+          )}
+        />
+        <CardBody>
+          <Field label="Static page" hint="The English source is read-only; it is owned by the seeded record.">
+            <select value={pageKey} onChange={(event) => setPageKey(event.target.value)} className={`${selectClass} max-w-md`}>
+              {pages.map((page) => <option key={page.pageKey} value={page.pageKey}>{page.label}</option>)}
+            </select>
+          </Field>
+        </CardBody>
+      </Card>
 
-    {data && french && <>
-      <div className="grid grid-cols-2 gap-3 text-sm font-semibold text-gray-700 dark:text-gray-200">
-        <div className="rounded bg-gray-100 p-3 dark:bg-gray-900">English</div>
-        <div className="rounded bg-gray-100 p-3 dark:bg-gray-900">French</div>
-      </div>
-      <div className="space-y-3">
-        {fields.map((field) => <div key={field.path.join('.')} className="grid gap-3 rounded border bg-white p-3 dark:bg-black md:grid-cols-2">
-          <div>
-            <p className="mb-1 text-xs text-gray-400">{fieldLabel(field.path)}</p>
-            <p className="whitespace-pre-wrap text-sm leading-6">{field.english}</p>
-          </div>
-          <div>
-            <p className="mb-1 text-xs text-gray-400">{fieldLabel(field.path)}</p>
-            <textarea
-              value={valueAt(french, field.path) || ''}
-              onChange={(event) => setFrench((current) => updateAt(current, field.path, event.target.value))}
-              rows={Math.max(2, Math.ceil(String(valueAt(french, field.path) || '').length / 80))}
-              className="w-full resize-y rounded border px-3 py-2 text-sm leading-6 focus:border-orange-500 focus:outline-none"
+      {loading && <Card><Spinner label="Loading page content" /></Card>}
+
+      {data && french && !loading && (
+        <>
+          <Card>
+            <CardHeader
+              icon={FileText}
+              title="English source and French copy"
+              description="Structure, ordering and fixed values such as the brand name and address must stay identical."
             />
+            <CardBody className="space-y-3">
+              {fields.map((field) => {
+                const isSame = valueAt(french, field.path) === field.english;
+                return (
+                  <div key={field.path.join('.')} className="grid gap-3 rounded-xl border border-gray-200 dark:border-white/10 p-4 md:grid-cols-2">
+                    <div>
+                      <p className="mb-1.5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                        {fieldLabel(field.path)}
+                        {isSame && <Badge tone="warning">same as English</Badge>}
+                      </p>
+                      <p className="whitespace-pre-wrap text-sm leading-6 text-gray-600 dark:text-gray-300">{field.english}</p>
+                    </div>
+                    <div>
+                      <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-orange-500">French</p>
+                      <textarea
+                        value={valueAt(french, field.path) || ''}
+                        onChange={(event) => setFrench((current) => updateAt(current, field.path, event.target.value))}
+                        rows={Math.max(2, Math.ceil(String(valueAt(french, field.path) || '').length / 80))}
+                        className={textareaClass}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </CardBody>
+          </Card>
+
+          <div className="sticky bottom-4 flex justify-end">
+            <Button variant="success" onClick={publish} loading={publishing} className="shadow-2xl">
+              <Send size={13} /> Publish French page
+            </Button>
           </div>
-        </div>)}
-      </div>
-      <div className="sticky bottom-4 flex justify-end">
-        <button onClick={publish} disabled={publishing} className="rounded bg-green-600 px-5 py-3 font-semibold text-white shadow disabled:opacity-50">
-          {publishing ? 'Publishing…' : 'Publish French Page'}
-        </button>
-      </div>
-    </>}
-  </section>;
+        </>
+      )}
+    </section>
+  );
 }

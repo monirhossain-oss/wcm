@@ -19,6 +19,7 @@ import ContactSection from '@/components/creators-terms/ContactSection'
 import GoverningLawSection from '@/components/creators-terms/GoverningLawSection'
 import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization'
 import { buildPageMetadata } from '@/lib/seo/pageMetadata'
+import { translate } from '@/lib/i18n'
 
 export async function generateMetadata({ locale = 'en' } = {}) {
   return buildPageMetadata({ pageId: 'creator-terms-and-conditions', locale })
@@ -37,12 +38,14 @@ const getPublishedContent = async (languageCode) => {
   }
 }
 
-const renderLocalized = (Section, translations) => localizeValue(Section(), translations)
+// Sections are called directly so their own markup joins the translation pass; `locale` reaches them
+// the same way, because their internal links must stay in the page's language.
+const renderLocalized = (Section, translations, locale) => localizeValue(Section({ locale }), translations)
 
 export default async function CreatorTermsPage({ locale = 'en' } = {}) {
   const englishContent = await getPublishedContent('en')
   if (!englishContent) {
-    return <main className="mx-auto max-w-4xl px-6 py-20"><p>Creator Terms &amp; Conditions are temporarily unavailable.</p></main>
+    return <main className="mx-auto max-w-4xl px-6 py-20"><p>{translate(locale, 'staticPage.unavailable.creator-terms-and-conditions')}</p></main>
   }
   const localizedContent = !locale || locale === 'en'
     ? englishContent
@@ -57,10 +60,10 @@ export default async function CreatorTermsPage({ locale = 'en' } = {}) {
 
   return (
     <main className="min-h-screen ">
-      {renderLocalized(Hero, translations)}
+      {renderLocalized(Hero, translations, locale)}
       <div className="max-w-5xl mx-auto py-12 px-4 space-y-16">
         {sections.map((Section) => (
-          <section key={Section.name}>{renderLocalized(Section, translations)}</section>
+          <section key={Section.name}>{renderLocalized(Section, translations, locale)}</section>
         ))}
       </div>
     </main>

@@ -41,6 +41,34 @@ const en = {
     'terms-and-conditions': { title: 'Terms & Conditions', description: 'Read the terms and conditions for using World Culture Marketplace.', keywords: ['Terms', 'Conditions', 'WCM', 'Legal'] },
     'cookie-policy': { title: 'Cookie Policy', description: 'Learn how World Culture Marketplace uses cookies.', keywords: ['Cookies', 'Policy', 'WCM'] },
   },
+  cookieConsent: {
+    heading: 'Privacy Protocol', text: 'We use analytics cookies for a superior asset discovery experience. Review our',
+    policy: 'Privacy Policy', reject: 'Reject', accept: 'Accept All',
+  },
+  notFound: {
+    title: 'Page Not Found',
+    description: 'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.',
+    back: 'Back to Home', imageAlt: '404 Error Illustration',
+  },
+  staticPage: {
+    // Rendered before the stored content is available, so it can never come from the page record.
+    unavailable: {
+      'advertising-policy': 'Advertising Policy is temporarily unavailable.',
+      'boost-terms-and-ppc': 'Boost & PPC Terms are temporarily unavailable.',
+      'creator-terms-and-conditions': 'Creator Terms & Conditions are temporarily unavailable.',
+      'privacy-policy': 'Privacy Policy is temporarily unavailable.',
+      'terms-and-conditions': 'Terms & Conditions are temporarily unavailable.',
+      'cookie-policy': 'Cookie Policy is temporarily unavailable.',
+    },
+    // Cookie Policy card notes: present in the page markup but not in the stored English record,
+    // so the record-based localization cannot reach them.
+    cookieNotes: {
+      essential: 'You cannot disable these cookies because the Platform cannot function without them. Examples include: authentication cookies, security and anti-bot cookies, and cookie consent preferences.',
+      analytics: 'We use tools such as Google Analytics, Meta Pixel, and server log analysis. Data is aggregated and anonymized wherever possible.',
+      preference: 'Disabling them may reduce usability but will not block site access.',
+      advertising: 'Third-party advertising cookies may include: Google Ads, Meta Ads, TikTok Pixel, and other ad networks. These cookies operate only if WCM activates advertising tools.',
+    },
+  },
   blog: {
     heading: 'Cultural Stories', intro: 'Explore traditions, craftsmanship, and cultural creativity from around the world through an editorial lens.', empty: 'No stories found.',
     loading: 'Loading blogs...', loadFailure: 'Failed to load stories.', readMore: 'Read More', archiveEmpty: 'No stories found in the archives.', loadMore: 'Load More Insights',
@@ -90,6 +118,10 @@ const en = {
     cultures: { heading: 'Explore Cultures', description: 'Craftsmanship & heritage rituals.' },
     popularCreators: { heading: 'Featured Creators', description: 'Verified artists & craftsmen.', failure: 'Failed to load creators.' },
     regions: { asia: 'Asia', africa: 'Africa', europe: 'Europe', 'north-america': 'North America', 'latin-america': 'Latin America', 'middle-east': 'Middle East', oceania: 'Oceania' },
+    // Region name carrying its own preposition: French elides and contracts it ("d'Asie", "du
+    // Moyen-Orient"), so the phrase cannot be assembled from a separate word at runtime.
+    regionsOf: { asia: 'from Asia', africa: 'from Africa', europe: 'from Europe', 'north-america': 'from North America', 'latin-america': 'from Latin America', 'middle-east': 'from the Middle East', oceania: 'from Oceania' },
+    regionsHeritage: { asia: 'of Asia', africa: 'of Africa', europe: 'of Europe', 'north-america': 'of North America', 'latin-america': 'of Latin America', 'middle-east': 'of the Middle East', oceania: 'of Oceania' },
   },
   homeCurated: {
     heading: 'Curated Collections', description: 'Handpicked treasures from top-ranked global creators', viewAll: 'View All',
@@ -105,7 +137,7 @@ const en = {
   },
   explore: {
     filteredDescription: 'Explore the best cultural creations matching these filters.',
-    heading: 'Explore World Culture', categoryCollections: 'Collections', culturalHeritage: 'Cultural Heritage of', from: 'from',
+    heading: 'Explore World Culture', categoryCollections: 'Collections', culturalHeritage: 'Cultural Heritage', from: 'from',
     searchPlaceholder: 'Search culture, art, traditions...', endResults: 'End of results.', noListings: 'No listings found',
     noListingsDescription: "We couldn't find anything matching your current filters or search.", scrollLeft: 'Scroll categories left', scrollRight: 'Scroll categories right',
     promoted: 'Promoted', listingAlt: 'Listing', heritage: 'Heritage', global: 'Global',

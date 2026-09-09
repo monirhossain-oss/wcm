@@ -20,6 +20,28 @@ export async function getCategories() {
   }
 }
 
+// Localized category titles keyed by master category id. Explore URLs carry master slugs in every
+// language, so the English list stays the source of truth for matching and this only supplies the
+// display name — the same id-based pairing the public navbar uses.
+export async function getLocalizedCategoryTitles(languageCode) {
+  if (!BASE_URL || !languageCode || languageCode === 'en') return new Map();
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/admin/categories?language=${encodeURIComponent(languageCode)}`, {
+      next: { revalidate: 30 },
+    });
+
+    if (!res.ok) return new Map();
+
+    const data = await res.json();
+    const categories = Array.isArray(data) ? data : data.data || [];
+    return new Map(categories.filter(({ _id, title }) => _id && title).map(({ _id, title }) => [String(_id), title]));
+  } catch (error) {
+    console.error(`Error fetching ${languageCode} category titles:`, error);
+    return new Map();
+  }
+}
+
 // ==================== FOOTER API ====================
 
 // ✅ Cache footer data for 1 hour

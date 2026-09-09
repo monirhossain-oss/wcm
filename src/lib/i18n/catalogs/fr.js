@@ -41,6 +41,31 @@ const fr = {
     'terms-and-conditions': { title: 'Conditions générales', description: 'Consultez les conditions générales de World Culture Marketplace.', keywords: ['Conditions', 'Juridique', 'WCM'] },
     'cookie-policy': { title: 'Politique relative aux cookies', description: 'Consultez la politique relative aux cookies de World Culture Marketplace.', keywords: ['Cookies', 'Politique', 'WCM'] },
   },
+  cookieConsent: {
+    heading: 'Confidentialité', text: 'Nous utilisons des cookies de mesure d’audience pour améliorer votre expérience de découverte. Consultez notre',
+    policy: 'Politique de confidentialité', reject: 'Refuser', accept: 'Tout accepter',
+  },
+  notFound: {
+    title: 'Page introuvable',
+    description: 'La page que vous recherchez a peut-être été supprimée, renommée ou est temporairement indisponible.',
+    back: 'Retour à l’accueil', imageAlt: 'Illustration d’erreur 404',
+  },
+  staticPage: {
+    unavailable: {
+      'advertising-policy': 'La politique publicitaire est temporairement indisponible.',
+      'boost-terms-and-ppc': 'Les conditions Boost et PPC sont temporairement indisponibles.',
+      'creator-terms-and-conditions': 'Les conditions générales des créateurs sont temporairement indisponibles.',
+      'privacy-policy': 'La politique de confidentialité est temporairement indisponible.',
+      'terms-and-conditions': 'Les conditions générales sont temporairement indisponibles.',
+      'cookie-policy': 'La politique relative aux cookies est temporairement indisponible.',
+    },
+    cookieNotes: {
+      essential: 'Vous ne pouvez pas désactiver ces cookies, car la plateforme ne peut pas fonctionner sans eux. Exemples : cookies d’authentification, cookies de sécurité et anti-robots, et préférences de consentement aux cookies.',
+      analytics: 'Nous utilisons des outils tels que Google Analytics, Meta Pixel et l’analyse des journaux serveur. Les données sont agrégées et anonymisées dans la mesure du possible.',
+      preference: 'Les désactiver peut réduire le confort d’utilisation, mais ne bloque pas l’accès au site.',
+      advertising: 'Les cookies publicitaires tiers peuvent inclure : Google Ads, Meta Ads, TikTok Pixel et d’autres régies publicitaires. Ces cookies ne fonctionnent que si WCM active des outils publicitaires.',
+    },
+  },
   blog: {
     heading: 'Histoires culturelles', intro: 'Explorez les traditions, le savoir-faire et la créativité culturelle du monde entier à travers un regard éditorial.', empty: 'Aucune histoire trouvée.',
     loading: 'Chargement des articles...', loadFailure: 'Impossible de charger les histoires.', readMore: 'Lire la suite', archiveEmpty: 'Aucune histoire trouvée dans les archives.', loadMore: 'Afficher plus d’articles',
@@ -90,6 +115,8 @@ const fr = {
     cultures: { heading: 'Explorer les cultures', description: 'Artisanat et rituels du patrimoine.' },
     popularCreators: { heading: 'Créateurs à la une', description: 'Artistes et artisans vérifiés.', failure: 'Impossible de charger les créateurs.' },
     regions: { asia: 'Asie', africa: 'Afrique', europe: 'Europe', 'north-america': 'Amérique du Nord', 'latin-america': 'Amérique latine', 'middle-east': 'Moyen-Orient', oceania: 'Océanie' },
+    regionsOf: { asia: 'd’Asie', africa: 'd’Afrique', europe: 'd’Europe', 'north-america': 'd’Amérique du Nord', 'latin-america': 'd’Amérique latine', 'middle-east': 'du Moyen-Orient', oceania: 'd’Océanie' },
+    regionsHeritage: { asia: 'd’Asie', africa: 'd’Afrique', europe: 'd’Europe', 'north-america': 'd’Amérique du Nord', 'latin-america': 'd’Amérique latine', 'middle-east': 'du Moyen-Orient', oceania: 'd’Océanie' },
   },
   homeCurated: {
     heading: 'Collections sélectionnées', description: 'Des trésors sélectionnés parmi les meilleurs créateurs du monde', viewAll: 'Voir tout',
@@ -105,7 +132,7 @@ const fr = {
   },
   explore: {
     filteredDescription: 'Découvrez les meilleures créations culturelles correspondant à ces filtres.',
-    heading: 'Explorer les cultures du monde', categoryCollections: 'Collections', culturalHeritage: 'Patrimoine culturel de', from: 'de',
+    heading: 'Explorer les cultures du monde', categoryCollections: 'Collections', culturalHeritage: 'Patrimoine culturel', from: 'de',
     searchPlaceholder: 'Rechercher une culture, un art, une tradition...', endResults: 'Fin des résultats.', noListings: 'Aucune création trouvée',
     noListingsDescription: 'Aucun résultat ne correspond à vos filtres ou à votre recherche.', scrollLeft: 'Faire défiler les catégories vers la gauche', scrollRight: 'Faire défiler les catégories vers la droite',
     promoted: 'Sponsorisé', listingAlt: 'Création', heritage: 'Patrimoine', global: 'Monde',
@@ -135,7 +162,7 @@ const fr = {
     subscriptionSuccess: 'Inscription réussie ! Merci de rester connecté.', alreadySubscribed: 'Cette adresse e-mail est déjà inscrite !', subscriptionError: 'Une erreur est survenue. Veuillez réessayer plus tard.',
   },
   auth: {
-    close: 'Fermer la fenÃªtre', loginTitle: 'Cultures en connexion', loginIntro: 'Saisissez vos identifiants pour accÃ©der Ã  votre compte', resetTitle: 'RÃ©initialiser le mot de passe', resetIntro: 'Saisissez votre e-mail pour recevoir un lien de rÃ©initialisation', email: 'Adresse e-mail', emailPlaceholder: 'Saisissez votre e-mail...', emailRequired: 'Lâ€™adresse e-mail est requise', emailInvalid: 'Format dâ€™e-mail invalide', password: 'Mot de passe', passwordPlaceholder: 'Saisissez votre mot de passe...', passwordRequired: 'Le mot de passe est requis', forgot: 'OubliÃ© ?', signIn: 'Se connecter', signingIn: 'Connexion...', resetSend: 'Envoyer le lien', resetSending: 'Envoi...', backLogin: 'Retour Ã  la connexion', or: 'OU', newHere: 'Nouveau ici ?', createAccount: 'CrÃ©er un compte', loginSuccess: 'Connexion rÃ©ussie ! Bienvenue sur World Culture Marketplace', loginFailed: 'Ã‰chec de la connexion. Veuillez rÃ©essayer.', unexpected: 'Une erreur inattendue est survenue.', validEmailFirst: 'Saisissez dâ€™abord une adresse e-mail valide.', resetSent: 'Un lien de rÃ©initialisation vous a Ã©tÃ© envoyÃ©. Consultez votre messagerie.', resetFailed: 'Impossible dâ€™envoyer le lien de rÃ©initialisation.', passwordMust: 'Le mot de passe doit contenir', requirements: 'Exigences du mot de passe :', minLength: 'Au moins 8 caractÃ¨res', uppercase: 'Une lettre majuscule (A-Z)', lowercase: 'Une lettre minuscule (a-z)', number: 'Un chiffre (0-9)', symbol: 'Un caractÃ¨re spÃ©cial (!@#$%^&*)', agreementLead: 'En cliquant sur Se connecter, vous acceptez les', terms: 'Conditions gÃ©nÃ©rales', privacy: 'Politique de confidentialitÃ©', and: 'et la', registerTitle: 'CrÃ©er un compte', registerIntro: 'Rejoignez la marketplace culturelle mondiale', firstName: 'PrÃ©nom', lastName: 'Nom', required: 'Requis', username: 'Nom dâ€™utilisateur', usernamePlaceholder: 'Choisissez un nom dâ€™utilisateur...', usernameRequired: 'Le nom dâ€™utilisateur est requis', registerEmailPlaceholder: 'Saisissez votre adresse e-mail...', registerEmailRequired: 'Lâ€™adresse e-mail est requise', confirm: 'Confirmer', creating: 'CrÃ©ation du compte...', register: 'Sâ€™inscrire', already: 'Vous avez dÃ©jÃ  un compte ?', logIn: 'Se connecter', mismatch: 'Les mots de passe ne correspondent pas', registrationFailed: 'Ã‰chec de lâ€™inscription.', registrationSuccess: 'Inscription rÃ©ussie ! Consultez votre e-mail pour valider votre compte.', joiningLead: 'En vous inscrivant, vous acceptez les', cookieText: 'Nous utilisons des cookies pour amÃ©liorer votre expÃ©rience.', cookie: 'Politique relative aux cookies',
+    close: 'Fermer la fenêtre', loginTitle: 'Cultures en connexion', loginIntro: 'Saisissez vos identifiants pour accéder à votre compte', resetTitle: 'Réinitialiser le mot de passe', resetIntro: 'Saisissez votre e-mail pour recevoir un lien de réinitialisation', email: 'Adresse e-mail', emailPlaceholder: 'Saisissez votre e-mail...', emailRequired: 'L’adresse e-mail est requise', emailInvalid: 'Format d’e-mail invalide', password: 'Mot de passe', passwordPlaceholder: 'Saisissez votre mot de passe...', passwordRequired: 'Le mot de passe est requis', forgot: 'Oublié ?', signIn: 'Se connecter', signingIn: 'Connexion...', resetSend: 'Envoyer le lien', resetSending: 'Envoi...', backLogin: 'Retour à la connexion', or: 'OU', newHere: 'Nouveau ici ?', createAccount: 'Créer un compte', loginSuccess: 'Connexion réussie ! Bienvenue sur World Culture Marketplace', loginFailed: 'Échec de la connexion. Veuillez réessayer.', unexpected: 'Une erreur inattendue est survenue.', validEmailFirst: 'Saisissez d’abord une adresse e-mail valide.', resetSent: 'Un lien de réinitialisation vous a été envoyé. Consultez votre messagerie.', resetFailed: 'Impossible d’envoyer le lien de réinitialisation.', passwordMust: 'Le mot de passe doit contenir', requirements: 'Exigences du mot de passe :', minLength: 'Au moins 8 caractères', uppercase: 'Une lettre majuscule (A-Z)', lowercase: 'Une lettre minuscule (a-z)', number: 'Un chiffre (0-9)', symbol: 'Un caractère spécial (!@#$%^&*)', agreementLead: 'En cliquant sur Se connecter, vous acceptez les', terms: 'Conditions générales', privacy: 'Politique de confidentialité', and: 'et la', registerTitle: 'Créer un compte', registerIntro: 'Rejoignez la marketplace culturelle mondiale', firstName: 'Prénom', lastName: 'Nom', required: 'Requis', username: 'Nom d’utilisateur', usernamePlaceholder: 'Choisissez un nom d’utilisateur...', usernameRequired: 'Le nom d’utilisateur est requis', registerEmailPlaceholder: 'Saisissez votre adresse e-mail...', registerEmailRequired: 'L’adresse e-mail est requise', confirm: 'Confirmer', creating: 'Création du compte...', register: 'S’inscrire', already: 'Vous avez déjà un compte ?', logIn: 'Se connecter', mismatch: 'Les mots de passe ne correspondent pas', registrationFailed: 'Échec de l’inscription.', registrationSuccess: 'Inscription réussie ! Consultez votre e-mail pour valider votre compte.', joiningLead: 'En vous inscrivant, vous acceptez les', cookieText: 'Nous utilisons des cookies pour améliorer votre expérience.', cookie: 'Politique relative aux cookies',
   },
 };
 export default fr;

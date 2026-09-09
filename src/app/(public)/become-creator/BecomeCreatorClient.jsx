@@ -145,7 +145,7 @@ export default function UserProfileForm() {
         router.push(localize('/profile'));
       }
     } catch (error) {
-      setServerError(locale === 'fr' ? 'Impossible dâ€™envoyer la demande. Veuillez rÃ©essayer.' : getApiErrorMessage(error, 'Something went wrong'));
+      setServerError(locale === 'fr' ? 'Impossible d’envoyer la demande. Veuillez réessayer.' : getApiErrorMessage(error, 'Something went wrong'));
     }
   };
 
@@ -175,16 +175,16 @@ export default function UserProfileForm() {
             <FiClock size={40} className="text-orange-500 animate-pulse" />
           </div>
           <h2 className="text-2xl font-black uppercase tracking-tighter text-gray-900 dark:text-white mb-2">
-            {L('Request Under Review', 'Demande en cours dâ€™examen')}
+            {L('Request Under Review', 'Demande en cours d’examen')}
           </h2>
           <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-            {L('Your application is being processed by our admins. You will be notified once approved.', 'Votre demande est examinÃ©e par notre Ã©quipe. Vous serez informÃ© aprÃ¨s son approbation.')}
+            {L('Your application is being processed by our admins. You will be notified once approved.', 'Votre demande est examinée par notre équipe. Vous serez informé après son approbation.')}
           </p>
           <button
             onClick={() => router.push(localize('/profile'))}
             className="mt-8 w-full py-4 bg-orange-500 text-white text-[10px] font-black uppercase rounded-md shadow-lg shadow-orange-500/20 hover:bg-orange-600 transition-all"
           >
-            {L('Go to Dashboard', 'AccÃ©der au profil')}
+            {L('Go to Dashboard', 'Accéder au profil')}
           </button>
         </div>
       </div>
@@ -208,10 +208,10 @@ export default function UserProfileForm() {
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
             <div className="relative z-10 text-white px-10 text-center">
               <h1 className="text-3xl font-black uppercase tracking-tighter text-gray-900 dark:text-white mb-6">
-                {L('Become a', 'Devenir')} <span className="text-orange-500">{L('Creator', 'crÃ©ateur')}</span>
+                {L('Become a', 'Devenir')} <span className="text-orange-500">{L('Creator', 'créateur')}</span>
               </h1>
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
-                {L('Unlock your professional node', 'DÃ©veloppez votre prÃ©sence professionnelle')}
+                {L('Unlock your professional node', 'Développez votre présence professionnelle')}
               </p>
             </div>
           </div>
@@ -245,7 +245,7 @@ export default function UserProfileForm() {
               {/* Names */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className={labelStyle}>{L('Display Name', 'Nom affichÃ©')}</label>
+                  <label className={labelStyle}>{L('Display Name', 'Nom affiché')}</label>
                   <input
                     {...register('display_name', { required: true })}
                     className={inputStyle}
@@ -255,12 +255,12 @@ export default function UserProfileForm() {
                 <div>
                   <label className={labelStyle}>
                     <FiBriefcase size={10} />{' '}
-                    {customerType === 'business' ? L('Business Name', 'Nom de lâ€™entreprise') : L('Legal Name', 'Nom lÃ©gal')}
+                    {customerType === 'business' ? L('Business Name', 'Nom de l’entreprise') : L('Legal Name', 'Nom légal')}
                   </label>
                   <input
                     {...register('business_name', { required: true })}
                     className={inputStyle}
-                    placeholder={L('Agency or Brand Name', 'Nom de lâ€™agence ou de la marque')}
+                    placeholder={L('Agency or Brand Name', 'Nom de l’agence ou de la marque')}
                   />
                 </div>
               </div>
@@ -269,7 +269,7 @@ export default function UserProfileForm() {
               {customerType === 'business' && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                   <label className={labelStyle}>
-                    <FiCheckCircle size={10} />{L('Business Number (Optional)', 'NumÃ©ro dâ€™entreprise (facultatif)')}
+                    <FiCheckCircle size={10} />{L('Business Number (Optional)', 'Numéro d’entreprise (facultatif)')}
                   </label>
                   <input
                     {...register('vatNumber')}
@@ -277,7 +277,7 @@ export default function UserProfileForm() {
                     placeholder="e.g. FR123456789"
                   />
                   <p className="text-[9px] text-gray-400 mt-2 ml-1 uppercase font-bold tracking-tight">
-                    {L('Needed for EU Reverse Charge (0% Tax)', 'NÃ©cessaire pour lâ€™autoliquidation de TVA dans lâ€™UE')}
+                    {L('Needed for EU Reverse Charge (0% Tax)', 'Nécessaire pour l’autoliquidation de TVA dans l’UE')}
                   </p>
                 </div>
               )}
@@ -285,7 +285,7 @@ export default function UserProfileForm() {
               {/* Category */}
               <div>
                 <label className={labelStyle}>
-                  <Grid size={14} className="inline mr-2" /> {L('Expertise Category', 'CatÃ©gorie dâ€™expertise')}
+                  <Grid size={14} className="inline mr-2" /> {L('Expertise Category', 'Catégorie d’expertise')}
                 </label>
                 <div className="relative">
                   <select
@@ -294,7 +294,7 @@ export default function UserProfileForm() {
                     disabled={catLoading}
                   >
                     <option value="" className="bg-white dark:bg-zinc-900 text-gray-500">
-                      {catLoading ? L('Loading Categories...', 'Chargement des catÃ©gories...') : L('Select your primary field', 'SÃ©lectionnez votre domaine principal')}
+                      {catLoading ? L('Loading Categories...', 'Chargement des catégories...') : L('Select your primary field', 'Sélectionnez votre domaine principal')}
                     </option>
 
                     {categories.map((cat) => (
@@ -325,7 +325,7 @@ export default function UserProfileForm() {
                 <textarea
                   {...register('bio')}
                   rows={2}
-                  placeholder={L('Briefly describe your services...', 'DÃ©crivez briÃ¨vement vos services...')}
+                  placeholder={L('Briefly describe your services...', 'Décrivez brièvement vos services...')}
                   className={`${inputStyle} resize-none`}
                 />
               </div>
@@ -342,7 +342,7 @@ export default function UserProfileForm() {
                   <div className="relative z-10 flex flex-col items-center opacity-0 group-hover:opacity-100 transition-all">
                     <FiCamera size={20} className="text-gray-900 dark:text-white mb-1" />
                     <span className="text-[8px] font-black uppercase text-gray-900 dark:text-white">
-                      {L('Change Avatar', 'Modifier lâ€™avatar')}
+                      {L('Change Avatar', 'Modifier l’avatar')}
                     </span>
                   </div>
                   <input
@@ -393,7 +393,7 @@ export default function UserProfileForm() {
                     <FiGlobe size={10} /> {L('Country', 'Pays')}
                   </label>
                   <select {...register('countryCode', { required: true })} className={inputStyle}>
-                    <option value="">{L('Select Country', 'SÃ©lectionnez un pays')}</option>
+                    <option value="">{L('Select Country', 'Sélectionnez un pays')}</option>
                     {Country.getAllCountries().map((c) => (
                       <option className="dark:bg-gray-800" key={c.isoCode} value={c.isoCode}>
                         {locale === 'fr' ? (new Intl.DisplayNames(['fr'], { type: 'region' }).of(c.isoCode) || c.name) : c.name}
@@ -408,7 +408,7 @@ export default function UserProfileForm() {
                     className={inputStyle}
                     disabled={!selectedCountryCode}
                   >
-                    <option value="">{L('Select City', 'SÃ©lectionnez une ville')}</option>
+                    <option value="">{L('Select City', 'Sélectionnez une ville')}</option>
                     {cities.map((c, index) => (
                       <option
                         className="dark:bg-gray-800"
@@ -436,7 +436,7 @@ export default function UserProfileForm() {
                       value=""
                       className="bg-white text-black dark:bg-black dark:text-white"
                     >
-                      {L('Select Language', 'SÃ©lectionnez une langue')}
+                      {L('Select Language', 'Sélectionnez une langue')}
                     </option>
 
                     <option
@@ -450,7 +450,7 @@ export default function UserProfileForm() {
                       value="French"
                       className="bg-white text-black dark:bg-black dark:text-white"
                     >
-                      {L('French', 'FranÃ§ais')}
+                      {L('French', 'Français')}
                     </option>
                   </select>
                 </div>
@@ -490,16 +490,16 @@ export default function UserProfileForm() {
                   htmlFor="agreeTerms"
                   className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 cursor-pointer leading-relaxed flex items-center gap-1"
                 >
-                  {L('I agree to the', 'Jâ€™accepte les')}{' '}
+                  {L('I agree to the', 'J’accepte les')}{' '}
                   <Link
                     href={localize('/creator-terms-and-conditions')}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-orange-500 underline hover:text-orange-600"
                   >
-                    {L('Terms and Conditions', 'conditions gÃ©nÃ©rales')}
+                    {L('Terms and Conditions', 'conditions générales')}
                   </Link>{' '}
-                  {L('and confirm that all provided information is accurate.', 'et je confirme lâ€™exactitude des informations fournies.')}
+                  {L('and confirm that all provided information is accurate.', 'et je confirme l’exactitude des informations fournies.')}
                 </label>
               </div>
 

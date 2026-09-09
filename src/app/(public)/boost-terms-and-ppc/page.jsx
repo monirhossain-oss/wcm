@@ -13,6 +13,7 @@ import PromotionBudget from '@/components/boost-terms-and-ppc/PromotionBudget'
 import React from 'react'
 import { buildPageMetadata } from '@/lib/seo/pageMetadata'
 import { buildTranslationMap } from '@/lib/staticPageLocalization'
+import { translate } from '@/lib/i18n'
 
 export async function generateMetadata({ locale = 'en' } = {}) {
   return buildPageMetadata({ pageId: 'boost-terms-and-ppc', locale })
@@ -34,7 +35,7 @@ const getPublishedContent = async (languageCode) => {
 async function page({ locale = 'en' } = {}) {
   const englishContent = await getPublishedContent('en')
   if (!englishContent) {
-    return <main className="mx-auto max-w-4xl px-6 py-20"><p>Boost &amp; PPC Terms are temporarily unavailable.</p></main>
+    return <main className="mx-auto max-w-4xl px-6 py-20"><p>{translate(locale, 'staticPage.unavailable.boost-terms-and-ppc')}</p></main>
   }
   const localizedContent = !locale || locale === 'en'
     ? englishContent

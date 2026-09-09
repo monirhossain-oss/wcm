@@ -1,6 +1,7 @@
 import React from 'react';
 import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
+import { translate } from '@/lib/i18n';
 import Hero from '@/components/Advertising/Hero';
 import TableOfContents from '@/components/Advertising/TableOfContents';
 import ContactSection from '@/components/Advertising/ContactSection';
@@ -28,7 +29,7 @@ const getPublishedContent = async (languageCode) => {
 const AdvertisingPolicyPage = async ({ locale = 'en' } = {}) => {
     const englishContent = await getPublishedContent('en');
     if (!englishContent) {
-        return <main className="mx-auto max-w-4xl px-6 py-20"><p>Advertising Policy is temporarily unavailable.</p></main>;
+        return <main className="mx-auto max-w-4xl px-6 py-20"><p>{translate(locale, 'staticPage.unavailable.advertising-policy')}</p></main>;
     }
     const localizedContent = !locale || locale === 'en'
         ? englishContent

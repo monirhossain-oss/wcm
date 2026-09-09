@@ -1,8 +1,9 @@
 import ExploreClient from '../ExploreClient';
 import { continentMapping } from '@/constants/continentData';
-import { getCategories } from '@/lib/api';
+import { getCategories, getLocalizedCategoryTitles } from '@/lib/api';
 import { buildPageMetadata, resolvePageSeo } from '@/lib/seo/pageMetadata';
 import { resolveExploreIndexing } from '@/lib/seo/indexing';
+import { slugsMatch } from '@/lib/exploreSlug';
 import { translate } from '@/lib/i18n';
 
 // ── Shared helper: slug ke readable text e convert kora ──
@@ -15,7 +16,6 @@ function formatText(slug) {
 // ── Shared helper: URL filters theke category/continent/search bujhe ana ──
 // generateMetadata() ar ExplorePage() dutoy eta call kore, tai logic ekbar e lekha + duplicate bug hoy na
 function resolveExploreFilters(filters = []) {
-    const continentsList = Object.keys(continentMapping).map((c) => c.toLowerCase().trim());
 
     let category = 'All';
     let continent = 'All Regions';
@@ -29,18 +29,15 @@ function resolveExploreFilters(filters = []) {
     const baseFilters = searchIndex !== -1 ? filters.slice(0, searchIndex) : filters;
 
     if (baseFilters.length === 1) {
-        const val = formatText(baseFilters[0]);
-        const normalizedVal = val.toLowerCase().trim();
+        // Region slug "middle-east" style, kintu formatText dash ke space kore dey — tai milano hoy
+        // indexing policy ar client hook-er same slug rule (exploreSlug) diye.
+        const regionKey = Object.keys(continentMapping).find((key) => slugsMatch(key, baseFilters[0]));
 
-        if (continentsList.includes(normalizedVal)) {
-            // মেইন ফিক্স: Latin America বা Middle East-এর মতো স্পেসওয়ালা নাম চেক করা
-            const originalKey = Object.keys(continentMapping).find(
-                (key) => key.toLowerCase().trim() === normalizedVal
-            );
-            continent = originalKey || val;
+        if (regionKey) {
+            continent = regionKey;
             category = 'All';
         } else {
-            category = val;
+            category = formatText(baseFilters[0]);
             continent = 'All Regions';
         }
     } else if (baseFilters.length >= 2) {
@@ -49,6 +46,30 @@ function resolveExploreFilters(filters = []) {
     }
 
     return { category, continent, search };
+}
+
+// ── Filter name gulo current language e dekhano ──
+// URL slug bodlay na; shudhu visible text (title/H1) er jonno localized name neya hoy.
+async function resolveFilterNames({ category, continent, locale, categories }) {
+    // Two-filter URL e continent ta "north america" hoye ashe, tai catalog key (master slug) khuje ber kora hoy.
+    const regionKey = Object.keys(continentMapping).find((key) => slugsMatch(key, continent));
+    const localizedContinent = continent === 'All Regions'
+        ? translate(locale, 'homeDiscovery.allRegions')
+        : translate(locale, `homeDiscovery.regions.${regionKey || continent}`, continent);
+    // Ready-made phrase: "textiles from Asia" / "textiles d’Asie" ar "Cultural Heritage of Asia" /
+    // "Patrimoine culturel d’Asie". Unknown region hole shudhu nam-e fallback kore.
+    const fromRegion = translate(locale, `homeDiscovery.regionsOf.${regionKey || continent}`,
+        `${translate(locale, 'explore.from')} ${localizedContinent}`);
+    const ofRegion = translate(locale, `homeDiscovery.regionsHeritage.${regionKey || continent}`, localizedContinent);
+    const names = { category, continent: localizedContinent, fromRegion, ofRegion };
+    if (!locale || locale === 'en' || category === 'All') return names;
+
+    const master = (categories || await getCategories()).find((item) => slugsMatch(item?.title, category));
+    if (!master) return names;
+    // Translation na thakle backend master title-i ferot dey; sekhetre URL theke banano nam-i rakha hoy,
+    // jate French page e hoothat kore raw master title na dekhay.
+    const localizedTitle = (await getLocalizedCategoryTitles(locale)).get(String(master._id));
+    return { ...names, category: localizedTitle && localizedTitle !== master.title ? localizedTitle : category };
 }
 
 // ১. ডাইনামিক মেটাডাটা জেনারেটর
@@ -63,28 +84,27 @@ export async function generateMetadata({ params, locale = 'en' }) {
 
     // Stage 5: only a valid category/region combination is indexable. Explore URLs carry master
     // category slugs in both languages, so one master list validates English and French alike.
-    const { indexable } = resolveExploreIndexing(filters, await getCategories());
+    const categories = await getCategories();
+    const { indexable } = resolveExploreIndexing(filters, categories);
 
     let finalTitle = base.title;
     let finalDescription = base.description;
     let finalKeywords = base.keywords;
 
     const isFiltered = category !== 'All' || continent !== 'All Regions';
-    const localizedContinent = continent === 'All Regions'
-        ? translate(locale, 'homeDiscovery.allRegions')
-        : translate(locale, `homeDiscovery.regions.${continent}`, continent);
+    const localized = await resolveFilterNames({ category, continent, locale, categories });
 
     if (isFiltered) {
         if (category !== 'All' && continent !== 'All Regions') {
-            finalTitle = `${category} ${translate(locale, 'explore.from')} ${localizedContinent} | ${base.title}`;
+            finalTitle = `${localized.category} ${localized.fromRegion} | ${base.title}`;
         } else if (category !== 'All') {
-            finalTitle = `${translate(locale, 'explore.categoryCollections')} : ${category} | ${base.title}`;
+            finalTitle = `${translate(locale, 'explore.categoryCollections')} : ${localized.category} | ${base.title}`;
         } else if (continent !== 'All Regions') {
-            finalTitle = `${translate(locale, 'explore.culturalHeritage')} ${localizedContinent} | ${base.title}`;
+            finalTitle = `${translate(locale, 'explore.culturalHeritage')} ${localized.ofRegion} | ${base.title}`;
         }
 
         finalDescription = `${translate(locale, 'explore.filteredDescription')} ${finalDescription}`;
-        finalKeywords = [category, continent, ...finalKeywords];
+        finalKeywords = [localized.category, localized.continent, ...finalKeywords];
     }
 
     return buildPageMetadata({
@@ -106,14 +126,15 @@ export default async function ExplorePage({ params, locale = 'en' }) {
 
     const { category, continent, search } = resolveExploreFilters(filters);
 
-    // h1-এর জন্য ডাইনামিক টেক্সট বানানো
+    // h1-এর জন্য ডাইনামিক টেক্সট বানানো — metadata-র মতো একই localized filter name ব্যবহার করে
+    const localized = await resolveFilterNames({ category, continent, locale });
     let pageHeading = translate(locale, 'explore.heading');
     if (category !== 'All' && continent !== 'All Regions') {
-        pageHeading = `${category} ${translate(locale, 'explore.from')} ${continent}`;
+        pageHeading = `${localized.category} ${localized.fromRegion}`;
     } else if (category !== 'All') {
-        pageHeading = `${translate(locale, 'explore.categoryCollections')} : ${category}`;
+        pageHeading = `${translate(locale, 'explore.categoryCollections')} : ${localized.category}`;
     } else if (continent !== 'All Regions') {
-        pageHeading = `${translate(locale, 'explore.culturalHeritage')} ${translate(locale, `homeDiscovery.regions.${continent}`, continent)}`;
+        pageHeading = `${translate(locale, 'explore.culturalHeritage')} ${localized.ofRegion}`;
     }
 
     return (

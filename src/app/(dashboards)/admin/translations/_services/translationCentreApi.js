@@ -20,6 +20,8 @@ export const releaseEditLock = (translationRecordId, lockToken) =>
   api.delete(`/api/translations/admin/records/${translationRecordId}/lock`, { data: { lockToken } });
 export const requestRegeneration = (translationRecordId) =>
   api.post(`/api/translations/admin/records/${translationRecordId}/regenerations`);
+export const changeLocalizedSlug = (translationRecordId, data) =>
+  api.patch(`/api/translations/admin/records/${translationRecordId}/slug`, data);
 export const acceptProposal = (proposalId, data) =>
   api.post(`/api/translations/admin/proposals/${proposalId}/accept`, data);
 export const discardProposal = (proposalId) =>

@@ -44,7 +44,7 @@ export default function HeroActions() {
                 </span>
             ) : (
                 <Link
-                    href="/become-creator"
+                    href={localize('/become-creator')}
                     onClick={handleBecomeCreatorClick}
                     className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg font-medium whitespace-nowrap
             border border-[#F57C00] text-[#F57C00] bg-transparent

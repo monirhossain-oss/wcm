@@ -2,6 +2,7 @@
 import React from 'react';
 import { buildPageMetadata } from '@/lib/seo/pageMetadata';
 import { buildTranslationMap, localizeValue } from '@/lib/staticPageLocalization';
+import { localePath, translate } from '@/lib/i18n';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
 const getPublishedContent = async (languageCode) => {
@@ -85,7 +86,8 @@ const TwoColList = ({ items }) => (
 );
 
 /* ── Main Page ── */
-const TermsAndConditionsContent = () => {
+// `locale` only drives internal links: a French page must point at the French policy routes.
+const TermsAndConditionsContent = ({ locale = 'en' } = {}) => {
   const toc = [
     'Introduction', 'Definitions', 'About WCM', 'Eligibility',
     'Account Registration', 'Acceptable Use Policy', 'Platform Content',
@@ -319,7 +321,7 @@ const TermsAndConditionsContent = () => {
             <TwoColList items={['Banner ads', 'Sponsored cultural content', 'Boosted visibility', 'PPC-based advertising']} />
             <NoteBox>
               All advertising activities are governed by the{' '}
-              <Link href="/advertising-policy" className="font-bold text-[#F57C00] underline underline-offset-2 cursor-pointer">
+              <Link href={localePath(locale, '/advertising-policy')} className="font-bold text-[#F57C00] underline underline-offset-2 cursor-pointer">
                 Advertising Terms
               </Link>
               , which form part of this legal suite.
@@ -491,10 +493,10 @@ const TermsAndConditionsContent = () => {
 export default async function TermsAndConditions({ locale = 'en' } = {}) {
     const englishContent = await getPublishedContent('en');
     if (!englishContent) {
-        return <main className="mx-auto max-w-4xl px-6 py-20"><p>Terms &amp; Conditions are temporarily unavailable.</p></main>;
+        return <main className="mx-auto max-w-4xl px-6 py-20"><p>{translate(locale, 'staticPage.unavailable.terms-and-conditions')}</p></main>;
     }
     const localizedContent = !locale || locale === 'en'
         ? englishContent
         : (await getPublishedContent(locale)) || englishContent;
-    return localizeValue(TermsAndConditionsContent(), buildTranslationMap(englishContent, localizedContent));
+    return localizeValue(TermsAndConditionsContent({ locale }), buildTranslationMap(englishContent, localizedContent));
 }

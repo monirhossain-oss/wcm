@@ -1,7 +1,22 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { AlertTriangle, CheckCircle2, Globe2, Plus, RefreshCw } from 'lucide-react';
 import { getLanguageBackfill, getLanguages, registerLanguage, runLanguageAction } from '../_services/translationCentreApi';
+import {
+  Badge,
+  Banner,
+  Button,
+  Card,
+  CardHeader,
+  EmptyState,
+  PageHeader,
+  Spinner,
+  StatusBadge,
+  TableShell,
+  Td,
+  Th,
+} from '../_components/ui';
 
 const actionsFor = (language) => {
   if (language.isSource) return [];
@@ -12,19 +27,130 @@ const actionsFor = (language) => {
   return [];
 };
 
+const actionHelp = {
+  enable: 'Queues a translation job for every existing object in this language.',
+  retry: 'Retries the failed backfill jobs and resumes enumeration.',
+  publish: 'Makes the language visible to visitors and to hreflang.',
+  unpublish: 'Hides the language from visitors; stored translations are kept.',
+  disable: 'Stops new translation work for this language.',
+};
+
 export default function TranslationLanguagesPage() {
-  const [languages, setLanguages] = useState([]); const [progress, setProgress] = useState({});
-  const [error, setError] = useState(''); const [busy, setBusy] = useState('');
+  const [languages, setLanguages] = useState([]);
+  const [progress, setProgress] = useState({});
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [busy, setBusy] = useState('');
+  const [loading, setLoading] = useState(true);
+
   const load = useCallback(async () => {
     try {
-      const { data } = await getLanguages(); setLanguages(data.data || []);
-      const backfills = await Promise.all((data.data || []).filter((language) => language.backfillOperationId).map(async (language) => [language.code, (await getLanguageBackfill(language.code)).data.data.progress]));
-      setProgress(Object.fromEntries(backfills)); setError('');
-    } catch (requestError) { setError(requestError.response?.data?.message || 'Unable to load languages.'); }
+      setLoading(true);
+      const { data } = await getLanguages();
+      setLanguages(data.data || []);
+      const backfills = await Promise.all((data.data || [])
+        .filter((language) => language.backfillOperationId)
+        .map(async (language) => [language.code, (await getLanguageBackfill(language.code)).data.data.progress]));
+      setProgress(Object.fromEntries(backfills));
+      setError('');
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Unable to load languages.');
+    } finally { setLoading(false); }
   }, []);
-  useEffect(() => { load(); }, [load]);
-  const act = async (code, action) => { setBusy(`${code}:${action}`); try { await runLanguageAction(code, action); await load(); } catch (requestError) { setError(requestError.response?.data?.message || 'Language action failed.'); } finally { setBusy(''); } };
-  const addFrench = async () => { setBusy('register'); try { await registerLanguage({ code: 'fr', catalogVersion: '1' }); await load(); } catch (requestError) { setError(requestError.response?.data?.message || 'Registration failed.'); } finally { setBusy(''); } };
+
+  useEffect(() => { const timer = setTimeout(load, 0); return () => clearTimeout(timer); }, [load]);
+
+  const act = async (code, action) => {
+    setBusy(`${code}:${action}`); setError(''); setNotice('');
+    try {
+      await runLanguageAction(code, action);
+      setNotice(`${code.toUpperCase()} ${action}d.`);
+      await load();
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Language action failed.');
+    } finally { setBusy(''); }
+  };
+
+  const addFrench = async () => {
+    setBusy('register'); setError(''); setNotice('');
+    try {
+      await registerLanguage({ code: 'fr', catalogVersion: '1' });
+      setNotice('French registered. Enable it to start the backfill.');
+      await load();
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Registration failed.');
+    } finally { setBusy(''); }
+  };
+
   const hasFrench = languages.some(({ code }) => code === 'fr');
-  return <section className="space-y-5"><div className="flex flex-wrap items-end justify-between gap-3"><div><h1 className="text-2xl font-bold">Languages</h1><p className="text-sm text-gray-500">Register, backfill and publish approved language catalogs.</p></div>{!hasFrench && <button disabled={Boolean(busy)} onClick={addFrench} className="rounded bg-orange-500 px-4 py-2 text-white disabled:opacity-50">Register French</button>}</div>{error && <p className="rounded bg-red-50 p-3 text-red-700">{error}</p>}<div className="overflow-x-auto rounded border bg-white dark:bg-black"><table className="min-w-full text-sm"><thead className="border-b text-left text-gray-500"><tr><th className="p-3">Language</th><th>Status</th><th>Catalog</th><th>Backfill</th><th>Actions</th></tr></thead><tbody>{languages.map((language) => { const state = progress[language.code]; return <tr key={language.code} className="border-b"><td className="p-3"><span className="font-medium">{language.name}</span><div className="text-xs text-gray-500">{language.code} · {language.direction}{language.isSource ? ' · source' : ''}</div></td><td>{language.status}</td><td>v{language.catalogVersion}</td><td>{state ? `${state.completed}/${state.total} complete · ${state.failed} failed` : '—'}</td><td><div className="flex flex-wrap gap-2">{actionsFor(language).map((action) => <button key={action} disabled={Boolean(busy)} onClick={() => act(language.code, action)} className="rounded border px-2 py-1 capitalize disabled:opacity-50">{action}</button>)}</div></td></tr>;})}</tbody></table></div></section>;
+
+  return (
+    <section className="space-y-6">
+      <PageHeader
+        icon={Globe2}
+        title="Languages"
+        description="Lifecycle of every approved language: register, backfill existing content, then publish it to visitors."
+        actions={
+          <>
+            <Button variant="secondary" onClick={load} loading={loading}><RefreshCw size={13} /> Refresh</Button>
+            {!hasFrench && <Button onClick={addFrench} loading={busy === 'register'}><Plus size={13} /> Register French</Button>}
+          </>
+        }
+      />
+
+      <Banner tone="error" icon={AlertTriangle}>{error}</Banner>
+      <Banner tone="success" icon={CheckCircle2}>{notice}</Banner>
+      <Banner tone="neutral">
+        A published language cannot be backfilled again. Unpublishing to force a backfill would take the language off the public site, so add missing translations by saving the source object instead.
+      </Banner>
+
+      <Card>
+        <CardHeader icon={Globe2} title="Registered languages" description="English is the source language and is never translated." />
+        {loading && !languages.length ? <Spinner label="Loading languages" /> : languages.length ? (
+          <TableShell>
+            <thead className="border-b border-gray-100 dark:border-white/5">
+              <tr><Th>Language</Th><Th>Status</Th><Th>Catalog</Th><Th>Backfill</Th><Th>Actions</Th></tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+              {languages.map((language) => {
+                const state = progress[language.code];
+                return (
+                  <tr key={language.code}>
+                    <Td>
+                      <p className="font-bold text-gray-900 dark:text-white">{language.name}</p>
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                        {language.code} · {language.direction}{language.isSource ? ' · source' : ''}
+                      </p>
+                    </Td>
+                    <Td><StatusBadge value={language.status} /></Td>
+                    <Td><Badge tone="neutral">v{language.catalogVersion}</Badge></Td>
+                    <Td className="text-xs font-medium text-gray-500">
+                      {state ? `${state.completed}/${state.total} complete · ${state.failed} failed` : '—'}
+                    </Td>
+                    <Td>
+                      <div className="flex flex-wrap gap-1.5">
+                        {actionsFor(language).map((action) => (
+                          <Button
+                            key={action}
+                            variant={action === 'publish' ? 'success' : 'secondary'}
+                            size="sm"
+                            title={actionHelp[action]}
+                            onClick={() => act(language.code, action)}
+                            loading={busy === `${language.code}:${action}`}
+                          >
+                            {action}
+                          </Button>
+                        ))}
+                        {!actionsFor(language).length && <span className="text-xs font-medium text-gray-400">—</span>}
+                      </div>
+                    </Td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </TableShell>
+        ) : <EmptyState icon={Globe2} title="No languages registered" />}
+      </Card>
+    </section>
+  );
 }
