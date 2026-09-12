@@ -117,3 +117,34 @@ test('FAQ structured data is omitted rather than claiming an empty page', () => 
   });
   assert.equal(partial.mainEntity.length, 1);
 });
+
+// ── One heading, one source ────────────────────────────────────────────────────────────────────
+
+// The page had three sources for its own heading: a hardcoded French string in the /fr/faq route,
+// a language ternary in the English page, and two catalog keys nothing read. The French route
+// rendered "Questions fréquentes" while every other path to the same page rendered something else.
+test('the FAQ heading comes from the catalog, not from a branch inside the page', () => {
+  const page = source('src/app/(public)/faqUs/page.jsx');
+  assert.ok(!page.includes('isFrench'), 'no language branch may choose the heading');
+  assert.ok(page.includes("translate(locale, 'faq.heading')"), 'the heading comes from the catalog');
+  assert.ok(page.includes("translate(locale, 'faq.badge')"), 'so does the badge above it');
+
+  const catalogs = {
+    en: load('src/lib/i18n/catalogs/en.js').default,
+    fr: load('src/lib/i18n/catalogs/fr.js').default,
+  };
+  assert.equal(catalogs.fr.faq.heading, 'Questions fréquentes');
+  assert.equal(catalogs.en.faq.heading, 'Frequently Asked Questions');
+  // The French heading matches the French SEO title, so the page and the search result agree.
+  assert.equal(catalogs.fr.seo.faq.title, catalogs.fr.faq.heading);
+});
+
+test('the French route renders the same page component rather than a second copy', () => {
+  const french = source('src/app/(public)/fr/faq/page.jsx');
+  assert.ok(french.includes("from '../../faqUs/page'"), 'it reuses the English page component');
+  assert.ok(french.includes('locale="fr"'), 'rendered in French');
+  // Everything that used to be duplicated here now lives in one file.
+  for (const duplicated of ['getFaqs', 'buildFaqPageSchema', '<h1', 'FaqSection']) {
+    assert.ok(!french.includes(duplicated), `${duplicated} must not be duplicated in the French route`);
+  }
+});

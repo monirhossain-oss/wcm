@@ -1,35 +1,14 @@
-import FaqContact from '@/components/faq/FaqContact';
+import FaqPage from '../../faqUs/page';
 import { buildPageMetadata } from '@/lib/seo/pageMetadata';
-import FaqSection from '@/components/faq/FaqSection';
-import { buildFaqPageSchema } from '@/lib/seo/structuredData';
-import { getFaqs } from '@/lib/api';
-import { SITE_URL } from '@/lib/seo/siteConfig';
-import React from 'react';
 
+// Next's static segment wins over the [locale] catch-all for this URL, so the route has to exist.
+// It renders the English page component in French, the way the other three hand-written /fr routes
+// do: this file used to carry its own copy of the header, the FAQ read and the JSON-LD, which is
+// how its H1 drifted apart from the one every other path to the same page rendered.
 export async function generateMetadata() {
   return buildPageMetadata({ pageId: 'faq', locale: 'fr' });
 }
 
-// Static French route: Next's static segment wins over the [locale] catch-all, so this page reads
-// its own questions exactly as the English one does.
-export default async function FaqFrPage() {
-  const faqs = await getFaqs('fr');
-  const faqSchema = buildFaqPageSchema({ faqs, locale: 'fr', url: `${SITE_URL}/fr/faq` });
-
-  return (
-    <main className="bg-white dark:bg-[#0a0a0a]">
-      {faqSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
-      )}
-      <div className="text-center my-4 space-y-4">
-        <span className="px-4 py-1 rounded-full border border-orange-200 text-orange-600 text-[10px] font-bold uppercase tracking-widest">Centre d’assistance</span>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">Questions fréquentes</h1>
-      </div>
-      <FaqSection language="fr" initialFaqs={faqs} />
-      <FaqContact language="fr" />
-    </main>
-  );
+export default function FaqFrPage() {
+  return <FaqPage locale="fr" />;
 }

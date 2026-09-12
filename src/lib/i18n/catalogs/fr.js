@@ -154,7 +154,7 @@ const fr = {
     noListingsDescription: 'Aucun résultat ne correspond à vos filtres ou à votre recherche.', scrollLeft: 'Faire défiler les catégories vers la gauche', scrollRight: 'Faire défiler les catégories vers la droite',
     promoted: 'Sponsorisé', listingAlt: 'Création', heritage: 'Patrimoine', global: 'Monde',
   },
-  faq: { badge: 'Centre d’assistance', heading: 'Questions fréquemment posées' },
+  faq: { badge: 'Centre d’assistance', heading: 'Questions fréquentes' },
   navigation: {
     explore: 'Explorer', categories: 'Catégories', creators: 'Créateurs', about: 'À propos', blogs: 'Blog',
     browseAll: 'Voir toutes les catégories', wishlist: 'Favoris', wishlistTitle: 'Mes favoris', signIn: 'Se connecter', signUp: 'S’inscrire',
