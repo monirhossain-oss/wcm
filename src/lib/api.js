@@ -23,6 +23,29 @@ export async function getFaqs(languageCode) {
   }
 }
 
+// ==================== BLOG API ====================
+
+// First page of the blog list, read on the server. The list used to arrive through a browser fetch,
+// which left the served HTML with a spinner: no titles, no descriptions and, more to the point, no
+// links a crawler could follow to the posts themselves. Load More still runs in the browser.
+export async function getBlogs({ offset = 0, limit = 6, languageCode } = {}) {
+  if (!BASE_URL) return { blogs: [], hasMore: false };
+
+  try {
+    const language = languageCode && languageCode !== 'en' ? `&language=${encodeURIComponent(languageCode)}` : '';
+    const res = await fetch(`${BASE_URL}/api/blogs?offset=${offset}&limit=${limit}${language}`, {
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return { blogs: [], hasMore: false };
+
+    const data = await res.json();
+    return { blogs: data?.blogs || [], hasMore: Boolean(data?.pagination?.hasMore) };
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    return { blogs: [], hasMore: false };
+  }
+}
+
 // ==================== CATEGORIES API ====================
 
 // ✅ Cache categories for 1 hour

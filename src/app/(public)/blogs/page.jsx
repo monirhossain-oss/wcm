@@ -1,13 +1,18 @@
 import BlogCard from '@/components/blog/BlogCard';
 import React from 'react';
 import { buildPageMetadata } from '@/lib/seo/pageMetadata';
+import { getBlogs } from '@/lib/api';
 import { translate } from '@/lib/i18n';
 
 export async function generateMetadata({ locale = 'en' } = {}) {
   return buildPageMetadata({ pageId: 'blogs', locale });
 }
 
-const page = ({ locale = 'en' }) => {
+// The first page of posts is read here rather than in the browser. The list used to arrive through
+// a client fetch, so the served HTML carried a spinner and no link to a single post.
+const page = async ({ locale = 'en' }) => {
+  const { blogs, hasMore } = await getBlogs({ languageCode: locale });
+
   return (
     <div className="container mx-auto px-4">
       {/* হেডলাইন সেকশন */}
@@ -20,7 +25,9 @@ const page = ({ locale = 'en' }) => {
           {translate(locale, 'blog.intro')}
         </p>
       </div>
-      <BlogCard />
+      {/* An empty list means the read failed or there is nothing to show; either way the component
+          falls back to its own fetch rather than rendering an empty grid. */}
+      <BlogCard initialBlogs={blogs.length ? blogs : null} initialHasMore={hasMore} />
     </div>
   );
 };

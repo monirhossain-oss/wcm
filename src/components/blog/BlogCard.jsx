@@ -16,17 +16,19 @@ const api = axios.create({
   withCredentials: true,
 });
 
-const BlogCard = () => {
+// initialBlogs is the first page, read on the server so the titles, descriptions and post links
+// are in the served HTML. Load More and the newsletter form stay in the browser.
+const BlogCard = ({ initialBlogs = null, initialHasMore = false }) => {
   const { locale, localize, t } = useLocale();
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [blogs, setBlogs] = useState(initialBlogs || []);
+  const [loading, setLoading] = useState(!initialBlogs);
   const [loadMoreLoading, setLoadMoreLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   // Offset-based states
   const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
+  const [hasMore, setHasMore] = useState(initialHasMore);
   const limit = 6; // একবারে ৬টি করে ব্লগ আসবে
 
   // ১. ব্যাকএন্ড থেকে ডাটা ফেচ করার ফাংশন
@@ -58,11 +60,14 @@ const BlogCard = () => {
 
   // মাউন্ট হওয়ার সময় প্রথমবার ডাটা লোড
   useEffect(() => {
+    // A server-supplied first page is already in state. Switching language is a route change, so
+    // the component remounts with that language's page rather than refetching here.
+    if (initialBlogs) return;
     setOffset(0);
     fetchBlogs(0, false);
   // fetchBlogs is intentionally recreated for the active locale.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locale]);
+  }, [locale, initialBlogs]);
 
   // ২. Load More হ্যান্ডলার (Offset আপডেট)
   const handleLoadMore = () => {
@@ -117,7 +122,7 @@ const BlogCard = () => {
                 className="relative aspect-4/3 overflow-hidden rounded-2xl mb-6 bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800"
               >
                 <Image
-                  src={blog.image || '/placeholder-image.jpg'}
+                  src={blog.image || '/fallback-image.png'}
                   alt={blog.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
