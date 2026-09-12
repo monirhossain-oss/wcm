@@ -9,12 +9,14 @@ export const NOINDEX = Object.freeze({ index: false, follow: true, googleBot: { 
 // Token-bearing recovery URLs: never indexed and never followed, so the token is not crawled onward.
 export const NOINDEX_NOFOLLOW = Object.freeze({ index: false, follow: false, googleBot: { index: false, follow: false } });
 
-// Stage 6: robots.txt must never block a URL whose exclusion depends on a meta robots tag — a
-// disallowed URL is not fetched, so its `noindex` is never read and the URL can still be listed
-// from links alone. Only non-public surfaces are blocked here; every noindex route in the registry
-// and every non-indexable Explore URL stays crawlable so the tag is what removes it. The former
-// `*/search/*` rule is gone for exactly that reason: search results now carry `noindex`.
-export const ROBOTS_DISALLOW = Object.freeze(['/admin/', '/api/']);
+// robots.txt must never block a URL whose exclusion depends on a meta robots tag — a disallowed
+// URL is not fetched, so its `noindex` is never read and the URL can still be listed from links
+// alone. Every noindex route in the registry, every non-indexable Explore URL and every dashboard
+// route stays crawlable so the tag is what removes it. The former `*/search/*` and `/admin/`
+// rules are gone for exactly that reason: those URLs now carry `noindex` instead, and blocking
+// them left the tag unread while still advertising the admin path to anyone reading robots.txt.
+// Only the API, which serves no indexable document and carries no robots tag, stays blocked.
+export const ROBOTS_DISALLOW = Object.freeze(['/api/']);
 
 export const REGION_SLUGS = Object.freeze(Object.keys(continentMapping));
 export const isRegionSlug = (slug) => REGION_SLUGS.includes(toRouteSlug(slug));

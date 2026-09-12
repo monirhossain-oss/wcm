@@ -24,7 +24,7 @@ function load(path, mocks = {}, globals = {}) {
   });
   const loaded = { exports: {} };
   vm.runInNewContext(code, {
-    module: loaded, exports: loaded.exports, React, URL, Headers, console, process: { env }, ...globals,
+    module: loaded, exports: loaded.exports, React, URL, Headers, console, setTimeout, clearTimeout, process: { env }, ...globals,
     require: (name) => (name in mocks ? mocks[name] : require(name)),
   });
   return loaded.exports;
@@ -50,8 +50,13 @@ const seoRecords = {
 const seoApi = { getSeoByPage: async (pageName, languageCode) => seoRecords[`${pageName}:${languageCode}`] || null };
 
 const localizedMetadata = load('src/lib/localizedMetadata.js', { '@/lib/seo/siteConfig': site });
+const publishedLanguages = load('src/lib/seo/publishedLanguages.js', {}, {
+  fetch: async () => ({ ok: true, json: async () => ({ data: [{ code: 'en' }, { code: 'fr' }] }) }),
+});
 const pageMetadata = load('src/lib/seo/pageMetadata.js', {
+  './brandTitle': load('src/lib/seo/brandTitle.js'),
   './publicPageRegistry': registry, './indexing': indexing, './siteConfig': site,
+  './publishedLanguages': publishedLanguages,
   '@/lib/api': seoApi, '@/lib/i18n': i18n, '@/lib/localizedMetadata': localizedMetadata,
 });
 const structuredData = load('src/lib/seo/structuredData.js', {
@@ -98,6 +103,24 @@ test('a base entry claims lastModified only when a real timestamp exists', () =>
   assert.equal(entries.filter((entry) => 'lastModified' in entry).length, 1);
 });
 
+test('every base entry carries the whole language cluster, matching what the pages emit', () => {
+  const entries = sitemapEntries.buildBaseSitemapEntries({ locales: ['en', 'fr'] });
+  const at = (path) => entries.find((entry) => entry.url === url(path));
+  for (const [english, french] of [['/about-us', '/fr/about-us'], ['/faqUs', '/fr/faq'], ['/', '/fr']]) {
+    for (const path of [english, french]) {
+      const languages = at(path).alternates.languages;
+      assert.equal(languages.en, url(english), path);
+      assert.equal(languages.fr, url(french), path);
+      // x-default is the unprefixed English URL, exactly as in the page metadata.
+      assert.equal(languages['x-default'], url(english), path);
+    }
+  }
+
+  // One published language is not a cluster, so nothing is annotated at all.
+  const englishOnly = sitemapEntries.buildBaseSitemapEntries({ locales: ['en'] });
+  assert.ok(englishOnly.every((entry) => !('alternates' in entry)));
+});
+
 const sitemapResponses = (published) => ({
   '/api/translations/languages': { data: published },
   '/api/seo/all?languageCode=en': Object.values(seoRecords),
@@ -118,16 +141,18 @@ const sitemapResponses = (published) => ({
   ] },
 });
 
+const loadSitemap = (fetchMock) => load('src/app/sitemap.js', {
+  '@/lib/seo/publicPageRegistry': registry, '@/lib/seo/sitemapEntries': sitemapEntries,
+  '@/lib/seo/publishedLanguages': load('src/lib/seo/publishedLanguages.js', {}, { fetch: fetchMock }),
+}, { fetch: fetchMock });
+
 const runSitemap = async (published) => {
   const responses = sitemapResponses(published);
   const fetchMock = async (target) => {
     const key = Object.keys(responses).find((route) => target.includes(route));
     return key ? { ok: true, json: async () => responses[key] } : { ok: false, json: async () => null };
   };
-  const route = load('src/app/sitemap.js', {
-    '@/lib/seo/publicPageRegistry': registry, '@/lib/seo/sitemapEntries': sitemapEntries,
-  }, { fetch: fetchMock });
-  return route.default();
+  return loadSitemap(fetchMock).default();
 };
 
 test('sitemap lists French only while French is published and keeps the detail feeds', async () => {
@@ -170,14 +195,54 @@ test('sitemap drops every French URL when French is not published', async () => 
   assert.ok(urls.includes(url('/about-us')));
 });
 
-test('sitemap survives every upstream failing without inventing URLs or dates', async () => {
-  const route = load('src/app/sitemap.js', {
-    '@/lib/seo/publicPageRegistry': registry, '@/lib/seo/sitemapEntries': sitemapEntries,
-  }, { fetch: async () => { throw new Error('offline'); } });
-  const entries = await route.default();
-  assert.equal(entries.length, 15);
-  assert.ok(entries.every((entry) => !('lastModified' in entry)));
-  assert.ok(entries.every((entry) => !entry.url.startsWith(url('/fr'))));
+test('an unreadable language list aborts the sitemap instead of publishing an English-only one', async () => {
+  // Dropping every French URL from a 200 response is acted on as the truth; a thrown error becomes
+  // a 5xx that search engines retry, leaving the last good sitemap in place.
+  const route = loadSitemap(async () => { throw new Error('offline'); });
+  await assert.rejects(route.default(), /published-language list/);
+});
+
+test('a language list read once survives a later outage, and other feeds still fail harmlessly', async () => {
+  const responses = sitemapResponses([{ code: 'en' }, { code: 'fr' }]);
+  let languageLookups = 0;
+  const fetchMock = async (target) => {
+    if (target.includes('/api/translations/languages')) {
+      languageLookups += 1;
+      if (languageLookups > 1) throw new Error('offline');
+      return { ok: true, json: async () => responses['/api/translations/languages'] };
+    }
+    // Every other upstream is down: the sitemap still publishes, just without their URLs or dates.
+    throw new Error('offline');
+  };
+  const route = loadSitemap(fetchMock);
+  const first = await route.default();
+  assert.equal(first.length, 30);
+  assert.ok(first.every((entry) => !('lastModified' in entry)));
+
+  const second = await route.default();
+  assert.deepEqual(second.map((entry) => entry.url), first.map((entry) => entry.url));
+  assert.ok(second.some((entry) => entry.url.startsWith(url('/fr'))));
+});
+
+// Structured data must be as complete as the metadata: every indexable page, in both languages,
+// resolves a WebPage node that agrees with that page's canonical URL and language. The root layout
+// emits it from the request path, so this is what a crawler receives on every one of those URLs.
+test('every indexable page resolves a WebPage node in both languages', async () => {
+  const pages = registry.PUBLIC_SEO_PAGES.filter(({ seoKey, indexing }) => seoKey && indexing !== 'noindex');
+  for (const page of pages) {
+    for (const locale of ['en', 'fr']) {
+      const where = `${page.id}:${locale}`;
+      const schema = await structuredData.resolvePageStructuredData(page.paths[locale]);
+      assert.ok(schema, `${where}: no WebPage node`);
+      assert.equal(schema['@type'], 'WebPage', where);
+      assert.equal(schema.url, url(page.paths[locale]), `${where}: url`);
+      assert.equal(schema.inLanguage, locale, `${where}: inLanguage`);
+      assert.ok(schema.name && schema.description, `${where}: name and description`);
+      // Each node hangs off that language's WebSite and the one shared Organization identity.
+      assert.equal(schema.isPartOf['@id'], structuredData.websiteId(locale), `${where}: isPartOf`);
+      assert.equal(schema.publisher['@id'], structuredData.ORGANIZATION_ID, `${where}: publisher`);
+    }
+  }
 });
 
 // ── Robots ─────────────────────────────────────────────────────────────────────────────────────
@@ -185,13 +250,15 @@ test('sitemap survives every upstream failing without inventing URLs or dates', 
 test('robots blocks only non-public surfaces so every noindex URL stays crawlable', () => {
   const rules = load('src/app/robots.js', { '@/lib/seo/indexing': indexing, '@/lib/seo/siteConfig': site }).default();
   assert.equal(rules.sitemap, 'https://site.test/sitemap.xml');
-  assert.deepEqual(Array.from(rules.rules[0].disallow), ['/admin/', '/api/']);
+  assert.deepEqual(Array.from(rules.rules[0].disallow), ['/api/']);
   assert.equal(rules.rules[0].allow, '/');
   assert.equal(rules.rules[0].userAgent, '*');
 
   const blocked = (path) => rules.rules[0].disallow.some((rule) =>
     new RegExp(`^${rule.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}`).test(path));
-  assert.ok(blocked('/admin/seo-settings') && blocked('/api/anything'));
+  assert.ok(blocked('/api/anything'));
+  // Dashboards carry `noindex` from their group layout, so blocking them would leave it unread.
+  assert.ok(!blocked('/admin/seo-settings') && !blocked('/creator/listings'));
   // A page Google must fetch to read its noindex tag may never be disallowed.
   for (const page of registry.PUBLIC_SEO_PAGES) {
     for (const locale of ['en', 'fr']) if (page.paths[locale]) assert.ok(!blocked(page.paths[locale]), page.paths[locale]);
@@ -270,7 +337,8 @@ const renderLayout = async (path, locale) => {
   const requestHeaders = path === null ? {} : { [site.REQUEST_LOCALE_HEADER]: locale, [site.REQUEST_PATH_HEADER]: path };
   const layout = load('src/app/layout.jsx', {
     './globals.css': {},
-    'next/font/google': { Inter: font, Poppins: font, Roboto: font, Geist_Mono: font },
+    'next/font/google': { Poppins: font, Roboto: font },
+    '@/components/ClarityAnalytics': { __esModule: true, default: () => null },
     'next/headers': { headers: async () => new Headers(requestHeaders) },
     '@/context/AuthContext': { AuthProvider: Provider },
     '@/context/ListingsContext': { ListingsProvider: Provider },
@@ -288,7 +356,8 @@ test('rendered French markup carries French JSON-LD URLs and one Organization id
   const { html, nodes } = await renderLayout('/fr/about-us', 'fr');
   assert.ok(html.startsWith('<html lang="fr" dir="ltr">'));
   assert.ok(html.includes('<meta name="google-site-verification" content="kept"/>'));
-  assert.ok(html.includes('https://www.clarity.ms/tag/') && html.includes('property="fb:app_id"'));
+  // Clarity is consent-gated in its own component and contributes nothing to the server shell.
+  assert.ok(html.includes('property="fb:app_id"') && !html.includes('clarity.ms'));
 
   assert.deepEqual(nodes.map((node) => node['@type']), ['WebSite', 'Organization', 'WebPage']);
   const organizations = nodes.filter((node) => node['@type'] === 'Organization');

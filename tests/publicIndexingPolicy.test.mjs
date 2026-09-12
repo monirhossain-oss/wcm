@@ -21,7 +21,7 @@ function load(path, mocks = {}, globals = {}) {
   });
   const loaded = { exports: {} };
   vm.runInNewContext(code, {
-    module: loaded, exports: loaded.exports, React, URL, Headers, console,
+    module: loaded, exports: loaded.exports, React, URL, Headers, console, setTimeout, clearTimeout,
     process: { env }, ...globals,
     require: (name) => (name in mocks ? mocks[name] : require(name)),
   });
@@ -88,6 +88,10 @@ test('the same filters are judged identically for both languages', () => {
 
 // The metadata helper must turn a noindex verdict into an actual robots directive and stop
 // advertising alternates for a URL search engines are being asked to drop.
+const publishedLanguagesModule = () => load('src/lib/seo/publishedLanguages.js', {}, {
+  fetch: async () => ({ ok: true, json: async () => ({ data: [{ code: 'en' }, { code: 'fr' }] }) }),
+});
+
 function metadataModule() {
   const localized = load('src/lib/localizedMetadata.js', { '@/lib/seo/siteConfig': site }, {
     fetch: async () => ({ ok: true, json: async () => ({ data: [{ code: 'en' }, { code: 'fr' }] }) }),
@@ -98,7 +102,9 @@ function metadataModule() {
     '@/lib/seo/publicPageRegistry': registry,
   });
   return load('src/lib/seo/pageMetadata.js', {
+    './brandTitle': load('src/lib/seo/brandTitle.js'),
     './publicPageRegistry': registry, './siteConfig': site, './indexing': indexing,
+    './publishedLanguages': publishedLanguagesModule(),
     '@/lib/api': { getSeoByPage: async () => null }, '@/lib/i18n': i18n, '@/lib/localizedMetadata': localized,
   });
 }
@@ -189,6 +195,22 @@ test('private, token and placeholder routes are excluded from the index', () => 
   assert.equal(indexing.NOINDEX_NOFOLLOW.follow, false);
 });
 
+test('dashboard routes are noindex and stay crawlable so the tag is read', () => {
+  const layout = source('src/app/(dashboards)/layout.jsx');
+  assert.ok(layout.includes('robots: NOINDEX'), 'the dashboards group layout must declare NOINDEX');
+  assert.ok(!layout.includes("'use client'"), 'a client layout cannot export metadata');
+  // The rule can only live above these two: both are client components by necessity (auth guard,
+  // sidebar state), so neither can carry metadata of its own.
+  for (const file of ['admin/layout.jsx', 'creator/layout.jsx']) {
+    assert.ok(source(`src/app/(dashboards)/${file}`).includes("'use client'"), `${file} is still a client layout`);
+  }
+  // A disallowed dashboard would never have its noindex read, leaving the URL listed from links.
+  assert.ok(!indexing.ROBOTS_DISALLOW.includes('/admin/'), 'dashboards must stay crawlable');
+  assert.deepEqual(Array.from(indexing.ROBOTS_DISALLOW), ['/api/']);
+  assert.equal(indexing.NOINDEX.index, false);
+  assert.equal(indexing.NOINDEX.follow, true);
+});
+
 test('French private routes are noindex, hide the token URL, and /fr/products does not exist', async () => {
   const notFound = () => { throw new Error('notFound'); };
   const stub = (id) => Object.assign(() => null, {});
@@ -203,7 +225,7 @@ test('French private routes are noindex, hide the token URL, and /fr/products do
   });
   const catchAll = load('src/app/(public)/[locale]/[[...segments]]/page.jsx', Object.fromEntries([
     ['next/navigation', { notFound }], ['@/lib/localizedMetadata', localized], ['@/lib/i18n', i18n],
-    ['@/lib/seo/indexing', indexing],
+    ['@/lib/seo/indexing', indexing], ['@/lib/seo/publishedLanguages', publishedLanguagesModule()],
     ...[['../../about-us/page', 'about'], ['../../blogs/page', 'blogs'], ['../../blogs/[id]/page', 'blog-detail'],
       ['../../creators/page', 'creators'], ['../../explore/[[...filters]]/page', 'explore'], ['../../faqUs/page', 'faq'],
       ['../../how-it-works/page', 'how-it-works'], ['../../listings/[id]/page', 'listing'], ['../../profile/[id]/page', 'profile-detail'],
