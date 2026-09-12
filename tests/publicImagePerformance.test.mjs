@@ -178,3 +178,34 @@ test('a CSS background image is small enough to ship unoptimised', () => {
     assert.ok(size < 300 * 1024, `${src} is ${(size / 1024).toFixed(0)} KB and is downloaded in full`);
   }
 });
+
+// A data file imported at module scope lands in the first chunk of every route that reaches it,
+// exactly like the bulk npm packages above. The contact page carried a 60 KB Lottie animation that
+// way, for a panel its own CSS hides below 1024px — so phones downloaded it to show nothing.
+test('no public component bundles a large data file at module scope', () => {
+  const offenders = [];
+  for (const path of files) {
+    const text = readFileSync(join(root, path), 'utf8');
+    for (const match of text.matchAll(/import\s+[\w{},\s]+\s+from\s+['"]([^'"]+\.json)['"]/g)) {
+      const asset = match[1].replace(/^.*\/public\//, 'public/');
+      let size = 0;
+      try { size = statSync(join(root, asset)).size; } catch { size = 0; }
+      if (size > 10 * 1024) offenders.push(`${path} -> ${match[1]} (${(size / 1024).toFixed(0)} KB)`);
+    }
+  }
+  assert.deepEqual(offenders, [], `import these on demand instead:\n  ${offenders.join('\n  ')}`);
+});
+
+test('the contact animation is fetched on demand and only where it is visible', () => {
+  const component = readFileSync(join(root, 'src/components/ContactAnimation.jsx'), 'utf8');
+  assert.match(component, /import\('lottie-react'\)/, 'the player is loaded on demand');
+  assert.match(component, /import\('\.\.\/\.\.\/public\/animation\/contact\.json'\)/, 'so is the animation');
+  // The panel is hidden below lg, so the fetch must not happen there at all.
+  assert.match(component, /min-width: 1024px/, 'the viewport gate matches the panel CSS');
+  assert.match(component, /\.catch\(\(\) => \{\}\)/, 'a failed chunk load must not break the form');
+
+  const client = readFileSync(join(root, 'src/components/ContactClient.jsx'), 'utf8');
+  assert.ok(!client.includes('lottie-react'), 'the page must not pull the player in directly');
+  assert.ok(!client.includes('contact.json'), 'nor the animation data');
+  assert.ok(client.includes('<ContactAnimation />'));
+});

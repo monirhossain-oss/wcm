@@ -182,6 +182,7 @@ export default function AdminLayout({ children }) {
             alt="Logo"
             width={90}
             height={90}
+            priority
             className="dark:hidden h-auto w-auto"
           />
           <Image
@@ -189,6 +190,7 @@ export default function AdminLayout({ children }) {
             alt="Logo"
             width={90}
             height={90}
+            priority
             className="hidden dark:block h-auto w-auto"
           />
         </Link>

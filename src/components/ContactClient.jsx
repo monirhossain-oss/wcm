@@ -3,8 +3,7 @@ import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { HiCloudUpload, HiArrowLeft, HiX } from 'react-icons/hi';
 import emailjs from '@emailjs/browser';
-import Lottie from "lottie-react";
-import contactAnim from '../../public/animation/contact.json';
+import ContactAnimation from './ContactAnimation';
 import { useLocale } from '@/context/LocaleContext';
 
 const ContactClient = () => {
@@ -72,7 +71,7 @@ const ContactClient = () => {
                 {/* --- Animation (Left Side) --- */}
                 <div className="hidden lg:flex bg-white dark:bg-slate-900/50 rounded-l-2xl border border-r-0 border-gray-100 dark:border-slate-800 items-center justify-center p-8">
                     <div className="w-full h-full max-h-[500px]">
-                        <Lottie animationData={contactAnim} loop={true} autoplay={true} />
+                        <ContactAnimation />
                     </div>
                 </div>
 
