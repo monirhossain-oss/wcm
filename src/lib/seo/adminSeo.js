@@ -1,4 +1,5 @@
 import { PUBLIC_SEO_PAGES } from './publicPageRegistry';
+import { BRAND_SUFFIX, withBrand } from './brandTitle';
 
 const labels = {
   home: 'Home', about: 'About Us', contact: 'Contact', 'how-it-works': 'How It Works',
@@ -15,6 +16,13 @@ export const SEO_PAGE_OPTIONS = PUBLIC_SEO_PAGES.filter(({ seoKey }) => seoKey).
 // would tell an editor their pages live on localhost.
 export const seoPagePath = (pageName, languageCode) =>
   SEO_PAGE_OPTIONS.find(({ value }) => value === pageName)?.paths[languageCode] || '';
+// What a stored title actually becomes in the page's <title>. The Admin counter measures this,
+// not the raw field: a 55-character title that gains the 28-character brand suffix renders at 83,
+// and counting the field alone reported that as comfortably inside the 60-character budget.
+export const renderedTitle = (title) => withBrand(title);
+// True when the suffix will be added, so the form can show the editor where the extra length goes.
+export const addsBrandSuffix = (title) => Boolean(String(title || '').trim()) && renderedTitle(title).endsWith(BRAND_SUFFIX);
+
 export const seoDraft = (pageName = 'home', record) => ({
   pageName, title: record?.title || '', description: record?.description || '',
   keywords: record?.keywords?.join(', ') || '', ogImage: record?.ogImage || '', imageAlt: record?.imageAlt || '',

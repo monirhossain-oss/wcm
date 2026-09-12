@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import Image from 'next/image';
 import { Eye, Edit3, Trash2, Globe, Loader2, Search, X, Save, Hash, AlertCircle } from 'lucide-react';
-import { SEO_PAGE_OPTIONS as PAGE_OPTIONS, seoPagePath, seoDraft, seoPayload } from '@/lib/seo/adminSeo';
+import { SEO_PAGE_OPTIONS as PAGE_OPTIONS, seoPagePath, seoDraft, seoPayload, renderedTitle, addsBrandSuffix } from '@/lib/seo/adminSeo';
 import { DEFAULT_SOCIAL_IMAGE_PATH } from '@/lib/seo/siteConfig';
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -67,7 +67,10 @@ function ViewModal({ item, onClose }) {
     const [imageFailed, setImageFailed] = useState(false);
     if (!item) return null;
 
-    const titleTruncated = item.title?.length > 60;
+    // The page renders the stored title plus a brand suffix, so that is what the preview shows
+    // and what the counter measures — the raw field alone under-reports by up to 28 characters.
+    const renderedItemTitle = renderedTitle(item.title);
+    const titleTruncated = renderedItemTitle.length > 60;
     const descTruncated = item.description?.length > 160;
 
     return (
@@ -97,13 +100,13 @@ function ViewModal({ item, onClose }) {
                     <section>
                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2 flex items-center justify-between">
                             <span>Meta Title</span>
-                            <span className={`text-[10px] ${item.title?.length > 60 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                {item.title?.length || 0} chars
+                            <span className={`text-[10px] ${titleTruncated ? 'text-red-500' : 'text-emerald-500'}`}>
+                                {renderedItemTitle.length} chars rendered
                             </span>
                         </label>
                         <div className="p-3 md:p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
                             <p className="text-sm font-bold text-gray-900 dark:text-white leading-relaxed break-words">
-                                {item.title || '—'}
+                                {item.title ? renderedItemTitle : '—'}
                             </p>
                         </div>
                         {titleTruncated && (
@@ -162,7 +165,7 @@ function ViewModal({ item, onClose }) {
                             </p>
                             {/* Title - Google style: blue, 20px, 600px max, 1 line */}
                             <p className="text-blue-600 dark:text-blue-400 font-medium text-lg md:text-xl mb-1 line-clamp-1 break-words" style={{ maxWidth: '100%' }}>
-                                {item.title?.slice(0, 60)}{item.title?.length > 60 ? '...' : ''}
+                                {renderedItemTitle.slice(0, 60)}{titleTruncated ? '...' : ''}
                             </p>
                             {/* Description - Google style: gray, 14px, 2 lines */}
                             <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base line-clamp-2 leading-relaxed break-words">
@@ -197,7 +200,9 @@ function EditModal({ item, onClose, onSave }) {
     const [form, setForm] = useState(() => seoDraft(item.pageName, item));
     const [loading, setLoading] = useState(false);
 
-    const titleLen = form.title.length;
+    // Measured on the rendered title: what the editor types is not what Google shows.
+    const renderedFormTitle = renderedTitle(form.title);
+    const titleLen = renderedFormTitle.length;
     const descLen = form.description.length;
     const keywordCount = form.keywords ? form.keywords.split(',').filter(k => k.trim()).length : 0;
 
@@ -252,9 +257,12 @@ function EditModal({ item, onClose, onSave }) {
                                 className={getInputClasses(titleLen > 60)}
                                 required
                             />
+                            {addsBrandSuffix(form.title) && (
+                                <p className="text-[10px] text-gray-400 break-words">Renders as: {renderedFormTitle}</p>
+                            )}
                             {titleLen > 60 && (
                                 <p className="text-[10px] text-red-500 flex items-center gap-1">
-                                    <AlertCircle size={10} /> Google truncates titles over 60 characters
+                                    <AlertCircle size={10} /> Google truncates titles over 60 characters, brand suffix included
                                 </p>
                             )}
                         </div>
@@ -367,7 +375,9 @@ const SeoWorkspace = ({ languageCode, onLanguageChange }) => {
         } else setFormData((previous) => ({ ...previous, [name]: value }));
     };
 
-    const titleLen = formData.title.length;
+    // Same rule as the edit modal: the counter measures the title as rendered, suffix included.
+    const renderedFormTitle = renderedTitle(formData.title);
+    const titleLen = renderedFormTitle.length;
     const descLen = formData.description.length;
     const keywordCount = formData.keywords ? formData.keywords.split(',').filter(k => k.trim()).length : 0;
 
@@ -473,9 +483,12 @@ const SeoWorkspace = ({ languageCode, onLanguageChange }) => {
                                 className={getInputClasses(titleLen > 60)}
                                 required
                             />
+                            {addsBrandSuffix(formData.title) && (
+                                <p className="text-[10px] text-gray-400 break-words">Renders as: {renderedFormTitle}</p>
+                            )}
                             {titleLen > 60 && (
                                 <p className="text-[10px] text-red-500 flex items-center gap-1">
-                                    <AlertCircle size={10} /> Google truncates titles over 60 characters
+                                    <AlertCircle size={10} /> Google truncates titles over 60 characters, brand suffix included
                                 </p>
                             )}
                         </div>

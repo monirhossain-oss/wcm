@@ -7,16 +7,13 @@ import { NOINDEX } from './indexing';
 import { SITE_URL, DEFAULT_SOCIAL_IMAGE } from './siteConfig';
 import { getSeoByPage } from '@/lib/api';
 import { translate } from '@/lib/i18n';
-import { absoluteSiteUrl, buildLocalizedMetadata, getPublishedLanguageCodes, localizedPath } from '@/lib/localizedMetadata';
+import { absoluteSiteUrl, buildLocalizedMetadata, localizedPath } from '@/lib/localizedMetadata';
+import { getPublishedLanguageCodes } from './publishedLanguages';
+import { withBrand } from './brandTitle';
 
-export const BRAND_NAME = 'World Culture Marketplace';
-const brandPattern = /world\s+culture\s+marketplace/i;
-
-export const withBrand = (title) => {
-  const trimmed = String(title || '').trim();
-  if (!trimmed) return BRAND_NAME;
-  return brandPattern.test(trimmed) ? trimmed : `${trimmed} | ${BRAND_NAME}`;
-};
+// The brand rule lives in its own dependency-free module so the Admin form can measure a title
+// exactly as this file renders it. Re-exported here because existing callers import it from here.
+export { BRAND_NAME, withBrand } from './brandTitle';
 
 const resolveImageUrl = (value) => {
   if (!value) return DEFAULT_SOCIAL_IMAGE;
@@ -54,7 +51,11 @@ export const buildPageMetadata = async ({ pageId, locale = 'en', path, fallback,
   const seo = resolved || await resolvePageSeo({ pageId, locale, fallback });
   const absoluteTitle = withBrand(title || seo.title);
   const finalDescription = description || seo.description;
-  const languages = indexable ? await getPublishedLanguageCodes() : [];
+  // A page must always advertise itself. The published list can degrade to English alone when the
+  // language lookup fails, and a French URL that lists only an English alternate is a hreflang
+  // conflict — search engines read it as a cluster whose members disagree. We are rendering this
+  // URL in this language, so its own alternate is known without asking anyone.
+  const languages = indexable ? [...new Set([locale, ...await getPublishedLanguageCodes()])] : [];
   const pathFor = (code) => (path ? localizedPath(path, code) : seo.page.paths[code]);
   const languageUrls = Object.fromEntries(languages.filter((code) => pathFor(code)).map((code) => [code, absoluteSiteUrl(pathFor(code))]));
   const canonical = absoluteSiteUrl(pathFor(locale));

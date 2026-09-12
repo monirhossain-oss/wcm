@@ -26,7 +26,8 @@ function load(path, mocks = {}, globals = {}) {
 }
 const registry = load('src/lib/seo/publicPageRegistry.js');
 const site = load('src/lib/seo/siteConfig.js');
-const helper = load('src/lib/seo/adminSeo.js', { './publicPageRegistry': registry, './siteConfig': site });
+const brandTitle = load('src/lib/seo/brandTitle.js');
+const helper = load('src/lib/seo/adminSeo.js', { './publicPageRegistry': registry, './siteConfig': site, './brandTitle': brandTitle });
 const path = 'src/app/(dashboards)/admin/seo-settings/page.jsx';
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 function nodes(element) {
@@ -87,6 +88,28 @@ function environment(get) {
   return { mount, workspace: (languageCode) => mount(wrapper.type, { languageCode, onLanguageChange: (value) => switches.push(value) }),
     posts, deletes, errors, confirmations, switches, denyWrites: () => { rejectWrite = true; } };
 }
+
+test('the SEO form measures a title the way the page renders it', () => {
+  assert.equal(helper.renderedTitle('How It Works'), 'How It Works | World Culture Marketplace');
+  assert.equal(helper.renderedTitle('How It Works').length, 40);
+  // A title that already names the brand keeps its own wording and gains nothing.
+  const named = 'World Culture Marketplace - Authentic Crafts';
+  assert.equal(helper.renderedTitle(named), named);
+  assert.equal(helper.addsBrandSuffix('How It Works'), true);
+  assert.equal(helper.addsBrandSuffix(named), false);
+  assert.equal(helper.addsBrandSuffix(''), false);
+  assert.equal(helper.renderedTitle(''), 'World Culture Marketplace');
+  // The case the old counter got wrong: a field well inside 60 that renders well past it.
+  const stored = 'Global Cultural Creators - Verified Artisans';
+  assert.ok(stored.length < 60, 'the raw field looks safe');
+  assert.ok(helper.renderedTitle(stored).length > 60, 'the rendered title is not');
+  // Both forms must measure the rendered title, not the field.
+  const page = readFileSync(new URL(path, root), 'utf8');
+  assert.ok(!page.includes('form.title.length'), 'the edit form must not count the raw field');
+  assert.ok(!page.includes('formData.title.length'), 'the create form must not count the raw field');
+  assert.ok(page.includes('renderedTitle(form.title)'), 'the edit form must measure the rendered title');
+  assert.ok(page.includes('renderedTitle(formData.title)'), 'the create form must measure the rendered title');
+});
 
 test('admin options and previews use real mapped URLs, including FAQ and legacy SEO keys', () => {
   assert.equal(helper.SEO_PAGE_OPTIONS.length, 15);
