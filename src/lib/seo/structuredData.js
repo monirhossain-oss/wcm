@@ -58,6 +58,39 @@ export const buildWebPageSchema = ({ locale = 'en', url, name, description }) =>
   publisher: { '@id': ORGANIZATION_ID },
 });
 
+// FAQ rich results describe question and answer pairs the page actually serves. This was left out
+// while the answers loaded in the browser — markup would have claimed content the HTML did not
+// carry — and became honest once the FAQ list started rendering on the server. Answers are stored
+// as HTML; tags are stripped so the node carries text rather than markup.
+const plainText = (value) => String(value || '')
+  .replace(/<[^>]*>/g, ' ')
+  .replace(/&nbsp;/g, ' ')
+  .replace(/&amp;/g, '&')
+  .replace(/&lt;/g, '<')
+  .replace(/&gt;/g, '>')
+  .replace(/&quot;/g, '"')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+export const buildFaqPageSchema = ({ faqs = [], locale = 'en', url }) => {
+  const entries = faqs
+    .map((faq) => ({ question: plainText(faq?.question), answer: plainText(faq?.answer) }))
+    .filter(({ question, answer }) => question && answer);
+  if (!entries.length) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${url}#faq`,
+    inLanguage: locale,
+    isPartOf: { '@id': webPageId(url) },
+    mainEntity: entries.map(({ question, answer }) => ({
+      '@type': 'Question',
+      name: question,
+      acceptedAnswer: { '@type': 'Answer', text: answer },
+    })),
+  };
+};
+
 // Resolves the WebPage node for a request path, or null when the path is not a base page we ask
 // search engines to index. Detail routes (listings/blogs/creator profiles) keep their own JSON-LD,
 // noindex routes and filtered/search Explore URLs get none, and aliases are redirected before they

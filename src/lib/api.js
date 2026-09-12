@@ -1,5 +1,28 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+// ==================== FAQ API ====================
+
+// Server-side FAQ read. The public FAQ page used to fetch this in the browser, which left the
+// served HTML with category buttons and a spinner: 1,147 words of question and answer text that no
+// crawler ever saw. A missing or failed response returns an empty list, and the page still renders.
+export async function getFaqs(languageCode) {
+  if (!BASE_URL) return [];
+
+  try {
+    const query = languageCode && languageCode !== 'en' ? `?language=${encodeURIComponent(languageCode)}` : '';
+    // Editors change FAQ text through Admin, not by the minute; a five-minute window keeps the page
+    // off the API on every request without making an edit wait long to appear.
+    const res = await fetch(`${BASE_URL}/api/faqs${query}`, { next: { revalidate: 300 } });
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    return Array.isArray(data) ? data : data.data || [];
+  } catch (error) {
+    console.error('Error fetching FAQs:', error);
+    return [];
+  }
+}
+
 // ==================== CATEGORIES API ====================
 
 // ✅ Cache categories for 1 hour
