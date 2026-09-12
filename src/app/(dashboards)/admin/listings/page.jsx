@@ -53,6 +53,10 @@ export default function AdminListings() {
   const [filter, setFilter] = useState('all');
   const [viewItem, setViewItem] = useState(null);
 
+  // Translations shown beside the English master while reviewing a listing.
+  const [translations, setTranslations] = useState(null);
+  const [translationsError, setTranslationsError] = useState('');
+
   // Restriction States
   const [showRestrictionModal, setShowRestrictionModal] = useState(false);
   const [restrictionType, setRestrictionType] = useState('rejected'); // 'rejected' or 'blocked'
@@ -132,6 +136,47 @@ export default function AdminListings() {
       setActionLoading(false);
     }
   };
+
+  // Record search accepts an object id in `search`, so one call returns every language for this
+  // listing. Approving the listing publishes them all, so the Admin has to see them before deciding.
+  useEffect(() => {
+    if (!viewItem?._id) {
+      setTranslations(null);
+      setTranslationsError('');
+      return undefined;
+    }
+    let cancelled = false;
+    setTranslations(null);
+    setTranslationsError('');
+    api
+      .get('/api/translations/admin/records', {
+        params: { businessObjectType: 'listing', search: viewItem._id, limit: 20 },
+      })
+      .then(async (res) => {
+        const rows = (res.data?.data?.records || []).filter((row) => row.languageCode !== 'en');
+        // The search projection carries only a one-line preview, so each language is read in full.
+        const details = await Promise.all(
+          rows.map((row) =>
+            api
+              .get(`/api/translations/admin/records/${row.translationRecordId}`)
+              .then(({ data }) => data?.data?.record || null)
+              .catch(() => null)
+          )
+        );
+        if (cancelled) return;
+        setTranslations(details.filter(Boolean));
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setTranslationsError(
+            err?.response?.data?.message || 'Could not load translations for this listing.'
+          );
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [viewItem?._id]);
 
   const stats = {
     total: listings.length,
@@ -429,6 +474,73 @@ export default function AdminListings() {
                       "{viewItem.description}"
                     </p>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-2">
+                    <FiGlobe className="text-orange-500" /> Translations
+                  </h4>
+                  {translationsError ? (
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                      <p className="text-[11px] font-bold text-red-500">{translationsError}</p>
+                    </div>
+                  ) : translations === null ? (
+                    <div className="p-4 bg-gray-50 dark:bg-white/2 rounded-lg border dark:border-white/10">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        Loading…
+                      </p>
+                    </div>
+                  ) : translations.length === 0 ? (
+                    <div className="p-4 bg-gray-50 dark:bg-white/2 rounded-lg border dark:border-white/10">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        No translation prepared yet
+                      </p>
+                    </div>
+                  ) : (
+                    translations.map((record) => (
+                      <div
+                        key={record._id}
+                        className="p-4 bg-gray-50 dark:bg-white/2 rounded-lg border dark:border-white/10 space-y-3"
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="px-2 py-1 rounded-md text-[9px] font-black uppercase bg-orange-500/10 text-orange-500">
+                            {record.languageCode}
+                          </span>
+                          <span
+                            className={`px-2 py-1 rounded-md text-[9px] font-black uppercase ${
+                              record.publicationStatus === 'published'
+                                ? 'bg-green-500/10 text-green-600'
+                                : 'bg-gray-500/10 text-gray-500'
+                            }`}
+                          >
+                            {record.publicationStatus}
+                          </span>
+                          <span className="px-2 py-1 rounded-md text-[9px] font-black uppercase bg-blue-500/10 text-blue-500">
+                            {String(record.translationStatus).replace(/_/g, ' ')}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Title</p>
+                          <p className="text-[11px] font-black dark:text-white">
+                            {record.content?.title || '—'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-black text-gray-400 uppercase mb-1">
+                            Description
+                          </p>
+                          <p className="text-xs font-medium dark:text-gray-300 leading-relaxed italic">
+                            {record.content?.description || '—'}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  {viewItem.status !== 'approved' && (
+                    <p className="text-[10px] font-bold text-gray-400 leading-relaxed">
+                      Approving this listing publishes every language above at the same time.
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">

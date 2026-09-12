@@ -3,6 +3,12 @@
 // publication rules. Timestamps are only ever a stored record date — never "now".
 import { PUBLIC_SEO_PAGES, findPublicRoute } from '@/lib/seo/publicPageRegistry';
 import { buildBaseSitemapEntries, sitemapEntry, toValidDate } from '@/lib/seo/sitemapEntries';
+import { getPublishedLanguages } from '@/lib/seo/publishedLanguages';
+
+// Never generated at build time. A backend that is unreachable during a deploy used to bake an
+// English-only sitemap that then served for as long as the cache lived; resolving it per request
+// keeps the language list as fresh as the data behind it.
+export const dynamic = 'force-dynamic';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
 
@@ -23,20 +29,26 @@ const rememberLatest = (timestamps, path, value) => {
 const seoPageByKey = (pageName) => PUBLIC_SEO_PAGES.find(({ seoKey }) => seoKey && seoKey === pageName);
 
 export default async function sitemap() {
-  const [listingData, creatorData, blogData, translationData, languageData, englishSeo, frenchSeo] = await Promise.all([
+  const [listingData, creatorData, blogData, translationData, languages, englishSeo, frenchSeo] = await Promise.all([
     fetchJson(`${API_BASE_URL}/api/listings/public?limit=500&offset=0`),
     fetchJson(`${API_BASE_URL}/api/users/famous-creators?limit=500&offset=0`),
     fetchJson(`${API_BASE_URL}/api/blogs?limit=500&offset=0`),
     fetchJson(`${API_BASE_URL}/api/translations/sitemap`),
-    fetchJson(`${API_BASE_URL}/api/translations/languages`),
+    getPublishedLanguages(),
     fetchJson(`${API_BASE_URL}/api/seo/all?languageCode=en`),
     fetchJson(`${API_BASE_URL}/api/seo/all?languageCode=fr`),
   ]);
 
+  // Every other feed here may fail harmlessly: a missing listing feed costs a few detail URLs. The
+  // language list is different — losing it silently drops half the site, and a 200 that omits every
+  // French URL is acted on as the truth. A 5xx is retried instead, leaving the last good sitemap in
+  // place, so an unreadable language list aborts rather than publishes a partial site.
+  if (!languages.ok && !languages.stale) {
+    throw new Error('Sitemap aborted: the published-language list could not be read');
+  }
   // A language appears only while it is published — the same gate hreflang uses, so the sitemap
   // can never advertise a URL the page itself refuses to list as an alternate.
-  const published = (languageData?.data || []).map(({ code }) => code).filter(Boolean);
-  const locales = ['en', ...published.filter((code) => code && code !== 'en')];
+  const locales = ['en', ...languages.locales.filter((code) => code && code !== 'en')];
 
   // The two honest change signals for a base page: when its stored SEO text was last edited, and
   // when the localized CMS record behind it was last published.

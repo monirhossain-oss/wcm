@@ -16,7 +16,7 @@ import {
   FiCheckCircle,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
-import { Country, City } from 'country-state-city';
+import { loadCitiesOfCountry, loadCountries, loadCountryByCode } from '@/lib/countryData';
 import { ChevronDown, Grid, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getApiErrorMessage } from '@/lib/apiError';
@@ -56,9 +56,12 @@ export default function UserProfileForm() {
   const [agreeTerms, setAgreeTerms] = useState(false);
 
   // Watch fields for conditional logic
+  // The country table is fetched on demand (see lib/countryData.js) instead of being imported at
+  // module scope, so its 7.7 MB never sits in the first chunk of this page or of the French routes.
+  const [countries, setCountries] = useState([]);
+  const [cities, setCities] = useState([]);
   const selectedCountryCode = watch('countryCode');
   const customerType = watch('customerType');
-  const cities = selectedCountryCode ? City.getCitiesOfCountry(selectedCountryCode) : [];
 
   useEffect(() => {
     setMounted(true);
@@ -74,6 +77,24 @@ export default function UserProfileForm() {
     };
     fetchCategories();
   }, [locale]);
+
+  // Countries arrive after hydration, so the chunk never blocks the form's first paint. The guard
+  // flag drops a response that resolves after the component has gone.
+  useEffect(() => {
+    let active = true;
+    loadCountries().then((list) => { if (active) setCountries(list); }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedCountryCode) {
+      setCities([]);
+      return undefined;
+    }
+    let active = true;
+    loadCitiesOfCountry(selectedCountryCode).then((list) => { if (active) setCities(list); }).catch(() => {});
+    return () => { active = false; };
+  }, [selectedCountryCode]);
 
   useEffect(() => {
     if (user) {
@@ -115,7 +136,7 @@ export default function UserProfileForm() {
       setServerError('');
       const formData = new FormData();
 
-      const countryObj = Country.getCountryByCode(data.countryCode);
+      const countryObj = await loadCountryByCode(data.countryCode);
 
       formData.append('displayName', data.display_name);
       formData.append('businessName', data.business_name);
@@ -150,20 +171,44 @@ export default function UserProfileForm() {
   };
 
   if (!mounted) return null;
+  // ✅ Signed-out visitor: modal bondho korle ar home page-e pathano hoy na — page.jsx-er
+  // intro content-ei theke jay, ar ei CTA diye modal abar khola jay.
   if (!user) return (
-    <>
+    <div className="max-w-7xl mx-auto px-6 pt-8 pb-20">
+      <div className="rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.03] p-8 text-center">
+        <p className="text-[13px] font-bold text-gray-600 dark:text-gray-300 leading-relaxed">
+          {L('Sign in to open the creator application form.', 'Connectez-vous pour ouvrir le formulaire de candidature.')}
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3 justify-center">
+          <button
+            type="button"
+            onClick={() => setAuthModal('login')}
+            className="px-8 py-4 bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest rounded-md shadow-lg shadow-orange-500/20 hover:bg-orange-600 transition-all"
+          >
+            {L('Sign In', 'Se connecter')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setAuthModal('register')}
+            className="px-8 py-4 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-200 text-[10px] font-black uppercase tracking-widest rounded-md hover:border-orange-500 hover:text-orange-500 transition-all"
+          >
+            {L('Create Account', 'Créer un compte')}
+          </button>
+        </div>
+      </div>
+
       <LoginModal
         isOpen={authModal === 'login'}
-        onClose={() => router.push(localize('/'))}
+        onClose={() => setAuthModal(null)}
         onSwitchToRegister={() => setAuthModal('register')}
         onLoginSuccess={() => setAuthModal(null)}
       />
       <RegisterModal
         isOpen={authModal === 'register'}
-        onClose={() => router.push(localize('/'))}
+        onClose={() => setAuthModal(null)}
         onSwitchToLogin={() => setAuthModal('login')}
       />
-    </>
+    </div>
   );
 
   // --- PENDING STATE VIEW ---
@@ -207,9 +252,11 @@ export default function UserProfileForm() {
           >
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
             <div className="relative z-10 text-white px-10 text-center">
-              <h1 className="text-3xl font-black uppercase tracking-tighter text-gray-900 dark:text-white mb-6">
+              {/* ✅ decorative poster text, h1 noy — পেজের একমাত্র h1 page.jsx-এ আছে,
+                  কারণ এই প্যানেল mobile-এ hidden ar signed-out visitor-er kachhe render-i hoy na. */}
+              <p className="text-3xl font-black uppercase tracking-tighter text-gray-900 dark:text-white mb-6">
                 {L('Become a', 'Devenir')} <span className="text-orange-500">{L('Creator', 'créateur')}</span>
-              </h1>
+              </p>
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
                 {L('Unlock your professional node', 'Développez votre présence professionnelle')}
               </p>
@@ -394,7 +441,7 @@ export default function UserProfileForm() {
                   </label>
                   <select {...register('countryCode', { required: true })} className={inputStyle}>
                     <option value="">{L('Select Country', 'Sélectionnez un pays')}</option>
-                    {Country.getAllCountries().map((c) => (
+                    {countries.map((c) => (
                       <option className="dark:bg-gray-800" key={c.isoCode} value={c.isoCode}>
                         {locale === 'fr' ? (new Intl.DisplayNames(['fr'], { type: 'region' }).of(c.isoCode) || c.name) : c.name}
                       </option>

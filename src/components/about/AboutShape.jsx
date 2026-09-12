@@ -58,7 +58,7 @@ const AboutShape = ({ data }) => {
                             className="object-cover"
                             sizes="(max-width: 768px) 100vw, 50vw"
                             priority
-                            unoptimized={mainImage.includes('postimg.cc') || mainImage.includes('cloudinary')}
+                            fetchPriority="high"
                         />
                         {/* ইমেজের ওপর হালকা ওভারলে (Dark mode এর জন্য) */}
                         <div className="absolute inset-0 bg-black/5 dark:bg-black/20 pointer-events-none" />

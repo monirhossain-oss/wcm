@@ -21,7 +21,8 @@ import OwnProfilePage from '../../profile/page';
 import FavoritesPage from '../../favorites/page';
 import VerifyEmailPage from '../../verify-email/page';
 import ResetPasswordPage from '../../reset-password/[token]/page';
-import { buildLocalizedMetadata, getPublishedLanguageCodes } from '@/lib/localizedMetadata';
+import { buildLocalizedMetadata } from '@/lib/localizedMetadata';
+import { getPublishedLanguageCodes } from '@/lib/seo/publishedLanguages';
 import { NOINDEX, NOINDEX_NOFOLLOW } from '@/lib/seo/indexing';
 import { translate } from '@/lib/i18n';
 
@@ -104,7 +105,8 @@ export async function generateMetadata({ params }) {
     path,
     title: 'World Culture Marketplace',
     description: 'Discover cultural creators, stories and traditions on World Culture Marketplace.',
-    languages: await getPublishedLanguageCodes(),
+    // Same self-reference rule as the registry pages: this URL always lists its own language.
+    languages: [...new Set([resolved.locale, ...await getPublishedLanguageCodes()])],
   });
 }
 

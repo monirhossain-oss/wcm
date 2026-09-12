@@ -34,16 +34,6 @@ export const buildLocalizedMetadata = ({
   };
 };
 
-export const getPublishedLanguageCodes = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/translations/languages`, { next: { revalidate: 300 } });
-    if (!response.ok) return ['en'];
-    const payload = await response.json();
-    const codes = (payload.data || []).map(({ code }) => code);
-    return codes.includes('en') ? codes : ['en'];
-  } catch { return ['en']; }
-};
-
 export const getDynamicSeoContext = async ({ objectType, slug, locale = 'en' }) => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/translations/url/${locale}/${objectType}/${encodeURIComponent(slug)}`, {

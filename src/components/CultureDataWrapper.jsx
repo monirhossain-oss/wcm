@@ -8,8 +8,8 @@ const continentsSliderData = [
     { slug: "middle-east", image: "/Middle-East.png" },
     { slug: "europe", image: "/europe.png" },
     { slug: "africa", image: "/africa.png" },
-    { slug: "north-america", image: "/North America.png" },
-    { slug: "latin-america", image: "/Latin America.png" },
+    { slug: "north-america", image: "/north-america.png" },
+    { slug: "latin-america", image: "/latin-america.png" },
     { slug: "oceania", image: "/Oceania.png" }
 ];
 

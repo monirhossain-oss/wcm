@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { Country } from 'country-state-city';
+import { loadCountries } from '@/lib/countryData';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '@/lib/cropImage';
 import {
@@ -106,7 +106,10 @@ export default function AddListing() {
       try {
         const [catRes, allCountries] = await Promise.all([
           api.get('/api/admin/categories'),
-          Promise.resolve(Country.getAllCountries()),
+          // Fetched on demand (lib/countryData.js): the package is 7.7 MB of city data and used to
+          // sit in this page's first chunk, so opening the add-listing form downloaded all of it
+          // before anything could render.
+          loadCountries(),
         ]);
         setCategories(catRes.data);
         setCountries(allCountries.sort((a, b) => a.name.localeCompare(b.name)));

@@ -19,9 +19,9 @@ const CreatorPopover = ({ creator, item, creatorLocation }) => {
 
       {/* Cover & Avatar */}
       <div className="relative h-20 w-full bg-zinc-800">
-        <Image src={coverSrc} alt={t('favorites.coverAlt')} fill className="object-cover opacity-70" />
+        <Image src={coverSrc} alt={t('favorites.coverAlt')} fill sizes="288px" className="object-cover opacity-70" />
         <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full border-4 border-white dark:border-zinc-900 overflow-hidden bg-white">
-          <Image src={avatarSrc} alt={creatorName} fill className="object-cover" />
+          <Image src={avatarSrc} alt={creatorName} fill sizes="56px" className="object-cover" />
         </div>
       </div>
 

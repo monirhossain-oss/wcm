@@ -62,24 +62,31 @@ export async function getFooterData() {
 
 // ==================== SEO API ====================
 
-// ✅ ISR — 60 seconds পর পর refresh। pageName diye specific page er SEO data fetch kore.
+// ✅ ISR — 5 minutes por por refresh। pageName diye specific page er SEO data fetch kore.
 // generateMetadata() er moddhe use korar jonno banano.
 export async function getSeoByPage(pageName, languageCode = 'en') {
   if (!BASE_URL) return null;
 
   try {
+    // Stored SEO text changes when an admin edits it, not every few seconds. A 10-second window
+    // meant every page re-read its record constantly; with all server rendering coming from one IP,
+    // that alone could exhaust the API's rate limit and leave pages on catalog fallback text.
     const res = await fetch(`${BASE_URL}/api/seo/${encodeURIComponent(pageName)}?languageCode=${encodeURIComponent(languageCode)}`, {
-      next: { revalidate: 10 },
+      next: { revalidate: 300 },
     });
 
     // 404 mane shei page er jonno kono custom SEO set kora nai - eta error na
     if (res.status === 404) return null;
 
-    if (!res.ok) throw new Error('Failed to fetch SEO data');
+    // A rate-limited read is not a missing record: the page falls back to catalog text, which is a
+    // real SEO regression, so it is reported as itself rather than as a generic failure.
+    if (res.status === 429) throw new Error(`Rate limited by the API (retry after ${res.headers.get('Retry-After') || '?'}s)`);
+
+    if (!res.ok) throw new Error(`Failed to fetch SEO data (HTTP ${res.status})`);
 
     return res.json();
   } catch (error) {
-    console.error(`Error fetching SEO data for page "${pageName}":`, error);
+    console.error(`Error fetching SEO data for page "${pageName}":`, error.message);
     return null;
   }
 }

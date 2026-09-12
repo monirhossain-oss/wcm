@@ -13,6 +13,7 @@ import {
   FiMenu,
   FiX,
   FiActivity,
+  FiGlobe,
 } from 'react-icons/fi';
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/imageHelper';
@@ -71,6 +72,7 @@ export default function CreatorLayout({ children }) {
     { name: 'Wallet & Promotions', path: '/creator/promotions', icon: DollarSign },
     { name: 'Transactions', path: '/creator/transactions', icon: DollarSign },
     { name: 'My Listings', path: '/creator/listings', icon: FiList },
+    { name: 'Translations', path: '/creator/translations', icon: FiGlobe },
     { name: 'Add Listing', path: '/creator/add', icon: FiPlus },
   ].filter((item) => !(isBusinessRestricted && item.path === '/creator/add'));
 

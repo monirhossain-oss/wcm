@@ -62,7 +62,7 @@ export default function CultureSlider({ items, listingsLabel = 'Listings' }) {
                                 className="relative block aspect-square w-full overflow-hidden cursor-pointer group/card shadow-sm hover:shadow-xl transition-all duration-500 rounded-sm"
                             >
                                 <Image
-                                    src={item.image || '/placeholder.jpg'}
+                                    src={item.image || '/fallback-image.png'}
                                     alt={item.title}
                                     fill
                                     className="object-cover transition-transform duration-700 group-hover/card:scale-110"

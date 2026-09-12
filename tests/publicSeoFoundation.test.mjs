@@ -80,13 +80,50 @@ test('proxy forwards path-owned language, preserves request headers and French h
   }
 });
 
+test('no tracker loads until the visitor has accepted cookies', () => {
+  // Compliance-critical case: before a choice is made, neither tag may be fetched, so no recording
+  // can start and no identifying cookie can be set. Effects do not run under renderToStaticMarkup,
+  // which is exactly the "no consent yet" state — and exactly what a crawler receives.
+  const scriptStub = { __esModule: true, default: ({ id, strategy, children, src }) => React.createElement('script', { id, src, 'data-nscript': strategy }, children) };
+  const consent = load('src/hooks/useAnalyticsConsent.js');
+  for (const path of ['src/components/ClarityAnalytics.jsx', 'src/components/Analytics.jsx']) {
+    const tracker = load(path, { 'next/script': scriptStub, '@/hooks/useAnalyticsConsent': consent });
+    assert.equal(renderToStaticMarkup(React.createElement(tracker.default)), '', path);
+  }
+
+  // Both trackers defer to one rule, so the gate is asserted once, at its source. The accepted
+  // branch only runs in a browser, so its wiring is checked here rather than rendered.
+  const hook = source('src/hooks/useAnalyticsConsent.js');
+  assert.match(hook, /=== 'accepted'/);
+  assert.match(hook, /addEventListener\('cookie-consent-updated'/);
+  assert.match(hook, /addEventListener\('storage'/);
+  // Reading a blocked localStorage must not throw the whole page down.
+  assert.match(hook, /try \{[\s\S]*localStorage\.getItem[\s\S]*\} catch/);
+
+  for (const path of ['src/components/ClarityAnalytics.jsx', 'src/components/Analytics.jsx']) {
+    const text = source(path);
+    assert.match(text, /useAnalyticsConsent\(\)/, path);
+    assert.match(text, /if \(!?[A-Za-z_]*\s*(\|\|\s*!accepted|accepted)\) return null/, path);
+    assert.match(text, /strategy="afterInteractive"/, path);
+  }
+  // An unconfigured deployment must request nothing at all, so the measurement id takes no
+  // fallback: the old default was a truthy placeholder and was requested on every page.
+  assert.ok(!/NEXT_PUBLIC_GA_ID\s*\|\|/.test(source('src/components/Analytics.jsx')));
+});
+
 test('root server markup has initial locale and preserves verification, tracking and providers', async () => {
   const Provider = ({ children }) => React.createElement('div', { 'data-provider': 'preserved' }, children);
-  const font = () => ({ variable: 'test-font' });
+  // A Proxy so the stub answers for any family the layout asks for, while recording which it asked
+  // for: an unused family reintroduced later shows up here instead of shipping unnoticed.
+  const loadedFonts = new Set();
+  const fontModule = new Proxy({}, { get: (_target, family) => { loadedFonts.add(family); return () => ({ variable: 'test-font' }); } });
   for (const [locale, expected] of [['en', 'en'], ['fr', 'fr'], ['invalid', 'en']]) {
+    loadedFonts.clear();
     const layout = load('src/app/layout.jsx', {
       './globals.css': {},
-      'next/font/google': { Inter: font, Poppins: font, Roboto: font, Geist_Mono: font },
+      'next/font/google': fontModule,
+      // Clarity now lives behind a consent gate of its own; the shell only has to mount it.
+      '@/components/ClarityAnalytics': { __esModule: true, default: () => React.createElement('div', { 'data-clarity-mount': 'true' }) },
       'next/headers': { headers: async () => new Headers({ [site.REQUEST_LOCALE_HEADER]: locale }) },
       '@/context/AuthContext': { AuthProvider: Provider },
       '@/context/ListingsContext': { ListingsProvider: Provider },
@@ -108,7 +145,13 @@ test('root server markup has initial locale and preserves verification, tracking
     assert.ok(html.includes('<meta name="google-site-verification" content="test-verification"/>'));
     assert.ok(html.includes('window.testVerification=true;'));
     assert.ok(html.includes('property="fb:app_id"'));
-    assert.ok(html.includes('https://www.clarity.ms/tag/'));
+    // Analytics is mounted, not inlined: the shell must carry no tracking snippet of its own.
+    assert.ok(html.includes('data-clarity-mount="true"'));
+    assert.ok(!html.includes('clarity.ms'));
+    assert.ok(!source('src/app/layout.jsx').includes('clarity.ms'));
+
+    // Only the two font families globals.css actually renders are loaded.
+    assert.deepEqual([...loadedFonts], ['Poppins', 'Roboto']);
     assert.equal((html.match(/type="application\/ld\+json"/g) || []).length, 2);
     assert.equal((html.match(/data-provider="preserved"/g) || []).length, 2);
     assert.ok(html.includes('<main>Page content</main>'));

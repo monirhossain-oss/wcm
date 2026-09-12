@@ -11,6 +11,7 @@ const AboutPresting = () => {
                     src="https://i.postimg.cc/hv36wd4y/image-(17).jpg"
                     alt="Preserving Identity Background"
                     fill
+                    sizes="100vw"
                     className="object-cover"
                     priority
                 />

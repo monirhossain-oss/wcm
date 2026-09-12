@@ -1,33 +1,28 @@
-import { Inter, Poppins, Roboto, Geist_Mono } from 'next/font/google';
+import { Poppins, Roboto } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ListingsProvider } from '@/context/ListingsContext';
 import { getVerifications } from '@/lib/api';
 import { headers } from 'next/headers';
+import ClarityAnalytics from '@/components/ClarityAnalytics';
 import { SITE_URL as siteUrl, DEFAULT_SOCIAL_IMAGE, REQUEST_LOCALE_HEADER, REQUEST_PATH_HEADER, getDocumentLanguage } from '@/lib/seo/siteConfig';
 import { buildOrganizationSchema, buildWebSiteSchema, resolvePageStructuredData } from '@/lib/seo/structuredData';
 
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-inter',
-});
-
+// Only the two families globals.css actually renders. Inter and Geist Mono were downloaded on
+// every page and referenced by nothing, so they are gone. `display: 'swap'` keeps text visible
+// while a face loads instead of blocking the first paint on it.
 const poppins = Poppins({
   subsets: ['latin'],
   weight: ['600', '700'],
+  display: 'swap',
   variable: '--font-poppins',
 });
 
 const roboto = Roboto({
   subsets: ['latin'],
   weight: ['400', '500'],
+  display: 'swap',
   variable: '--font-roboto',
-});
-
-const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-geist-mono',
 });
 
 // ── Allowed tags only (valid <head> children) ──
@@ -197,15 +192,6 @@ export default async function RootLayout({ children }) {
     webPageSchema = null;
   }
 
-  // ✅ Microsoft Clarity tracking script (project id: xgch337gyo)
-  const clarityScript = `
-    (function(c,l,a,r,i,t,y){
-      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "xgch337gyo");
-  `;
-
   return (
     <html lang={documentLanguage.lang} dir={documentLanguage.dir}>
       <head suppressHydrationWarning>
@@ -231,19 +217,18 @@ export default async function RootLayout({ children }) {
           />
         )}
 
-        {/* ✅ Microsoft Clarity — loads on every page */}
-        <script
-          type="text/javascript"
-          dangerouslySetInnerHTML={{ __html: clarityScript }}
-        />
       </head>
       <body
-        className={`${inter.variable} ${poppins.variable} ${roboto.variable} ${geistMono.variable} antialiased`}
+        className={`${poppins.variable} ${roboto.variable} antialiased`}
         suppressHydrationWarning={true}
       >
         <ListingsProvider>
           <AuthProvider>{children}</AuthProvider>
         </ListingsProvider>
+
+        {/* ✅ Microsoft Clarity — cookie consent accept korle tobei load hoy, ar next/script
+            diye hydration-er por chole. Bishod ClarityAnalytics.jsx-e. */}
+        <ClarityAnalytics />
       </body>
     </html>
   );

@@ -45,9 +45,14 @@ const AboutContent = ({ data }) => {
                                                overflow-hidden bg-gray-200 
                                                shadow-sm"
                                 >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={`https://i.pravatar.cc/150?u=${i}`}
                                         alt="user"
+                                        width={40}
+                                        height={40}
+                                        loading="lazy"
+                                        decoding="async"
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
@@ -71,6 +76,7 @@ const AboutContent = ({ data }) => {
                                     src={gridImages[0]}
                                     alt="Pottery"
                                     fill
+                                    sizes="(max-width: 1024px) 50vw, 280px"
                                     className="object-cover transition-transform duration-700 hover:scale-105"
                                 />
                             )}
@@ -82,6 +88,7 @@ const AboutContent = ({ data }) => {
                                     src={gridImages[1]}
                                     alt="People"
                                     fill
+                                    sizes="(max-width: 1024px) 50vw, 280px"
                                     className="object-cover transition-transform duration-700 hover:scale-105"
                                 />
                             )}
@@ -96,6 +103,7 @@ const AboutContent = ({ data }) => {
                                     src={gridImages[2]}
                                     alt="Fabric"
                                     fill
+                                    sizes="(max-width: 1024px) 50vw, 280px"
                                     className="object-cover transition-transform duration-700 hover:scale-105"
                                 />
                             )}
@@ -107,6 +115,7 @@ const AboutContent = ({ data }) => {
                                     src={gridImages[3]}
                                     alt="Architecture"
                                     fill
+                                    sizes="(max-width: 1024px) 50vw, 280px"
                                     className="object-cover transition-transform duration-700 hover:scale-105"
                                 />
                             )}

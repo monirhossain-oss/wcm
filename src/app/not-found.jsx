@@ -17,6 +17,7 @@ export default async function NotFound() {
           src="/not-found.png"
           alt={translate(lang, 'notFound.imageAlt')}
           fill
+          sizes="(max-width: 768px) 100vw, 448px"
           className="object-contain"
           priority
         />

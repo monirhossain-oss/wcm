@@ -4,7 +4,7 @@ import Image from "next/image";
 import { getImageUrl } from "@/lib/imageHelper";
 import { useLocale } from "@/context/LocaleContext";
 
-const DEFAULT_IMAGE = "/hero (2).png";
+const DEFAULT_IMAGE = "/hero.png";
 
 const SliderSkeleton = () => (
     <div className="absolute inset-0 w-full h-full bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded-2xl flex flex-col justify-end p-10 md:p-16">
@@ -61,9 +61,12 @@ export default function HeroSlider({ initialSliders = [] }) {
                         src={getImageUrl(slide.imageUrl)}
                         alt={slide.alt || slide.title || t('homeHero.slideAlt')}
                         fill
-                        // ✅ Fix 4: শুধু প্রথম image priority, বাকিগুলো lazy
+                        // ✅ Slide gulo sob-i ekhoi above-the-fold box-e boshe ar kichhu second-er
+                        // moddhei dekha jay, tai kono-tai lazy noy. Ekta lazy slide LCP hoye gele
+                        // Next LCP warning dey ar sheta deri kore ase. Preload shudhu prothom-tar.
                         priority={index === 0}
-                        loading={index === 0 ? "eager" : "lazy"}
+                        loading="eager"
+                        fetchPriority={index === 0 ? 'high' : 'low'}
                         className={`object-cover transition-transform duration-[7000ms] ease-out ${index === current ? "scale-110" : "scale-100"
                             }`}
                         sizes="(max-width: 768px) 100vw, 50vw"
@@ -72,9 +75,11 @@ export default function HeroSlider({ initialSliders = [] }) {
                     <div className="absolute inset-0 flex flex-col justify-end pb-12 px-10 md:px-20 text-white">
                         {index === current && (
                             <div className="max-w-2xl animate-fade-in-up">
-                                <h1 className="text-3xl md:text-5xl font-bold mb-3 drop-shadow-2xl">
+                                {/* ✅ h2 — পেজের একমাত্র h1 HeroSection-এ আছে। স্লাইডের টাইটেল
+                                    ঘুরতে থাকা caption, তাই এটা page heading হতে পারে না। */}
+                                <h2 className="text-3xl md:text-5xl font-bold mb-3 drop-shadow-2xl">
                                     {slide.title}
-                                </h1>
+                                </h2>
                                 <p className="text-base md:text-lg opacity-90 font-medium drop-shadow-lg line-clamp-2">
                                     {slide.subTitle}
                                 </p>

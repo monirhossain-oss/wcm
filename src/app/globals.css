@@ -38,9 +38,21 @@
    2. Typography
    ======================== */
 :root {
-  --font-heading: 'Poppins', sans-serif;
-  --font-body: 'Roboto', sans-serif;
-  --font-mono: monospace;
+  /* next/font gives each family a hashed name and exposes it through these variables. Writing the
+     plain family name here never matched them, so the site quietly rendered in system fonts while
+     still downloading every face. Always go through the variable. */
+  --font-heading: var(--font-poppins), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: var(--font-roboto), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Tailwind reads its own font tokens, not the variables above, so `font-sans` used to drop out of
+   Roboto and back into the system stack wherever it appeared. Binding them here makes the utility
+   classes and the base rules agree, and it is the only place a font stack is spelled out twice. */
+@theme {
+  --font-sans: var(--font-roboto), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /* Body styles */

@@ -95,8 +95,9 @@ const AboutCulture = ({ data }) => {
                             src={previewUrl || visionData.imageCard?.imageUrl}
                             alt="Cultural Craft"
                             fill
+                            sizes="(max-width: 1024px) 100vw, 600px"
                             className="object-contain p-8 transition-transform duration-700 group-hover:scale-105"
-                            unoptimized
+                            unoptimized={previewUrl.startsWith('blob:')}
                         />
                     </div>
 

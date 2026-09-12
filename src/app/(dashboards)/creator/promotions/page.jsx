@@ -184,6 +184,35 @@ export default function PromotionsPage() {
     }
   }, [promoType]);
 
+  // মডাল খুললে: চলমান ক্যাম্পেইন অনুযায়ী ট্যাব বাছাই + সম্মতি রিসেট
+  useEffect(() => {
+    if (!selectedListing) return;
+
+    const boostBusy = !!selectedListing.activePromoTypes?.boost;
+    const ppcBusy = !!selectedListing.activePromoTypes?.ppc;
+
+    setPromoType(boostBusy && !ppcBusy ? 'ppc' : 'boost');
+    setAgreedToTerms(false);
+  }, [selectedListing]);
+
+  // মডাল খোলা অবস্থায় background scroll বন্ধ, আর Escape দিয়ে বন্ধ করা
+  useEffect(() => {
+    if (!selectedListing) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && !actionLoading) setSelectedListing(null);
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedListing, actionLoading]);
+
   const handlePurchase = async () => {
     if (isBusinessRestricted) return toast.error('Account business actions are restricted');
     if (walletBalance < currentCost) return toast.error('Insufficient credits.');
@@ -423,21 +452,47 @@ export default function PromotionsPage() {
 
       {/* Promotion Modal */}
       {selectedListing && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
-          <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-md overflow-hidden shadow-2xl border border-zinc-200 dark:border-white/10">
-            <div className="p-6 border-b border-zinc-100 dark:border-white/5 flex justify-between items-center bg-zinc-50/50 dark:bg-white/5">
-              <h3 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-3 dark:text-white">
-                <FiZap className="text-orange-500" size={18} /> Growth Protocol
-              </h3>
+        <div
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !actionLoading) setSelectedListing(null);
+          }}
+          className="fixed inset-0 z-100 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md sm:p-4"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="promo-modal-title"
+            className="animate-creatorFade bg-white dark:bg-zinc-950 w-full sm:max-w-md flex flex-col max-h-[92dvh] sm:max-h-[88dvh] rounded-t-2xl sm:rounded-md shadow-2xl border border-zinc-200 dark:border-white/10"
+          >
+            {/* Drag handle — mobile bottom sheet affordance */}
+            <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0">
+              <span className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+            </div>
+
+            <div className="shrink-0 px-5 sm:px-6 py-4 sm:py-5 border-b border-zinc-100 dark:border-white/5 flex justify-between items-center gap-4 bg-zinc-50/50 dark:bg-white/5">
+              <div className="min-w-0">
+                <h3
+                  id="promo-modal-title"
+                  className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2.5 dark:text-white"
+                >
+                  <FiZap className="text-orange-500 shrink-0" size={16} /> Growth Protocol
+                </h3>
+                <p className="mt-1.5 truncate text-[10px] font-bold text-zinc-500 tracking-tight">
+                  {selectedListing.title}
+                </p>
+              </div>
               <button
+                type="button"
+                aria-label="Close promotion dialog"
                 onClick={() => setSelectedListing(null)}
-                className="text-zinc-400 hover:text-red-500"
+                className="shrink-0 p-2 -mr-2 text-zinc-400 hover:text-red-500 transition-colors"
               >
-                <FiX size={22} />
+                <FiX size={20} />
               </button>
             </div>
 
-            <div className="p-8 space-y-8">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
               <div className="flex p-1 bg-zinc-100 dark:bg-white/5 rounded-md">
                 <button
                   disabled={hasActiveBoost}
@@ -541,18 +596,7 @@ export default function PromotionsPage() {
                 </div>
               )}
 
-              <div className="p-6 bg-orange-500/5 rounded-md border border-orange-500/10 flex justify-between items-center">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                  Total Investment
-                </span>
-                <div className="text-right">
-                  <span className="text-3xl font-black text-orange-600 italic tracking-tighter">
-                    €{currentCost.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-white/5">
+              <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-white/5">
                 <div className="space-y-1">
                   <p className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">
                     All Boost & PPC purchases are final and non-refundable.
@@ -580,6 +624,18 @@ export default function PromotionsPage() {
                   </span>
                 </label>
               </div>
+            </div>
+
+            {/* Footer — total ও action সবসময় দৃশ্যমান থাকে, স্ক্রল করলেও */}
+            <div className="shrink-0 border-t border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-950 px-5 sm:px-8 py-4 sm:py-5 space-y-4 rounded-b-none sm:rounded-b-md pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-5">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                  Total Investment
+                </span>
+                <span className="text-2xl sm:text-3xl font-black text-orange-600 italic tracking-tighter">
+                  €{currentCost.toFixed(2)}
+                </span>
+              </div>
 
               <button
                 onClick={handlePurchase}
@@ -590,7 +646,7 @@ export default function PromotionsPage() {
                   currentCost < 5 ||
                   !agreedToTerms
                 }
-                className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-md font-black uppercase text-[10px] tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20 disabled:hover:bg-zinc-900"
+                className="w-full py-4 sm:py-5 px-3 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-md font-black uppercase text-[10px] tracking-[0.2em] sm:tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20 disabled:hover:bg-zinc-900"
               >
                 {actionLoading
                   ? 'Initializing...'

@@ -105,7 +105,7 @@ const StorySection = ({ data, refresh }) => {
                     <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider">Main Image</label>
                     <div className="relative aspect-[4/3] bg-[#0d0d0d] rounded-xl border border-gray-800 overflow-hidden group">
                         <img
-                            src={previewUrl || data?.mainImage || "/placeholder.jpg"}
+                            src={previewUrl || data?.mainImage || "/fallback-image.png"}
                             alt="Story"
                             className="w-full h-full object-cover opacity-60"
                         />

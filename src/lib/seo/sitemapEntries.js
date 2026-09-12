@@ -25,19 +25,34 @@ export const toValidDate = (value) => {
 // A sitemap entry claims a change date only when something actually recorded one. Stamping the
 // current time on every crawl would tell search engines the whole site changed continuously,
 // which makes lastModified worthless for the pages that really did change.
-export const sitemapEntry = ({ path, lastModified, priority }) => {
+export const sitemapEntry = ({ path, lastModified, priority, alternates }) => {
   const date = toValidDate(lastModified);
   const entry = { url: absoluteUrl(path), changeFrequency: 'weekly', priority };
-  return date ? { ...entry, lastModified: date } : entry;
+  const dated = date ? { ...entry, lastModified: date } : entry;
+  return alternates ? { ...dated, alternates } : dated;
+};
+
+// hreflang for one registry page, as every locale that has a path for it. The sitemap carries the
+// same annotation the pages themselves emit, so the two can never disagree about the cluster, and
+// x-default is the unprefixed English URL exactly as in the page metadata.
+const languageAlternates = (page, locales) => {
+  const languages = Object.fromEntries(locales
+    .filter((locale) => page.paths[locale])
+    .map((locale) => [locale, absoluteUrl(page.paths[locale])]));
+  if (Object.keys(languages).length < 2) return undefined;
+  return { languages: { ...languages, 'x-default': languages.en || absoluteUrl(page.paths.en) } };
 };
 
 // `locales` are the published language codes; a language the registry has no path for contributes
 // nothing, so an enabled-but-unmapped language can never produce an invented URL.
 export const buildBaseSitemapEntries = ({ locales = ['en'], lastModifiedByPath } = {}) => {
   const timestamps = lastModifiedByPath || new Map();
-  return SITEMAP_BASE_PAGES.flatMap((page) => locales.flatMap((locale) => {
-    const path = page.paths[locale];
-    if (!path) return [];
-    return [sitemapEntry({ path, lastModified: timestamps.get(path), priority: page.id === 'home' ? 1 : 0.5 })];
-  }));
+  return SITEMAP_BASE_PAGES.flatMap((page) => {
+    const alternates = languageAlternates(page, locales);
+    return locales.flatMap((locale) => {
+      const path = page.paths[locale];
+      if (!path) return [];
+      return [sitemapEntry({ path, lastModified: timestamps.get(path), priority: page.id === 'home' ? 1 : 0.5, alternates })];
+    });
+  });
 };

@@ -16,6 +16,7 @@ import {
   FiSearch,
   FiFilter,
   FiLayers,
+  FiGlobe,
 } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import { useRouter } from 'next/navigation';
@@ -385,6 +386,12 @@ export default function MyListings() {
                           onClick={() => openEditModal(item)}
                           color={item.status === 'blocked' ? 'opacity-20' : 'hover:bg-orange-600'}
                           label="Edit"
+                        />
+                        <ActionButton
+                          icon={FiGlobe}
+                          onClick={() => router.push(`/creator/translations/listing/${item._id}`)}
+                          color="hover:bg-emerald-600"
+                          label="Translations"
                         />
                         <ActionButton
                           icon={FiTrash2}
