@@ -21,7 +21,7 @@ function load(path, mocks = {}, globals = {}) {
   });
   const loaded = { exports: {} };
   vm.runInNewContext(code, {
-    module: loaded, exports: loaded.exports, React, URL, Headers, console,
+    module: loaded, exports: loaded.exports, React, URL, Headers, console, setTimeout, clearTimeout,
     process: { env }, ...globals,
     require: (name) => (name in mocks ? mocks[name] : require(name)),
   });
@@ -36,6 +36,7 @@ const i18n = load('src/lib/i18n/index.js', {
   '@/lib/seo/publicPageRegistry': registry,
 });
 const catalogs = { en: i18n.catalogs.en, fr: i18n.catalogs.fr };
+const brandTitle = load('src/lib/seo/brandTitle.js');
 const indexing = load('src/lib/seo/indexing.js', {
   '@/constants/continentData': load('src/constants/continentData.js'),
   '@/lib/exploreSlug': load('src/lib/exploreSlug.js'),
@@ -54,8 +55,13 @@ function metadataModule({ records = {}, languages = ['en', 'fr'] } = {}) {
       return records[`${pageName}:${languageCode}`] || null;
     },
   };
+  const publishedLanguages = load('src/lib/seo/publishedLanguages.js', {}, {
+    fetch: async () => ({ ok: true, json: async () => ({ data: languages.map((code) => ({ code })) }) }),
+  });
   const pageMetadata = load('src/lib/seo/pageMetadata.js', {
+    './brandTitle': load('src/lib/seo/brandTitle.js'),
     './publicPageRegistry': registry, './siteConfig': site, './indexing': indexing,
+    './publishedLanguages': publishedLanguages,
     '@/lib/api': api, '@/lib/i18n': i18n, '@/lib/localizedMetadata': localized,
   });
   return { ...pageMetadata, requested, api, i18n, localized };
@@ -164,6 +170,92 @@ test('an unpublished language drops its alternate but keeps x-default English', 
   assert.equal(english.alternates.languages['x-default'], 'https://site.test/blogs');
 });
 
+// ── Self-referencing hreflang (issue 2) ────────────────────────────────────────────────────────
+
+test('a page always advertises its own language, even when the language lookup fails', async () => {
+  // The failure mode this guards: the lookup degrades to English alone, the French page keeps a
+  // French canonical, and its alternates list only English — a cluster that disagrees with itself.
+  const offline = load('src/lib/seo/publishedLanguages.js', {}, { fetch: async () => { throw new Error('offline'); } });
+  const localized = load('src/lib/localizedMetadata.js', { '@/lib/seo/siteConfig': site });
+  const pageMetadata = load('src/lib/seo/pageMetadata.js', {
+    './brandTitle': load('src/lib/seo/brandTitle.js'),
+    './publicPageRegistry': registry, './siteConfig': site, './indexing': indexing,
+    './publishedLanguages': offline,
+    '@/lib/api': { getSeoByPage: async () => null }, '@/lib/i18n': i18n, '@/lib/localizedMetadata': localized,
+  });
+
+  const french = await pageMetadata.buildPageMetadata({ pageId: 'about', locale: 'fr' });
+  assert.equal(french.alternates.canonical, 'https://site.test/fr/about-us');
+  assert.equal(french.alternates.languages.fr, french.alternates.canonical);
+  assert.equal(french.alternates.languages['x-default'], 'https://site.test/about-us');
+
+  const english = await pageMetadata.buildPageMetadata({ pageId: 'about', locale: 'en' });
+  assert.equal(english.alternates.languages.en, english.alternates.canonical);
+});
+
+// Every indexable public page, in both languages, must ship the complete set. This walks the whole
+// registry rather than sampling, so a page added later cannot quietly go out with half its metadata.
+test('every managed page carries complete metadata in both languages', async () => {
+  const metadataApi = metadataModule();
+  const pages = registry.PUBLIC_SEO_PAGES.filter(({ seoKey, indexing }) => seoKey && indexing !== 'noindex');
+  assert.ok(pages.length >= 15, `expected the managed pages, found ${pages.length}`);
+
+  for (const page of pages) {
+    for (const locale of ['en', 'fr']) {
+      const where = `${page.id}:${locale}`;
+      const metadata = await metadataApi.buildPageMetadata({ pageId: page.id, locale });
+      const canonical = `https://site.test${page.paths[locale] === '/' ? '' : page.paths[locale]}`;
+
+      // Title and description: present, and the brand suffix appears exactly once.
+      const title = metadata.title.absolute;
+      assert.ok(title && title.trim(), `${where}: title`);
+      assert.equal((title.match(/World Culture Marketplace/g) || []).length, 1, `${where}: one brand suffix`);
+      assert.ok(metadata.description && metadata.description.trim(), `${where}: description`);
+      assert.ok(metadata.keywords?.length, `${where}: keywords`);
+
+      // Canonical points at this page in this language, never at the other one.
+      assert.equal(metadata.alternates.canonical, canonical, `${where}: canonical`);
+
+      // hreflang: both languages plus x-default, and the page advertises itself.
+      const languages = metadata.alternates.languages;
+      assert.equal(languages[locale], canonical, `${where}: self-referencing hreflang`);
+      assert.deepEqual(Object.keys(languages).sort(), ['en', 'fr', 'x-default'], `${where}: hreflang set`);
+      assert.equal(languages['x-default'], languages.en, `${where}: x-default is the English URL`);
+
+      // Social cards carry the same URL, the right locale and an image with alt text.
+      assert.equal(metadata.openGraph.url, canonical, `${where}: og:url`);
+      assert.equal(metadata.openGraph.locale, locale === 'fr' ? 'fr_FR' : 'en_US', `${where}: og:locale`);
+      assert.equal(metadata.openGraph.title, title, `${where}: og:title`);
+      assert.ok(metadata.openGraph.images?.[0]?.url, `${where}: og:image`);
+      assert.ok(metadata.openGraph.images[0].alt, `${where}: og:image alt`);
+      assert.equal(metadata.twitter.card, 'summary_large_image', `${where}: twitter card`);
+      assert.ok(metadata.twitter.images?.[0]?.url, `${where}: twitter image`);
+
+      // Indexable pages must not carry a robots override that would contradict the alternates.
+      assert.equal(metadata.robots, undefined, `${where}: no noindex on an indexable page`);
+    }
+  }
+});
+
+test('a language list that omits English keeps the languages it does report', async () => {
+  // The old gate discarded the whole payload unless English was in it, so a response listing only
+  // French produced an English-only site.
+  const lookup = load('src/lib/seo/publishedLanguages.js', {}, {
+    fetch: async () => ({ ok: true, json: async () => ({ data: [{ code: 'fr' }] }) }),
+  });
+  const { locales, ok } = await lookup.getPublishedLanguages();
+  assert.deepEqual([...locales].sort(), ['en', 'fr']);
+  assert.equal(ok, true);
+});
+
+test('a failed lookup is reported as failed, not as an English-only site', async () => {
+  const lookup = load('src/lib/seo/publishedLanguages.js', {}, { fetch: async () => ({ ok: false }) });
+  const result = await lookup.getPublishedLanguages();
+  assert.deepEqual([...result.locales], ['en']);
+  assert.equal(result.ok, false);
+  assert.equal(result.stale, false);
+});
+
 test('the brand suffix is applied exactly once', async () => {
   const module = metadataModule({
     records: {
@@ -200,6 +292,100 @@ test('explore keeps localized filter URLs and reuses the resolved record', async
   assert.equal(metadata.alternates.languages['x-default'], 'https://site.test/explore/pottery/asia');
   assert.equal(metadata.title.absolute, 'Poterie de Asie | Titre administrateur | World Culture Marketplace');
   assert.deepEqual(module.requested, ['explore:fr']);
+});
+
+// Loads the Explore page's own generateMetadata against stubbed categories, so the composition
+// under test is the page's, not the shared helper's.
+function exploreModule({ locale = 'en', records = {} } = {}) {
+  const metadata = metadataModule({ records });
+  const api = {
+    ...metadata.api,
+    getCategories: async () => [{ _id: 'c1', title: 'Textiles' }, { _id: 'c2', title: 'Pottery' }],
+    // No published category translation: the page must then keep the name built from the URL.
+    getLocalizedCategoryTitles: async () => new Map(),
+  };
+  return load('src/app/(public)/explore/[[...filters]]/page.jsx', {
+    '../ExploreClient': { __esModule: true, default: () => null },
+    '@/constants/continentData': load('src/constants/continentData.js'),
+    '@/lib/api': api,
+    '@/lib/seo/pageMetadata': metadata,
+    '@/lib/seo/indexing': indexing,
+    '@/lib/exploreSlug': load('src/lib/exploreSlug.js'),
+    '@/lib/i18n': i18n,
+  });
+}
+
+test('every filtered Explore URL describes its own filters, never one shared sentence', async () => {
+  const storedExplore = { title: 'Stored explore title', description: 'Stored explore description used by the unfiltered page.' };
+  for (const locale of ['en', 'fr']) {
+    const page = exploreModule({ records: { 'explore:en': storedExplore, 'explore:fr': storedExplore } });
+    const describe = async (filters) => (await page.generateMetadata({ params: Promise.resolve({ filters }), locale })).description;
+
+    const categoryRegion = await describe(['textiles', 'asia']);
+    const categoryOnly = await describe(['textiles']);
+    const regionOnly = await describe(['asia']);
+    const unfiltered = await describe([]);
+
+    const filtered = [categoryRegion, categoryOnly, regionOnly];
+    assert.equal(new Set(filtered).size, 3, locale + ': the three filter shapes must not share a description');
+    for (const description of filtered) {
+      assert.ok(description.length <= 160, locale + ': description is ' + description.length + ' chars: ' + description);
+      assert.ok(description.length >= 60, locale + ': description is too thin: ' + description);
+      assert.notEqual(description, storedExplore.description, locale + ': a filtered URL must not reuse the stored record');
+      assert.ok(!description.includes('undefined'), locale + ': ' + description);
+    }
+    // The stored record still owns the unfiltered page — this change narrows where it applies, not whether.
+    assert.equal(unfiltered, storedExplore.description, locale + ': /explore keeps its stored description');
+    // Each description opens with the same filter name its title and H1 use.
+    assert.ok(categoryRegion.startsWith('Textiles '), locale + ': ' + categoryRegion);
+    assert.ok(categoryOnly.startsWith('Textiles '), locale + ': ' + categoryOnly);
+    assert.ok(regionOnly.startsWith(i18n.translate(locale, 'explore.culturalHeritage')), locale + ': ' + regionOnly);
+  }
+});
+
+test('French filter descriptions use the ready-made elided region phrases', async () => {
+  const page = exploreModule();
+  const describe = async (filters) => (await page.generateMetadata({ params: Promise.resolve({ filters }), locale: 'fr' })).description;
+  // "de Asie" and "de Moyen-Orient" are the wrong forms these catalog phrases exist to avoid.
+  assert.match(await describe(['textiles', 'asia']), /d\u2019Asie/);
+  assert.match(await describe(['asia']), /d\u2019Asie/);
+  assert.match(await describe(['middle-east']), /du Moyen-Orient/);
+  for (const filters of [['textiles', 'asia'], ['asia'], ['middle-east']]) {
+    assert.ok(!(await describe(filters)).includes('de Asie'), 'no unelided region name');
+  }
+});
+
+test('no catalog title renders past the 60 characters a search result shows', () => {
+  // The brand suffix costs 28 characters, so a catalog title that looks short can still render long.
+  for (const locale of ['en', 'fr']) {
+    for (const { id, seoKey } of registry.PUBLIC_SEO_PAGES) {
+      if (!seoKey) continue;
+      const rendered = brandTitle.withBrand(i18n.translate(locale, 'seo.' + id + '.title'));
+      assert.ok(rendered.length <= 60, locale + ' ' + id + ': ' + rendered.length + ' chars - ' + rendered);
+    }
+  }
+});
+
+test('a filtered Explore title carries the filter and the brand, not the stored page title', async () => {
+  const storedExplore = {
+    title: 'Explore Global Cultural Collections - Handmade Crafts & Artisan Art | WCM',
+    description: 'Stored explore description.',
+  };
+  for (const locale of ['en', 'fr']) {
+    const page = exploreModule({ records: { 'explore:en': storedExplore, 'explore:fr': storedExplore } });
+    const titleFor = async (filters) => (await page.generateMetadata({ params: Promise.resolve({ filters }), locale })).title.absolute;
+
+    for (const filters of [['textiles', 'asia'], ['textiles'], ['asia']]) {
+      const title = await titleFor(filters);
+      assert.ok(!title.includes(storedExplore.title), locale + ': the stored page title must not stack into a filtered title');
+      assert.ok(title.endsWith(' | World Culture Marketplace'), locale + ': ' + title);
+      // A long category and a long region can still push past 60; what the template must not do is
+      // add a second title of its own, which is what took these URLs past 120 characters.
+      assert.ok(title.length <= 70, locale + ': ' + title.length + ' chars - ' + title);
+    }
+    // The unfiltered page still renders the stored title exactly as the admin wrote it.
+    assert.equal(await titleFor([]), storedExplore.title + ' | World Culture Marketplace');
+  }
 });
 
 test('an unmanaged page id is rejected instead of emitting broken metadata', async () => {
@@ -246,6 +432,9 @@ test('the French catch-all dispatches base pages and leaves the legacy FAQ alias
   const catchAll = load('src/app/(public)/[locale]/[[...segments]]/page.jsx', Object.fromEntries([
     ['next/navigation', { notFound() { throw new Error('notFound'); } }],
     ['@/lib/localizedMetadata', localized], ['@/lib/i18n', i18n], ['@/lib/seo/indexing', indexing],
+    ['@/lib/seo/publishedLanguages', load('src/lib/seo/publishedLanguages.js', {}, {
+      fetch: async () => ({ ok: true, json: async () => ({ data: [{ code: 'en' }, { code: 'fr' }] }) }),
+    })],
     ...[['../../about-us/page', 'about'], ['../../blogs/page', 'blogs'], ['../../blogs/[id]/page', 'blog-detail'],
       ['../../creators/page', 'creators'], ['../../explore/[[...filters]]/page', 'explore'], ['../../faqUs/page', 'faq'],
       ['../../how-it-works/page', 'how-it-works'], ['../../listings/[id]/page', 'listing'], ['../../profile/[id]/page', 'profile-detail'],

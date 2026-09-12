@@ -13,6 +13,14 @@ function formatText(slug) {
     return text.replace(/\band\b/g, '&');
 }
 
+// ── Shared helper: description ekta bakko, tai prothom okkhor boro hoy ──
+// A category name built from the URL slug arrives lowercase ("textiles"). A published translation
+// already arrives capitalised, and upper-casing one character is a no-op there.
+function sentenceCase(text) {
+    const value = String(text || '');
+    return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+}
+
 // ── Shared helper: URL filters theke category/continent/search bujhe ana ──
 // generateMetadata() ar ExplorePage() dutoy eta call kore, tai logic ekbar e lekha + duplicate bug hoy na
 function resolveExploreFilters(filters = []) {
@@ -94,16 +102,30 @@ export async function generateMetadata({ params, locale = 'en' }) {
     const isFiltered = category !== 'All' || continent !== 'All Regions';
     const localized = await resolveFilterNames({ category, continent, locale, categories });
 
+    // A filtered title is the filter phrase plus the one brand suffix buildPageMetadata adds. The
+    // stored Explore title used to sit between them, which pushed a two-filter URL past 120
+    // characters — roughly twice what a search result shows. The stored title still owns /explore.
+    // Title and description take the same three branches so a filtered URL never describes itself
+    // as something the heading contradicts. The description is composed rather than prefixed onto
+    // the stored record: one stored sentence in front of every category/region combination is a
+    // duplicate description by construction, which is exactly what the audit found. Each branch
+    // ends differently, so two filtered URLs never share a sentence, and every result stays inside
+    // the ~160 characters a search result shows. The stored record still owns unfiltered /explore.
+    // Each phrase leads with the filter name and no article, so French gender and number never
+    // have to agree with a category title; region elision (d'Asie, du Moyen-Orient) already comes
+    // ready-made from homeDiscovery.regionsOf / regionsHeritage.
     if (isFiltered) {
         if (category !== 'All' && continent !== 'All Regions') {
-            finalTitle = `${localized.category} ${localized.fromRegion} | ${base.title}`;
+            finalTitle = `${sentenceCase(localized.category)} ${localized.fromRegion}`;
+            finalDescription = `${sentenceCase(localized.category)} ${localized.fromRegion} ${translate(locale, 'explore.descriptionCategoryRegion')}`;
         } else if (category !== 'All') {
-            finalTitle = `${translate(locale, 'explore.categoryCollections')} : ${localized.category} | ${base.title}`;
+            finalTitle = `${translate(locale, 'explore.categoryCollections')} : ${sentenceCase(localized.category)}`;
+            finalDescription = `${sentenceCase(localized.category)} ${translate(locale, 'explore.descriptionCategory')}`;
         } else if (continent !== 'All Regions') {
-            finalTitle = `${translate(locale, 'explore.culturalHeritage')} ${localized.ofRegion} | ${base.title}`;
+            finalTitle = `${translate(locale, 'explore.culturalHeritage')} ${localized.ofRegion}`;
+            finalDescription = `${translate(locale, 'explore.culturalHeritage')} ${localized.ofRegion} ${translate(locale, 'explore.descriptionRegion')}`;
         }
 
-        finalDescription = `${translate(locale, 'explore.filteredDescription')} ${finalDescription}`;
         finalKeywords = [localized.category, localized.continent, ...finalKeywords];
     }
 

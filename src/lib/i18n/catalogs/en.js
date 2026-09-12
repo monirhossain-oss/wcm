@@ -98,6 +98,23 @@ const en = {
   contact: {
     back: 'Back', heading: 'Get in touch', intro: 'Our support team will get in touch with you shortly.', fullName: 'Full Name', namePlaceholder: 'Your Name', email: 'Email Address', emailPlaceholder: 'example@mail.com', subject: 'Subject', subjectPlaceholder: 'What is this regarding?', message: 'Message Details', messagePlaceholder: 'How can we help you?', attachments: 'Attachments (Optional)', addFiles: 'Add screenshot or files', previewAlt: 'Attachment preview', removeAttachment: 'Remove attachment', sending: 'Sending...', send: 'Send Message', success: 'Message Sent Successfully!', error: 'Something went wrong. Please try again.',
   },
+  // Server-rendered intro for /become-creator. The application form itself is auth-gated and
+  // client-only, so this block is the whole page for a signed-out visitor and for a crawler.
+  becomeCreator: {
+    badge: 'Creator Applications',
+    heading: 'Become a Creator on World Culture Marketplace',
+    lead: 'Share your craft with the people looking for it. A creator profile gives your work, your technique and the culture behind it a lasting place in a catalogue that visitors browse by region and by tradition.',
+    requirementsHeading: 'What your application needs',
+    requirements: [
+      'A display name and a short biography describing your practice.',
+      'The country and city you work from, so your work appears in the right regional collections.',
+      'A category that matches your craft, such as textiles, ceramics or jewellery.',
+      'A profile photograph and a cover image that show your work.',
+    ],
+    reviewHeading: 'What happens next',
+    review: 'Our moderation team reviews every application for authenticity and cultural relevance. You keep full ownership of everything you upload and can withdraw a listing at any time. Approved creators can start publishing straight away.',
+    signInNote: 'You need an account before you can apply. Sign in or register to open the application form.',
+  },
   howItWorks: {
     process: 'Our Process',
     fallback: { title: 'Empowering Global Craftsmanship', description: "World Cultural Marketplace (WCM) brings the world's finest artisans under one roof. Follow these simple steps to start your journey with us.", steps: [
@@ -136,7 +153,9 @@ const en = {
     imageAlt: 'Cultural representation',
   },
   explore: {
-    filteredDescription: 'Explore the best cultural creations matching these filters.',
+    descriptionCategoryRegion: 'on World Culture Marketplace — handmade pieces from independent cultural creators.',
+    descriptionCategory: 'on World Culture Marketplace — browse the full collection of handmade pieces from independent creators.',
+    descriptionRegion: 'on World Culture Marketplace — crafts, textiles and traditions from independent creators.',
     heading: 'Explore World Culture', categoryCollections: 'Collections', culturalHeritage: 'Cultural Heritage', from: 'from',
     searchPlaceholder: 'Search culture, art, traditions...', endResults: 'End of results.', noListings: 'No listings found',
     noListingsDescription: "We couldn't find anything matching your current filters or search.", scrollLeft: 'Scroll categories left', scrollRight: 'Scroll categories right',
