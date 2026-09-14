@@ -91,7 +91,7 @@ export default function PromotionsPage() {
   const initData = async () => {
     try {
       const [listRes, userRes] = await Promise.all([
-        api.get('/api/listings/my-listings'),
+        api.get('/api/listings/my-listings', { params: { language: locale } }),
         api.get('/api/users/me'),
       ]);
 
@@ -272,7 +272,9 @@ export default function PromotionsPage() {
                             {item.title}
                           </p>
                           <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest italic">
-                            {item.category?.title || t('creator.promotions.assetFallback')}
+                            {item.localizedLabels?.category ||
+                              item.category?.title ||
+                              t('creator.promotions.assetFallback')}
                           </p>
                         </div>
                       </div>
@@ -322,7 +324,7 @@ export default function PromotionsPage() {
                     <td className="px-8 py-5 text-right">
                       <div className="flex justify-end items-center gap-3">
                         <Link
-                          href={`/creator/promotions/${item._id}`}
+                          href={localize(`/creator/promotions/${item._id}`)}
                           className="flex items-center gap-2 px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
                         >
                           <FiEye size={14} />

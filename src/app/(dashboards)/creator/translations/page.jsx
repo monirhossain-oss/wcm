@@ -55,7 +55,7 @@ const loadAvailability = async (entries) => {
 
 export default function CreatorTranslationsPage() {
   const { user } = useAuth();
-  const { t, tf } = useLocale();
+  const { localize, t, tf } = useLocale();
   const [listings, setListings] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [availability, setAvailability] = useState({});
@@ -265,7 +265,7 @@ export default function CreatorTranslationsPage() {
           {renderBadges('profile')}
           {user?._id && (
             <Link
-              href={`/creator/translations/creatorProfile/${user._id}`}
+              href={localize(`/creator/translations/creatorProfile/${user._id}`)}
               className="ml-auto inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-[11px] font-black uppercase tracking-widest bg-orange-500 text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600 transition-all"
             >
               {t('creator.common.open')} <FiArrowRight size={13} />
@@ -322,7 +322,7 @@ export default function CreatorTranslationsPage() {
                 </div>
                 {renderBadges(String(listing._id))}
                 <Link
-                  href={`/creator/translations/listing/${listing._id}`}
+                  href={localize(`/creator/translations/listing/${listing._id}`)}
                   className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] font-black uppercase tracking-widest border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-orange-500/40 hover:text-orange-500 transition-all"
                 >
                   {t('creator.common.open')} <FiArrowRight size={12} />

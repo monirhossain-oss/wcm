@@ -30,12 +30,12 @@ const api = axios.create({
   withCredentials: true,
 });
 
-const LISTINGS_CACHE_KEY = 'wcm_listings_cache';
+const listingsCacheKey = (locale) => `wcm_listings_cache_${locale}`;
 const CACHE_TIME = 1 * 60 * 1000;
 
 export default function MyListings() {
   const { isBusinessRestricted } = useAuth();
-  const { locale, t, tf } = useLocale();
+  const { locale, localize, t, tf } = useLocale();
   const [listings, setListings] = useState([]);
   const [metaData, setMetaData] = useState({ categories: [], tags: [] });
   const [loading, setLoading] = useState(true);
@@ -59,7 +59,7 @@ export default function MyListings() {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    const cachedData = localStorage.getItem(LISTINGS_CACHE_KEY);
+    const cachedData = localStorage.getItem(listingsCacheKey(locale));
     if (cachedData) {
       const { data, timestamp } = JSON.parse(cachedData);
       const isExpired = Date.now() - timestamp > CACHE_TIME;
@@ -84,10 +84,10 @@ export default function MyListings() {
       if (isForce) setRefreshing(true);
       else setLoading(true);
 
-      const res = await api.get('/api/listings/my-listings');
+      const res = await api.get('/api/listings/my-listings', { params: { language: locale } });
       const data = res.data;
 
-      localStorage.setItem(LISTINGS_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+      localStorage.setItem(listingsCacheKey(locale), JSON.stringify({ data, timestamp: Date.now() }));
       setListings(data);
       setLastSynced(Date.now());
       if (isForce) toast.success(t('creator.listings.synced'));
@@ -102,7 +102,7 @@ export default function MyListings() {
 
   const fetchMeta = async () => {
     try {
-      const res = await api.get('/api/listings/meta-data');
+      const res = await api.get('/api/listings/meta-data', { params: { language: locale } });
       setMetaData(res.data);
     } catch (err) {
       console.error(err);
@@ -165,6 +165,8 @@ export default function MyListings() {
           data.append(key, editFormData[key]);
         }
       });
+      // An edit can be written in a different language than the listing was created in.
+      data.append('sourceLanguage', locale);
       if (editImage) data.append('image', editImage);
 
       const res = await api.put(`/api/listings/update/${editingItem._id}`, data);
@@ -173,7 +175,7 @@ export default function MyListings() {
       );
       setListings(updatedListings);
       localStorage.setItem(
-        LISTINGS_CACHE_KEY,
+        listingsCacheKey(locale),
         JSON.stringify({ data: updatedListings, timestamp: Date.now() })
       );
       setEditingItem(null);
@@ -193,7 +195,7 @@ export default function MyListings() {
       const filtered = listings.filter((l) => l._id !== id);
       setListings(filtered);
       localStorage.setItem(
-        LISTINGS_CACHE_KEY,
+        listingsCacheKey(locale),
         JSON.stringify({ data: filtered, timestamp: Date.now() })
       );
       toast.success(t('creator.listings.deleted'));
@@ -343,10 +345,12 @@ export default function MyListings() {
                       </p>
                       <div className="flex items-center gap-2 mt-1.5">
                         <span className="text-[8px] font-black uppercase text-orange-500 bg-orange-500/5 px-2 py-0.5 rounded-md border border-orange-500/10 italic">
-                          {item.category?.title || t('creator.listings.categoryFallback')}
+                          {item.localizedLabels?.category ||
+                            item.category?.title ||
+                            t('creator.listings.categoryFallback')}
                         </span>
                         <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">
-                          {item.tradition}
+                          {item.localizedLabels?.tradition || item.tradition}
                         </span>
                       </div>
                     </td>
@@ -388,7 +392,7 @@ export default function MyListings() {
                       <div className="flex items-center justify-end gap-2.5">
                         <ActionButton
                           icon={FiEye}
-                          onClick={() => router.push(`/listings/${item._id}`)}
+                          onClick={() => router.push(localize(`/listings/${item._id}`))}
                           color="hover:bg-blue-600"
                           label={t('creator.listings.actionView')}
                         />
@@ -401,7 +405,7 @@ export default function MyListings() {
                         />
                         <ActionButton
                           icon={FiGlobe}
-                          onClick={() => router.push(`/creator/translations/listing/${item._id}`)}
+                          onClick={() => router.push(localize(`/creator/translations/listing/${item._id}`))}
                           color="hover:bg-emerald-600"
                           label={t('creator.listings.actionTranslations')}
                         />

@@ -197,3 +197,153 @@ test('the .fr host redirect still wins over dashboard handling', () => {
   assert.equal(result.status, 301);
   assert.equal(result.url, 'https://worldculturemarketplace.com/fr/creator');
 });
+
+// ── No hand-written dashboard URLs ───────────────────────────────────────────
+//
+// Every internal link inside the dashboard has to go through `localize()`. A literal `/creator/...`
+// works perfectly in English and silently drops the reader back to English from `/fr/creator`,
+// which is exactly the kind of bug that only shows up when somebody clicks it. This walks the
+// source instead of the rendered page so a new link cannot reintroduce it.
+import { readdirSync, statSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const sourceFiles = (directory) =>
+  readdirSync(directory).flatMap((entry) => {
+    const target = path.join(directory, entry);
+    return statSync(target).isDirectory()
+      ? sourceFiles(target)
+      : /\.(js|jsx)$/.test(entry)
+        ? [target]
+        : [];
+  });
+
+const DASHBOARD_SOURCES = [
+  fileURLToPath(new URL('../src/app/(dashboards)/creator/', import.meta.url)),
+  fileURLToPath(new URL('../src/components/creator/', import.meta.url)),
+];
+
+// A route the reader can be sent to: an href, or a router navigation.
+const NAVIGATION = /(?:href=\{?|router\.(?:push|replace)\()\s*[`'"]\/(creator|listings|profile|blogs|explore|favorites)\b/g;
+
+test('no dashboard navigation hardcodes a path instead of localizing it', () => {
+  const offenders = [];
+  for (const directory of DASHBOARD_SOURCES) {
+    for (const file of sourceFiles(directory)) {
+      const source = readFileSync(file, 'utf8');
+      source.split(/\r?\n/).forEach((line, index) => {
+        NAVIGATION.lastIndex = 0;
+        if (NAVIGATION.test(line)) {
+          offenders.push(`${path.basename(path.dirname(file))}/${path.basename(file)}:${index + 1}`);
+        }
+      });
+    }
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    `these navigations need localize(): ${offenders.join(', ')}`
+  );
+});
+
+// ── localize() as the pages actually call it ─────────────────────────────────
+//
+// The source scan above proves every link goes through `localize()`; this proves `localize()` sends
+// them somewhere right. The provider is rendered with its hooks stubbed and the resulting context
+// value is read directly, so these are the very strings the pages put in an href.
+const React = require('react');
+
+function loadComponent(path, mocks = {}, globals = {}) {
+  const { code } = transformSync(readFileSync(new URL(path, root), 'utf8'), {
+    filename: path,
+    babelrc: false,
+    configFile: false,
+    presets: [
+      [
+        require.resolve('next/dist/compiled/babel/preset-env'),
+        { targets: { node: 'current' }, modules: 'commonjs' },
+      ],
+      [require.resolve('next/dist/compiled/babel/preset-react'), { runtime: 'classic' }],
+    ],
+  });
+  const loaded = { exports: {} };
+  vm.runInNewContext(code, {
+    module: loaded,
+    exports: loaded.exports,
+    React,
+    console,
+    URL,
+    process: { env: { NEXT_PUBLIC_API_BASE_URL: 'https://api.test' } },
+    ...globals,
+    require: (name) => (name in mocks ? mocks[name] : require(name)),
+  });
+  return loaded.exports;
+}
+
+const i18n = load('src/lib/i18n/index.js', {
+  './catalogs/en': load('src/lib/i18n/catalogs/en.js'),
+  './catalogs/fr': load('src/lib/i18n/catalogs/fr.js'),
+  './format': load('src/lib/i18n/format.js'),
+  './catalogs/creator/en': load('src/lib/i18n/catalogs/creator/en.js'),
+  './catalogs/creator/fr': load('src/lib/i18n/catalogs/creator/fr.js'),
+  '@/lib/seo/publicPageRegistry': load('src/lib/seo/publicPageRegistry.js'),
+});
+
+const dashboardContext = (pathname) => {
+  const Provider = loadComponent(
+    'src/context/DashboardLocaleProvider.jsx',
+    {
+      react: {
+        ...React,
+        useEffect: () => {},
+        useState: (initial) => [typeof initial === 'function' ? initial() : initial, () => {}],
+        useCallback: (fn) => fn,
+        useMemo: (fn) => fn(),
+      },
+      'next/navigation': { usePathname: () => pathname },
+      '@/lib/i18n': i18n,
+      '@/lib/i18n/format': load('src/lib/i18n/format.js'),
+      '@/lib/localePreference': preference,
+      './LocaleContext': { LocaleContext: { Provider: 'ctx' } },
+    },
+    { document: { documentElement: {} }, fetch: () => ({ then: () => ({ then: () => ({ catch: () => {} }) }) }) }
+  ).default;
+  return Provider({ initialLocale: 'en', children: null }).props.value;
+};
+
+test('a French reader keeps the prefix on every link the dashboard renders', () => {
+  const { locale, localize } = dashboardContext('/fr/creator');
+  assert.equal(locale, 'fr');
+
+  for (const [from, expected] of [
+    // Dashboard routes — the ones that were dropping back to English.
+    ['/creator/transactions', '/fr/creator/transactions'],
+    ['/creator/promotions', '/fr/creator/promotions'],
+    ['/creator/add', '/fr/creator/add'],
+    ['/creator/promotions/abc123', '/fr/creator/promotions/abc123'],
+    ['/creator/translations', '/fr/creator/translations'],
+    ['/creator/translations/listing/abc123', '/fr/creator/translations/listing/abc123'],
+    ['/creator/listings', '/fr/creator/listings'],
+    // Links out to the public site.
+    ['/listings/abc123', '/fr/listings/abc123'],
+    ['/profile', '/fr/profile'],
+    ['/boost-terms-and-ppc', '/fr/boost-terms-and-ppc'],
+    ['/', '/fr'],
+  ]) {
+    assert.equal(localize(from), expected, from);
+  }
+
+  // Query and hash survive.
+  assert.equal(localize('/creator/listings?page=2#top'), '/fr/creator/listings?page=2#top');
+  // External links are left alone.
+  assert.equal(localize('https://stripe.com/x'), 'https://stripe.com/x');
+  assert.equal(localize('mailto:a@b.c'), 'mailto:a@b.c');
+});
+
+test('an English reader gets unprefixed links', () => {
+  const { locale, localize } = dashboardContext('/creator');
+  assert.equal(locale, 'en');
+  for (const path of ['/creator/transactions', '/listings/abc123', '/profile', '/']) {
+    assert.equal(localize(path), path, path);
+  }
+});

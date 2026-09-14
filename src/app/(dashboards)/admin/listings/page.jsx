@@ -104,6 +104,10 @@ export default function AdminListings() {
     fetchListings();
   }, [fetchListings]);
 
+  // Which language version the Admin is looking at. Approval now applies to this one alone, so it
+  // has to be part of the moderation state rather than a display-only preference.
+  const [reviewLanguage, setReviewLanguage] = useState('en');
+
   const handleStatusUpdate = async (id, newStatus, code, notes) => {
     setActionLoading(true);
     try {
@@ -111,6 +115,9 @@ export default function AdminListings() {
         status: newStatus,
         reasonCode: code,
         additionalReason: notes,
+        // Only this version publishes. English has no translation record — approving it publishes
+        // the listing's own master text.
+        languageCode: newStatus === 'approved' ? reviewLanguage : undefined,
       });
 
       const updated = listings.map((l) =>
@@ -138,7 +145,25 @@ export default function AdminListings() {
   };
 
   // Record search accepts an object id in `search`, so one call returns every language for this
-  // listing. Approving the listing publishes them all, so the Admin has to see them before deciding.
+  // listing. The Admin reviews one version at a time and approves that one, so every language has to
+  // be loaded before the toggle can show any of them.
+  useEffect(() => {
+    setReviewLanguage('en');
+  }, [viewItem?._id]);
+
+  // What the Admin is actually reading. English comes off the listing itself; any other language
+  // comes from that language's record, falling back to the master while it is still loading.
+  const reviewedContent =
+    reviewLanguage === 'en'
+      ? { title: viewItem?.title, description: viewItem?.description }
+      : (() => {
+          const record = (translations || []).find((row) => row.languageCode === reviewLanguage);
+          return {
+            title: record?.content?.title || viewItem?.title,
+            description: record?.content?.description || viewItem?.description,
+          };
+        })();
+
   useEffect(() => {
     if (!viewItem?._id) {
       setTranslations(null);
@@ -450,6 +475,18 @@ export default function AdminListings() {
               </div>
 
               <div className="space-y-6">
+                {/* The text under review. English is the listing's own master; any other language is
+                    that language's translation record, shown exactly as it will publish. */}
+                <div className="p-4 bg-gray-50 dark:bg-white/2 rounded-lg border dark:border-white/10 space-y-2">
+                  <p className="text-[9px] font-black text-gray-400 uppercase">
+                    {reviewLanguage.toUpperCase()} version under review
+                  </p>
+                  <p className="text-sm font-black dark:text-white">{reviewedContent.title}</p>
+                  <p className="text-xs font-medium dark:text-gray-300 leading-relaxed italic">
+                    {reviewedContent.description}
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-gray-50 dark:bg-white/2 rounded-lg border dark:border-white/10">
                     <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Tradition</p>
@@ -478,8 +515,46 @@ export default function AdminListings() {
 
                 <div className="space-y-2">
                   <h4 className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-2">
-                    <FiGlobe className="text-orange-500" /> Translations
+                    <FiGlobe className="text-orange-500" /> Versions
                   </h4>
+                  {/* One version is approved at a time. English is the master stored on the listing;
+                      every other language is a translation record with its own publication state. */}
+                  <div className="flex flex-wrap gap-2">
+                    {['en', ...(translations || []).map((record) => record.languageCode)].map(
+                      (code) => {
+                        const record = (translations || []).find((row) => row.languageCode === code);
+                        const isPublished =
+                          code === 'en'
+                            ? viewItem.status === 'approved'
+                            : record?.publicationStatus === 'published';
+                        return (
+                          <button
+                            key={code}
+                            type="button"
+                            onClick={() => setReviewLanguage(code)}
+                            className={`px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all ${
+                              reviewLanguage === code
+                                ? 'bg-orange-500 border-orange-500 text-white'
+                                : 'border-gray-200 dark:border-white/10 text-gray-500 hover:border-orange-500/50'
+                            }`}
+                          >
+                            {code}
+                            <span
+                              className={`ml-2 inline-block w-1.5 h-1.5 rounded-full align-middle ${
+                                isPublished ? 'bg-green-500' : 'bg-gray-400'
+                              }`}
+                            />
+                          </button>
+                        );
+                      }
+                    )}
+                  </div>
+                  {viewItem.sourceLanguage && viewItem.sourceLanguage !== 'en' && (
+                    <p className="text-[10px] font-bold text-orange-500">
+                      The creator wrote this listing in {viewItem.sourceLanguage.toUpperCase()}. The
+                      English master is a translation of their words.
+                    </p>
+                  )}
                   {translationsError ? (
                     <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
                       <p className="text-[11px] font-bold text-red-500">{translationsError}</p>
@@ -611,14 +686,18 @@ export default function AdminListings() {
                   <button
                     onClick={() => handleStatusUpdate(viewItem._id, 'approved')}
                     disabled={
-                      viewItem.status === 'approved' ||
+                      (viewItem.status === 'approved' && reviewLanguage === 'en') ||
                       viewItem.status === 'blocked' ||
-                      actionLoading
+                      actionLoading ||
+                      (reviewLanguage !== 'en' &&
+                        !(translations || []).some((row) => row.languageCode === reviewLanguage))
                     }
                     className="h-14 bg-green-600 text-white rounded-lg cursor-pointer font-black text-[10px] uppercase tracking-widest hover:bg-green-700 transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <FiCheck size={18} />
-                    {viewItem.status === 'approved' ? 'Approved' : 'Approve'}
+                    {viewItem.status === 'approved' && reviewLanguage === 'en'
+                      ? 'Approved'
+                      : `Approve ${reviewLanguage.toUpperCase()}`}
                   </button>
 
                   {/* REJECT BUTTON */}

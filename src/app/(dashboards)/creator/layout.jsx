@@ -62,7 +62,7 @@ export default function CreatorLayout({ children }) {
 
   const handleLogout = async () => {
     await logoutUser();
-    router.push('/');
+    router.push(localize('/'));
   };
 
   if (loading) {

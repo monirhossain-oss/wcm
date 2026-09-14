@@ -36,7 +36,7 @@ const api = axios.create({
 });
 
 export default function CreatorDashboard() {
-  const { locale, t, tf } = useLocale();
+  const { locale, localize, t, tf } = useLocale();
   const [stats, setStats] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +153,7 @@ export default function CreatorDashboard() {
             </p>
           </div>
           <Link
-            href="/creator/promotions"
+            href={localize('/creator/promotions')}
             className="px-6 py-2.5 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-md hover:bg-red-600"
           >
             {t('creator.overview.recharge')}
@@ -319,7 +319,7 @@ export default function CreatorDashboard() {
                 </p>
               </div>
               <Link
-                href="/creator/add"
+                href={localize('/creator/add')}
                 className="bg-orange-600 p-4 rounded-lg hover:bg-orange-500 transition-all shadow-lg shadow-orange-600/20"
               >
                 <FiArrowUpRight className="text-white" size={20} />
@@ -336,7 +336,7 @@ export default function CreatorDashboard() {
             {t('creator.overview.ledger.heading')}
           </h4>
           <Link
-            href="/creator/transactions"
+            href={localize('/creator/transactions')}
             className="text-[9px] font-black text-orange-500 uppercase tracking-widest hover:tracking-[0.4em] transition-all"
           >
             {t('creator.overview.ledger.viewAll')}

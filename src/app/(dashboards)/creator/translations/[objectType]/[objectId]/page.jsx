@@ -66,7 +66,7 @@ const sameContent = (left, right) =>
 export default function CreatorTranslationWorkspacePage() {
   const { objectType, objectId } = useParams();
   const { user } = useAuth();
-  const { locale, t, tf } = useLocale();
+  const { locale, localize, t, tf } = useLocale();
 
   const labelFor = useCallback(
     (field) => (FIELD_KEYS.has(field) ? t(`creator.workspace.fields.${field}`) : field),
@@ -261,7 +261,7 @@ export default function CreatorTranslationWorkspacePage() {
           title={t('creator.workspace.unsupportedTitle')}
           description={t('creator.workspace.unsupportedDescription')}
           action={
-            <Link href="/creator/translations">
+            <Link href={localize('/creator/translations')}>
               <Button variant="secondary">{t('creator.workspace.backToTranslations')}</Button>
             </Link>
           }
@@ -278,7 +278,7 @@ export default function CreatorTranslationWorkspacePage() {
         <Banner tone="error" icon={FiAlertCircle}>
           {error}
         </Banner>
-        <Link href="/creator/translations">
+        <Link href={localize('/creator/translations')}>
           <Button variant="secondary">
             <FiArrowLeft size={13} /> {t('creator.workspace.backToTranslations')}
           </Button>
@@ -295,7 +295,7 @@ export default function CreatorTranslationWorkspacePage() {
 
       <div className="flex flex-wrap items-center gap-4">
         <Link
-          href="/creator/translations"
+          href={localize('/creator/translations')}
           className="w-10 h-10 rounded-xl border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 hover:text-orange-500 hover:border-orange-500/40 transition-all"
         >
           <FiArrowLeft size={16} />

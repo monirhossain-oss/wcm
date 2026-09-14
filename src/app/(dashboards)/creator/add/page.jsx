@@ -30,7 +30,7 @@ const api = axios.create({
 });
 
 export default function AddListing() {
-  const { t, tf } = useLocale();
+  const { locale, localize, t, tf } = useLocale();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -109,7 +109,7 @@ export default function AddListing() {
     const fetchMeta = async () => {
       try {
         const [catRes, allCountries] = await Promise.all([
-          api.get('/api/admin/categories'),
+          api.get('/api/admin/categories', { params: { language: locale } }),
           // Fetched on demand (lib/countryData.js): the package is 7.7 MB of city data and used to
           // sit in this page's first chunk, so opening the add-listing form downloaded all of it
           // before anything could render.
@@ -124,7 +124,7 @@ export default function AddListing() {
       }
     };
     fetchMeta();
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     if (!formData.category) {
@@ -137,7 +137,9 @@ export default function AddListing() {
     const fetchCategoryAssets = async () => {
       setAssetsLoading(true);
       try {
-        const res = await api.get(`/api/admin/category-assets/${formData.category}`);
+        const res = await api.get(`/api/admin/category-assets/${formData.category}`, {
+          params: { language: locale },
+        });
         if (res.data.success) {
           setCategoryTags(res.data.tags);
           setRegions(res.data.regions);
@@ -157,7 +159,7 @@ export default function AddListing() {
       }
     };
     fetchCategoryAssets();
-  }, [formData.category]);
+  }, [formData.category, locale]);
 
   const handleUrlChange = (index, value) => {
     const newUrls = [...formData.externalUrls];
@@ -232,9 +234,10 @@ export default function AddListing() {
         ? customTradition.trim()
         : formData.tradition;
 
+      // masterTitle is what the API stores; title is only what this creator was shown.
       const finalTags = formData.culturalTags.map((tagId) => {
         const tag = categoryTags.find((t) => t._id === tagId);
-        return tag ? tag.title : tagId;
+        return tag ? tag.masterTitle || tag.title : tagId;
       });
 
       Object.keys(formData).forEach((key) => {
@@ -251,12 +254,16 @@ export default function AddListing() {
         }
       });
 
+      // The language this listing was written in. The server keeps an English master whatever the
+      // creator typed, and stores their own words as that language's version.
+      data.append('sourceLanguage', locale);
+
       data.append('image', finalCroppedImage, 'listing-image.jpg');
 
       const response = await api.post('/api/listings/add', data);
 
       if (response.data.success || response.status === 201 || response.status === 200) {
-        setTimeout(() => { router.push('/creator/listings'); router.refresh(); }, 100);
+        setTimeout(() => { router.push(localize('/creator/listings')); router.refresh(); }, 100);
       }
     } catch (err) {
       console.error(err);
@@ -531,7 +538,11 @@ export default function AddListing() {
                   {assetsLoading ? t('creator.common.loading') : t('creator.add.selectCulture')}
                 </option>
                 {regions.map((r) => (
-                  <option key={r._id} value={r.title} className="bg-white dark:bg-[#1f1f1f]">
+                  <option
+                    key={r._id}
+                    value={r.masterTitle || r.title}
+                    className="bg-white dark:bg-[#1f1f1f]"
+                  >
                     {r.title}
                   </option>
                 ))}
@@ -574,9 +585,13 @@ export default function AddListing() {
                 <option value="">
                   {assetsLoading ? t('creator.common.loading') : t('creator.add.selectTradition')}
                 </option>
-                {traditions.map((t) => (
-                  <option key={t._id} value={t.title} className="bg-white dark:bg-[#1f1f1f]">
-                    {t.title}
+                {traditions.map((tradition) => (
+                  <option
+                    key={tradition._id}
+                    value={tradition.masterTitle || tradition.title}
+                    className="bg-white dark:bg-[#1f1f1f]"
+                  >
+                    {tradition.title}
                   </option>
                 ))}
                 <option value="others" className="bg-orange-50 text-orange-600 font-black">{t('creator.add.othersOption')}</option>
