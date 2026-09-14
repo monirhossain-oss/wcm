@@ -176,6 +176,7 @@ test('manual and saved-language switches preserve verification query and reset p
       react: { ...React, useEffect: (fn) => effects.push(fn), useState: () => [[{ code: 'en' }, { code: 'fr' }], () => {}], useRef: () => ({ current: false }), useCallback: (fn) => fn, useMemo: (fn) => fn() },
       'next/navigation': { usePathname: () => pathname, useRouter: () => ({ push: (url) => pushed.push(url) }) },
       '@/lib/i18n/catalogs/en': en, '@/lib/i18n/catalogs/fr': fr,
+      '@/lib/i18n/format': loadPage('src/lib/i18n/format.js'),
       '@/lib/seo/publicPageRegistry': registry,
     }, {
       window: { location: { search: '?token=a%2Bb&source=email', hash: '#notice' } },

@@ -3,6 +3,8 @@
 // Building blocks for the Creator translation pages. They follow the creator shell's language:
 // white / #0c0c0c surfaces, hairline borders, orange accent and black uppercase micro-labels.
 import { FiLoader } from 'react-icons/fi';
+import { useLocale } from '@/context/LocaleContext';
+import { format } from '@/lib/i18n/format';
 
 export const cx = (...values) => values.filter(Boolean).join(' ');
 
@@ -82,7 +84,10 @@ const availabilityTones = {
   'Not available': 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400',
 };
 
+// `state` stays the backend's English value — it keys both the colour and the catalog entry — so
+// the wire format is untouched and only the rendered word follows the reader's language.
 export function AvailabilityBadge({ languageCode, state, className }) {
+  const { t } = useLocale();
   return (
     <span
       className={cx(
@@ -92,7 +97,7 @@ export function AvailabilityBadge({ languageCode, state, className }) {
       )}
     >
       {languageCode && <span className="opacity-60">{languageCode}</span>}
-      {state}
+      {t(`creator.availability.${state}`, state)}
     </span>
   );
 }
@@ -142,23 +147,36 @@ export function EmptyState({ icon: Icon, title, description, action }) {
   );
 }
 
-export const Spinner = ({ label = 'Loading…' }) => (
-  <div className="flex items-center justify-center gap-3 px-6 py-14 text-gray-400">
-    <FiLoader size={16} className="animate-spin" />
-    <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
-  </div>
-);
+export const Spinner = ({ label }) => {
+  const { t } = useLocale();
+  return (
+    <div className="flex items-center justify-center gap-3 px-6 py-14 text-gray-400">
+      <FiLoader size={16} className="animate-spin" />
+      <span className="text-[10px] font-black uppercase tracking-widest">
+        {label || t('creator.common.loading')}
+      </span>
+    </div>
+  );
+};
 
-export const formatDateTime = (value) =>
-  value ? new Date(value).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+// Both take the locale explicitly: they are plain functions, so they cannot read the context, and
+// passing `undefined` would follow the browser's language rather than the one the reader picked.
+export const formatDateTime = (value, locale = 'en') =>
+  value
+    ? new Date(value).toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })
+    : '—';
 
-export const relativeTime = (value) => {
-  if (!value) return '—';
+export const relativeTime = (value, t) => {
+  const dash = '—';
+  if (!value) return dash;
   const minutes = Math.round((Date.now() - new Date(value).getTime()) / 60_000);
-  if (Number.isNaN(minutes)) return '—';
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes} min ago`;
+  if (Number.isNaN(minutes)) return dash;
+  if (minutes < 1) return t('creator.relativeTime.justNow');
+  if (minutes < 60) return format(t('creator.relativeTime.minutes'), { count: minutes });
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours} h ago`;
-  return `${Math.round(hours / 24)} d ago`;
+  if (hours < 24) return format(t('creator.relativeTime.hours'), { count: hours });
+  return format(t('creator.relativeTime.days'), { count: Math.round(hours / 24) });
 };

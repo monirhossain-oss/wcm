@@ -18,6 +18,7 @@ import {
   FiXCircle,
 } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 import {
   AvailabilityBadge,
   Banner,
@@ -46,17 +47,11 @@ import { getTranslationErrorMessage } from '../../_services/translationErrors';
 
 // Only the two object types the backend lets a Creator own reach this page. Anything else is an
 // Admin-managed object and `assertCreatorOwnsBusinessObject()` would reject it anyway.
-const SUPPORTED_OBJECT_TYPES = {
-  listing: 'Listing',
-  creatorProfile: 'Creator profile',
-};
+const SUPPORTED_OBJECT_TYPES = new Set(['listing', 'creatorProfile']);
 
-const FIELD_LABELS = {
-  title: 'Title',
-  description: 'Description',
-  name: 'Display name',
-  bio: 'Biography',
-};
+// Field names come from the backend's source content, so the catalog is keyed by that same name and
+// an unknown field falls back to showing the raw key rather than nothing.
+const FIELD_KEYS = new Set(['title', 'description', 'name', 'bio']);
 
 const SHORT_FIELDS = new Set(['title', 'name']);
 
@@ -65,14 +60,18 @@ const SHORT_FIELDS = new Set(['title', 'name']);
 const POLL_INTERVAL_MS = 6000;
 const POLL_ATTEMPTS = 10;
 
-const labelFor = (field) => FIELD_LABELS[field] || field;
-
 const sameContent = (left, right) =>
   JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
 
 export default function CreatorTranslationWorkspacePage() {
   const { objectType, objectId } = useParams();
   const { user } = useAuth();
+  const { locale, t, tf } = useLocale();
+
+  const labelFor = useCallback(
+    (field) => (FIELD_KEYS.has(field) ? t(`creator.workspace.fields.${field}`) : field),
+    [t]
+  );
 
   const [workspace, setWorkspace] = useState(null);
   const [languages, setLanguages] = useState([]);
@@ -86,7 +85,7 @@ export default function CreatorTranslationWorkspacePage() {
   const [waitingForSuggestion, setWaitingForSuggestion] = useState(false);
   const pollRef = useRef(null);
 
-  const isSupported = Boolean(SUPPORTED_OBJECT_TYPES[objectType]);
+  const isSupported = SUPPORTED_OBJECT_TYPES.has(objectType);
   const canEdit = user?.status === 'active';
 
   const stopPolling = useCallback(() => {
@@ -117,10 +116,10 @@ export default function CreatorTranslationWorkspacePage() {
         const published = (languagesResponse.data?.data || []).filter((language) => !language.isSource);
         setLanguages(published);
         setActiveLanguage((current) => current || published[0]?.code || '');
-        if (!data) setError('This item has no translation workspace yet.');
+        if (!data) setError(t('creator.workspace.noWorkspace'));
       } catch (requestError) {
         if (!cancelled) {
-          setError(getTranslationErrorMessage(requestError, 'Could not open this translation workspace.'));
+          setError(getTranslationErrorMessage(requestError, t, 'creator.workspace.openFailed'));
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -129,7 +128,7 @@ export default function CreatorTranslationWorkspacePage() {
     return () => {
       cancelled = true;
     };
-  }, [fetchWorkspace, isSupported]);
+  }, [fetchWorkspace, isSupported, t]);
 
   useEffect(() => stopPolling, [stopPolling]);
 
@@ -169,7 +168,7 @@ export default function CreatorTranslationWorkspacePage() {
       if (successMessage) toast.success(successMessage);
       return true;
     } catch (requestError) {
-      toast.error(getTranslationErrorMessage(requestError, 'That did not work.'));
+      toast.error(getTranslationErrorMessage(requestError, t, 'creator.workspace.actionFailed'));
       return false;
     } finally {
       setBusy('');
@@ -186,7 +185,7 @@ export default function CreatorTranslationWorkspacePage() {
           translatedContent: draft,
           expectedVersion: record?.versionNumber,
         }),
-      'Your translation is live.'
+      t('creator.workspace.saved')
     );
 
   const handleRegenerate = async () => {
@@ -197,7 +196,7 @@ export default function CreatorTranslationWorkspacePage() {
           targetLanguageCode: activeLanguage,
           sourceVersion: record?.metadata?.sourceVersion,
         }),
-      'Working on a new suggestion.'
+      t('creator.workspace.regenerateQueued')
     );
     if (!started) return;
     setWaitingForSuggestion(true);
@@ -223,11 +222,11 @@ export default function CreatorTranslationWorkspacePage() {
           mergedContent: action === 'manual_merge' ? draft : undefined,
           expectedVersion: proposal.expectedTranslationVersion,
         }),
-      'The suggestion is live.'
+      t('creator.workspace.proposalAccepted')
     );
 
   const handleDiscard = () =>
-    runAction('discard', () => discardProposal(proposal._id), 'Suggestion discarded.');
+    runAction('discard', () => discardProposal(proposal._id), t('creator.workspace.proposalDiscarded'));
 
   const handleSlug = () =>
     runAction(
@@ -238,7 +237,7 @@ export default function CreatorTranslationWorkspacePage() {
           slug: slugDraft,
           expectedVersion: record?.versionNumber,
         }),
-      'Web address updated.'
+      t('creator.workspace.slugUpdated')
     );
 
   const handleVersions = async () => {
@@ -248,7 +247,7 @@ export default function CreatorTranslationWorkspacePage() {
       const response = await getVersions(objectType, objectId, record._id);
       setVersions(response.data?.data || []);
     } catch (requestError) {
-      toast.error(getTranslationErrorMessage(requestError, 'Could not load the history.'));
+      toast.error(getTranslationErrorMessage(requestError, t, 'creator.workspace.historyFailed'));
     } finally {
       setBusy('');
     }
@@ -259,11 +258,11 @@ export default function CreatorTranslationWorkspacePage() {
       <Card>
         <EmptyState
           icon={FiXCircle}
-          title="Not available"
-          description="Only your listings and your creator profile have a translation workspace."
+          title={t('creator.workspace.unsupportedTitle')}
+          description={t('creator.workspace.unsupportedDescription')}
           action={
             <Link href="/creator/translations">
-              <Button variant="secondary">Back to translations</Button>
+              <Button variant="secondary">{t('creator.workspace.backToTranslations')}</Button>
             </Link>
           }
         />
@@ -271,7 +270,7 @@ export default function CreatorTranslationWorkspacePage() {
     );
   }
 
-  if (loading) return <Spinner label="Opening workspace…" />;
+  if (loading) return <Spinner label={t('creator.workspace.opening')} />;
 
   if (error) {
     return (
@@ -281,7 +280,7 @@ export default function CreatorTranslationWorkspacePage() {
         </Banner>
         <Link href="/creator/translations">
           <Button variant="secondary">
-            <FiArrowLeft size={13} /> Back to translations
+            <FiArrowLeft size={13} /> {t('creator.workspace.backToTranslations')}
           </Button>
         </Link>
       </div>
@@ -303,10 +302,12 @@ export default function CreatorTranslationWorkspacePage() {
         </Link>
         <div className="min-w-0">
           <h1 className="text-xl font-black tracking-tight text-gray-900 dark:text-white">
-            {SUPPORTED_OBJECT_TYPES[objectType]} translation
+            {tf('creator.workspace.heading', {
+              objectType: t(`creator.workspace.objectType.${objectType}`),
+            })}
           </h1>
           <p className="text-xs text-gray-500 font-medium mt-0.5">
-            English stays the original. Your edits change only the language you pick here.
+            {t('creator.workspace.subtitle')}
           </p>
         </div>
         <Button
@@ -315,13 +316,13 @@ export default function CreatorTranslationWorkspacePage() {
           loading={busy === 'refresh'}
           onClick={() => runAction('refresh', async () => {}, '')}
         >
-          <FiRefreshCw size={13} /> Refresh
+          <FiRefreshCw size={13} /> {t('creator.common.refresh')}
         </Button>
       </div>
 
       {!canEdit && (
         <Banner tone="error" icon={FiAlertCircle}>
-          Your account is restricted right now, so translations are read only.
+          {t('creator.workspace.readOnly')}
         </Banner>
       )}
 
@@ -329,8 +330,8 @@ export default function CreatorTranslationWorkspacePage() {
         <Card>
           <EmptyState
             icon={FiGlobe}
-            title="No other language is published"
-            description="Once another language goes live, its translation will appear here."
+            title={t('creator.workspace.noLanguageTitle')}
+            description={t('creator.workspace.noLanguageDescription')}
           />
         </Card>
       ) : (
@@ -359,8 +360,8 @@ export default function CreatorTranslationWorkspacePage() {
             <Card>
               <EmptyState
                 icon={FiGlobe}
-                title="Nothing translated yet"
-                description="This language has no translation for this item so far. It appears here once it has been prepared."
+                title={t('creator.workspace.nothingTranslatedTitle')}
+                description={t('creator.workspace.nothingTranslatedDescription')}
               />
             </Card>
           ) : (
@@ -368,8 +369,8 @@ export default function CreatorTranslationWorkspacePage() {
               <Card>
                 <CardHeader
                   icon={FiFileText}
-                  title="Text"
-                  description="English on the left, your language on the right"
+                  title={t('creator.workspace.textHeading')}
+                  description={t('creator.workspace.textDescription')}
                   actions={
                     <AvailabilityBadge
                       languageCode={activeLanguage}
@@ -380,15 +381,14 @@ export default function CreatorTranslationWorkspacePage() {
                 <CardBody className="space-y-5">
                   {outdatedFields.size > 0 && (
                     <Banner tone="error" icon={FiAlertCircle}>
-                      The English text changed after this translation was written. The fields marked
-                      in red below are out of date, so please update them.
+                      {t('creator.workspace.outdatedBanner')}
                     </Banner>
                   )}
                   {fields.map((field) => {
                     const isOutdated = outdatedFields.has(field);
                     return (
                       <div key={field} className="grid gap-4 md:grid-cols-2">
-                        <Field label={`${labelFor(field)} · English`}>
+                        <Field label={tf('creator.workspace.sourceLabel', { field: labelFor(field) })}>
                           <div
                             className={`rounded-lg border px-4 py-2.5 text-sm whitespace-pre-wrap min-h-[44px] ${
                               isOutdated
@@ -399,7 +399,12 @@ export default function CreatorTranslationWorkspacePage() {
                             {sourceContent[field] || '—'}
                           </div>
                         </Field>
-                        <Field label={`${labelFor(field)} · ${activeLanguage.toUpperCase()}`}>
+                        <Field
+                          label={tf('creator.workspace.targetLabel', {
+                            field: labelFor(field),
+                            language: activeLanguage.toUpperCase(),
+                          })}
+                        >
                           {SHORT_FIELDS.has(field) ? (
                             <input
                               value={draft[field] ?? ''}
@@ -427,8 +432,9 @@ export default function CreatorTranslationWorkspacePage() {
                           {isOutdated && (
                             <p className="flex items-start gap-2 text-[11px] font-semibold text-red-600 dark:text-red-400">
                               <FiAlertCircle size={13} className="mt-0.5 flex-shrink-0" />
-                              The English {labelFor(field).toLowerCase()} has changed. Please update
-                              this translation to match.
+                              {tf('creator.workspace.outdatedField', {
+                                field: labelFor(field).toLowerCase(),
+                              })}
                             </p>
                           )}
                         </Field>
@@ -442,14 +448,14 @@ export default function CreatorTranslationWorkspacePage() {
                     disabled={!canEdit || !dirty}
                     onClick={handleSave}
                   >
-                    <FiSave size={13} /> Save changes
+                    <FiSave size={13} /> {t('creator.workspace.save')}
                   </Button>
                   <Button
                     variant="secondary"
                     disabled={!dirty}
                     onClick={() => setDraft(record.content ? { ...record.content } : {})}
                   >
-                    Undo edits
+                    {t('creator.workspace.undo')}
                   </Button>
                   <Button
                     variant="secondary"
@@ -459,7 +465,9 @@ export default function CreatorTranslationWorkspacePage() {
                     onClick={handleRegenerate}
                   >
                     <FiRotateCw size={13} />
-                    {waitingForSuggestion ? 'Preparing…' : 'Suggest a new translation'}
+                    {waitingForSuggestion
+                      ? t('creator.workspace.preparing')
+                      : t('creator.workspace.regenerate')}
                   </Button>
                 </div>
               </Card>
@@ -468,18 +476,18 @@ export default function CreatorTranslationWorkspacePage() {
                 <Card>
                   <CardHeader
                     icon={FiEdit3}
-                    title="New suggestion"
-                    description="Compare it with what is live, then choose"
+                    title={t('creator.workspace.proposalHeading')}
+                    description={t('creator.workspace.proposalDescription')}
                   />
                   <CardBody className="space-y-5">
                     {fields.map((field) => (
                       <div key={field} className="grid gap-4 md:grid-cols-2">
-                        <Field label={`${labelFor(field)} · live now`}>
+                        <Field label={tf('creator.workspace.proposalLiveLabel', { field: labelFor(field) })}>
                           <div className="rounded-lg border border-gray-100 dark:border-white/5 bg-gray-50/60 dark:bg-white/5 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap min-h-[44px]">
                             {record.content?.[field] || '—'}
                           </div>
                         </Field>
-                        <Field label={`${labelFor(field)} · suggested`}>
+                        <Field label={tf('creator.workspace.proposalSuggestedLabel', { field: labelFor(field) })}>
                           <div className="rounded-lg border border-orange-200 dark:border-orange-500/30 bg-orange-50/60 dark:bg-orange-500/10 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap min-h-[44px]">
                             {proposal.proposedContent?.[field] || '—'}
                           </div>
@@ -493,7 +501,7 @@ export default function CreatorTranslationWorkspacePage() {
                       disabled={!canEdit}
                       onClick={() => handleAccept('replace')}
                     >
-                      Use the suggestion
+                      {t('creator.workspace.acceptReplace')}
                     </Button>
                     <Button
                       variant="secondary"
@@ -502,7 +510,7 @@ export default function CreatorTranslationWorkspacePage() {
                         setDraft(proposal.proposedContent ? { ...proposal.proposedContent } : {})
                       }
                     >
-                      Copy into the editor
+                      {t('creator.workspace.copyToEditor')}
                     </Button>
                     <Button
                       variant="secondary"
@@ -510,7 +518,7 @@ export default function CreatorTranslationWorkspacePage() {
                       disabled={!canEdit || !dirty}
                       onClick={() => handleAccept('manual_merge')}
                     >
-                      Use my edited version
+                      {t('creator.workspace.acceptMerge')}
                     </Button>
                     <Button
                       variant="danger"
@@ -519,7 +527,7 @@ export default function CreatorTranslationWorkspacePage() {
                       disabled={!canEdit}
                       onClick={handleDiscard}
                     >
-                      Discard
+                      {t('creator.workspace.discard')}
                     </Button>
                   </div>
                 </Card>
@@ -531,17 +539,22 @@ export default function CreatorTranslationWorkspacePage() {
               <Card>
                 <CardHeader
                   icon={FiLink2}
-                  title="Web address"
-                  description="The part of the link that belongs to this language"
+                  title={t('creator.workspace.slugHeading')}
+                  description={t('creator.workspace.slugDescription')}
                 />
                 <CardBody className="flex flex-wrap items-end gap-3">
-                  <Field label={`Slug · ${activeLanguage.toUpperCase()}`} className="flex-1 min-w-[240px]">
+                  <Field
+                    label={tf('creator.workspace.slugLabel', {
+                      language: activeLanguage.toUpperCase(),
+                    })}
+                    className="flex-1 min-w-[240px]"
+                  >
                     <input
                       value={slugDraft}
                       disabled={!canEdit}
                       onChange={(event) => setSlugDraft(event.target.value)}
                       className={inputClass}
-                      placeholder="vase-fait-main"
+                      placeholder={t('creator.workspace.slugPlaceholder')}
                     />
                   </Field>
                   <Button
@@ -549,7 +562,7 @@ export default function CreatorTranslationWorkspacePage() {
                     disabled={!canEdit || !slugDraft || slugDraft === record.slug}
                     onClick={handleSlug}
                   >
-                    Update address
+                    {t('creator.workspace.slugSubmit')}
                   </Button>
                 </CardBody>
               </Card>
@@ -558,33 +571,35 @@ export default function CreatorTranslationWorkspacePage() {
               <Card>
                 <CardHeader
                   icon={FiClock}
-                  title="History"
-                  description="Every earlier version of this translation"
+                  title={t('creator.workspace.historyHeading')}
+                  description={t('creator.workspace.historyDescription')}
                   actions={
                     <Button variant="secondary" size="sm" loading={busy === 'versions'} onClick={handleVersions}>
-                      {versions ? 'Reload' : 'Show history'}
+                      {versions
+                        ? t('creator.workspace.reloadHistory')
+                        : t('creator.workspace.showHistory')}
                     </Button>
                   }
                 />
                 {versions === null ? (
                   <CardBody className="text-xs font-medium text-gray-400">
-                    Earlier versions are kept for reference. Only an administrator can restore one.
+                    {t('creator.workspace.historyNote')}
                   </CardBody>
                 ) : versions.length === 0 ? (
-                  <EmptyState icon={FiClock} title="No earlier versions" />
+                  <EmptyState icon={FiClock} title={t('creator.workspace.noVersions')} />
                 ) : (
                   <ul className="divide-y divide-gray-100 dark:divide-white/5">
                     {versions.map((version) => (
                       <li key={version.versionNumber} className="px-5 md:px-6 py-4">
                         <div className="flex flex-wrap items-center gap-3">
                           <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                            Version {version.versionNumber}
+                            {tf('creator.workspace.version', { number: version.versionNumber })}
                           </span>
                           <span className="text-[10px] font-black uppercase tracking-widest text-orange-500">
                             {version.authorType}
                           </span>
                           <span className="ml-auto text-[11px] font-medium text-gray-400">
-                            {formatDateTime(version.createdAt)}
+                            {formatDateTime(version.createdAt, locale)}
                           </span>
                         </div>
                         <div className="mt-2 space-y-1">

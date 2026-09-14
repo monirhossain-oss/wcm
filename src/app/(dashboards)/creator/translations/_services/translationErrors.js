@@ -1,25 +1,27 @@
 import { getApiErrorMessage } from '@/lib/apiError';
+import { format } from '@/lib/i18n/format';
 
 // The Creator translation endpoints answer with a stable `code`, and each one needs a sentence that
-// tells the Creator what to do next rather than repeating the backend's internal wording.
-const messagesByCode = {
-  TRANSLATION_OWNERSHIP_DENIED: 'You can only work on translations for your own listings and profile.',
-  ACCOUNT_RESTRICTED: 'Your account is currently restricted, so translations cannot be changed.',
-  TRANSLATION_NOT_FOUND: 'There is no translation for this language yet.',
-  TRANSLATION_PROPOSAL_NOT_FOUND: 'This suggestion is no longer available.',
-  TRANSLATION_PROPOSAL_EXPIRED: 'This suggestion has expired. Request a new one to try again.',
-  TRANSLATION_REGENERATION_LIMIT_REACHED:
-    'You have used all regeneration attempts for this language today. Try again tomorrow.',
-  TRANSLATION_VERSION_CONFLICT:
-    'This translation changed while you were editing. Reload the page and reapply your changes.',
-  STALE_TRANSLATION_JOB: 'The English text changed since this suggestion was made. Reload and try again.',
-  INVALID_LOCALIZED_SLUG: 'That web address is not valid. Use letters, numbers and hyphens.',
-  LOCALIZED_SLUG_CONFLICT: 'That web address is already taken for this language.',
-  LOCALIZED_SLUG_PERMANENTLY_RESERVED: 'That web address was used before and cannot be reused.',
-  LOCALIZED_SLUG_UNSUPPORTED: 'This content type does not use a translated web address.',
-  LOCALIZED_SLUG_MISSING: 'This language does not have its own web address yet.',
-  TRANSLATION_NOT_PUBLISHED: 'The web address can only change once the translation is published.',
-};
+// tells the Creator what to do next rather than repeating the backend's internal wording. The
+// sentences themselves live in the UI catalog under `creator.errors.<CODE>`; this list is what
+// decides whether a code is one we have wording for, since a catalog miss would otherwise render
+// the key itself.
+const KNOWN_CODES = new Set([
+  'TRANSLATION_OWNERSHIP_DENIED',
+  'ACCOUNT_RESTRICTED',
+  'TRANSLATION_NOT_FOUND',
+  'TRANSLATION_PROPOSAL_NOT_FOUND',
+  'TRANSLATION_PROPOSAL_EXPIRED',
+  'TRANSLATION_REGENERATION_LIMIT_REACHED',
+  'TRANSLATION_VERSION_CONFLICT',
+  'STALE_TRANSLATION_JOB',
+  'INVALID_LOCALIZED_SLUG',
+  'LOCALIZED_SLUG_CONFLICT',
+  'LOCALIZED_SLUG_PERMANENTLY_RESERVED',
+  'LOCALIZED_SLUG_UNSUPPORTED',
+  'LOCALIZED_SLUG_MISSING',
+  'TRANSLATION_NOT_PUBLISHED',
+]);
 
 // Validation failures carry the individual rule breaks, which are the only useful part of the reply.
 export const getValidationErrors = (error) => {
@@ -27,13 +29,20 @@ export const getValidationErrors = (error) => {
   return Array.isArray(details) ? details : [];
 };
 
-export const getTranslationErrorMessage = (error, fallback = 'Request failed') => {
+// `t` comes from `useLocale()`. Endpoints that answer with only a `message` — most of the listing,
+// payment and creator routes — still surface the backend's English sentence; only the ones that
+// carry a `code` can be spoken in the reader's language.
+export const getTranslationErrorMessage = (error, t, fallbackKey = 'creator.workspace.actionFailed') => {
   const code = error?.response?.data?.code;
+
   if (code === 'TRANSLATION_VALIDATION_FAILED') {
     const details = getValidationErrors(error);
     return details.length
-      ? `This text did not pass the translation checks: ${details.join(', ')}`
-      : 'This text did not pass the translation checks.';
+      ? format(t('creator.errors.validationFailedDetails'), { details: details.join(', ') })
+      : t('creator.errors.validationFailed');
   }
-  return messagesByCode[code] || getApiErrorMessage(error, fallback);
+
+  if (KNOWN_CODES.has(code)) return t(`creator.errors.${code}`);
+
+  return getApiErrorMessage(error, t(fallbackKey), t);
 };

@@ -1,3 +1,6 @@
+// Public-site strings only. The Creator Dashboard's own catalog lives in ./creator/en.js and is
+// merged in by lib/i18n/index.js under the `creator` key — this file stays free of imports because
+// the test suite loads it as a standalone module.
 const en = {
   accountRecovery: {
     loading: 'Loading...', verifying: 'Verifying your email...', wait: 'Please wait a moment.',

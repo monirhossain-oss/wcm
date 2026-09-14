@@ -22,6 +22,7 @@ import { getImageUrl } from '@/lib/imageHelper';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 import { getApiErrorMessage } from '@/lib/apiError';
 
 const api = axios.create({
@@ -34,6 +35,7 @@ const CACHE_TIME = 1 * 60 * 1000;
 
 export default function MyListings() {
   const { isBusinessRestricted } = useAuth();
+  const { locale, t, tf } = useLocale();
   const [listings, setListings] = useState([]);
   const [metaData, setMetaData] = useState({ categories: [], tags: [] });
   const [loading, setLoading] = useState(true);
@@ -71,6 +73,10 @@ export default function MyListings() {
     }
     fetchListings();
     fetchMeta();
+    // Bootstrap only. `fetchListings` became reactive once its toasts started reading the catalog,
+    // but re-running this on a language switch would refetch the whole inventory for nothing — the
+    // rows already on screen are API data and do not change with the reader's language.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchListings = async (isForce = false) => {
@@ -84,10 +90,10 @@ export default function MyListings() {
       localStorage.setItem(LISTINGS_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
       setListings(data);
       setLastSynced(Date.now());
-      if (isForce) toast.success('Inventory Synchronized');
+      if (isForce) toast.success(t('creator.listings.synced'));
     } catch (err) {
       console.error(err);
-      toast.error(getApiErrorMessage(err, 'Failed to fetch assets'));
+      toast.error(getApiErrorMessage(err, t('creator.listings.fetchFailed'), t));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -122,7 +128,7 @@ export default function MyListings() {
   const currentItems = filteredListings.slice(indexOfFirstItem, indexOfLastItem);
 
   const openEditModal = (item) => {
-    if (isBusinessRestricted) return toast.error('Account business actions are restricted');
+    if (isBusinessRestricted) return toast.error(t('creator.restricted.action'));
     setEditingItem(item);
     setEditFormData({
       title: item.title,
@@ -142,7 +148,7 @@ export default function MyListings() {
     if (currentTags.includes(tagId)) {
       setEditFormData({ ...editFormData, culturalTags: currentTags.filter((id) => id !== tagId) });
     } else {
-      if (currentTags.length >= 5) return toast.error('Maximum 5 tags allowed');
+      if (currentTags.length >= 5) return toast.error(tf('creator.listings.maxTags', { count: 5 }));
       setEditFormData({ ...editFormData, culturalTags: [...currentTags, tagId] });
     }
   };
@@ -171,17 +177,17 @@ export default function MyListings() {
         JSON.stringify({ data: updatedListings, timestamp: Date.now() })
       );
       setEditingItem(null);
-      toast.success('Asset updated successfully');
+      toast.success(t('creator.listings.updated'));
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Update failed'));
+      toast.error(getApiErrorMessage(err, t('creator.listings.updateFailed'), t));
     } finally {
       setUpdateLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (isBusinessRestricted) return toast.error('Account business actions are restricted');
-    if (!window.confirm('Delete this node? All promotion data will be lost.')) return;
+    if (isBusinessRestricted) return toast.error(t('creator.restricted.action'));
+    if (!window.confirm(t('creator.listings.deleteConfirm'))) return;
     try {
       await api.delete(`/api/listings/delete/${id}`);
       const filtered = listings.filter((l) => l._id !== id);
@@ -190,9 +196,9 @@ export default function MyListings() {
         LISTINGS_CACHE_KEY,
         JSON.stringify({ data: filtered, timestamp: Date.now() })
       );
-      toast.success('Node deleted');
+      toast.success(t('creator.listings.deleted'));
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Delete failed'));
+      toast.error(getApiErrorMessage(err, t('creator.listings.deleteFailed'), t));
     }
   };
 
@@ -211,13 +217,17 @@ export default function MyListings() {
       <div className="flex flex-col lg:flex-row justify-between lg:items-center border-b border-gray-100 dark:border-white/10 pb-8 gap-6">
         <div>
           <h2 className="text-3xl font-black uppercase tracking-tighter dark:text-white flex items-center gap-3 italic">
-            <FiActivity className="text-orange-500" /> My{' '}
-            <span className="text-orange-500">Listings</span>
+            <FiActivity className="text-orange-500" /> {t('creator.listings.headingLead')}{' '}
+            <span className="text-orange-500">{t('creator.listings.headingAccent')}</span>
           </h2>
           <div className="flex items-center gap-2 mt-2">
             <FiClock size={10} className="text-orange-500" />
             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em]">
-              Synchronized: {lastSynced ? new Date(lastSynced).toLocaleTimeString() : 'Pending'}
+              {tf('creator.listings.synchronized', {
+                time: lastSynced
+                  ? new Date(lastSynced).toLocaleTimeString(locale === 'fr' ? 'fr-FR' : 'en-GB')
+                  : t('creator.listings.syncPending'),
+              })}
             </p>
           </div>
         </div>
@@ -228,7 +238,7 @@ export default function MyListings() {
             <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
             <input
               type="text"
-              placeholder="SEARCH ASSET..."
+              placeholder={t('creator.listings.searchPlaceholder')}
               className="pl-11 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-[10px] font-black uppercase outline-none focus:border-orange-500/50 w-full md:w-48 transition-all"
               value={searchTerm}
               onChange={(e) => {
@@ -248,7 +258,7 @@ export default function MyListings() {
                 setCurrentPage(1);
               }}
             >
-              <option value="all">ALL CATEGORIES</option>
+              <option value="all">{t('creator.listings.allCategories')}</option>
               {metaData.categories.map((cat) => (
                 <option key={cat._id} value={cat._id}>
                   {cat.title.toUpperCase()}
@@ -267,10 +277,11 @@ export default function MyListings() {
                 setCurrentPage(1);
               }}
             >
-              <option value="all">ALL STATUS</option>
-              <option value="approved">APPROVED</option>
-              <option value="pending">PENDING</option>
-              <option value="rejected">REJECTED</option>
+              <option value="all">{t('creator.listings.allStatus')}</option>
+              <option value="approved">{t('creator.status.approved')}</option>
+              <option value="pending">{t('creator.status.pending')}</option>
+              <option value="rejected">{t('creator.status.rejected')}</option>
+              <option value="blocked">{t('creator.status.blocked')}</option>
             </select>
           </div>
 
@@ -291,22 +302,22 @@ export default function MyListings() {
             <thead>
               <tr className="bg-gray-50/50 dark:bg-white/2 border-b border-gray-100 dark:border-white/10">
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  Listing Asset
+                  {t('creator.listings.columnAsset')}
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  Identity Details
+                  {t('creator.listings.columnIdentity')}
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center">
-                  Listing Status
+                  {t('creator.listings.columnStatus')}
                 </th>
                 <th
                   // key={item._id}
                   className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-center"
                 >
-                  Reason
+                  {t('creator.listings.columnReason')}
                 </th>
                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-gray-400 text-right">
-                  Actions
+                  {t('creator.listings.columnActions')}
                 </th>
               </tr>
             </thead>
@@ -332,7 +343,7 @@ export default function MyListings() {
                       </p>
                       <div className="flex items-center gap-2 mt-1.5">
                         <span className="text-[8px] font-black uppercase text-orange-500 bg-orange-500/5 px-2 py-0.5 rounded-md border border-orange-500/10 italic">
-                          {item.category?.title || 'General'}
+                          {item.category?.title || t('creator.listings.categoryFallback')}
                         </span>
                         <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">
                           {item.tradition}
@@ -349,7 +360,7 @@ export default function MyListings() {
                               : 'bg-orange-500/5 border-orange-500/10 text-orange-500'
                         }`}
                       >
-                        {item.status}
+                        {t(`creator.status.${item.status}`, item.status)}
                       </span>
                     </td>
 
@@ -357,7 +368,8 @@ export default function MyListings() {
                       {item.status === 'rejected' || item.status === 'blocked' ? (
                         <div className="flex flex-col gap-1">
                           <span className="text-[9px] font-black text-red-500 uppercase tracking-wider bg-red-500/5 border border-red-500/10 px-2 py-0.5 rounded w-fit">
-                            {item.rejectionReason?.replace(/_/g, ' ') || 'GENERAL_VIOLATION'}
+                            {item.rejectionReason?.replace(/_/g, ' ') ||
+                              t('creator.listings.reasonFallback')}
                           </span>
                           {item.additionalReason && (
                             <p className="text-[8px] text-gray-400 italic truncate max-w-[150px]">
@@ -367,7 +379,7 @@ export default function MyListings() {
                         </div>
                       ) : (
                         <span className="text-[9px] text-gray-300 font-bold uppercase tracking-widest opacity-30">
-                          ---
+                          {t('creator.common.empty')}
                         </span>
                       )}
                     </td>
@@ -378,20 +390,20 @@ export default function MyListings() {
                           icon={FiEye}
                           onClick={() => router.push(`/listings/${item._id}`)}
                           color="hover:bg-blue-600"
-                          label="View"
+                          label={t('creator.listings.actionView')}
                         />
                         <ActionButton
                           disabled={item.status === 'blocked' || isBusinessRestricted}
                           icon={FiEdit2}
                           onClick={() => openEditModal(item)}
                           color={item.status === 'blocked' ? 'opacity-20' : 'hover:bg-orange-600'}
-                          label="Edit"
+                          label={t('creator.listings.actionEdit')}
                         />
                         <ActionButton
                           icon={FiGlobe}
                           onClick={() => router.push(`/creator/translations/listing/${item._id}`)}
                           color="hover:bg-emerald-600"
-                          label="Translations"
+                          label={t('creator.listings.actionTranslations')}
                         />
                         <ActionButton
                           icon={FiTrash2}
@@ -399,7 +411,7 @@ export default function MyListings() {
                           disabled={isBusinessRestricted}
                           color="hover:bg-red-600"
                           isDelete
-                          label="Delete"
+                          label={t('creator.listings.actionDelete')}
                         />
                       </div>
                     </td>
@@ -408,10 +420,10 @@ export default function MyListings() {
               ) : (
                 <tr>
                   <td
-                    colSpan="4"
+                    colSpan="5"
                     className="px-8 py-24 text-center text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 italic opacity-50"
                   >
-                    No matching nodes detected in system index.
+                    {t('creator.listings.empty')}
                   </td>
                 </tr>
               )}
@@ -423,8 +435,11 @@ export default function MyListings() {
         {totalPages > 1 && (
           <div className="px-8 py-6 border-t border-gray-100 dark:border-white/10 flex flex-col md:flex-row items-center justify-between bg-gray-50/30 dark:bg-white/2 gap-4">
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] italic opacity-60">
-              Indexing {indexOfFirstItem + 1} — {Math.min(indexOfLastItem, filteredListings.length)}{' '}
-              of {filteredListings.length} ASSETS
+              {tf('creator.listings.indexing', {
+                from: indexOfFirstItem + 1,
+                to: Math.min(indexOfLastItem, filteredListings.length),
+                total: filteredListings.length,
+              })}
             </p>
             <div className="flex gap-2">
               <button
@@ -468,10 +483,13 @@ export default function MyListings() {
             <div className="p-6 border-b dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-white/10">
               <div>
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] dark:text-white italic">
-                  Node <span className="text-orange-500 text-sm">Re-Configuration</span>
+                  {t('creator.listings.edit.headingLead')}{' '}
+                  <span className="text-orange-500 text-sm">
+                    {t('creator.listings.edit.headingAccent')}
+                  </span>
                 </h3>
                 <p className="text-[8px] font-bold text-gray-500 uppercase mt-1">
-                  Asset ID Ref: {editingItem._id}
+                  {tf('creator.listings.edit.assetId', { id: editingItem._id })}
                 </p>
               </div>
               <button
@@ -489,7 +507,7 @@ export default function MyListings() {
               <div className="lg:col-span-4 space-y-6">
                 <div className="space-y-3">
                   <p className="text-[9px] font-black uppercase text-gray-400 tracking-widest">
-                    Visual Identity
+                    {t('creator.listings.edit.visualIdentity')}
                   </p>
                   <div className="relative h-64 bg-gray-50 dark:bg-white/5 border border-dashed dark:border-white/10 rounded-2xl overflow-hidden group">
                     <img
@@ -502,7 +520,7 @@ export default function MyListings() {
                     <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center text-white cursor-pointer backdrop-blur-sm">
                       <FiUploadCloud size={30} className="mb-2 text-orange-500" />
                       <span className="text-[10px] font-black uppercase tracking-widest">
-                        Update Buffer
+                        {t('creator.listings.edit.updateBuffer')}
                       </span>
                       <input
                         type="file"
@@ -514,7 +532,8 @@ export default function MyListings() {
                 </div>
                 <div className="space-y-4">
                   <p className="text-[9px] font-black uppercase text-gray-400 tracking-widest flex justify-between">
-                    Taxonomy Tags <span>{editFormData.culturalTags?.length}/5</span>
+                    {t('creator.listings.edit.taxonomyTags')}{' '}
+                    <span>{editFormData.culturalTags?.length}/5</span>
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {metaData.tags.map((tag) => (
@@ -534,20 +553,20 @@ export default function MyListings() {
               <div className="lg:col-span-8 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <InputField
-                    label="Asset Title"
+                    label={t('creator.listings.edit.title')}
                     value={editFormData.title}
                     onChange={(v) => setEditFormData({ ...editFormData, title: v })}
                   />
                   <div className="space-y-2 relative">
                     <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                      Category Protocol
+                      {t('creator.listings.edit.category')}
                     </label>
                     <div
                       onClick={() => setShowCatDrop(!showCatDrop)}
                       className="w-full bg-gray-50 dark:bg-white/5 border dark:border-white/10 p-4 rounded-xl text-[11px] font-black dark:text-white flex justify-between items-center cursor-pointer hover:border-orange-500/50 transition-all"
                     >
                       {metaData.categories.find((c) => c._id === editFormData.category)?.title ||
-                        'SELECT CATEGORY'}
+                        t('creator.listings.edit.selectCategory')}
                       <FiChevronDown
                         className={`${showCatDrop ? 'rotate-180' : ''} transition-transform`}
                       />
@@ -570,29 +589,29 @@ export default function MyListings() {
                     )}
                   </div>
                   <InputField
-                    label="Tradition"
+                    label={t('creator.listings.edit.tradition')}
                     value={editFormData.tradition}
                     onChange={(v) => setEditFormData({ ...editFormData, tradition: v })}
                   />
                   <InputField
-                    label="Country"
+                    label={t('creator.listings.edit.country')}
                     value={editFormData.country}
                     onChange={(v) => setEditFormData({ ...editFormData, country: v })}
                   />
                   <InputField
-                    label="Region"
+                    label={t('creator.listings.edit.region')}
                     value={editFormData.region}
                     onChange={(v) => setEditFormData({ ...editFormData, region: v })}
                   />
                   <InputField
-                    label="Access Link"
+                    label={t('creator.listings.edit.websiteLink')}
                     value={editFormData.websiteLink}
                     onChange={(v) => setEditFormData({ ...editFormData, websiteLink: v })}
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                    Asset Description
+                    {t('creator.listings.edit.description')}
                   </label>
                   <textarea
                     rows={4}
@@ -610,7 +629,7 @@ export default function MyListings() {
                   {updateLoading ? (
                     <FiRefreshCw className="animate-spin" />
                   ) : (
-                    'Updates Listing'
+                    t('creator.listings.edit.submit')
                   )}
                 </button>
               </div>

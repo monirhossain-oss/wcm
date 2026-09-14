@@ -1,23 +1,15 @@
 'use client';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import {
-  FiZap,
-  FiX,
-  FiActivity,
-  FiPlus,
-  FiCreditCard,
-  FiInfo,
-  FiEye,
-  FiGlobe,
-  FiBriefcase,
-} from 'react-icons/fi';
+import { FiZap, FiX, FiActivity, FiInfo, FiEye } from 'react-icons/fi';
 import { getImageUrl } from '@/lib/imageHelper';
 import { usePathname } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
 import CreatorWallet from '@/components/creator/CreatorWallet';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
+import { formatCurrency } from '@/lib/i18n/formatters';
 import { getApiErrorMessage } from '@/lib/apiError';
 
 const api = axios.create({
@@ -25,48 +17,12 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// `id`, `price` and `days` mirror `wcm-server/src/constants/promotion.js` and are validated there
+// on purchase, so they stay literal. Only the reader-facing name and description are localized.
 const BOOST_PACKAGES = [
-  {
-    id: 'starter',
-    name: 'Starter Boost',
-    price: 12,
-    days: 7,
-    desc: 'Boosted Search + Category Pages',
-  },
-  {
-    id: 'standard',
-    name: 'Standard Boost',
-    price: 29,
-    days: 14,
-    desc: 'Search + Category + Discovery',
-  },
-  {
-    id: 'premium',
-    name: 'Premium Boost',
-    price: 79,
-    days: 30,
-    desc: 'Homepage + Search + Featured',
-  },
-];
-
-const EU_COUNTRIES = [
-  { code: 'FR', name: 'France' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'NL', name: 'Netherlands' },
-  { code: 'BE', name: 'Belgium' },
-  { code: 'AT', name: 'Austria' },
-  { code: 'SE', name: 'Sweden' },
-  { code: 'DK', name: 'Denmark' },
-  { code: 'FI', name: 'Finland' },
-  { code: 'IE', name: 'Ireland' },
-  { code: 'PT', name: 'Portugal' },
-  { code: 'GR', name: 'Greece' },
-  { code: 'PL', name: 'Poland' },
-  { code: 'US', name: 'United States (Non-EU)' },
-  { code: 'GB', name: 'United Kingdom (Non-EU)' },
-  { code: 'CA', name: 'Canada (Non-EU)' },
+  { id: 'starter', price: 12, days: 7 },
+  { id: 'standard', price: 29, days: 14 },
+  { id: 'premium', price: 79, days: 30 },
 ];
 
 /**
@@ -97,6 +53,7 @@ function getListingStatus(listing) {
 
 export default function PromotionsPage() {
   const { isBusinessRestricted } = useAuth();
+  const { locale, localize, t, tf } = useLocale();
   const [listings, setListings] = useState([]);
   const [walletBalance, setWalletBalance] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -126,6 +83,9 @@ export default function PromotionsPage() {
 
   useEffect(() => {
     initData();
+    // Bootstrap only. `initData` became reactive once its error toast started reading the catalog,
+    // but the rows it loads are API data that do not change with the reader's language.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initData = async () => {
@@ -171,7 +131,7 @@ export default function PromotionsPage() {
       setListings(normalizedListings);
       setWalletBalance(userRes.data.walletBalance || 0);
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Synchronization failed'));
+      toast.error(getApiErrorMessage(err, t('creator.promotions.syncFailed'), t));
     } finally {
       setLoading(false);
     }
@@ -214,10 +174,10 @@ export default function PromotionsPage() {
   }, [selectedListing, actionLoading]);
 
   const handlePurchase = async () => {
-    if (isBusinessRestricted) return toast.error('Account business actions are restricted');
-    if (walletBalance < currentCost) return toast.error('Insufficient credits.');
+    if (isBusinessRestricted) return toast.error(t('creator.restricted.action'));
+    if (walletBalance < currentCost) return toast.error(t('creator.promotions.insufficientCredits'));
     setActionLoading(true);
-    const toastId = toast.loading('Executing Protocol...');
+    const toastId = toast.loading(t('creator.promotions.executing'));
     try {
       const selectedPkgId =
         promoType === 'boost' ? BOOST_PACKAGES.find((pkg) => pkg.price === boostBudget)?.id : null;
@@ -231,11 +191,11 @@ export default function PromotionsPage() {
       };
       const res = await api.post('/api/payments/purchase-promotion', payload);
       setWalletBalance(res.data.newBalance);
-      toast.success('Campaign Launched!', { id: toastId });
+      toast.success(t('creator.promotions.launched'), { id: toastId });
       setSelectedListing(null);
       initData();
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Transaction failed'), { id: toastId });
+      toast.error(getApiErrorMessage(err, t('creator.promotions.transactionFailed'), t), { id: toastId });
     } finally {
       setActionLoading(false);
     }
@@ -260,7 +220,7 @@ export default function PromotionsPage() {
 
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 flex flex-col justify-center">
           <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-black">
-            Managed Assets
+            {t('creator.promotions.managedAssets')}
           </p>
           <p className="text-4xl font-black dark:text-white mt-1 tracking-tighter">
             {listings.length}
@@ -272,17 +232,18 @@ export default function PromotionsPage() {
       <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden shadow-sm">
         <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30">
           <h3 className="font-black text-[10px] uppercase tracking-[0.3em] text-zinc-500 flex items-center gap-3">
-            <FiActivity className="text-orange-500" size={16} /> Asset List
+            <FiActivity className="text-orange-500" size={16} />{' '}
+            {t('creator.promotions.assetList')}
           </h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="text-[9px] uppercase tracking-widest text-zinc-400 font-black border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/20">
-                <th className="px-8 py-5">Item Details</th>
-                <th className="px-8 py-5">Status</th>
-                <th className="px-8 py-5">Promotions</th>
-                <th className="px-8 py-5 text-right">Actions</th>
+                <th className="px-8 py-5">{t('creator.promotions.columnItem')}</th>
+                <th className="px-8 py-5">{t('creator.promotions.columnStatus')}</th>
+                <th className="px-8 py-5">{t('creator.promotions.columnPromotions')}</th>
+                <th className="px-8 py-5 text-right">{t('creator.promotions.columnActions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -311,7 +272,7 @@ export default function PromotionsPage() {
                             {item.title}
                           </p>
                           <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest italic">
-                            {item.category?.title || 'Standard Asset'}
+                            {item.category?.title || t('creator.promotions.assetFallback')}
                           </p>
                         </div>
                       </div>
@@ -322,18 +283,18 @@ export default function PromotionsPage() {
                       {listingStatus === 'live' && (
                         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase bg-green-500/10 text-green-500 border border-green-500/20">
                           <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-                          Live
+                          {t('creator.promoStatus.live')}
                         </span>
                       )}
                       {listingStatus === 'paused' && (
                         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
                           <span className="w-1 h-1 rounded-full bg-yellow-500" />
-                          Paused
+                          {t('creator.promoStatus.paused')}
                         </span>
                       )}
                       {listingStatus === 'organic' && (
                         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase bg-zinc-100 dark:bg-zinc-800 text-zinc-400">
-                          Organic
+                          {t('creator.promoStatus.organic')}
                         </span>
                       )}
                     </td>
@@ -342,16 +303,18 @@ export default function PromotionsPage() {
                       <div className="flex gap-2">
                         {boost && (
                           <span className="px-2 py-1 bg-orange-500/10 text-orange-500 rounded text-[8px] font-black border border-orange-500/10">
-                            BOOST
+                            {t('creator.packageType.boost')}
                           </span>
                         )}
                         {ppc && (
                           <span className="px-2 py-1 bg-blue-500/10 text-blue-500 rounded text-[8px] font-black border border-blue-500/10">
-                            PPC
+                            {t('creator.packageType.ppc')}
                           </span>
                         )}
                         {!boost && !ppc && (
-                          <span className="text-[10px] text-zinc-400 italic opacity-40">--</span>
+                          <span className="text-[10px] text-zinc-400 italic opacity-40">
+                            {t('creator.common.empty')}
+                          </span>
                         )}
                       </div>
                     </td>
@@ -364,7 +327,7 @@ export default function PromotionsPage() {
                         >
                           <FiEye size={14} />
                           <span className="text-[9px] font-black uppercase tracking-widest">
-                            Insights
+                            {t('creator.promotions.insights')}
                           </span>
                         </Link>
                         <button
@@ -377,7 +340,9 @@ export default function PromotionsPage() {
                           }`}
                         >
                           <FiZap size={14} />
-                          {isFullyPromoted ? 'Active' : 'Promote'}
+                          {isFullyPromoted
+                            ? t('creator.promotions.active')
+                            : t('creator.promotions.promote')}
                         </button>
                       </div>
                     </td>
@@ -392,12 +357,11 @@ export default function PromotionsPage() {
         {totalPages > 1 && (
           <div className="px-8 py-6 bg-zinc-50 dark:bg-zinc-900/50 flex flex-col sm:flex-row items-center justify-between border-t border-zinc-100 dark:border-zinc-800 gap-4">
             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest order-2 sm:order-1">
-              Showing <span className="text-zinc-900 dark:text-white">{indexOfFirstItem + 1}</span>{' '}
-              to{' '}
-              <span className="text-zinc-900 dark:text-white">
-                {Math.min(indexOfLastItem, listings.length)}
-              </span>{' '}
-              of <span className="text-orange-500">{listings.length}</span> Assets
+              {tf('creator.promotions.showing', {
+                from: indexOfFirstItem + 1,
+                to: Math.min(indexOfLastItem, listings.length),
+                total: listings.length,
+              })}
             </p>
 
             <div className="flex items-center gap-2 order-1 sm:order-2">
@@ -406,7 +370,7 @@ export default function PromotionsPage() {
                 onClick={() => setCurrentPage((prev) => prev - 1)}
                 className="p-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-[10px] font-black uppercase disabled:opacity-20 dark:text-white hover:border-orange-500/50 transition-all active:scale-95"
               >
-                Prev
+                {t('creator.common.prev')}
               </button>
 
               <div className="flex items-center gap-1.5 px-2">
@@ -433,16 +397,16 @@ export default function PromotionsPage() {
                 onClick={() => setCurrentPage((prev) => prev + 1)}
                 className="p-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-[10px] font-black uppercase disabled:opacity-20 dark:text-white hover:border-orange-500/50 transition-all active:scale-95"
               >
-                Next
+                {t('creator.common.next')}
               </button>
 
               {totalPages > 2 && currentPage !== totalPages && (
                 <button
                   onClick={() => setCurrentPage(totalPages)}
                   className="ml-1 p-2.5 text-[10px] font-black uppercase text-zinc-400 hover:text-orange-500 transition-colors"
-                  title="Go to Last Page"
+                  title={t('creator.common.goToLastPage')}
                 >
-                  Last ({totalPages})
+                  {tf('creator.common.last', { count: totalPages })}
                 </button>
               )}
             </div>
@@ -476,7 +440,8 @@ export default function PromotionsPage() {
                   id="promo-modal-title"
                   className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2.5 dark:text-white"
                 >
-                  <FiZap className="text-orange-500 shrink-0" size={16} /> Growth Protocol
+                  <FiZap className="text-orange-500 shrink-0" size={16} />{' '}
+                  {t('creator.promotions.modal.title')}
                 </h3>
                 <p className="mt-1.5 truncate text-[10px] font-bold text-zinc-500 tracking-tight">
                   {selectedListing.title}
@@ -484,7 +449,7 @@ export default function PromotionsPage() {
               </div>
               <button
                 type="button"
-                aria-label="Close promotion dialog"
+                aria-label={t('creator.promotions.modal.close')}
                 onClick={() => setSelectedListing(null)}
                 className="shrink-0 p-2 -mr-2 text-zinc-400 hover:text-red-500 transition-colors"
               >
@@ -503,7 +468,9 @@ export default function PromotionsPage() {
                       : 'text-zinc-500'
                   } ${hasActiveBoost ? 'opacity-30 cursor-not-allowed' : ''}`}
                 >
-                  {hasActiveBoost ? 'Boost Active' : 'Viral Boost'}
+                  {hasActiveBoost
+                    ? t('creator.promotions.modal.boostActive')
+                    : t('creator.promotions.modal.boostTab')}
                 </button>
                 <button
                   disabled={hasActivePpc}
@@ -514,14 +481,16 @@ export default function PromotionsPage() {
                       : 'text-zinc-500'
                   } ${hasActivePpc ? 'opacity-30 cursor-not-allowed' : ''}`}
                 >
-                  {hasActivePpc ? 'PPC Active' : 'PPC Flow'}
+                  {hasActivePpc
+                    ? t('creator.promotions.modal.ppcActive')
+                    : t('creator.promotions.modal.ppcTab')}
                 </button>
               </div>
 
               {promoType === 'boost' ? (
                 <div className="space-y-3">
                   <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
-                    Select Package
+                    {t('creator.promotions.modal.selectPackage')}
                   </label>
                   <div className="grid grid-cols-1 gap-3">
                     {BOOST_PACKAGES.map((pkg) => (
@@ -539,12 +508,17 @@ export default function PromotionsPage() {
                       >
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-[10px] font-black uppercase tracking-widest dark:text-white">
-                            {pkg.name}
+                            {t(`creator.promotions.packages.${pkg.id}`)}
                           </span>
-                          <span className="text-sm font-black text-orange-600">€{pkg.price}</span>
+                          <span className="text-sm font-black text-orange-600">
+                            {formatCurrency(pkg.price, locale)}
+                          </span>
                         </div>
                         <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-tighter leading-tight">
-                          {pkg.days} Days • {pkg.desc}
+                          {tf('creator.promotions.packages.summary', {
+                            days: pkg.days,
+                            description: t(`creator.promotions.packages.${pkg.id}Desc`),
+                          })}
                         </p>
                       </button>
                     ))}
@@ -554,7 +528,7 @@ export default function PromotionsPage() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">
-                      Enter Budget (€)
+                      {t('creator.promotions.modal.budgetLabel')}
                     </label>
                     <div className="relative">
                       <input
@@ -567,10 +541,10 @@ export default function PromotionsPage() {
                           setTargetClicks(Math.floor(val / PPC_COST_PER_CLICK));
                         }}
                         className="w-full bg-zinc-100 dark:bg-white/5 border border-transparent focus:border-orange-500 p-4 rounded-md text-sm font-black outline-none dark:text-white transition-all"
-                        placeholder="Min €5"
+                        placeholder={t('creator.promotions.modal.budgetPlaceholder')}
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-400">
-                        EUR
+                        {t('creator.promotions.modal.currency')}
                       </span>
                     </div>
                   </div>
@@ -578,20 +552,24 @@ export default function PromotionsPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-zinc-50 dark:bg-white/5 rounded-md border border-zinc-100 dark:border-white/5">
                       <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">
-                        Cost Per Click
+                        {t('creator.promotions.modal.costPerClick')}
                       </p>
-                      <p className="text-sm font-black dark:text-white">€{PPC_COST_PER_CLICK}</p>
+                      <p className="text-sm font-black dark:text-white">
+                        {formatCurrency(PPC_COST_PER_CLICK, locale)}
+                      </p>
                     </div>
                     <div className="p-4 bg-zinc-50 dark:bg-white/5 rounded-md border border-zinc-100 dark:border-white/5">
                       <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">
-                        Est. Clicks
+                        {t('creator.promotions.modal.estimatedClicks')}
                       </p>
                       <p className="text-sm font-black text-blue-500">~ {estimatedClicks}</p>
                     </div>
                   </div>
 
                   <p className="text-[9px] text-zinc-500 font-medium italic">
-                    * Clicks are estimated based on a fixed rate of €0.30 per click.
+                    {tf('creator.promotions.modal.clickRateNote', {
+                      rate: PPC_COST_PER_CLICK.toFixed(2),
+                    })}
                   </p>
                 </div>
               )}
@@ -599,13 +577,14 @@ export default function PromotionsPage() {
               <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-white/5">
                 <div className="space-y-1">
                   <p className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">
-                    All Boost & PPC purchases are final and non-refundable.
+                    {t('creator.promotions.modal.nonRefundable')}
                   </p>
                   <Link
-                    href="/boost-terms-and-ppc"
+                    href={localize('/boost-terms-and-ppc')}
                     className="text-[10px] font-black text-orange-500 uppercase tracking-tight flex items-center gap-1"
                   >
-                    Learn more about <span className="underline">Boost & PPC</span>
+                    {t('creator.promotions.modal.learnMore')}{' '}
+                    <span className="underline">{t('creator.promotions.modal.learnMoreLink')}</span>
                     <FiInfo size={12} />
                   </Link>
                 </div>
@@ -620,7 +599,7 @@ export default function PromotionsPage() {
                     />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
-                    I agree to the Boost & PPC purchase terms
+                    {t('creator.promotions.modal.agree')}
                   </span>
                 </label>
               </div>
@@ -630,10 +609,10 @@ export default function PromotionsPage() {
             <div className="shrink-0 border-t border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-950 px-5 sm:px-8 py-4 sm:py-5 space-y-4 rounded-b-none sm:rounded-b-md pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-5">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                  Total Investment
+                  {t('creator.promotions.modal.total')}
                 </span>
                 <span className="text-2xl sm:text-3xl font-black text-orange-600 italic tracking-tighter">
-                  €{currentCost.toFixed(2)}
+                  {formatCurrency(currentCost, locale)}
                 </span>
               </div>
 
@@ -649,10 +628,10 @@ export default function PromotionsPage() {
                 className="w-full py-4 sm:py-5 px-3 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-md font-black uppercase text-[10px] tracking-[0.2em] sm:tracking-[0.4em] transition-all hover:bg-orange-600 hover:text-white active:scale-[0.98] shadow-2xl disabled:opacity-20 disabled:hover:bg-zinc-900"
               >
                 {actionLoading
-                  ? 'Initializing...'
+                  ? t('creator.promotions.modal.initializing')
                   : walletBalance < currentCost
-                    ? 'Insufficient Credits'
-                    : 'Launch Campaign'}
+                    ? t('creator.promotions.modal.insufficient')
+                    : t('creator.promotions.modal.launch')}
               </button>
             </div>
           </div>

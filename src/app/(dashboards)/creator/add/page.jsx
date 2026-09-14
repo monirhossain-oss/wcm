@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { loadCountries } from '@/lib/countryData';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '@/lib/cropImage';
+import toast, { Toaster } from 'react-hot-toast';
+import { useLocale } from '@/context/LocaleContext';
+import { getApiErrorMessage } from '@/lib/apiError';
 import {
   FiUploadCloud,
   FiX,
@@ -27,6 +30,7 @@ const api = axios.create({
 });
 
 export default function AddListing() {
+  const { t, tf } = useLocale();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -183,7 +187,7 @@ export default function AddListing() {
         return { ...prev, culturalTags: prev.culturalTags.filter((id) => id !== tagId) };
       }
       if (prev.culturalTags.length >= 10) {
-        alert('Maximum 10 tags allowed');
+        toast.error(tf('creator.add.errorMaxTags', { count: 10 }));
         return prev;
       }
       return { ...prev, culturalTags: [...prev.culturalTags, tagId] };
@@ -193,7 +197,7 @@ export default function AddListing() {
   const handleAddCustomTag = () => {
     if (!customTag.trim()) return;
     if (formData.culturalTags.length >= 10) {
-      alert('Maximum 10 tags allowed');
+      toast.error(tf('creator.add.errorMaxTags', { count: 10 }));
       return;
     }
     const customTagId = `custom-${Date.now()}`;
@@ -211,11 +215,10 @@ export default function AddListing() {
     e.preventDefault();
 
     if (!finalCroppedImage || !formData.category)
-      return alert('Please upload/crop image and select category');
+      return toast.error(t('creator.add.errorImageCategory'));
 
     // ✅ country validation
-    if (!formData.countryIsoCode)
-      return alert('Please select a country');
+    if (!formData.countryIsoCode) return toast.error(t('creator.add.errorCountry'));
 
     setLoading(true);
     try {
@@ -257,7 +260,7 @@ export default function AddListing() {
       }
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Error creating listing');
+      toast.error(getApiErrorMessage(err, t('creator.add.errorCreate'), t));
     } finally {
       setLoading(false);
     }
@@ -273,14 +276,16 @@ export default function AddListing() {
 
   return (
     <div className="max-w-6xl mx-auto py-4 pb-20 font-sans px-4 md:px-0">
+      <Toaster position="top-right" />
 
       {/* Header */}
       <div className="mb-8 border-b border-gray-100 dark:border-white/10 pb-6">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
-          Add <span className="text-orange-500">Listing</span>
+          {t('creator.add.headingLead')}{' '}
+          <span className="text-orange-500">{t('creator.add.headingAccent')}</span>
         </h2>
         <p className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mt-1">
-          Submit to the cultural archive
+          {t('creator.add.subtitle')}
         </p>
       </div>
 
@@ -290,7 +295,7 @@ export default function AddListing() {
           {/* ── Left: Image Upload & Crop ── */}
           <div className="lg:col-span-4">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block ml-1">
-              Cover Media (Aspect 4:5 Ratio)
+              {t('creator.add.coverMedia')}
             </label>
             <div className="relative aspect-[4/5] w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center overflow-hidden shadow-sm group">
               {showCropper ? (
@@ -310,14 +315,14 @@ export default function AddListing() {
                       onClick={handleConfirmCrop}
                       className="bg-orange-500 text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 shadow-2xl active:scale-95 transition-transform"
                     >
-                      <FiCheck size={14} /> Set Area
+                      <FiCheck size={14} /> {t('creator.add.setArea')}
                     </button>
                     <button
                       type="button"
                       onClick={() => { setShowCropper(false); setPreviewUrl(null); }}
                       className="bg-zinc-800 text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase active:scale-95 transition-transform"
                     >
-                      Cancel
+                      {t('creator.common.cancel')}
                     </button>
                   </div>
                 </div>
@@ -326,12 +331,13 @@ export default function AddListing() {
                   <img
                     src={URL.createObjectURL(finalCroppedImage)}
                     className="w-full h-full object-cover rounded-xl"
-                    alt="final-crop"
+                    alt={t('creator.add.croppedAlt')}
                   />
                   <div className="absolute top-4 right-4 flex gap-2">
                     <button
                       type="button"
                       onClick={() => setShowCropper(true)}
+                      aria-label={t('creator.add.recrop')}
                       className="p-2 bg-orange-500 text-white rounded-lg shadow-lg hover:bg-orange-600 transition-colors"
                     >
                       <FiScissors size={14} />
@@ -339,6 +345,7 @@ export default function AddListing() {
                     <button
                       type="button"
                       onClick={() => { setFinalCroppedImage(null); setPreviewUrl(null); }}
+                      aria-label={t('creator.add.removeImage')}
                       className="p-2 bg-black/60 text-white rounded-lg hover:bg-red-500 backdrop-blur-md transition-colors"
                     >
                       <FiX size={14} />
@@ -349,8 +356,8 @@ export default function AddListing() {
                 <div className="text-center p-6 space-y-2 relative w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                   <FiUploadCloud size={32} className="text-orange-500 mx-auto" />
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-300">Click to Upload</p>
-                    <p className="text-[8px] font-medium text-gray-400 uppercase tracking-tighter">Image will be cropped to 4:5 ratio</p>
+                    <p className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-300">{t('creator.add.clickToUpload')}</p>
+                    <p className="text-[8px] font-medium text-gray-400 uppercase tracking-tighter">{t('creator.add.cropHint')}</p>
                   </div>
                   <input
                     type="file"
@@ -362,7 +369,7 @@ export default function AddListing() {
               )}
             </div>
             <p className="text-[9px] text-gray-400 mt-2 ml-1 italic font-medium">
-              * Focus on the most important part of your image.
+              {t('creator.add.focusHint')}
             </p>
           </div>
 
@@ -371,34 +378,34 @@ export default function AddListing() {
 
             {/* Title */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Listing Title</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('creator.add.title')}</label>
               <input
                 type="text"
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
-                placeholder="Descriptive name..."
+                placeholder={t('creator.add.titlePlaceholder')}
               />
             </div>
 
             {/* Website Link */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Website Link</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('creator.add.websiteLink')}</label>
               <input
                 type="text"
                 required
                 value={formData.websiteLink}
                 onChange={(e) => setFormData({ ...formData, websiteLink: e.target.value })}
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white"
-                placeholder="https://example.com"
+                placeholder={t('creator.add.websitePlaceholder')}
               />
             </div>
 
             {/* Category Dropdown */}
             <div className="space-y-2 relative">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
-                <FiGrid size={10} /> Category
+                <FiGrid size={10} /> {t('creator.add.category')}
               </label>
               <div
                 onClick={() => setShowCatDrop(!showCatDrop)}
@@ -406,7 +413,7 @@ export default function AddListing() {
               >
                 {formData.category
                   ? categories.find((c) => c._id === formData.category)?.title
-                  : 'Select Category'}
+                  : t('creator.add.selectCategory')}
                 <FiChevronDown className={`${showCatDrop ? 'rotate-180' : ''} transition-transform`} />
               </div>
               {showCatDrop && (
@@ -415,7 +422,7 @@ export default function AddListing() {
                     <FiSearch className="text-gray-400" size={12} />
                     <input
                       autoFocus
-                      placeholder="Search..."
+                      placeholder={t('creator.common.search')}
                       className="w-full bg-transparent text-[10px] font-bold outline-none dark:text-white"
                       onChange={(e) => setCatSearch(e.target.value)}
                     />
@@ -438,7 +445,7 @@ export default function AddListing() {
             {/* ✅ Country Dropdown — এখন formData update করে */}
             <div className="space-y-2 relative">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
-                <FiMapPin size={10} /> Region / Country
+                <FiMapPin size={10} /> {t('creator.add.regionCountry')}
               </label>
               <div
                 onClick={() => setShowCountryDrop(!showCountryDrop)}
@@ -452,7 +459,7 @@ export default function AddListing() {
                       className="w-5 h-auto rounded-sm"
                     />
                   )}
-                  {showCountry || 'Select Country'}
+                  {showCountry || t('creator.add.selectCountry')}
                 </div>
                 <FiChevronDown className={`${showCountryDrop ? 'rotate-180' : ''} transition-transform`} />
               </div>
@@ -462,7 +469,7 @@ export default function AddListing() {
                     <FiSearch className="text-gray-400" size={12} />
                     <input
                       autoFocus
-                      placeholder="Search country..."
+                      placeholder={t('creator.add.searchCountry')}
                       className="w-full bg-transparent text-[10px] font-bold outline-none dark:text-white"
                       onChange={(e) => setCountrySearch(e.target.value)}
                     />
@@ -501,7 +508,7 @@ export default function AddListing() {
             {/* Culture / Origin (Region) */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
-                <FiMapPin size={10} /> Culture / Origin
+                <FiMapPin size={10} /> {t('creator.add.cultureOrigin')}
               </label>
               <select
                 required
@@ -520,13 +527,15 @@ export default function AddListing() {
                 }}
                 className={`w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
               >
-                <option value="">{assetsLoading ? 'Loading...' : 'Select Culture'}</option>
+                <option value="">
+                  {assetsLoading ? t('creator.common.loading') : t('creator.add.selectCulture')}
+                </option>
                 {regions.map((r) => (
                   <option key={r._id} value={r.title} className="bg-white dark:bg-[#1f1f1f]">
                     {r.title}
                   </option>
                 ))}
-                <option value="others" className="bg-orange-50 text-orange-600 font-black">+ Others (Custom)</option>
+                <option value="others" className="bg-orange-50 text-orange-600 font-black">{t('creator.add.othersOption')}</option>
               </select>
               {showCustomRegion && (
                 <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -536,7 +545,7 @@ export default function AddListing() {
                     value={customRegion}
                     onChange={(e) => setCustomRegion(e.target.value)}
                     className="w-full bg-white dark:bg-white/10 border border-orange-300 dark:border-orange-500/30 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white placeholder:text-gray-400"
-                    placeholder="Enter your custom culture/origin..."
+                    placeholder={t('creator.add.customCulturePlaceholder')}
                   />
                 </div>
               )}
@@ -544,7 +553,7 @@ export default function AddListing() {
 
             {/* Tradition */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Tradition / Technique</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('creator.add.tradition')}</label>
               <select
                 required
                 disabled={!formData.category || assetsLoading}
@@ -562,13 +571,15 @@ export default function AddListing() {
                 }}
                 className={`w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-xs font-bold dark:text-white outline-none focus:border-orange-500 ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
               >
-                <option value="">{assetsLoading ? 'Loading...' : 'Select Tradition'}</option>
+                <option value="">
+                  {assetsLoading ? t('creator.common.loading') : t('creator.add.selectTradition')}
+                </option>
                 {traditions.map((t) => (
                   <option key={t._id} value={t.title} className="bg-white dark:bg-[#1f1f1f]">
                     {t.title}
                   </option>
                 ))}
-                <option value="others" className="bg-orange-50 text-orange-600 font-black">+ Others (Custom)</option>
+                <option value="others" className="bg-orange-50 text-orange-600 font-black">{t('creator.add.othersOption')}</option>
               </select>
               {showCustomTradition && (
                 <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -578,7 +589,7 @@ export default function AddListing() {
                     value={customTradition}
                     onChange={(e) => setCustomTradition(e.target.value)}
                     className="w-full bg-white dark:bg-white/10 border border-orange-300 dark:border-orange-500/30 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 dark:text-white placeholder:text-gray-400"
-                    placeholder="Enter your custom tradition/technique..."
+                    placeholder={t('creator.add.customTraditionPlaceholder')}
                   />
                 </div>
               )}
@@ -586,13 +597,13 @@ export default function AddListing() {
 
             {/* Description */}
             <div className="md:col-span-2 space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Story & Description</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('creator.add.description')}</label>
               <textarea
                 required
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-4 rounded-lg text-xs font-bold outline-none focus:border-orange-500 h-32 resize-none dark:text-white placeholder:text-gray-400"
-                placeholder="Tell the cultural story..."
+                placeholder={t('creator.add.descriptionPlaceholder')}
               />
             </div>
           </div>
@@ -606,15 +617,17 @@ export default function AddListing() {
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-1">
               <FiTag size={10} />
               {formData.category
-                ? `Tags for ${categories.find((c) => c._id === formData.category)?.title}`
-                : 'Select Category first'}
+                ? tf('creator.add.tagsFor', {
+                    category: categories.find((c) => c._id === formData.category)?.title,
+                  })
+                : t('creator.add.selectCategoryFirst')}
             </label>
             <div
               onClick={() => formData.category && setShowTagDrop(!showTagDrop)}
               className={`w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-lg text-[10px] font-bold dark:text-white flex flex-wrap gap-1 min-h-[44px] cursor-pointer ${!formData.category && 'opacity-50 cursor-not-allowed'}`}
             >
               {formData.culturalTags.length === 0 && (
-                <span className="text-gray-400">Select up to 10 tags...</span>
+                <span className="text-gray-400">{t('creator.add.tagsPlaceholder')}</span>
               )}
               {formData.culturalTags.map((tId) => (
                 <span key={tId} className="bg-orange-500 text-white px-2 py-1 h-fit rounded-lg flex items-center gap-1">
@@ -630,7 +643,7 @@ export default function AddListing() {
                   <FiSearch className="text-gray-400" size={12} />
                   <input
                     autoFocus
-                    placeholder="Search tags..."
+                    placeholder={t('creator.add.searchTags')}
                     className="w-full bg-transparent text-[10px] font-bold outline-none dark:text-white"
                     onChange={(e) => setTagSearch(e.target.value)}
                   />
@@ -640,7 +653,7 @@ export default function AddListing() {
                     onClick={() => setShowCustomTagInput(!showCustomTagInput)}
                     className="p-2 rounded-lg text-[9px] font-black uppercase cursor-pointer flex justify-between items-center bg-orange-50 text-orange-600 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400"
                   >
-                    <span className="flex items-center gap-1"><FiPlus size={10} /> Add Custom Tag</span>
+                    <span className="flex items-center gap-1"><FiPlus size={10} /> {t('creator.add.addCustomTag')}</span>
                   </div>
                   {showCustomTagInput && (
                     <div className="p-2 border-t dark:border-white/10">
@@ -651,7 +664,7 @@ export default function AddListing() {
                           onChange={(e) => setCustomTag(e.target.value)}
                           onClick={(e) => e.stopPropagation()}
                           className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-2 rounded-lg text-[10px] font-bold outline-none focus:border-orange-500 dark:text-white"
-                          placeholder="Enter custom tag..."
+                          placeholder={t('creator.add.customTagPlaceholder')}
                         />
                         <button
                           type="button"
@@ -664,7 +677,7 @@ export default function AddListing() {
                     </div>
                   )}
                   {filteredTags.length === 0 && !showCustomTagInput ? (
-                    <div className="p-3 text-[9px] text-center text-gray-500 uppercase">No tags found</div>
+                    <div className="p-3 text-[9px] text-center text-gray-500 uppercase">{t('creator.add.noTags')}</div>
                   ) : (
                     filteredTags.map((tag) => (
                       <div
@@ -689,9 +702,14 @@ export default function AddListing() {
           <div className="space-y-2">
             <div className="flex items-center justify-between ml-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-1">
-                <FiLink size={10} /> Sources
+                <FiLink size={10} /> {t('creator.add.sources')}
               </label>
-              <button type="button" onClick={addUrlField} className="text-orange-500 hover:text-orange-600">
+              <button
+                type="button"
+                onClick={addUrlField}
+                aria-label={t('creator.add.addSource')}
+                className="text-orange-500 hover:text-orange-600"
+              >
                 <FiPlus size={14} />
               </button>
             </div>
@@ -704,12 +722,13 @@ export default function AddListing() {
                     value={url}
                     onChange={(e) => handleUrlChange(index, e.target.value)}
                     className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 pr-8 rounded-lg text-[10px] font-bold dark:text-white outline-none focus:border-orange-500"
-                    placeholder="https://example.com"
+                    placeholder={t('creator.add.websitePlaceholder')}
                   />
                   {formData.externalUrls.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeUrlField(index)}
+                      aria-label={t('creator.add.removeSource')}
                       className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                     >
                       <FiX size={12} />
@@ -726,7 +745,13 @@ export default function AddListing() {
           disabled={loading}
           className="w-full h-16 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-black text-[11px] tracking-[0.3em] uppercase transition-all flex items-center justify-center gap-3 shadow-lg shadow-orange-500/20 active:scale-[0.98]"
         >
-          {loading ? <FiLoader className="animate-spin" /> : <>Confirm Publication <FiArrowRight /></>}
+          {loading ? (
+            <FiLoader className="animate-spin" />
+          ) : (
+            <>
+              {t('creator.add.submit')} <FiArrowRight />
+            </>
+          )}
         </button>
       </form>
     </div>

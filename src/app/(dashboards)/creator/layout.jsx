@@ -18,11 +18,19 @@ import {
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/imageHelper';
 import { DollarSign } from 'lucide-react';
+import { useLocale } from '@/context/LocaleContext';
+import CreatorLanguageSwitcher from '@/components/creator/CreatorLanguageSwitcher';
+import { splitDashboardPath } from '@/lib/localePreference';
 
 export default function CreatorLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logoutUser, isBusinessRestricted } = useAuth();
+  const { t, tf, localize } = useLocale();
+
+  // `/fr/creator/listings` and `/creator/listings` are the same screen in two languages, so every
+  // comparison below is made against the language-free route.
+  const routePath = splitDashboardPath(pathname)?.path || pathname;
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -31,16 +39,16 @@ export default function CreatorLayout({ children }) {
   useEffect(() => {
     if (!loading) {
       if (!user || user.role !== 'creator') {
-        router.replace('/');
+        router.replace(localize('/'));
       }
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, localize]);
 
   useEffect(() => {
-    if (!loading && isBusinessRestricted && pathname === '/creator/add') {
-      router.replace('/creator/listings');
+    if (!loading && isBusinessRestricted && routePath === '/creator/add') {
+      router.replace(localize('/creator/listings'));
     }
-  }, [isBusinessRestricted, loading, pathname, router]);
+  }, [isBusinessRestricted, loading, routePath, router, localize]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -68,12 +76,12 @@ export default function CreatorLayout({ children }) {
   if (!user || user.role !== 'creator') return null;
 
   const navItems = [
-    { name: 'Overview', path: '/creator', icon: FiGrid },
-    { name: 'Wallet & Promotions', path: '/creator/promotions', icon: DollarSign },
-    { name: 'Transactions', path: '/creator/transactions', icon: DollarSign },
-    { name: 'My Listings', path: '/creator/listings', icon: FiList },
-    { name: 'Translations', path: '/creator/translations', icon: FiGlobe },
-    { name: 'Add Listing', path: '/creator/add', icon: FiPlus },
+    { name: t('creator.nav.overview'), path: '/creator', icon: FiGrid },
+    { name: t('creator.nav.promotions'), path: '/creator/promotions', icon: DollarSign },
+    { name: t('creator.nav.transactions'), path: '/creator/transactions', icon: DollarSign },
+    { name: t('creator.nav.listings'), path: '/creator/listings', icon: FiList },
+    { name: t('creator.nav.translations'), path: '/creator/translations', icon: FiGlobe },
+    { name: t('creator.nav.add'), path: '/creator/add', icon: FiPlus },
   ].filter((item) => !(isBusinessRestricted && item.path === '/creator/add'));
 
   const profileImage = user?.profile?.profileImage
@@ -83,10 +91,10 @@ export default function CreatorLayout({ children }) {
   const renderSidebarContent = () => (
     <>
       <div className="h-20 flex items-center px-8 border-b border-gray-100 dark:border-white/5">
-        <Link href="/" className="cursor-pointer">
+        <Link href={localize('/')} className="cursor-pointer">
           <Image
             src="/wc,-web-logo.png"
-            alt="Logo"
+            alt={t('creator.nav.logoAlt')}
             width={90}
             height={90}
             priority
@@ -94,7 +102,7 @@ export default function CreatorLayout({ children }) {
           />
           <Image
             src="/wc,-web-white.png"
-            alt="Logo"
+            alt={t('creator.nav.logoAlt')}
             width={90}
             height={90}
             priority
@@ -106,16 +114,16 @@ export default function CreatorLayout({ children }) {
       <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 scrollbar-hide">
         <div>
           <p className="px-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">
-            Creator Terminal
+            {t('creator.nav.section')}
           </p>
           <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.path;
+              const isActive = routePath === item.path;
               return (
                 <Link
                   key={item.path}
-                  href={item.path}
+                  href={localize(item.path)}
                   onClick={() => setIsSidebarOpen(false)}
                   className={`flex items-center gap-4 px-4 py-3 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all group ${
                     isActive
@@ -136,13 +144,13 @@ export default function CreatorLayout({ children }) {
 
         <div>
           <p className="px-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">
-            Navigation
+            {t('creator.nav.navigation')}
           </p>
           <Link
-            href="/"
+            href={localize('/')}
             className="flex items-center gap-4 px-4 py-3 rounded-sm text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-orange-500 transition-all"
           >
-            <FiArrowLeft size={14} /> Go to Marketplace
+            <FiArrowLeft size={14} /> {t('creator.nav.marketplace')}
           </Link>
         </div>
       </div>
@@ -151,7 +159,7 @@ export default function CreatorLayout({ children }) {
         <div className="flex items-center gap-3 px-2 py-2">
           <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
           <span className="text-[8px] font-black uppercase tracking-tighter text-gray-400">
-            Mode: Creator Active
+            {t('creator.nav.mode')}
           </span>
         </div>
       </div>
@@ -170,20 +178,23 @@ export default function CreatorLayout({ children }) {
         <header className="h-20 bg-white/80 dark:bg-[#0c0c0c]/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-6 md:px-10 z-40">
           <button
             onClick={() => setIsSidebarOpen(true)}
+            aria-label={t('creator.header.openMenu')}
             className="lg:hidden p-2 text-gray-600 dark:text-gray-300"
           >
             <FiMenu size={20} />
           </button>
 
-          <div className="flex items-center gap-6 ml-auto" ref={dropdownRef}>
+          <div className="flex items-center gap-4 md:gap-6 ml-auto" ref={dropdownRef}>
+            <CreatorLanguageSwitcher />
+
             <div className="hidden md:flex items-center gap-3 pr-6 border-r border-gray-100 dark:border-white/10">
               <FiActivity className="text-orange-500" size={16} />
               <div className="flex flex-col">
                 <span className="text-[9px] font-black uppercase tracking-widest leading-none text-gray-400">
-                  Account Type
+                  {t('creator.header.accountType')}
                 </span>
                 <span className="text-[10px] font-black uppercase text-black dark:text-white mt-1">
-                  Verified Creator
+                  {t('creator.header.verifiedCreator')}
                 </span>
               </div>
             </div>
@@ -196,7 +207,7 @@ export default function CreatorLayout({ children }) {
                 <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-white/5 p-0.5 border border-gray-200 dark:border-white/10 group-hover:border-orange-500 transition-all overflow-hidden shadow-sm">
                   <img
                     src={profileImage}
-                    alt="creator"
+                    alt={t('creator.header.avatarAlt')}
                     className="w-full h-full object-cover rounded-full"
                   />
                 </div>
@@ -209,21 +220,21 @@ export default function CreatorLayout({ children }) {
                       {user?.email}
                     </p>
                     <p className="text-[8px] font-bold text-gray-400 uppercase mt-1 tracking-widest">
-                      Active Workspace
+                      {t('creator.header.activeWorkspace')}
                     </p>
                   </div>
                   <Link
-                    href="/profile"
+                    href={localize('/profile')}
                     onClick={() => setIsDropdownOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-black dark:hover:text-white transition-all rounded-sm"
                   >
-                    <FiUser size={14} /> My Profile
+                    <FiUser size={14} /> {t('creator.header.myProfile')}
                   </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/5 transition-all rounded-sm"
                   >
-                    <FiLogOut size={14} /> Logout
+                    <FiLogOut size={14} /> {t('creator.header.logout')}
                   </button>
                 </div>
               )}
@@ -235,8 +246,7 @@ export default function CreatorLayout({ children }) {
         <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[#080808] p-6 md:p-8 scrollbar-hide">
           {isBusinessRestricted && (
             <div className="max-w-7xl mx-auto mb-4 rounded-md border border-orange-500/30 bg-orange-500/10 px-5 py-4 text-[10px] font-black uppercase tracking-widest text-orange-600">
-              Account {user.status.replace(/_/g, ' ')}: read and profile access remain available,
-              but listing, favorite, wallet and promotion actions are restricted.
+              {tf('creator.restricted.banner', { status: user.status.replace(/_/g, ' ') })}
             </div>
           )}
           <div className="max-w-7xl mx-auto">{children}</div>
@@ -252,7 +262,11 @@ export default function CreatorLayout({ children }) {
           />
           <aside className="absolute left-0 top-0 h-full w-72 bg-white dark:bg-[#0c0c0c] flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 border-r border-white/10">
             <div className="flex justify-end p-4">
-              <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400">
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                aria-label={t('creator.header.closeMenu')}
+                className="text-gray-400"
+              >
                 <FiX size={24} />
               </button>
             </div>

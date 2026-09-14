@@ -1,3 +1,4 @@
+// Public-site strings only — see ./en.js. ./creator/fr.js is merged in by lib/i18n/index.js.
 const fr = {
   accountRecovery: {
     loading: 'Chargement...', verifying: 'Vérification de votre adresse e-mail...', wait: 'Veuillez patienter un instant.',

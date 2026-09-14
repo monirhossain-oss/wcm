@@ -14,6 +14,7 @@ import {
   FiUser,
 } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 import {
   AvailabilityBadge,
   Banner,
@@ -54,6 +55,7 @@ const loadAvailability = async (entries) => {
 
 export default function CreatorTranslationsPage() {
   const { user } = useAuth();
+  const { t, tf } = useLocale();
   const [listings, setListings] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [availability, setAvailability] = useState({});
@@ -78,12 +80,12 @@ export default function CreatorTranslationsPage() {
       setNotifications(notificationsResponse.data?.data || []);
       setError('');
     } catch (requestError) {
-      setError(getTranslationErrorMessage(requestError, 'Could not load your translations.'));
+      setError(getTranslationErrorMessage(requestError, t, 'creator.translations.loadFailed'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -133,7 +135,7 @@ export default function CreatorTranslationsPage() {
         )
       );
     } catch (requestError) {
-      toast.error(getTranslationErrorMessage(requestError, 'Could not update the notification.'));
+      toast.error(getTranslationErrorMessage(requestError, t, 'creator.translations.notificationFailed'));
     }
   };
 
@@ -149,7 +151,7 @@ export default function CreatorTranslationsPage() {
     if (states.length === 0) {
       return (
         <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-          No other language published
+          {t('creator.translations.noOtherLanguage')}
         </span>
       );
     }
@@ -160,7 +162,7 @@ export default function CreatorTranslationsPage() {
             <AvailabilityBadge languageCode={languageCode} state={state} />
             {needsUpdate && (
               <span className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[9px] font-black uppercase tracking-widest bg-red-500/10 text-red-600 dark:text-red-400">
-                <FiAlertCircle size={11} /> Update needed
+                <FiAlertCircle size={11} /> {t('creator.translations.updateNeeded')}
               </span>
             )}
           </span>
@@ -169,7 +171,7 @@ export default function CreatorTranslationsPage() {
     );
   };
 
-  if (loading) return <Spinner label="Loading translations…" />;
+  if (loading) return <Spinner label={t('creator.translations.loading')} />;
 
   return (
     <div className="space-y-6">
@@ -181,10 +183,10 @@ export default function CreatorTranslationsPage() {
         </div>
         <div className="min-w-0">
           <h1 className="text-xl font-black tracking-tight text-gray-900 dark:text-white">
-            Translations
+            {t('creator.translations.heading')}
           </h1>
           <p className="text-xs text-gray-500 font-medium mt-0.5">
-            Review and improve how your work reads in every published language.
+            {t('creator.translations.subtitle')}
           </p>
         </div>
         <Button
@@ -193,7 +195,7 @@ export default function CreatorTranslationsPage() {
           loading={refreshing}
           onClick={() => load({ silent: true })}
         >
-          <FiRefreshCw size={13} /> Refresh
+          <FiRefreshCw size={13} /> {t('creator.common.refresh')}
         </Button>
       </div>
 
@@ -206,14 +208,18 @@ export default function CreatorTranslationsPage() {
       <Card>
         <CardHeader
           icon={FiBell}
-          title="Notifications"
-          description={unreadCount ? `${unreadCount} unread` : 'Nothing new right now'}
+          title={t('creator.translations.notifications')}
+          description={
+            unreadCount
+              ? tf('creator.translations.unread', { count: unreadCount })
+              : t('creator.translations.nothingNew')
+          }
         />
         {notifications.length === 0 ? (
           <EmptyState
             icon={FiBell}
-            title="No notifications"
-            description="You will hear from us when a translation becomes available or needs your attention."
+            title={t('creator.translations.noNotifications')}
+            description={t('creator.translations.noNotificationsDescription')}
           />
         ) : (
           <ul className="divide-y divide-gray-100 dark:divide-white/5">
@@ -226,11 +232,11 @@ export default function CreatorTranslationsPage() {
                 />
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-                    {String(row.eventType || '').replace(/_/g, ' ')}
+                    {t(`creator.notificationEvent.${row.eventType}`, row.eventType)}
                     {row.languageCode ? ` · ${row.languageCode.toUpperCase()}` : ''}
                   </p>
                   <p className="text-[11px] font-medium text-gray-400 mt-0.5">
-                    {relativeTime(row.createdAt)}
+                    {relativeTime(row.createdAt, t)}
                   </p>
                 </div>
                 {!row.readAt && (
@@ -240,7 +246,7 @@ export default function CreatorTranslationsPage() {
                     className="ml-auto"
                     onClick={() => handleMarkRead(row._id)}
                   >
-                    Mark read
+                    {t('creator.translations.markRead')}
                   </Button>
                 )}
               </li>
@@ -252,8 +258,8 @@ export default function CreatorTranslationsPage() {
       <Card>
         <CardHeader
           icon={FiUser}
-          title="Creator profile"
-          description="Your display name and biography"
+          title={t('creator.translations.profile')}
+          description={t('creator.translations.profileDescription')}
         />
         <CardBody className="flex flex-wrap items-center gap-4">
           {renderBadges('profile')}
@@ -262,7 +268,7 @@ export default function CreatorTranslationsPage() {
               href={`/creator/translations/creatorProfile/${user._id}`}
               className="ml-auto inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-[11px] font-black uppercase tracking-widest bg-orange-500 text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600 transition-all"
             >
-              Open <FiArrowRight size={13} />
+              {t('creator.common.open')} <FiArrowRight size={13} />
             </Link>
           )}
         </CardBody>
@@ -271,8 +277,13 @@ export default function CreatorTranslationsPage() {
       <Card>
         <CardHeader
           icon={FiLayers}
-          title="My listings"
-          description={`${filtered.length} listing${filtered.length === 1 ? '' : 's'}`}
+          title={t('creator.translations.listings')}
+          description={tf(
+            filtered.length === 1
+              ? 'creator.translations.listingCountSingular'
+              : 'creator.translations.listingCountPlural',
+            { count: filtered.length }
+          )}
           actions={
             <div className="relative">
               <FiSearch
@@ -285,7 +296,7 @@ export default function CreatorTranslationsPage() {
                   setSearch(event.target.value);
                   setPage(1);
                 }}
-                placeholder="Search listings…"
+                placeholder={t('creator.translations.searchPlaceholder')}
                 className={`${inputClass} pl-9 w-56`}
               />
             </div>
@@ -294,8 +305,8 @@ export default function CreatorTranslationsPage() {
         {visible.length === 0 ? (
           <EmptyState
             icon={FiLayers}
-            title="No listings"
-            description="Publish a listing first and its translations will appear here."
+            title={t('creator.translations.noListings')}
+            description={t('creator.translations.noListingsDescription')}
           />
         ) : (
           <ul className="divide-y divide-gray-100 dark:divide-white/5">
@@ -306,7 +317,7 @@ export default function CreatorTranslationsPage() {
                     {listing.title}
                   </p>
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-1">
-                    {String(listing.status || '').replace(/_/g, ' ')}
+                    {t(`creator.status.${listing.status}`, listing.status)}
                   </p>
                 </div>
                 {renderBadges(String(listing._id))}
@@ -314,7 +325,7 @@ export default function CreatorTranslationsPage() {
                   href={`/creator/translations/listing/${listing._id}`}
                   className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[10px] font-black uppercase tracking-widest border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-orange-500/40 hover:text-orange-500 transition-all"
                 >
-                  Open <FiArrowRight size={12} />
+                  {t('creator.common.open')} <FiArrowRight size={12} />
                 </Link>
               </li>
             ))}
@@ -328,10 +339,10 @@ export default function CreatorTranslationsPage() {
               disabled={currentPage <= 1}
               onClick={() => setPage(currentPage - 1)}
             >
-              Previous
+              {t('creator.common.previous')}
             </Button>
             <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-              Page {currentPage} of {pageCount}
+              {tf('creator.common.pageOf', { page: currentPage, pages: pageCount })}
             </span>
             <Button
               variant="secondary"
@@ -339,7 +350,7 @@ export default function CreatorTranslationsPage() {
               disabled={currentPage >= pageCount}
               onClick={() => setPage(currentPage + 1)}
             >
-              Next
+              {t('creator.common.next')}
             </Button>
           </div>
         )}

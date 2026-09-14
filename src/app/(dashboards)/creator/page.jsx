@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import {
@@ -26,7 +26,9 @@ import {
 } from 'recharts';
 import { Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { formatReportingTime, REPORTING_TIME_ZONE } from '@/lib/reportingTime';
+import { formatReportingDate, formatReportingTime, REPORTING_TIME_ZONE } from '@/lib/reportingTime';
+import { useLocale } from '@/context/LocaleContext';
+import { formatCurrency, formatNumber } from '@/lib/i18n/formatters';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -34,12 +36,15 @@ const api = axios.create({
 });
 
 export default function CreatorDashboard() {
+  const { locale, t, tf } = useLocale();
   const [stats, setStats] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchDashboardData = async (isRefresh = false) => {
+  // Wrapped because it now reads `t`: the toast has to speak the reader's language, which makes
+  // the function reactive and the interval below depend on it.
+  const fetchDashboardData = useCallback(async (isRefresh = false) => {
     try {
       if (isRefresh) setRefreshing(true);
       else setLoading(true);
@@ -54,24 +59,23 @@ export default function CreatorDashboard() {
       setStats(statsRes.data);
       setTransactions(transRes.data.transactions?.slice(0, 5) || []);
 
-      if (isRefresh) toast.success('Dashboard Updated');
+      if (isRefresh) toast.success(t('creator.overview.updated'));
     } catch (err) {
       console.error('Dashboard Data Error:', err);
-      if (isRefresh) toast.error('Failed to sync data');
+      if (isRefresh) toast.error(t('creator.overview.syncFailed'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     fetchDashboardData();
     const interval = setInterval(() => {
-      console.log("Auto-syncing dashboard stats...");
       fetchDashboardData(true);
     }, 1 * 60 * 1000); // 1 minute for testing, change to 5 * 60 * 1000 for production
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchDashboardData]);
 
   const downloadInvoice = async (transactionId) => {
     try {
@@ -89,7 +93,7 @@ export default function CreatorDashboard() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      toast.error('Could not download invoice.');
+      toast.error(t('creator.overview.invoiceFailed'));
     }
   };
 
@@ -109,11 +113,14 @@ export default function CreatorDashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-black italic uppercase tracking-tighter dark:text-white">
-            Creator <span className="text-orange-500">Command Center</span>
+            {t('creator.overview.headingLead')}{' '}
+            <span className="text-orange-500">{t('creator.overview.headingAccent')}</span>
           </h2>
           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
-            Last Sync:{' '}
-            {stats?.lastUpdated ? formatReportingTime(stats.lastUpdated) : 'Just now'}{' '}
+            {t('creator.overview.lastSync')}{' '}
+            {stats?.lastUpdated
+              ? formatReportingTime(stats.lastUpdated, locale)
+              : t('creator.overview.justNow')}{' '}
             ({stats?.reportingTimeZone || REPORTING_TIME_ZONE})
           </p>
         </div>
@@ -127,7 +134,7 @@ export default function CreatorDashboard() {
             size={14}
           />
           <span className="text-[10px] font-black uppercase tracking-widest dark:text-gray-300">
-            {refreshing ? 'Syncing...' : 'Force Refresh'}
+            {refreshing ? t('creator.common.syncing') : t('creator.common.forceRefresh')}
           </span>
         </button>
       </div>
@@ -140,14 +147,16 @@ export default function CreatorDashboard() {
               <FiAlertCircle size={20} />
             </div>
             <p className="text-[11px] dark:text-gray-300 font-bold uppercase">
-              Operational Hazard: Your wallet balance is critically low (€{walletBalance})
+              {tf('creator.overview.lowBalance', {
+                balance: formatCurrency(walletBalance, locale),
+              })}
             </p>
           </div>
           <Link
             href="/creator/promotions"
             className="px-6 py-2.5 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-md hover:bg-red-600"
           >
-            Recharge Now
+            {t('creator.overview.recharge')}
           </Link>
         </div>
       )}
@@ -155,50 +164,55 @@ export default function CreatorDashboard() {
       {/* 🔹 Metric Intelligence Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard
-          label="My Wallet"
-          value={`€${walletBalance}`}
+          label={t('creator.overview.metrics.wallet')}
+          value={formatCurrency(walletBalance, locale)}
           icon={Wallet}
-          trend="Current Balance"
+          trend={t('creator.overview.metrics.walletTrend')}
           color="border-emerald-500/20 text-emerald-500"
           bg="bg-emerald-500/5"
-          description="Operational Liquidity: Total funds available in your vault for instant deployment into promotions."
+          tooltipHeading={t('creator.overview.tooltipHeading')}
+          description={t('creator.overview.metrics.walletInfo')}
         />
         <MetricCard
-          label="Total Reach"
-          value={mainStats?.totalViews}
+          label={t('creator.overview.metrics.reach')}
+          value={formatNumber(mainStats?.totalViews, locale)}
           icon={FiEye}
-          trend="Lifetime Views"
+          trend={t('creator.overview.metrics.reachTrend')}
           color="border-blue-500/20 text-blue-500"
           bg="bg-blue-500/5"
-          description="Global Exposure: The total number of unique impressions your assets have generated across the network."
+          tooltipHeading={t('creator.overview.tooltipHeading')}
+          description={t('creator.overview.metrics.reachInfo')}
         />
         <MetricCard
-          label="Promotion Spend"
-          value={`€${mainStats?.totalMonthlySpend || '0.00'}`}
+          label={t('creator.overview.metrics.spend')}
+          value={formatCurrency(mainStats?.totalMonthlySpend || 0, locale)}
           icon={FiDollarSign}
-          trend="This Month"
+          trend={t('creator.overview.metrics.spendTrend')}
           color="border-orange-500/20 text-orange-500"
           bg="bg-orange-500/5"
-          description="Resource Allocation: Total capital successfully utilized for Viral Boost and PPC campaigns this month."
+          tooltipHeading={t('creator.overview.tooltipHeading')}
+          description={t('creator.overview.metrics.spendInfo')}
         />
         <MetricCard
-          label="Active Campaign"
-          value={mainStats?.totalActivePromoted}
+          label={t('creator.overview.metrics.campaign')}
+          value={formatNumber(mainStats?.totalActivePromoted, locale)}
           icon={FiZap}
-          trend="Viral Status"
+          trend={t('creator.overview.metrics.campaignTrend')}
           color="border-purple-500/20 text-purple-500"
           bg="bg-purple-500/5"
           isPrimary
-          description="Live Nodes: The count of your assets currently running on high-priority discovery channels."
+          tooltipHeading={t('creator.overview.tooltipHeading')}
+          description={t('creator.overview.metrics.campaignInfo')}
         />
         <MetricCard
-          label="Engagement"
-          value={mainStats?.totalClicks}
+          label={t('creator.overview.metrics.engagement')}
+          value={formatNumber(mainStats?.totalClicks, locale)}
           icon={FiActivity}
-          trend="PPC Clicks"
+          trend={t('creator.overview.metrics.engagementTrend')}
           color="border-pink-500/20 text-pink-500"
           bg="bg-pink-500/5"
-          description="Interaction Pulse: Total direct actions and clicks received through your Pay-Per-Click configurations."
+          tooltipHeading={t('creator.overview.tooltipHeading')}
+          description={t('creator.overview.metrics.engagementInfo')}
         />
       </div>
 
@@ -209,15 +223,16 @@ export default function CreatorDashboard() {
           <div className="flex justify-between items-center mb-10 pl-6">
             <div>
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
-                Nodes Performance
+                {t('creator.overview.chart.eyebrow')}
               </h3>
               <p className="text-xl font-black dark:text-white italic uppercase tracking-tighter mt-1">
-                Growth <span className="text-orange-500">Pulse</span>
+                {t('creator.overview.chart.headingLead')}{' '}
+                <span className="text-orange-500">{t('creator.overview.chart.headingAccent')}</span>
               </p>
             </div>
             <div className="flex gap-4">
-              <LegendItem color="bg-orange-500" label="Views" />
-              <LegendItem color="bg-purple-500" label="Clicks" />
+              <LegendItem color="bg-orange-500" label={t('creator.overview.chart.views')} />
+              <LegendItem color="bg-purple-500" label={t('creator.overview.chart.clicks')} />
             </div>
           </div>
 
@@ -271,23 +286,23 @@ export default function CreatorDashboard() {
           <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-xl p-6 h-full flex flex-col justify-between">
             <div>
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6 flex items-center gap-2">
-                <FiLayers className="text-orange-500" /> Portfolio Health
+                <FiLayers className="text-orange-500" /> {t('creator.overview.health.heading')}
               </h3>
               <div className="space-y-3">
                 <StatusRow
-                  label="Approved"
+                  label={t('creator.overview.health.approved')}
                   count={mainStats?.statusCount?.approved}
                   color="text-emerald-500"
                   bg="bg-emerald-500/5"
                 />
                 <StatusRow
-                  label="Reviewing"
+                  label={t('creator.overview.health.reviewing')}
                   count={mainStats?.statusCount?.pending}
                   color="text-orange-500"
                   bg="bg-orange-500/5"
                 />
                 <StatusRow
-                  label="Rejected"
+                  label={t('creator.overview.health.rejected')}
                   count={mainStats?.statusCount?.rejected}
                   color="text-red-500"
                   bg="bg-red-500/5"
@@ -297,7 +312,7 @@ export default function CreatorDashboard() {
             <div className="mt-8 pt-6 border-t border-gray-100 dark:border-white/5 flex items-end justify-between">
               <div>
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                  Total Active Nodes
+                  {t('creator.overview.health.totalNodes')}
                 </p>
                 <p className="text-5xl font-black dark:text-white italic tracking-tighter mt-1">
                   {mainStats?.totalListings || 0}
@@ -318,44 +333,44 @@ export default function CreatorDashboard() {
       <div className="bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/5 rounded-xl overflow-hidden">
         <div className="px-8 py-5 flex justify-between items-center bg-gray-50/50 dark:bg-white/20">
           <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-400">
-            Capital Ledger
+            {t('creator.overview.ledger.heading')}
           </h4>
           <Link
             href="/creator/transactions"
             className="text-[9px] font-black text-orange-500 uppercase tracking-widest hover:tracking-[0.4em] transition-all"
           >
-            View All Entries
+            {t('creator.overview.ledger.viewAll')}
           </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-100 dark:border-white/5 bg-gray-50/30 dark:bg-transparent">
               <tr>
-                <th className="px-8 py-4">Transaction Date</th>
-                <th className="px-8 py-4">Protocol</th>
-                <th className="px-8 py-4">Amount</th>
-                <th className="px-8 py-4 text-right">Invoice</th>
+                <th className="px-8 py-4">{t('creator.overview.ledger.date')}</th>
+                <th className="px-8 py-4">{t('creator.overview.ledger.protocol')}</th>
+                <th className="px-8 py-4">{t('creator.overview.ledger.amount')}</th>
+                <th className="px-8 py-4 text-right">{t('creator.overview.ledger.invoice')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
               {transactions.length > 0 ? (
                 transactions.map((tx, idx) => (
                   <tr
-                    key={idx}
+                    key={tx._id || idx}
                     className="hover:bg-gray-50/50 dark:hover:bg-white/20 transition-all group"
                   >
                     <td className="px-8 py-4 text-[10px] font-bold text-gray-500">
-                      {new Date(tx.createdAt).toDateString()}
+                      {formatReportingDate(tx.createdAt, {}, locale)}
                     </td>
                     <td className="px-8 py-4">
                       <span
                         className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full border ${tx.packageType === 'boost' ? 'border-purple-500/30 text-purple-500' : 'border-orange-500/30 text-orange-500'}`}
                       >
-                        {tx.packageType}
+                        {t(`creator.packageType.${tx.packageType}`, tx.packageType)}
                       </span>
                     </td>
                     <td className="px-8 py-4 text-[12px] font-black dark:text-white italic">
-                      €{tx.amountPaid}
+                      {formatCurrency(tx.amountPaid, locale, tx.currency)}
                     </td>
                     <td className="px-8 py-4 text-right">
                       <button
@@ -373,7 +388,7 @@ export default function CreatorDashboard() {
                     colSpan="4"
                     className="px-8 py-12 text-center text-[10px] uppercase font-bold text-gray-500 italic"
                   >
-                    No activity logs found.
+                    {t('creator.overview.ledger.empty')}
                   </td>
                 </tr>
               )}
@@ -386,7 +401,17 @@ export default function CreatorDashboard() {
 }
 
 // 🔹 Atomic UI Components
-const MetricCard = ({ label, value, icon: Icon, trend, color, bg, isPrimary, description }) => (
+const MetricCard = ({
+  label,
+  value,
+  icon: Icon,
+  trend,
+  color,
+  bg,
+  isPrimary,
+  tooltipHeading,
+  description,
+}) => (
   <div
     className={`p-6 rounded-xl border border-gray-100 dark:border-white/5 relative group transition-all hover:-translate-y-1 bg-white dark:bg-[#0c0c0c] ${bg}`}
   >
@@ -409,7 +434,7 @@ const MetricCard = ({ label, value, icon: Icon, trend, color, bg, isPrimary, des
             />
             <div className="absolute bottom-full left-0 mb-3 w-52 p-3 bg-zinc-900 text-[10px] text-zinc-300 rounded-xl opacity-0 group-hover/info:opacity-100 transition-all pointer-events-none shadow-2xl border border-white/10 z-100 leading-relaxed font-medium transform -translate-x-2">
               <span className="text-orange-500 font-bold block mb-1 text-[8px] tracking-widest uppercase">
-                Reserve Policy
+                {tooltipHeading}
               </span>
               {description}
               {/* Tooltip Arrow */}

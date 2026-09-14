@@ -50,7 +50,7 @@ const ProfileMenu = () => {
                     <>
                         <div className="absolute top-12 right-0 w-48 bg-white dark:bg-[#1a1a1a] shadow-xl border border-gray-100 dark:border-gray-800 rounded-xl py-2 z-[60] animate-in slide-in-from-top-2 duration-200">
                             <Link
-                                href={getDashboardLink()}
+                                href={localize(getDashboardLink())}
                                 className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                                 onClick={() => setIsProfileOpen(false)}
                             >

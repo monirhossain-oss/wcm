@@ -33,6 +33,9 @@ const registry = load('src/lib/seo/publicPageRegistry.js');
 const i18n = load('src/lib/i18n/index.js', {
   './catalogs/en': load('src/lib/i18n/catalogs/en.js'),
   './catalogs/fr': load('src/lib/i18n/catalogs/fr.js'),
+  './format': load('src/lib/i18n/format.js'),
+  './catalogs/creator/en': load('src/lib/i18n/catalogs/creator/en.js'),
+  './catalogs/creator/fr': load('src/lib/i18n/catalogs/creator/fr.js'),
   '@/lib/seo/publicPageRegistry': registry,
 });
 const catalogs = { en: i18n.catalogs.en, fr: i18n.catalogs.fr };

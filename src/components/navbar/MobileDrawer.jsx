@@ -140,7 +140,7 @@ const MobileDrawer = ({ categories, menuItems }) => {
                     {user ? (
                         <>
                             <Link
-                                href={getDashboardLink()}
+                                href={localize(getDashboardLink())}
                                 onClick={() => setIsMobileDrawerOpen(false)}
                                 className="flex items-center px-3 py-3.5 text-[15px] font-semibold text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5"
                             >

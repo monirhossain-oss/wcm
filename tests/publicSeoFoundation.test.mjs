@@ -61,6 +61,7 @@ test('proxy forwards path-owned language, preserves request headers and French h
   const host = load('src/lib/hostRedirect.js');
   const { proxy } = load('src/proxy.js', {
     '@/lib/hostRedirect': host, '@/lib/seo/siteConfig': site,
+    '@/lib/localePreference': load('src/lib/localePreference.js'),
     '@/lib/seo/publicPageRegistry': load('src/lib/seo/publicPageRegistry.js'),
     'next/server': { NextResponse: { next: (options) => options, redirect: (url, status) => ({ url: String(url), status }) } },
   });

@@ -20,6 +20,9 @@ import {
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
 import { formatReportingDate } from '@/lib/reportingTime';
+import { useLocale } from '@/context/LocaleContext';
+import { formatCurrency, formatPercent } from '@/lib/i18n/formatters';
+import { getApiErrorMessage } from '@/lib/apiError';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -29,6 +32,7 @@ const api = axios.create({
 export default function PromotionInsightsPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { locale, t, tf } = useLocale();
   const [data, setData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,11 +53,11 @@ export default function PromotionInsightsPage() {
         transRes.data.transactions?.filter((tx) => (tx.listing?._id || tx.listing) === id) || [];
       setTransactions(filteredTrans);
     } catch (err) {
-      toast.error('Data load failed');
+      toast.error(t('creator.insights.loadFailed'));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     if (id) fetchStats();
@@ -67,11 +71,13 @@ export default function PromotionInsightsPage() {
         packageType,
       });
       if (res.data.success) {
-        toast.success(res.data.isPaused ? 'Campaign Paused' : 'Campaign Resumed');
+        toast.success(
+          res.data.isPaused ? t('creator.insights.paused') : t('creator.insights.resumed')
+        );
         fetchStats();
       }
     } catch (err) {
-      toast.error('Action failed');
+      toast.error(t('creator.insights.actionFailed'));
     } finally {
       setActionLoading(null);
     }
@@ -105,10 +111,10 @@ export default function PromotionInsightsPage() {
     }
 
     // কনফার্মেশন মেসেজ
-    const confirmMessage =
-      `STOP ${packageType.toUpperCase()} PROMOTION?\n\n` +
-      `Estimated Refund: €${estimatedRefund}\n` +
-      `The amount will be credited to your wallet immediately.`;
+    const confirmMessage = tf('creator.insights.cancelConfirm', {
+      type: t(`creator.packageType.${packageType}`, packageType).toUpperCase(),
+      amount: formatCurrency(estimatedRefund, locale),
+    });
 
     if (!window.confirm(confirmMessage)) return;
 
@@ -120,12 +126,16 @@ export default function PromotionInsightsPage() {
       });
 
       if (res.data.success) {
-        toast.success(`Refund Successful! €${res.data.refundAmount} added to wallet.`);
+        toast.success(
+          tf('creator.insights.refunded', {
+            amount: formatCurrency(res.data.refundAmount, locale),
+          })
+        );
         fetchStats(); // ডাটা রিফ্রেশ
       }
     } catch (err) {
       console.error('Cancel Error:', err);
-      toast.error(err.response?.data?.message || 'Cancellation failed');
+      toast.error(getApiErrorMessage(err, t('creator.insights.cancelFailed'), t));
     } finally {
       setActionLoading(null);
     }
@@ -142,11 +152,11 @@ export default function PromotionInsightsPage() {
         totalClicks: packageType === 'ppc' ? Number(editData.clicks) : 0,
       };
       await api.post('/api/payments/purchase-promotion', payload);
-      toast.success('Campaign Updated!');
+      toast.success(t('creator.insights.updated'));
       setEditMode(null);
       fetchStats();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Update failed');
+      toast.error(getApiErrorMessage(err, t('creator.insights.updateFailed'), t));
     } finally {
       setActionLoading(null);
     }
@@ -166,8 +176,9 @@ export default function PromotionInsightsPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      toast.error('Download failed');
+      toast.error(t('creator.insights.downloadFailed'));
     }
   };
 
@@ -186,8 +197,12 @@ export default function PromotionInsightsPage() {
     new Date(boost.expiresAt).getTime() > Date.now() &&
     Number(boost.hoursRemaining || 0) > 0;
   const ppcIsLive = !!ppc?.isActive && Number(ppc.balance || 0) > 0;
-  const ppcStatusLabel = ppcIsLive ? (ppc.isPaused ? 'Paused' : 'Live') : 'Ended';
-  const boostStatusLabel = boostIsLive ? (boost.isPaused ? 'Paused' : 'Live') : 'Ended';
+  const statusLabel = (isLive, isPaused) =>
+    isLive
+      ? t(isPaused ? 'creator.promoStatus.paused' : 'creator.promoStatus.live')
+      : t('creator.promoStatus.ended');
+  const ppcStatusLabel = statusLabel(ppcIsLive, ppc.isPaused);
+  const boostStatusLabel = statusLabel(boostIsLive, boost.isPaused);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-20 font-sans">
@@ -200,25 +215,31 @@ export default function PromotionInsightsPage() {
             onClick={() => router.back()}
             className="p-3 bg-white dark:bg-white/5 hover:bg-orange-500 hover:text-white rounded-xl border border-black/10 dark:border-white/5 shadow-sm transition-all"
           >
-            <FiArrowLeft size={20} />
+            <FiArrowLeft size={20} aria-label={t('creator.insights.back')} />
           </button>
           <div>
             <h1 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white">
-              Promo <span className="text-orange-600 italic">Insights</span>
+              {t('creator.insights.headingLead')}{' '}
+              <span className="text-orange-600 italic">{t('creator.insights.headingAccent')}</span>
             </h1>
             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] mt-1">
-              Asset: <span className="text-orange-500">{data.title}</span>
+              {t('creator.insights.asset')} <span className="text-orange-500">{data.title}</span>
             </p>
           </div>
         </div>
         <div className="flex gap-3">
           <QuickStat
             icon={FiTrendingUp}
-            label="Rank Score"
-            value={`Lvl ${data.level}`}
+            label={t('creator.insights.rankScore')}
+            value={tf('creator.insights.level', { level: data.level })}
             color="text-orange-500"
           />
-          <QuickStat icon={FiEye} label="Organic Reach" value={data.views} color="text-blue-500" />
+          <QuickStat
+            icon={FiEye}
+            label={t('creator.insights.organicReach')}
+            value={data.views}
+            color="text-blue-500"
+          />
         </div>
       </div>
 
@@ -231,7 +252,7 @@ export default function PromotionInsightsPage() {
                 <FiActivity className="text-blue-500" size={20} />
               </div>
               <h2 className="text-[11px] font-black uppercase tracking-widest text-zinc-900 dark:text-white">
-                PPC Management
+                {t('creator.insights.ppcHeading')}
               </h2>
             </div>
 
@@ -243,22 +264,41 @@ export default function PromotionInsightsPage() {
                 onClose={() => setEditMode(null)}
                 onSubmit={() => handleEditSubmit('ppc')}
                 loading={actionLoading === 'ppc_edit'}
+                locale={locale}
+                t={t}
+                tf={tf}
               />
             ) : (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-                  <MetricBox label="In Queue" value={ppc.clicksRemaining} sub="Clicks Left" />
-                  <MetricBox label="Delivered" value={ppc.clicksUsed} sub="Total Sent" />
-                  <MetricBox label="Budget" value={`€${ppc.balance}`} sub="Remaining" />
-                  <MetricBox label="Status" value={ppcStatusLabel} sub="Current State" />
+                  <MetricBox
+                    label={t('creator.insights.inQueue')}
+                    value={ppc.clicksRemaining}
+                    sub={t('creator.insights.clicksLeft')}
+                  />
+                  <MetricBox
+                    label={t('creator.insights.delivered')}
+                    value={ppc.clicksUsed}
+                    sub={t('creator.insights.totalSent')}
+                  />
+                  <MetricBox
+                    label={t('creator.insights.budget')}
+                    value={formatCurrency(ppc.balance, locale)}
+                    sub={t('creator.insights.remaining')}
+                  />
+                  <MetricBox
+                    label={t('creator.insights.status')}
+                    value={ppcStatusLabel}
+                    sub={t('creator.insights.currentState')}
+                  />
                 </div>
                 <div className="space-y-4 mb-10">
                   <div className="flex justify-between items-end">
                     <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">
-                      Delivery Progress
+                      {t('creator.insights.deliveryProgress')}
                     </p>
                     <p className="text-sm font-black text-blue-500 italic">
-                      {ppc.consumptionRate}%
+                      {formatPercent(ppc.consumptionRate, locale)}%
                     </p>
                   </div>
                   <div className="h-2 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
@@ -277,14 +317,18 @@ export default function PromotionInsightsPage() {
             <div className="flex items-center pt-6 border-t border-black/5 dark:border-white/5">
               <ControlBtn
                 icon={ppc.isPaused ? FiPlayCircle : FiPauseCircle}
-                label={ppc.isPaused ? 'Resume' : 'Pause'}
+                label={ppc.isPaused ? t('creator.insights.resume') : t('creator.insights.pause')}
                 onClick={() => handleTogglePause('ppc')}
                 loading={actionLoading === 'ppc_pause'}
               />
-              <ControlBtn icon={FiEdit3} label="Extend" onClick={() => setEditMode('ppc')} />
+              <ControlBtn
+                icon={FiEdit3}
+                label={t('creator.insights.extend')}
+                onClick={() => setEditMode('ppc')}
+              />
               <ControlBtn
                 icon={FiXCircle}
-                label="Refund"
+                label={t('creator.insights.refund')}
                 onClick={() => handleCancel('ppc')}
                 color="text-red-500 hover:bg-red-500/10"
                 loading={actionLoading === 'ppc_cancel'}
@@ -302,7 +346,9 @@ export default function PromotionInsightsPage() {
               <div className="p-2.5 bg-orange-500/10 rounded-lg">
                 <FiZap className="text-orange-500" size={20} />
               </div>
-              <h2 className="text-[11px] font-black uppercase tracking-widest">Viral Boost</h2>
+              <h2 className="text-[11px] font-black uppercase tracking-widest">
+                {t('creator.insights.boostHeading')}
+              </h2>
             </div>
 
             {editMode === 'boost' ? (
@@ -313,6 +359,9 @@ export default function PromotionInsightsPage() {
                 onClose={() => setEditMode(null)}
                 onSubmit={() => handleEditSubmit('boost')}
                 loading={actionLoading === 'boost_edit'}
+                locale={locale}
+                t={t}
+                tf={tf}
               />
             ) : (
               <div className="text-center py-6 mb-10">
@@ -328,11 +377,11 @@ export default function PromotionInsightsPage() {
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em]">
                   {boostIsLive
                     ? boost.isPaused
-                      ? 'Paused'
+                      ? t('creator.promoStatus.paused')
                       : boost.isExpiringSoon
-                        ? 'Hours Left'
-                        : 'Days Left'
-                    : 'Ended'}
+                        ? t('creator.insights.hoursLeft')
+                        : t('creator.insights.daysLeft')
+                    : t('creator.promoStatus.ended')}
                 </p>
                 <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-orange-500">
                   {boostStatusLabel}
@@ -346,14 +395,16 @@ export default function PromotionInsightsPage() {
             <div className="flex items-center pt-6 border-t border-black/5 dark:border-white/5">
               <ControlBtn
                 icon={boost.isPaused ? FiPlayCircle : FiPauseCircle}
-                label={boost.isPaused ? 'Resume' : 'Pause'}
+                label={
+                  boost.isPaused ? t('creator.insights.resume') : t('creator.insights.pause')
+                }
                 onClick={() => handleTogglePause('boost')}
                 loading={actionLoading === 'boost_pause'}
               />
               {/* <ControlBtn icon={FiEdit3} label="Extend" onClick={() => setEditMode('boost')} /> */}
               <ControlBtn
                 icon={FiXCircle}
-                label="Refund"
+                label={t('creator.insights.refund')}
                 onClick={() => handleCancel('boost')}
                 color="text-red-500 hover:bg-red-500/10"
                 loading={actionLoading === 'boost_cancel'}
@@ -368,34 +419,34 @@ export default function PromotionInsightsPage() {
         <div className="px-8 py-5 border-b border-black/5 dark:border-white/5 flex items-center gap-3">
           <FiCreditCard className="text-orange-500" />
           <h4 className="font-black text-[10px] uppercase tracking-[0.3em] text-zinc-400">
-            Payment History
+            {t('creator.insights.paymentHistory')}
           </h4>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 border-b border-black/5 dark:border-white/5">
               <tr>
-                <th className="px-8 py-5">Date</th>
-                <th className="px-8 py-5">Type</th>
-                <th className="px-8 py-5">Amount</th>
-                <th className="px-8 py-5 text-right">Invoice</th>
+                <th className="px-8 py-5">{t('creator.insights.columnDate')}</th>
+                <th className="px-8 py-5">{t('creator.insights.columnType')}</th>
+                <th className="px-8 py-5">{t('creator.insights.columnAmount')}</th>
+                <th className="px-8 py-5 text-right">{t('creator.insights.columnInvoice')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
               {transactions.map((tx, idx) => (
-                <tr key={idx} className="hover:bg-zinc-50 dark:hover:bg-white/2 transition-all">
+                <tr key={tx._id || idx} className="hover:bg-zinc-50 dark:hover:bg-white/2 transition-all">
                   <td className="px-8 py-4 text-[10px] font-bold text-zinc-500">
-                    {formatReportingDate(tx.createdAt)}
+                    {formatReportingDate(tx.createdAt, {}, locale)}
                   </td>
                   <td className="px-8 py-4">
                     <span
                       className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-sm ${tx.packageType === 'boost' ? 'bg-orange-500/10 text-orange-500' : 'bg-blue-500/10 text-blue-500'}`}
                     >
-                      {tx.packageType}
+                      {t(`creator.packageType.${tx.packageType}`, tx.packageType)}
                     </span>
                   </td>
                   <td className="px-8 py-4 text-[12px] font-black dark:text-white">
-                    €{tx.amountPaid}
+                    {formatCurrency(tx.amountPaid, locale, tx.currency)}
                   </td>
                   <td className="px-8 py-4 text-right">
                     <button
@@ -455,14 +506,17 @@ const MetricBox = ({ label, value, sub }) => (
 
 const PPC_RATE = 0.3;
 
-const EditPanel = ({ type, values, setValues, onClose, onSubmit, loading }) => {
+const EditPanel = ({ type, values, setValues, onClose, onSubmit, loading, locale, t, tf }) => {
   const extraClicks = type === 'ppc' ? Math.floor(Number(values.budget || 0) / PPC_RATE) : 0;
 
   return (
     <div className="animate-in fade-in slide-in-from-top-4 duration-300 bg-zinc-50 dark:bg-white/5 p-5 rounded-2xl border border-orange-500/10 mb-6">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-2">
-          <FiEdit3 /> {type === 'boost' ? 'Extend Duration' : 'Inject Budget'}
+          <FiEdit3 />{' '}
+          {type === 'boost'
+            ? t('creator.insights.editBoostTitle')
+            : t('creator.insights.editPpcTitle')}
         </h3>
         <button onClick={onClose} className="text-zinc-400 hover:text-red-500">
           <FiX size={18} />
@@ -472,7 +526,7 @@ const EditPanel = ({ type, values, setValues, onClose, onSubmit, loading }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         {type === 'boost' ? (
           <InputBox
-            label="Add Days"
+            label={t('creator.insights.addDays')}
             value={values.days}
             onChange={(v) => setValues({ ...values, days: v })}
             placeholder="e.g. 7"
@@ -480,16 +534,16 @@ const EditPanel = ({ type, values, setValues, onClose, onSubmit, loading }) => {
         ) : (
           <div className="bg-white dark:bg-[#0c0c0c] p-4 rounded-xl border border-black/5 dark:border-white/5">
             <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">
-              Estimated Growth
+              {t('creator.insights.estimatedGrowth')}
             </p>
             <p className="text-xl font-black text-blue-500 tracking-tighter">
-              +{extraClicks} Clicks
+              {tf('creator.insights.extraClicks', { count: extraClicks })}
             </p>
           </div>
         )}
 
         <InputBox
-          label="Add Budget (€)"
+          label={t('creator.insights.addBudget')}
           value={values.budget}
           onChange={(v) => {
             setValues({
@@ -507,7 +561,7 @@ const EditPanel = ({ type, values, setValues, onClose, onSubmit, loading }) => {
           onClick={onClose}
           className="flex-1 py-4 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-300 transition-all"
         >
-          Cancel
+          {t('creator.common.cancel')}
         </button>
         <button
           onClick={onSubmit}
@@ -515,7 +569,9 @@ const EditPanel = ({ type, values, setValues, onClose, onSubmit, loading }) => {
           className="flex-[2] py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-600 dark:hover:bg-orange-600 dark:hover:text-white transition-all shadow-lg disabled:opacity-30"
         >
           {loading ? <FiRefreshCcw className="animate-spin" /> : <FiSave />}
-          Confirm & Pay €{Number(values.budget).toFixed(2)}
+          {tf('creator.insights.confirmAndPay', {
+            amount: formatCurrency(values.budget, locale),
+          })}
         </button>
       </div>
     </div>

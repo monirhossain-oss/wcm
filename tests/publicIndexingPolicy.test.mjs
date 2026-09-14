@@ -99,6 +99,9 @@ function metadataModule() {
   const i18n = load('src/lib/i18n/index.js', {
     './catalogs/en': load('src/lib/i18n/catalogs/en.js'),
     './catalogs/fr': load('src/lib/i18n/catalogs/fr.js'),
+    './format': load('src/lib/i18n/format.js'),
+    './catalogs/creator/en': load('src/lib/i18n/catalogs/creator/en.js'),
+    './catalogs/creator/fr': load('src/lib/i18n/catalogs/creator/fr.js'),
     '@/lib/seo/publicPageRegistry': registry,
   });
   return load('src/lib/seo/pageMetadata.js', {
@@ -140,6 +143,9 @@ test('internal links resolve to canonical routes in both languages', () => {
   const i18n = load('src/lib/i18n/index.js', {
     './catalogs/en': load('src/lib/i18n/catalogs/en.js'),
     './catalogs/fr': load('src/lib/i18n/catalogs/fr.js'),
+    './format': load('src/lib/i18n/format.js'),
+    './catalogs/creator/en': load('src/lib/i18n/catalogs/creator/en.js'),
+    './catalogs/creator/fr': load('src/lib/i18n/catalogs/creator/fr.js'),
     '@/lib/seo/publicPageRegistry': registry,
   });
   assert.equal(i18n.localePath('fr', '/faqUs'), '/fr/faq');
@@ -154,6 +160,7 @@ test('the proxy redirects the French FAQ alias once and leaves canonical routes 
   const host = load('src/lib/hostRedirect.js');
   const { proxy } = load('src/proxy.js', {
     '@/lib/hostRedirect': host, '@/lib/seo/siteConfig': site, '@/lib/seo/publicPageRegistry': registry,
+    '@/lib/localePreference': load('src/lib/localePreference.js'),
     'next/server': { NextResponse: {
       next: (options) => ({ ...options, type: 'next' }),
       redirect: (url, status) => ({ url: String(url), status, type: 'redirect' }),
@@ -221,6 +228,9 @@ test('French private routes are noindex, hide the token URL, and /fr/products do
   const i18n = load('src/lib/i18n/index.js', {
     './catalogs/en': load('src/lib/i18n/catalogs/en.js'),
     './catalogs/fr': load('src/lib/i18n/catalogs/fr.js'),
+    './format': load('src/lib/i18n/format.js'),
+    './catalogs/creator/en': load('src/lib/i18n/catalogs/creator/en.js'),
+    './catalogs/creator/fr': load('src/lib/i18n/catalogs/creator/fr.js'),
     '@/lib/seo/publicPageRegistry': registry,
   });
   const catchAll = load('src/app/(public)/[locale]/[[...segments]]/page.jsx', Object.fromEntries([

@@ -4,10 +4,14 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { usePathname, useRouter } from 'next/navigation';
 import en from '@/lib/i18n/catalogs/en';
 import fr from '@/lib/i18n/catalogs/fr';
+import { format } from '@/lib/i18n/format';
 import { localizedRoutePath } from '@/lib/seo/publicPageRegistry';
 
 const catalogs = { en, fr };
-const LocaleContext = createContext(null);
+// Exported so DashboardLocaleProvider can fill the same context: the dashboards resolve their
+// language from a stored preference rather than the path, but every consumer still calls
+// `useLocale()` and a shared component must work on both sides.
+export const LocaleContext = createContext(null);
 const COOKIE = 'wcm_locale';
 const STORAGE = 'wcm_locale';
 
@@ -56,8 +60,11 @@ export function LocaleProvider({ children }) {
     if (saved && saved !== locale && languages.some(({ code }) => code === saved)) switchLocale(saved);
   }, [languages, locale, switchLocale]);
   const t = useCallback((key, fallback) => read(catalogs[locale], key) ?? read(en, key) ?? fallback ?? key, [locale]);
-  const value = useMemo(() => ({ locale, languages, localize, switchLocale, t }), [locale, languages, localize, switchLocale, t]);
+  // `tf` is `t` plus the `{token}` substitution counted phrases need. Both providers expose it so
+  // the context shape stays identical on the public site and in the dashboards.
+  const tf = useCallback((key, values, fallback) => format(t(key, fallback), values), [t]);
+  const value = useMemo(() => ({ locale, languages, localize, switchLocale, t, tf }), [locale, languages, localize, switchLocale, t, tf]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 
-export const useLocale = () => useContext(LocaleContext) || { locale: 'en', languages: [], localize: (path) => path, switchLocale: () => {}, t: (key, fallback) => fallback || key };
+export const useLocale = () => useContext(LocaleContext) || { locale: 'en', languages: [], localize: (path) => path, switchLocale: () => {}, t: (key, fallback) => fallback || key, tf: (key, values, fallback) => format(fallback || key, values) };
