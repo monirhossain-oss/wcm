@@ -171,6 +171,19 @@ const en = {
     becomeCreator: 'Become a Creator', profile: 'Profile', dashboard: 'Dashboard', adminDashboard: 'Admin Dashboard',
     creatorDashboard: 'Creator Dashboard', logout: 'Logout',
   },
+  // /listings/[id] — the listing's own text arrives translated from the API; this is the page around it.
+  listingDetail: {
+    back: 'Back', explore: 'Explore', save: 'Save', saved: 'Saved',
+    saveToFavorites: 'Save to Favorites', savedToFavorites: 'Saved to Favorites',
+    topRanked: 'Top Ranked', views: '{count} views', tradition: 'Tradition', country: 'Country',
+    byCreator: 'by @{username}', about: 'About', keyFeatures: 'Key Features', followOnSocial: 'Follow on Social',
+    visitWebsite: 'Visit Creator Website', youMightAlsoLike: 'You might also like', moreFrom: 'More from', viewAll: 'View all',
+    loginRequired: 'Please log in to save listings.', notFound: 'Listing not found.', metaFallbackTitle: 'Listing Details',
+    metaFrom: 'from {country}', metaExploreTags: 'Explore {tags} on World Culture Marketplace.',
+    metaDiscover: 'Discover authentic cultural craftsmanship on World Culture Marketplace.',
+    seoHeading: '{title} — {tradition} from {country} | World Culture Marketplace',
+    seoHeadingShort: '{title} | World Culture Marketplace',
+  },
   favorites: {
     metaTitle: 'Favorite Listings | WCM', metaDescription: 'View the cultural listings you saved on World Culture Marketplace.',
     heading: 'Favorite Listings ❤️', savedSingular: 'item saved', savedPlural: 'items saved', loading: 'Loading favorites',

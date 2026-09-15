@@ -31,6 +31,8 @@ export default function CreatorWallet({ walletBalance }) {
       const res = await api.post('/api/payments/create-checkout-session', {
         amount: Number(topUpAmount),
         currency: topUpCurrency,
+        // Decides the invoice language and which dashboard page Stripe sends the creator back to.
+        locale,
       });
 
       if (res.data.url) {

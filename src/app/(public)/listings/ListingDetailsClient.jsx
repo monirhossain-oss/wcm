@@ -8,6 +8,7 @@ import { FaHeart, FaRegHeart, FaEye, FaSpinner, FaFacebook, FaInstagram, FaYoutu
 import Image from 'next/image';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 import ListingCard from '@/components/ListingCard';
 
 // ── Module-level constants & helpers (component বাইরে — re-render এ নতুন তৈরি হয় না) ──
@@ -53,7 +54,7 @@ const StatBadge = ({ icon: Icon, label, value }) => (
 
 // compact=true  →  nav bar pill button
 // compact=false →  full-width CTA button
-const FavoriteButton = ({ isFavorited, favCount, onClick, compact = false }) => {
+const FavoriteButton = ({ isFavorited, favCount, onClick, compact = false, t }) => {
     if (compact) {
         return (
             <button
@@ -65,7 +66,7 @@ const FavoriteButton = ({ isFavorited, favCount, onClick, compact = false }) => 
                     }`}
             >
                 {isFavorited ? <FaHeart className="w-3 h-3" /> : <FaRegHeart className="w-3 h-3" />}
-                {isFavorited ? 'Saved' : 'Save'}
+                {isFavorited ? t('listingDetail.saved') : t('listingDetail.save')}
                 {favCount > 0 && <span className="opacity-60">· {favCount}</span>}
             </button>
         );
@@ -81,7 +82,7 @@ const FavoriteButton = ({ isFavorited, favCount, onClick, compact = false }) => 
                 }`}
         >
             {isFavorited ? <FaHeart className="w-3.5 h-3.5" /> : <FaRegHeart className="w-3.5 h-3.5" />}
-            {isFavorited ? 'Saved to Favorites' : 'Save to Favorites'}
+            {isFavorited ? t('listingDetail.savedToFavorites') : t('listingDetail.saveToFavorites')}
             {favCount > 0 && <span className="opacity-50 font-normal">· {favCount}</span>}
         </button>
     );
@@ -92,6 +93,9 @@ const FavoriteButton = ({ isFavorited, favCount, onClick, compact = false }) => 
 export default function ListingDetailsClient({ initialProduct, initialRelated }) {
     const { user } = useAuth();
     const router = useRouter();
+    // Listing text arrives already localized from the server; everything the page itself says comes
+    // from the catalog, and every link keeps the reader's language.
+    const { locale, localize, t, tf } = useLocale();
 
     const [product, setProduct] = useState(initialProduct);
     const [isFavorited, setIsFavorited] = useState(false);
@@ -138,7 +142,7 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
     // ── Handlers ──────────────────────────────────────────────────────────────
 
     const handleToggleFavorite = useCallback(async () => {
-        if (!user) return alert('Please login!');
+        if (!user) return alert(t('listingDetail.loginRequired'));
         if (isProcessing.current) return;
 
         isProcessing.current = true;
@@ -153,7 +157,7 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
         } finally {
             isProcessing.current = false;
         }
-    }, [user, product._id]);
+    }, [user, product._id, t]);
 
     const handleVisitSite = useCallback(async (url, isExternal = false, index = null) => {
         if (!url || isProcessing.current) return;
@@ -183,6 +187,8 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
 
     const imageUrl = resolveImageUrl(product.image);
     const creatorUsername = product.creatorId?.username;
+    const profileHref = creatorUsername ? localize(`/profile/${creatorUsername}`) : null;
+    const viewCount = new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-US').format(product.views || 0);
 
     // ── Render ────────────────────────────────────────────────────────────────
 
@@ -198,11 +204,13 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                         className="flex items-center gap-2 text-gray-400 hover:text-[#F57C00] transition-colors group"
                     >
                         <FiArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.25em]">Back</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.25em]">{t('listingDetail.back')}</span>
                     </button>
 
                     <div className="hidden md:flex items-center gap-2 text-[11px] text-gray-400">
-                        <span className="hover:text-[#F57C00] cursor-pointer transition-colors">Explore</span>
+                        <Link href={localize('/explore')} className="hover:text-[#F57C00] transition-colors">
+                            {t('listingDetail.explore')}
+                        </Link>
                         <span className="opacity-30">/</span>
                         <span className="text-[#F57C00] font-semibold truncate max-w-[200px]">{product.title}</span>
                     </div>
@@ -212,6 +220,7 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                         favCount={favCount}
                         onClick={handleToggleFavorite}
                         compact
+                        t={t}
                     />
                 </div>
             </div>
@@ -240,22 +249,22 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                                 {product.isPromoted && (
                                     <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-[#F57C00] px-3 py-1.5 rounded-full text-[9px] font-black text-white uppercase tracking-widest shadow-lg">
                                         <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                                        Top Ranked
+                                        {t('listingDetail.topRanked')}
                                     </div>
                                 )}
 
                                 <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-white">
                                         <FaEye className="w-3 h-3 opacity-80" />
-                                        <span>{product.views || 0} views</span>
+                                        <span>{tf('listingDetail.views', { count: viewCount })}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Stat Badges */}
                             <div className="grid grid-cols-2 gap-3 mt-3">
-                                <StatBadge icon={FiShield} label="Tradition" value={product.tradition} />
-                                <StatBadge icon={FiMapPin} label="Country" value={product.country} />
+                                <StatBadge icon={FiShield} label={t('listingDetail.tradition')} value={product.tradition} />
+                                <StatBadge icon={FiMapPin} label={t('listingDetail.country')} value={product.country} />
                             </div>
                         </div>
                     </div>
@@ -282,13 +291,13 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                             <h2 className="text-[36px] md:text-[44px] font-black text-gray-900 dark:text-white leading-[1.05] tracking-tight mb-3">
                                 {product.title}
                             </h2>
-                            {creatorUsername && (
-                                <Link href={`/profile/${creatorUsername}`} className="inline-flex items-center gap-2 group">
+                            {profileHref && (
+                                <Link href={profileHref} className="inline-flex items-center gap-2 group">
                                     <div className="w-5 h-5 rounded-full bg-[#F57C00] flex items-center justify-center text-white text-[8px] font-black">
                                         {creatorUsername[0].toUpperCase()}
                                     </div>
                                     <span className="text-[12px] font-semibold text-gray-400 group-hover:text-[#F57C00] transition-colors">
-                                        by @{creatorUsername}
+                                        {tf('listingDetail.byCreator', { username: creatorUsername })}
                                     </span>
                                 </Link>
                             )}
@@ -298,9 +307,9 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
 
                         {/* Description */}
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">About</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">{t('listingDetail.about')}</p>
                             <div className="text-[15px] leading-[1.8] text-gray-600 dark:text-gray-400 space-y-4">
-                                {product.description.split('\n').filter(Boolean).map((para, idx) => (
+                                {(product.description || '').split('\n').filter(Boolean).map((para, idx) => (
                                     <p key={idx}>{para}</p>
                                 ))}
                             </div>
@@ -309,7 +318,7 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                         {/* Cultural Tags */}
                         {product.culturalTags?.length > 0 && (
                             <div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">Key Features</p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">{t('listingDetail.keyFeatures')}</p>
                                 <div className="flex flex-wrap gap-2">
                                     {product.culturalTags.map((tag, idx) => (
                                         <span
@@ -327,7 +336,7 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                         {/* Social Links */}
                         {product.externalUrls?.length > 0 && (
                             <div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">Follow on Social</p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">{t('listingDetail.followOnSocial')}</p>
                                 <div className="flex items-center gap-2">
                                     {product.externalUrls.map((url, idx) => (
                                         <button
@@ -357,7 +366,7 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                             >
                                 {clickLoading
                                     ? <FaSpinner className="animate-spin" />
-                                    : <>Visit Creator Website <FiExternalLink className="w-4 h-4" /></>
+                                    : <>{t('listingDetail.visitWebsite')} <FiExternalLink className="w-4 h-4" /></>
                                 }
                             </button>
 
@@ -365,6 +374,7 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                                 isFavorited={isFavorited}
                                 favCount={favCount}
                                 onClick={handleToggleFavorite}
+                                t={t}
                             />
                         </div>
                     </div>
@@ -375,17 +385,17 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                     <div className="mt-20 pt-12 border-t border-gray-100 dark:border-white/5">
                         <div className="flex justify-between items-end mb-8">
                             <div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#F57C00] mb-2">You might also like</p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#F57C00] mb-2">{t('listingDetail.youMightAlsoLike')}</p>
                                 <h2 className="text-[28px] md:text-[34px] font-black text-gray-900 dark:text-white">
-                                    More from <span className="text-[#F57C00]">@{creatorUsername}</span>
+                                    {t('listingDetail.moreFrom')} <span className="text-[#F57C00]">@{creatorUsername}</span>
                                 </h2>
                             </div>
-                            {creatorUsername && (
+                            {profileHref && (
                                 <Link
-                                    href={`/profile/${creatorUsername}`}
+                                    href={profileHref}
                                     className="hidden md:inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#F57C00]"
                                 >
-                                    View all <FiExternalLink className="w-3 h-3" />
+                                    {t('listingDetail.viewAll')} <FiExternalLink className="w-3 h-3" />
                                 </Link>
                             )}
                         </div>

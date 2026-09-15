@@ -6,18 +6,29 @@ import AuthButtons from './AuthButtons';
 import WishlistIcon from './WishlistIcon';
 import { menuItems } from './utils';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { getPublishedLanguageCodes } from '@/lib/seo/publishedLanguages';
+
+const readCategories = async (response) => {
+    if (!response?.ok) return [];
+    const payload = await response.json();
+    return Array.isArray(payload) ? payload : payload.data || [];
+};
 
 async function getCategories() {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
     try {
-        const [res, frenchRes] = await Promise.all([
+        // Which languages are live comes from LanguageConfiguration, never from a literal: this
+        // used to ask for French by name, so a newly published language would reach every page
+        // except the one menu visitors actually navigate by.
+        const locales = (await getPublishedLanguageCodes()).filter((code) => code !== 'en');
+        const [res, ...localizedResponses] = await Promise.all([
           fetch(`${baseUrl}/api/admin/categories`, {
             // Cache categories for 1 hour, revalidate in the background after that.
             // Tune this number based on how often categories actually change.
             next: { revalidate: 3600 },
           }),
-          fetch(`${baseUrl}/api/admin/categories?language=fr`, { next: { revalidate: 3600 } }),
+          ...locales.map((code) => fetch(`${baseUrl}/api/admin/categories?language=${encodeURIComponent(code)}`, { next: { revalidate: 3600 } })),
         ]);
 
         if (!res.ok) {
@@ -25,12 +36,21 @@ async function getCategories() {
             return [];
         }
 
-        const data = await res.json();
-        const fetchedData = Array.isArray(data) ? data : data.data;
-        const frenchPayload = frenchRes.ok ? await frenchRes.json() : [];
-        const frenchData = Array.isArray(frenchPayload) ? frenchPayload : frenchPayload.data || [];
-        const frenchById = new Map(frenchData.map((category) => [String(category._id), category.title]));
-        return (fetchedData || []).map((category) => ({ ...category, localizedTitle: frenchById.get(String(category._id)) || category.title }));
+        const fetchedData = await readCategories(res);
+        const localizedTitleMaps = await Promise.all(
+            localizedResponses.map(async (response) => new Map(
+                (await readCategories(response)).map((category) => [String(category._id), category.title])
+            ))
+        );
+
+        return (fetchedData || []).map((category) => ({
+            ...category,
+            // A translation that is still unreviewed or unpublished simply leaves the master title.
+            localizedTitles: Object.fromEntries(locales.map((code, index) => [
+                code,
+                localizedTitleMaps[index].get(String(category._id)) || category.title,
+            ])),
+        }));
     } catch (error) {
         console.error('Error fetching categories:', error);
         return [];

@@ -1,14 +1,20 @@
 import axios from 'axios';
 import ListingDetailsClient from '../ListingDetailsClient';
 import { absoluteSiteUrl, buildLocalizedMetadata, getDynamicSeoContext, localizedPath } from '@/lib/localizedMetadata';
+import { format, translate } from '@/lib/i18n';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 const MIN_DESCRIPTION_LENGTH = 40;
 const MAX_META_LENGTH = 155;
-function generateMetaDescription(product) {
+
+const tr = (locale, key, values) => (values ? format(translate(locale, key), values) : translate(locale, key));
+
+// The listing text itself arrives in the reader's language; only the sentences built around it when
+// the description is too short are phrased here, from the catalog. The country stays as stored.
+function generateMetaDescription(product, locale = 'en') {
   const rawDescription = (product?.description || '').trim();
 
-  // URL/junk check — 
+  // URL/junk check —
   const isJunkOrUrl = /^https?:\/\//i.test(rawDescription) || rawDescription.length < MIN_DESCRIPTION_LENGTH;
 
   if (rawDescription && !isJunkOrUrl) {
@@ -23,19 +29,32 @@ function generateMetaDescription(product) {
 
   const detailBits = [];
   if (product?.tradition) detailBits.push(product.tradition);
-  if (product?.country) detailBits.push(`from ${product.country}`);
+  if (product?.country) detailBits.push(tr(locale, 'listingDetail.metaFrom', { country: product.country }));
   if (detailBits.length) parts.push(detailBits.join(' '));
 
   if (Array.isArray(product?.culturalTags) && product.culturalTags.length) {
-    parts.push(`Explore ${product.culturalTags.join(', ')} on World Culture Marketplace.`);
+    const tags = product.culturalTags.map((tag) => tag?.title || tag).join(', ');
+    parts.push(tr(locale, 'listingDetail.metaExploreTags', { tags }));
   } else {
-    parts.push('Discover authentic cultural craftsmanship on World Culture Marketplace.');
+    parts.push(tr(locale, 'listingDetail.metaDiscover'));
   }
 
   const generated = parts.join(' — ');
   return generated.length <= MAX_META_LENGTH
     ? generated
     : generated.slice(0, MAX_META_LENGTH).slice(0, generated.lastIndexOf(' ')) + '…';
+}
+
+// The visually hidden page heading, phrased for the reader's language.
+function buildSeoHeading(product, locale) {
+  if (product.tradition && product.country) {
+    return tr(locale, 'listingDetail.seoHeading', {
+      title: product.title,
+      tradition: product.tradition,
+      country: product.country,
+    });
+  }
+  return tr(locale, 'listingDetail.seoHeadingShort', { title: product.title });
 }
 
 export async function generateMetadata({ params, locale = 'en' }) {
@@ -48,7 +67,7 @@ export async function generateMetadata({ params, locale = 'en' }) {
       ? product.image
       : `${API_BASE_URL}/${product.image}`;
 
-    const metaDescription = generateMetaDescription(product);
+    const metaDescription = generateMetaDescription(product, locale);
     const seoContext = await getDynamicSeoContext({ objectType: 'listing', slug: id, locale });
     return buildLocalizedMetadata({ locale, path: `/listings/${product.slug || id}`,
       title: product._localizedSeo?.title || `${product.title} | World Culture Marketplace`,
@@ -56,7 +75,7 @@ export async function generateMetadata({ params, locale = 'en' }) {
       imageAlt: product._localizedSeo?.imageAlt || product.title,
       languageUrls: seoContext?.metadata?.languages, canonicalUrl: seoContext?.metadata?.canonical });
   } catch (error) {
-    return { title: 'Listing Details' };
+    return { title: translate(locale, 'listingDetail.metaFallbackTitle') };
   }
 }
 
@@ -74,21 +93,22 @@ export default async function Page({ params, locale = 'en' }) {
         `${API_BASE_URL}/api/listings/public?creatorId=${initialProduct.creatorId._id}&limit=5${locale === 'en' ? '' : `&language=${locale}`}`
       );
       initialRelated = (relatedRes.data.listings || [])
-        .filter((item) => item._id !== id)
+        .filter((item) => item._id !== initialProduct._id && item._id !== id)
         .slice(0, 4);
     }
   } catch (error) {
     console.error("Server Fetch Error:", error);
   }
 
-  if (!initialProduct) return <div className="p-20 text-center">Asset not found.</div>;
+  if (!initialProduct) return <div className="p-20 text-center">{translate(locale, 'listingDetail.notFound')}</div>;
 
   // ✅ CreativeWork Schema
   const creativeWorkSchema = {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
     name: initialProduct.title,
-    description: generateMetaDescription(initialProduct),
+    description: generateMetaDescription(initialProduct, locale),
+    inLanguage: locale,
     image: initialProduct.image ? {
       '@type': 'ImageObject', contentUrl: initialProduct.image,
       name: initialProduct._localizedSeo?.imageAlt || initialProduct.title,
@@ -103,7 +123,7 @@ export default async function Page({ params, locale = 'en' }) {
     },
     countryOfOrigin: initialProduct.country || undefined,
     genre: initialProduct.tradition || undefined,
-    keywords: initialProduct.culturalTags?.join(', ') || undefined,
+    keywords: initialProduct.culturalTags?.map((tag) => tag?.title || tag).join(', ') || undefined,
     dateCreated: initialProduct.createdAt,
     dateModified: initialProduct.updatedAt,
   };
@@ -117,9 +137,7 @@ export default async function Page({ params, locale = 'en' }) {
       />
 
       {/* SEO h1 */}
-      <h1 className="sr-only">
-        {initialProduct.title} — {initialProduct.tradition} from {initialProduct.country} | World Culture Marketplace
-      </h1>
+      <h1 className="sr-only">{buildSeoHeading(initialProduct, locale)}</h1>
 
       <ListingDetailsClient
         initialProduct={initialProduct}

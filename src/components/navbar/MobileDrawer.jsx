@@ -99,7 +99,7 @@ const MobileDrawer = ({ categories, menuItems }) => {
                                                     >
                                                         <span className="w-2 h-2 rounded-full bg-gray-200 dark:bg-gray-700 group-hover:bg-[#F57C00] flex-shrink-0 transition-colors duration-150" />
                                                         <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 group-hover:text-[#F57C00] truncate transition-colors duration-150 leading-tight">
-                                                            {locale === 'fr' ? cat.localizedTitle : cat.title || cat.name}
+                                                            {cat.localizedTitles?.[locale] || cat.title || cat.name}
                                                         </span>
                                                     </Link>
                                                 ))}

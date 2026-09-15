@@ -35,6 +35,8 @@ const api = axios.create({
   withCredentials: true,
 });
 
+const AUTO_REFRESH_MS = 5 * 60 * 1000;
+
 export default function CreatorDashboard() {
   const { locale, localize, t, tf } = useLocale();
   const [stats, setStats] = useState(null);
@@ -42,38 +44,42 @@ export default function CreatorDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Wrapped because it now reads `t`: the toast has to speak the reader's language, which makes
-  // the function reactive and the interval below depend on it.
-  const fetchDashboardData = useCallback(async (isRefresh = false) => {
-    try {
-      if (isRefresh) setRefreshing(true);
-      else setLoading(true);
+  // `force` is the Force Refresh button: it asks the server to rebuild the figures and says so.
+  // `silent` is the background refresh: no spinner, no toast, and the server's cached figures.
+  const fetchDashboardData = useCallback(
+    async ({ force = false, silent = false } = {}) => {
+      try {
+        if (force) setRefreshing(true);
+        else if (!silent) setLoading(true);
 
-      const statsUrl = isRefresh ? '/api/creator/stats?refresh=true' : '/api/creator/stats';
+        const [statsRes, transRes] = await Promise.all([
+          api.get('/api/creator/stats', { params: force ? { refresh: 'true' } : undefined }),
+          api.get('/api/creator/my-transactions'),
+        ]);
 
-      const [statsRes, transRes] = await Promise.all([
-        api.get(statsUrl),
-        api.get('/api/creator/my-transactions'),
-      ]);
+        setStats(statsRes.data);
+        setTransactions(transRes.data.transactions?.slice(0, 5) || []);
 
-      setStats(statsRes.data);
-      setTransactions(transRes.data.transactions?.slice(0, 5) || []);
+        if (force) toast.success(t('creator.overview.updated'));
+      } catch (err) {
+        console.error('Dashboard Data Error:', err);
+        if (force) toast.error(t('creator.overview.syncFailed'));
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [t]
+  );
 
-      if (isRefresh) toast.success(t('creator.overview.updated'));
-    } catch (err) {
-      console.error('Dashboard Data Error:', err);
-      if (isRefresh) toast.error(t('creator.overview.syncFailed'));
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [t]);
-
+  // Background refresh every five minutes, only while the tab is visible, reading the server's cached
+  // figures (which the server itself rebuilds at most every five minutes). It used to force a full
+  // recompute every minute from every open tab — and toast "Dashboard Updated" each time.
   useEffect(() => {
     fetchDashboardData();
     const interval = setInterval(() => {
-      fetchDashboardData(true);
-    }, 1 * 60 * 1000); // 1 minute for testing, change to 5 * 60 * 1000 for production
+      if (document.visibilityState === 'visible') fetchDashboardData({ silent: true });
+    }, AUTO_REFRESH_MS);
     return () => clearInterval(interval);
   }, [fetchDashboardData]);
 
@@ -125,7 +131,7 @@ export default function CreatorDashboard() {
           </p>
         </div>
         <button
-          onClick={() => fetchDashboardData(true)}
+          onClick={() => fetchDashboardData({ force: true })}
           disabled={refreshing}
           className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50"
         >

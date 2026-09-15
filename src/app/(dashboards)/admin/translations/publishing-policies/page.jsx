@@ -25,7 +25,7 @@ import {
   selectClass,
 } from '../_components/ui';
 
-const OBJECT_TYPES = ['listing', 'creatorProfile', 'category', 'blog', 'faq', 'cms'];
+const OBJECT_TYPES = ['listing', 'creatorProfile', 'category', 'tag', 'tradition', 'region', 'blog', 'faq', 'cms'];
 
 const MODE_HELP = {
   manual_review: 'A draft is created and an administrator must approve it before it goes live.',
@@ -37,6 +37,9 @@ const DEFAULTS = [
   ['listing', 'master_approval_gated', 'Publishes when the listing is approved'],
   ['creatorProfile', 'automatic', 'Publishes for active, approved creators'],
   ['category', 'manual_review', 'Admin approves each translation'],
+  ['tag', 'manual_review', 'Admin approves each translation'],
+  ['tradition', 'manual_review', 'Admin approves each translation'],
+  ['region', 'manual_review', 'Admin approves each translation'],
   ['blog', 'manual_review', 'Admin approves each translation'],
   ['faq', 'manual_review', 'Admin approves each translation'],
   ['cms', 'manual_review', 'Admin approves each translation'],

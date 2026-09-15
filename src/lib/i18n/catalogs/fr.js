@@ -162,6 +162,18 @@ const fr = {
     becomeCreator: 'Devenir créateur', profile: 'Profil', dashboard: 'Tableau de bord', adminDashboard: 'Tableau de bord administrateur',
     creatorDashboard: 'Tableau de bord créateur', logout: 'Se déconnecter',
   },
+  listingDetail: {
+    back: 'Retour', explore: 'Explorer', save: 'Enregistrer', saved: 'Enregistré',
+    saveToFavorites: 'Ajouter aux favoris', savedToFavorites: 'Ajouté aux favoris',
+    topRanked: 'Mieux classé', views: '{count} vues', tradition: 'Tradition', country: 'Pays',
+    byCreator: 'par @{username}', about: 'À propos', keyFeatures: 'Caractéristiques', followOnSocial: 'Suivre sur les réseaux',
+    visitWebsite: 'Visiter le site du créateur', youMightAlsoLike: 'Vous aimerez aussi', moreFrom: 'Plus de', viewAll: 'Tout voir',
+    loginRequired: 'Connectez-vous pour enregistrer des annonces.', notFound: 'Annonce introuvable.', metaFallbackTitle: 'Détails de l’annonce',
+    metaFrom: 'de {country}', metaExploreTags: 'Découvrez {tags} sur World Culture Marketplace.',
+    metaDiscover: 'Découvrez un artisanat culturel authentique sur World Culture Marketplace.',
+    seoHeading: '{title} — {tradition} de {country} | World Culture Marketplace',
+    seoHeadingShort: '{title} | World Culture Marketplace',
+  },
   favorites: {
     metaTitle: 'Mes favoris | WCM', metaDescription: 'Consultez les créations culturelles enregistrées sur World Culture Marketplace.',
     heading: 'Mes favoris ❤️', savedSingular: 'élément enregistré', savedPlural: 'éléments enregistrés', loading: 'Chargement des favoris',

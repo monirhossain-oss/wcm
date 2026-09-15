@@ -45,7 +45,7 @@ import {
   selectClass,
 } from './_components/ui';
 
-const TYPES = ['listing', 'creatorProfile', 'category', 'blog', 'faq', 'cms'];
+const TYPES = ['listing', 'creatorProfile', 'category', 'tag', 'tradition', 'region', 'blog', 'faq', 'cms'];
 const TRANSLATION_STATUSES = ['ai_generated', 'creator_reviewed', 'admin_reviewed', 'outdated', 'failed'];
 const PUBLICATION_STATUSES = ['published', 'draft', 'unpublished', 'archived'];
 const EMPTY_FILTERS = {
@@ -61,6 +61,9 @@ const typeLabels = {
   listing: 'Listing',
   creatorProfile: 'Creator profile',
   category: 'Category',
+  tag: 'Tag',
+  tradition: 'Tradition',
+  region: 'Region',
   blog: 'Blog',
   faq: 'FAQ',
   cms: 'CMS page',

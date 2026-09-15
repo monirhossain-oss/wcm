@@ -25,7 +25,7 @@ import {
   textareaClass,
 } from '../_components/ui';
 
-const OBJECT_TYPES = ['listing', 'creatorProfile', 'category', 'blog', 'faq', 'cms'];
+const OBJECT_TYPES = ['listing', 'creatorProfile', 'category', 'tag', 'tradition', 'region', 'blog', 'faq', 'cms'];
 
 const AVAILABLE_VARIABLES = [
   'sourceLanguageCode',

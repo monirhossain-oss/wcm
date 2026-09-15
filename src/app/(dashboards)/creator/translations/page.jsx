@@ -55,7 +55,7 @@ const loadAvailability = async (entries) => {
 
 export default function CreatorTranslationsPage() {
   const { user } = useAuth();
-  const { localize, t, tf } = useLocale();
+  const { locale, localize, t, tf } = useLocale();
   const [listings, setListings] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [availability, setAvailability] = useState({});
@@ -70,7 +70,7 @@ export default function CreatorTranslationsPage() {
     else setLoading(true);
     try {
       const [listingsResponse, notificationsResponse] = await Promise.all([
-        getMyListings(),
+        getMyListings(locale),
         getNotifications({ unreadOnly: 'false' }),
       ]);
       const rows = Array.isArray(listingsResponse.data)
@@ -85,7 +85,7 @@ export default function CreatorTranslationsPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [t]);
+  }, [locale, t]);
 
   useEffect(() => {
     load();
@@ -94,7 +94,9 @@ export default function CreatorTranslationsPage() {
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return listings;
-    return listings.filter((listing) => String(listing.title || '').toLowerCase().includes(term));
+    return listings.filter((listing) =>
+      String(listing.localizedText?.title || listing.title || '').toLowerCase().includes(term)
+    );
   }, [listings, search]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -314,7 +316,7 @@ export default function CreatorTranslationsPage() {
               <li key={listing._id} className="flex flex-wrap items-center gap-4 px-5 md:px-6 py-4">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
-                    {listing.title}
+                    {listing.localizedText?.title || listing.title}
                   </p>
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-1">
                     {t(`creator.status.${listing.status}`, listing.status)}

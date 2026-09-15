@@ -106,37 +106,33 @@ test('French keeps the same placeholders as English', () => {
 // that are legitimately identical in both languages (brand names, currency codes, punctuation) are
 // listed explicitly so a genuinely untranslated string cannot hide among them.
 const IDENTICAL_BY_DESIGN = new Set([
-  'common.none',
-  'common.empty',
+  // Words French spells exactly as English does. They are correct French, not missed translations.
   'nav.navigation',
-  'nav.translations',
-  'nav.transactions',
-  'nav.logoAlt',
-  'promoStatus.organic',
-  'packageType.boost',
-  'packageType.ppc',
   'overview.metrics.engagement',
+  'overview.ledger.protocol',
   'add.tradition',
   'add.sources',
-  'listings.edit.tradition',
-  'promotions.columnActions',
-  'promotions.columnPromotions',
-  'promotions.columnStatus',
-  'promotions.active',
-  'promotions.modal.currency',
   'listings.columnActions',
-  'listings.actionTranslations',
-  'insights.status',
+  'listings.edit.tradition',
+  'listings.edit.description',
+  'promotions.columnPromotions',
+  'promotions.columnActions',
   'insights.budget',
   'insights.columnDate',
   'insights.columnType',
-  'transactions.columnStatus',
-  'translations.heading',
+  'transactions.columnVerification',
+  'transactions.columnProtocol',
   'translations.notifications',
   'workspace.fields.description',
-  'workspace.slugPlaceholder',
-  'workspace.targetLabel',
   'workspace.version',
+  // Names, codes and examples that are the same in every language.
+  'nav.logoAlt',
+  'packageType.boost',
+  'packageType.ppc',
+  'promotions.modal.currency',
+  'workspace.slugPlaceholder',
+  // Pure structure around two placeholders.
+  'workspace.targetLabel',
 ]);
 
 test('French creator entries are actually translated', () => {

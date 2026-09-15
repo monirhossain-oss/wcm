@@ -1,8 +1,14 @@
-// Creator Dashboard UI strings. Separate from the public catalog because the dashboard is a
-// closed, noindex surface whose language comes from the `wcm_locale` preference rather than the
-// URL — see FEATURE_PLANS/creator_dashboard_static_localization.md.
+// Creator Dashboard UI strings, kept apart from the public catalog because the dashboard alone
+// carries roughly as many keys as the whole public site.
 //
-// `{token}` placeholders are filled by `format()` in lib/i18n/index.js. Counted phrases keep the
+// Which language is used is decided by the URL, exactly as on the public site: `/creator/...` is
+// English and `/fr/creator/...` is French. proxy.js reads the prefix, sets the request's locale
+// header and rewrites the prefixed URL onto the single /creator route tree; DashboardLocaleProvider
+// hands that locale to every page. The `wcm_locale` cookie decides nothing here — it is written only
+// when the reader switches language, so the public site follows their choice. See ARCHITECTURE.md
+// "Dashboard localization".
+//
+// `{token}` placeholders are filled by `format()` in lib/i18n/format.js. Counted phrases keep the
 // singular and the plural as two keys, matching the public catalog's existing convention.
 const creator = {
   // ── Shared across pages ────────────────────────────────────────────────────
@@ -111,7 +117,7 @@ const creator = {
     updated: 'Dashboard Updated',
     syncFailed: 'Failed to sync data',
     invoiceFailed: 'Could not download invoice.',
-    lowBalance: 'Operational Hazard: Your wallet balance is critically low (€{balance})',
+    lowBalance: 'Low balance: only {balance} left in your wallet',
     recharge: 'Recharge Now',
     tooltipHeading: 'Reserve Policy',
     metrics: {
@@ -137,7 +143,7 @@ const creator = {
         'Interaction Pulse: Total direct actions and clicks received through your Pay-Per-Click configurations.',
     },
     chart: {
-      eyebrow: 'Nodes Performance',
+      eyebrow: 'Listing Performance',
       headingLead: 'Growth',
       headingAccent: 'Pulse',
       views: 'Views',
@@ -148,16 +154,16 @@ const creator = {
       approved: 'Approved',
       reviewing: 'Reviewing',
       rejected: 'Rejected',
-      totalNodes: 'Total Active Nodes',
+      totalNodes: 'Total Listings',
     },
     ledger: {
       heading: 'Capital Ledger',
       viewAll: 'View All Entries',
       date: 'Transaction Date',
-      protocol: 'Protocol',
+      protocol: 'Type',
       amount: 'Amount',
       invoice: 'Invoice',
-      empty: 'No activity logs found.',
+      empty: 'No transactions yet.',
     },
   },
 
@@ -215,11 +221,11 @@ const creator = {
     headingAccent: 'Listings',
     synchronized: 'Synchronized: {time}',
     syncPending: 'Pending',
-    searchPlaceholder: 'SEARCH ASSET...',
+    searchPlaceholder: 'SEARCH LISTINGS...',
     allCategories: 'ALL CATEGORIES',
     allStatus: 'ALL STATUS',
-    columnAsset: 'Listing Asset',
-    columnIdentity: 'Identity Details',
+    columnAsset: 'Listing',
+    columnIdentity: 'Details',
     columnStatus: 'Listing Status',
     columnReason: 'Reason',
     columnActions: 'Actions',
@@ -229,32 +235,34 @@ const creator = {
     actionEdit: 'Edit',
     actionTranslations: 'Translations',
     actionDelete: 'Delete',
-    empty: 'No matching nodes detected in system index.',
-    indexing: 'Indexing {from} — {to} of {total} ASSETS',
-    synced: 'Inventory Synchronized',
-    fetchFailed: 'Failed to fetch assets',
-    updated: 'Asset updated successfully',
+    empty: 'No listings match your filters.',
+    indexing: 'Showing {from}–{to} of {total} listings',
+    synced: 'Listings refreshed',
+    fetchFailed: 'Could not load your listings',
+    updated: 'Listing updated',
     updateFailed: 'Update failed',
     maxTags: 'Maximum {count} tags allowed',
-    deleted: 'Node deleted',
+    deleted: 'Listing deleted',
     deleteFailed: 'Delete failed',
-    deleteConfirm: 'Delete this node? All promotion data will be lost.',
+    deleteConfirm: 'Delete this listing? All promotion data will be lost.',
     edit: {
-      headingLead: 'Node',
-      headingAccent: 'Re-Configuration',
-      assetId: 'Asset ID Ref: {id}',
-      visualIdentity: 'Visual Identity',
-      updateBuffer: 'Update Buffer',
-      taxonomyTags: 'Taxonomy Tags',
-      title: 'Asset Title',
-      category: 'Category Protocol',
+      headingLead: 'Edit',
+      headingAccent: 'Listing',
+      assetId: 'Listing ID: {id}',
+      visualIdentity: 'Cover Image',
+      updateBuffer: 'Replace image',
+      taxonomyTags: 'Tags',
+      title: 'Listing Title',
+      category: 'Category',
       selectCategory: 'SELECT CATEGORY',
       tradition: 'Tradition',
       country: 'Country',
-      region: 'Region',
-      websiteLink: 'Access Link',
-      description: 'Asset Description',
-      submit: 'Updates Listing',
+      region: 'Culture / Origin',
+      websiteLink: 'Website Link',
+      description: 'Description',
+      noTranslationYet:
+        'This listing has no version in this language yet, so the English text is shown. Write the title and description in this language before saving.',
+      submit: 'Update Listing',
     },
   },
 
@@ -279,17 +287,17 @@ const creator = {
 
   // ── /creator/promotions ────────────────────────────────────────────────────
   promotions: {
-    managedAssets: 'Managed Assets',
-    assetList: 'Asset List',
+    managedAssets: 'Approved Listings',
+    assetList: 'Listings',
     columnItem: 'Item Details',
     columnStatus: 'Status',
     columnPromotions: 'Promotions',
     columnActions: 'Actions',
-    assetFallback: 'Standard Asset',
+    assetFallback: 'Uncategorized',
     insights: 'Insights',
     promote: 'Promote',
     active: 'Active',
-    showing: 'Showing {from} to {to} of {total} Assets',
+    showing: 'Showing {from} to {to} of {total} listings',
     syncFailed: 'Synchronization failed',
     packages: {
       starter: 'Starter Boost',
@@ -313,7 +321,7 @@ const creator = {
       currency: 'EUR',
       costPerClick: 'Cost Per Click',
       estimatedClicks: 'Est. Clicks',
-      clickRateNote: '* Clicks are estimated based on a fixed rate of €{rate} per click.',
+      clickRateNote: '* Clicks are estimated at a fixed rate of {rate} per click.',
       nonRefundable: 'All Boost & PPC purchases are final and non-refundable.',
       learnMore: 'Learn more about',
       learnMoreLink: 'Boost & PPC',
@@ -324,7 +332,7 @@ const creator = {
       launch: 'Launch Campaign',
     },
     insufficientCredits: 'Insufficient credits.',
-    executing: 'Executing Protocol...',
+    executing: 'Launching campaign...',
     launched: 'Campaign Launched!',
     transactionFailed: 'Transaction failed',
   },
@@ -375,6 +383,7 @@ const creator = {
     actionFailed: 'Action failed',
     refunded: 'Refund Successful! {amount} added to wallet.',
     cancelFailed: 'Cancellation failed',
+    refundPreviewFailed: 'Could not calculate the refund. Please try again.',
     updated: 'Campaign Updated!',
     updateFailed: 'Update failed',
     downloadFailed: 'Download failed',
@@ -392,17 +401,17 @@ const creator = {
     totalEntries: 'Total Entries',
     userActivity: 'User Activity',
     online: 'ONLINE',
-    columnVerification: 'Verification',
-    columnProtocol: 'Protocol',
-    columnValue: 'Value',
+    columnVerification: 'Date',
+    columnProtocol: 'Type',
+    columnValue: 'Amount',
     columnStatus: 'Status',
-    columnInvoicing: 'Invoicing',
-    decrypting: 'Decrypting Records...',
-    syncComplete: 'Sync Complete',
-    empty: 'No synchronization data found for this period.',
+    columnInvoicing: 'Invoice',
+    decrypting: 'Loading transactions...',
+    syncComplete: 'Completed',
+    empty: 'No transactions found for this period.',
     totalRecords: 'Total {total} Records',
-    synced: 'Ledger Synchronized',
-    syncFailed: 'Failed to sync financial records',
+    synced: 'Transactions refreshed',
+    syncFailed: 'Could not load transactions',
     generating: 'Generating invoice...',
     downloaded: 'Downloaded',
     downloadFailed: 'Download failed',

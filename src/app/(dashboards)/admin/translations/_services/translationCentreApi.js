@@ -75,6 +75,10 @@ export const updateProtectedTerm = (id, data) => api.patch(`/api/translations/ad
 export const getMemory = (params) => api.get('/api/translations/admin/memory', { params });
 export const updateMemory = (id, data) => api.patch(`/api/translations/admin/memory/${id}`, data);
 export const archiveMemory = (id) => api.patch(`/api/translations/admin/memory/${id}/archive`);
+export const restoreMemory = (id) => api.patch(`/api/translations/admin/memory/${id}/restore`);
+// Returns suggested wording only; nothing changes until it is saved with updateMemory.
+export const regenerateMemory = (id) => api.post(`/api/translations/admin/memory/${id}/regenerate`);
+export const archiveStaleMemory = () => api.post('/api/translations/admin/memory/archive-stale');
 export const getLanguages = () => api.get('/api/translations/admin/languages');
 export const registerLanguage = (data) => api.post('/api/translations/admin/languages', data);
 export const runLanguageAction = (code, action) => api.post(`/api/translations/admin/languages/${code}/${action}`);

@@ -83,10 +83,10 @@ export default function PromotionsPage() {
 
   useEffect(() => {
     initData();
-    // Bootstrap only. `initData` became reactive once its error toast started reading the catalog,
-    // but the rows it loads are API data that do not change with the reader's language.
+    // Runs again on a language switch: listing titles come back in the reader's language. `initData`
+    // itself is left out because it is recreated every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [locale]);
 
   const initData = async () => {
     try {
@@ -184,6 +184,8 @@ export default function PromotionsPage() {
       const payload = {
         listingId: selectedListing._id,
         packageType: promoType,
+        // The invoice for this purchase is issued in the language this page is showing.
+        locale,
         packageId: selectedPkgId,
         amountInEUR: currentCost,
         days: promoType === 'boost' ? Number(boostDays) : 0,
@@ -269,7 +271,7 @@ export default function PromotionsPage() {
                         />
                         <div>
                           <p className="font-black text-zinc-900 dark:text-zinc-100 text-sm tracking-tight mb-1">
-                            {item.title}
+                            {item.localizedText?.title || item.title}
                           </p>
                           <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest italic">
                             {item.localizedLabels?.category ||
@@ -446,7 +448,7 @@ export default function PromotionsPage() {
                   {t('creator.promotions.modal.title')}
                 </h3>
                 <p className="mt-1.5 truncate text-[10px] font-bold text-zinc-500 tracking-tight">
-                  {selectedListing.title}
+                  {selectedListing.localizedText?.title || selectedListing.title}
                 </p>
               </div>
               <button
@@ -570,7 +572,7 @@ export default function PromotionsPage() {
 
                   <p className="text-[9px] text-zinc-500 font-medium italic">
                     {tf('creator.promotions.modal.clickRateNote', {
-                      rate: PPC_COST_PER_CLICK.toFixed(2),
+                      rate: formatCurrency(PPC_COST_PER_CLICK, locale),
                     })}
                   </p>
                 </div>

@@ -45,7 +45,8 @@ export default function PromotionInsightsPage() {
   const fetchStats = useCallback(async () => {
     try {
       const [insightsRes, transRes] = await Promise.all([
-        api.get(`/api/creator/promotion-insights/${id}`),
+        // The listing title comes back in the reader's language.
+        api.get(`/api/creator/promotion-insights/${id}`, { params: { language: locale } }),
         api.get(`/api/creator/my-transactions`),
       ]);
       if (insightsRes.data.success) setData(insightsRes.data.data);
@@ -57,7 +58,7 @@ export default function PromotionInsightsPage() {
     } finally {
       setLoading(false);
     }
-  }, [id, t]);
+  }, [id, locale, t]);
 
   useEffect(() => {
     if (id) fetchStats();
@@ -84,36 +85,26 @@ export default function PromotionInsightsPage() {
   };
 
   const handleCancel = async (packageType) => {
-    let estimatedRefund = 0;
-    const now = new Date();
-
-    const currentBoost = data?.boost;
-    const currentPpc = data?.ppc;
-
-    if (packageType === 'boost' && currentBoost?.isActive && currentBoost?.expiresAt) {
-      const expiry = new Date(currentBoost.expiresAt);
-
-      if (expiry > now) {
-        // ব্যাকএন্ড লজিক অনুযায়ী রিফান্ড ক্যালকুলেশন
-        // durationDays যদি না থাকে তবে ১ ধরে নেওয়া হচ্ছে যাতে ভাগ করলে এরর না আসে
-        const totalDurationMs = (currentBoost.durationDays || 1) * 24 * 60 * 60 * 1000;
-        const remainingMs = expiry.getTime() - now.getTime();
-
-        // রিফান্ড রেশিও (কত শতাংশ সময় বাকি আছে)
-        const refundRatio = Math.min(1, remainingMs / totalDurationMs);
-        estimatedRefund = Math.max(0, (currentBoost.amountPaid || 0) * refundRatio).toFixed(2);
-      } else {
-        estimatedRefund = '0.00';
-      }
-    } else if (packageType === 'ppc' && currentPpc?.isActive) {
-      // আপনার ডাটা অবজেক্টে ফিল্ডের নাম 'balance', তাই সেটিই ব্যবহার করা হয়েছে
-      estimatedRefund = Number(currentPpc.balance || 0).toFixed(2);
+    // The refund shown comes from the server, which runs the same calculation cancelPromotion then
+    // credits (utils/promotionRefund.js). The dashboard used to estimate it with its own proportional
+    // formula and could promise more than the wallet received.
+    setActionLoading(`${packageType}_cancel`);
+    let previewAmount;
+    try {
+      const { data: preview } = await api.get('/api/payments/refund-preview', {
+        params: { listingId: id, packageType },
+      });
+      previewAmount = preview.refundAmount;
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, t('creator.insights.refundPreviewFailed'), t));
+      return;
+    } finally {
+      setActionLoading(null);
     }
 
-    // কনফার্মেশন মেসেজ
     const confirmMessage = tf('creator.insights.cancelConfirm', {
       type: t(`creator.packageType.${packageType}`, packageType).toUpperCase(),
-      amount: formatCurrency(estimatedRefund, locale),
+      amount: formatCurrency(previewAmount, locale),
     });
 
     if (!window.confirm(confirmMessage)) return;
@@ -123,6 +114,8 @@ export default function PromotionInsightsPage() {
       const res = await api.post('/api/payments/cancel-promotion', {
         listingId: id,
         packageType,
+        // The refund's invoice is issued in the language this page is showing.
+        locale,
       });
 
       if (res.data.success) {
@@ -147,6 +140,7 @@ export default function PromotionInsightsPage() {
       const payload = {
         listingId: id,
         packageType,
+        locale,
         amountInEUR: Number(editData.budget),
         days: packageType === 'boost' ? Number(editData.days) : 0,
         totalClicks: packageType === 'ppc' ? Number(editData.clicks) : 0,

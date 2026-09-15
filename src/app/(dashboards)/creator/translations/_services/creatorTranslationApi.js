@@ -13,7 +13,9 @@ const objectPath = (businessObjectType, businessObjectId) =>
 // The published-language list is the public endpoint: the static registry is never authoritative.
 export const getPublishedLanguages = () => api.get('/api/translations/languages');
 
-export const getMyListings = () => api.get('/api/listings/my-listings');
+// `language` brings each listing's title in the reader's language beside the English master.
+export const getMyListings = (language) =>
+  api.get('/api/listings/my-listings', { params: { language } });
 
 export const getWorkspace = (businessObjectType, businessObjectId) =>
   api.get(`${objectPath(businessObjectType, businessObjectId)}/workspace`);
