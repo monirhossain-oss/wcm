@@ -43,6 +43,7 @@ export default function CreateBlogPage() {
   const [formData, setFormData] = useState({
     title: '',
     category: '',
+    imageAlt: '',
     description: '',
     selectedTags: [],
     content: [{ type: 'paragraph', text: '' }],
@@ -105,8 +106,20 @@ export default function CreateBlogPage() {
   };
 
   const addBlock = (type) => {
-    const newBlock = type === 'image_grid' ? { type, images: [] } : { type, text: '' };
+    const newBlock = type === 'image_grid' ? { type, images: [], imageAlts: [] } : { type, text: '' };
     setFormData({ ...formData, content: [...formData.content, newBlock] });
+  };
+
+  // Alt text is stored on the block, not beside the file, so it travels inside `content` and can be
+  // translated with the rest of the article. Its index is the index of the image it describes.
+  const setGridAlt = (blockIdx, imgIdx, value) => {
+    setFormData((prev) => {
+      const content = [...prev.content];
+      const imageAlts = [...(content[blockIdx]?.imageAlts || [])];
+      imageAlts[imgIdx] = value;
+      content[blockIdx] = { ...content[blockIdx], imageAlts };
+      return { ...prev, content };
+    });
   };
 
   const removeBlock = (index) => {
@@ -159,6 +172,15 @@ export default function CreateBlogPage() {
     const currentFiles = gridFiles[blockIdx] || [];
     const updatedFiles = currentFiles.filter((_, i) => i !== fileIdx);
     setGridFiles({ ...gridFiles, [blockIdx]: updatedFiles });
+    // The alt at that position described the image just removed; leaving it behind would shift
+    // every following alt onto the wrong picture.
+    setFormData((prev) => {
+      const content = [...prev.content];
+      const imageAlts = [...(content[blockIdx]?.imageAlts || [])];
+      imageAlts.splice(fileIdx, 1);
+      content[blockIdx] = { ...content[blockIdx], imageAlts };
+      return { ...prev, content };
+    });
   };
 
   const handleSubmit = async (e, status = 'published') => {
@@ -177,6 +199,7 @@ export default function CreateBlogPage() {
       data.append('category', catTitle);
       data.append('description', formData.description);
       data.append('image', mainImage);
+      data.append('imageAlt', formData.imageAlt);
 
       const tagTitles = formData.selectedTags.map(
         (tId) => categoryTags.find((t) => t._id === tId)?.title
@@ -195,7 +218,9 @@ export default function CreateBlogPage() {
 
       if (res.data.success) {
         toast.success(status === 'draft' ? 'Draft Saved!' : 'Journal Published!');
-        router.push('/admin/blogs');
+        // Straight to the article's own page, where the EN/FR toggle is: the French version is
+        // being prepared from this moment and the editor should be able to watch for it.
+        router.push(`/admin/blogs/${res.data.blog.slug}`);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Error');
@@ -298,6 +323,12 @@ export default function CreateBlogPage() {
                 </div>
               )}
             </div>
+            <input
+              value={formData.imageAlt}
+              onChange={(e) => setFormData({ ...formData, imageAlt: e.target.value })}
+              placeholder="Banner alt text"
+              className="w-full bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-orange-500"
+            />
           </section>
 
           <section className="bg-gray-50 dark:bg-white/5 p-6 rounded-lg space-y-6 border border-gray-100 dark:border-white/5">
@@ -463,23 +494,28 @@ export default function CreateBlogPage() {
                       {block.type === 'image_grid' ? (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                           {(gridFiles[idx] || []).map((file, fIdx) => (
-                            <div
-                              key={fIdx}
-                              className="relative aspect-square rounded-lg overflow-hidden border dark:border-white/10 group/img"
-                            >
-                              <img
-                                src={URL.createObjectURL(file)}
-                                className="w-full h-full object-cover"
-                                alt={`grid-${fIdx}`}
+                            <div key={fIdx} className="space-y-1.5">
+                              <div className="relative aspect-square rounded-lg overflow-hidden border dark:border-white/10 group/img">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  className="w-full h-full object-cover"
+                                  alt={`grid-${fIdx}`}
+                                />
+                                {/* ✅ Individual delete button per image */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveGridImage(idx, fIdx)}
+                                  className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 text-white rounded-full opacity-0 group-hover/img:opacity-100 hover:bg-red-500 transition-all"
+                                >
+                                  <FiX size={12} />
+                                </button>
+                              </div>
+                              <input
+                                value={block.imageAlts?.[fIdx] || ''}
+                                onChange={(e) => setGridAlt(idx, fIdx, e.target.value)}
+                                placeholder="Alt text"
+                                className="w-full bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-md px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500"
                               />
-                              {/* ✅ Individual delete button per image */}
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveGridImage(idx, fIdx)}
-                                className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 text-white rounded-full opacity-0 group-hover/img:opacity-100 hover:bg-red-500 transition-all"
-                              >
-                                <FiX size={12} />
-                              </button>
                             </div>
                           ))}
                           {(gridFiles[idx] || []).length < 4 && (

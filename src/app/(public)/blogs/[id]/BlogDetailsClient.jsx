@@ -182,7 +182,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                 <div className="relative w-full max-w-[1000px] mx-auto aspect-[1000/612] rounded-xl overflow-hidden shadow-2xl">
                     <Image
                         src={blog.image}
-                        alt={blog.title}
+                        alt={blog.imageAlt || blog.title}
                         fill
                         priority
                         sizes="100vw"
@@ -222,7 +222,7 @@ const BlogDetailsClient = ({ initialBlog }) => {
                                     >
                                         {item.images?.map((img, i) => (
                                             <div key={i} className="mb-4 md:mb-6">
-                                                <MasonryImage src={img} alt={t('blog.details.insightAlt')} />
+                                                <MasonryImage src={img} alt={item.imageAlts?.[i] || t('blog.details.insightAlt')} />
                                             </div>
                                         ))}
                                     </Masonry>

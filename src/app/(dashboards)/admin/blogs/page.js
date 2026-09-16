@@ -4,14 +4,23 @@ import axios from 'axios';
 import Link from 'next/link';
 import { FiEdit2, FiTrash2, FiPlus, FiLoader, FiExternalLink } from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
+import { getRecords } from '../translations/_services/translationCentreApi';
+import { frenchStatusOf } from './_components/BlogFrenchPanel';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   withCredentials: true,
 });
 
+const FR_BADGE_STYLES = {
+  Published: 'bg-green-500/10 text-green-500',
+  Ready: 'bg-blue-500/10 text-blue-500',
+  Outdated: 'bg-yellow-500/10 text-yellow-600',
+};
+
 export default function BlogListPage() {
   const [blogs, setBlogs] = useState([]);
+  const [frByBlog, setFrByBlog] = useState({});
   const [loading, setLoading] = useState(true);
 
   const fetchBlogs = async () => {
@@ -22,6 +31,20 @@ export default function BlogListPage() {
       toast.error('Failed to load journals');
     } finally {
       setLoading(false);
+    }
+
+    // One call for every French record, mapped by the blog it belongs to, so each row can show
+    // where its translation stands without a request per row. Kept in its own try: the journals
+    // list must still load for an admin whose translation permissions are missing.
+    try {
+      const french = await getRecords({ businessObjectType: 'blog', languageCode: 'fr', limit: 100 });
+      setFrByBlog(
+        Object.fromEntries(
+          (french.data?.data?.records || []).map((record) => [String(record.businessObjectId), record])
+        )
+      );
+    } catch {
+      setFrByBlog({});
     }
   };
 
@@ -83,6 +106,15 @@ export default function BlogListPage() {
                   >
                     {blog.status === 'published' ? '● Published' : '○ Draft'}
                   </span>
+                  {frByBlog[blog._id] && (
+                    <span
+                      className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                        FR_BADGE_STYLES[frenchStatusOf(frByBlog[blog._id])] || 'bg-zinc-500/10 text-zinc-400'
+                      }`}
+                    >
+                      FR · {frenchStatusOf(frByBlog[blog._id])}
+                    </span>
+                  )}
                   <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">
                     {blog.category} • {new Date(blog.createdAt).toLocaleDateString()}
                   </p>

@@ -18,6 +18,7 @@ import {
   FiEdit3,
 } from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
+import BlogFrenchPanel from '../_components/BlogFrenchPanel';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -39,9 +40,14 @@ export default function EditBlogPage() {
   const [showTagDrop, setShowTagDrop] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
 
+  // English is the master and stays the default view; French is one click away, on the same page.
+  const [mode, setMode] = useState('en');
+  const [blogRecordId, setBlogRecordId] = useState(null);
+
   const [formData, setFormData] = useState({
     title: '',
     category: '',
+    imageAlt: '',
     description: '',
     selectedTags: [],
     content: [],
@@ -65,10 +71,13 @@ export default function EditBlogPage() {
           title: blog.title,
           description: blog.description,
           category: currentCat?._id || '',
+          imageAlt: blog.imageAlt || '',
           content: blog.content || [],
           selectedTags: [],
         });
         setPreviewImage(blog.image);
+        // The route carries the slug; the French panel looks its record up by the blog's id.
+        setBlogRecordId(blog._id);
 
         if (currentCat) {
           const tagsRes = await api.get(`/api/listings/tags/by-category/${currentCat._id}`);
@@ -101,8 +110,20 @@ export default function EditBlogPage() {
   }, [formData.category]);
 
   const addBlock = (type) => {
-    const newBlock = type === 'image_grid' ? { type, images: [] } : { type, text: '' };
+    const newBlock = type === 'image_grid' ? { type, images: [], imageAlts: [] } : { type, text: '' };
     setFormData({ ...formData, content: [...formData.content, newBlock] });
+  };
+
+  // One alt per image, in the order the server will store them: the images already saved, then the
+  // newly uploaded files appended after them. That is exactly how `updateBlog` merges the two.
+  const setGridAlt = (blockIdx, imgIdx, value) => {
+    setFormData((prev) => {
+      const content = [...prev.content];
+      const imageAlts = [...(content[blockIdx]?.imageAlts || [])];
+      imageAlts[imgIdx] = value;
+      content[blockIdx] = { ...content[blockIdx], imageAlts };
+      return { ...prev, content };
+    });
   };
 
   const removeBlock = (index) => {
@@ -149,6 +170,10 @@ export default function EditBlogPage() {
   const handleRemoveExistingImage = (blockIdx, imgIdx) => {
     const newContent = [...formData.content];
     newContent[blockIdx].images = newContent[blockIdx].images.filter((_, i) => i !== imgIdx);
+    // Its alt goes with it, or every following alt would describe the wrong picture.
+    const imageAlts = [...(newContent[blockIdx].imageAlts || [])];
+    imageAlts.splice(imgIdx, 1);
+    newContent[blockIdx] = { ...newContent[blockIdx], imageAlts };
     setFormData({ ...formData, content: newContent });
   };
 
@@ -157,6 +182,14 @@ export default function EditBlogPage() {
     const updatedFiles = [...(gridFiles[blockIdx] || [])];
     updatedFiles.splice(fileIdx, 1);
     setGridFiles({ ...gridFiles, [blockIdx]: updatedFiles });
+    // New files sit after the saved images, so that is where this file's alt is.
+    setFormData((prev) => {
+      const content = [...prev.content];
+      const imageAlts = [...(content[blockIdx]?.imageAlts || [])];
+      imageAlts.splice((content[blockIdx]?.images?.length || 0) + fileIdx, 1);
+      content[blockIdx] = { ...content[blockIdx], imageAlts };
+      return { ...prev, content };
+    });
   };
 
   const handleSubmit = async (e, status) => {
@@ -168,6 +201,7 @@ export default function EditBlogPage() {
       data.append('title', formData.title);
       data.append('description', formData.description);
       data.append('category', categories.find((c) => c._id === formData.category)?.title);
+      data.append('imageAlt', formData.imageAlt);
       if (status) data.append('status', status); // শুধু explicitly দিলে পাঠাবে
 
       if (mainImage) data.append('image', mainImage);
@@ -212,6 +246,21 @@ export default function EditBlogPage() {
           Update <span className="text-orange-500">Journal</span>
         </h1>
         <div className="flex items-center gap-3">
+          <div className="flex rounded-md overflow-hidden border dark:border-white/10">
+            {['en', 'fr'].map((code) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => setMode(code)}
+                className={`px-4 py-2.5 text-xs font-black uppercase transition-all ${
+                  mode === code ? 'bg-orange-600 text-white' : 'hover:text-orange-500'
+                }`}
+              >
+                {code}
+              </button>
+            ))}
+          </div>
+
           <button
             type="button"
             onClick={() => router.back()}
@@ -244,6 +293,9 @@ export default function EditBlogPage() {
         </div>
       </div>
 
+      {mode === 'fr' ? (
+        <BlogFrenchPanel blogId={blogRecordId} />
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         <div className="lg:col-span-4 space-y-8">
           <section className="space-y-3">
@@ -263,6 +315,12 @@ export default function EditBlogPage() {
                 onChange={(e) => handleMainImageChange(e.target.files[0])}
               />
             </div>
+            <input
+              value={formData.imageAlt}
+              onChange={(e) => setFormData({ ...formData, imageAlt: e.target.value })}
+              placeholder="Banner alt text"
+              className="w-full bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-orange-500"
+            />
           </section>
 
           <section className="bg-gray-50 dark:bg-white/5 p-6 rounded-lg space-y-6 border dark:border-white/5">
@@ -396,35 +454,46 @@ export default function EditBlogPage() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {/* ✅ ফিক্সড: বিদ্যমান ইমেজ রিমুভ (ল্যাপটপ + মোবাইল) */}
                         {block.images?.map((img, i) => (
-                          <div
-                            key={i}
-                            className="relative aspect-square rounded-lg overflow-hidden group"
-                          >
-                            <img src={img} className="w-full h-full object-cover" />
-                            <button
-                              onClick={() => handleRemoveExistingImage(idx, i)}
-                              className="absolute top-1 right-1 bg-red-500 text-white p-1.5 rounded-full md:opacity-0 group-hover:opacity-100 transition-all"
-                            >
-                              <FiTrash2 size={14} />
-                            </button>
+                          <div key={i} className="space-y-1.5">
+                            <div className="relative aspect-square rounded-lg overflow-hidden group">
+                              <img src={img} className="w-full h-full object-cover" alt={block.imageAlts?.[i] || ''} />
+                              <button
+                                onClick={() => handleRemoveExistingImage(idx, i)}
+                                className="absolute top-1 right-1 bg-red-500 text-white p-1.5 rounded-full md:opacity-0 group-hover:opacity-100 transition-all"
+                              >
+                                <FiTrash2 size={14} />
+                              </button>
+                            </div>
+                            <input
+                              value={block.imageAlts?.[i] || ''}
+                              onChange={(e) => setGridAlt(idx, i, e.target.value)}
+                              placeholder="Alt text"
+                              className="w-full bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-md px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500"
+                            />
                           </div>
                         ))}
                         {/* ✅ ফিক্সড: নতুন ফাইল রিমুভ (ল্যাপটপ + মোবাইল) */}
                         {(gridFiles[idx] || []).map((file, fIdx) => (
-                          <div
-                            key={fIdx}
-                            className="relative aspect-square rounded-lg overflow-hidden border-2 border-orange-500 group"
-                          >
-                            <img
-                              src={URL.createObjectURL(file)}
-                              className="w-full h-full object-cover"
+                          <div key={fIdx} className="space-y-1.5">
+                            <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-orange-500 group">
+                              <img
+                                src={URL.createObjectURL(file)}
+                                className="w-full h-full object-cover"
+                                alt=""
+                              />
+                              <button
+                                onClick={() => handleRemoveNewFile(idx, fIdx)}
+                                className="absolute top-1 right-1 bg-red-600 text-white p-1.5 rounded-full md:opacity-0 group-hover:opacity-100 transition-all"
+                              >
+                                <FiX size={14} />
+                              </button>
+                            </div>
+                            <input
+                              value={block.imageAlts?.[(block.images?.length || 0) + fIdx] || ''}
+                              onChange={(e) => setGridAlt(idx, (block.images?.length || 0) + fIdx, e.target.value)}
+                              placeholder="Alt text"
+                              className="w-full bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-md px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500"
                             />
-                            <button
-                              onClick={() => handleRemoveNewFile(idx, fIdx)}
-                              className="absolute top-1 right-1 bg-red-600 text-white p-1.5 rounded-full md:opacity-0 group-hover:opacity-100 transition-all"
-                            >
-                              <FiX size={14} />
-                            </button>
                           </div>
                         ))}
                         {(block.images?.length || 0) + (gridFiles[idx]?.length || 0) < 4 && (
@@ -465,6 +534,7 @@ export default function EditBlogPage() {
           </section>
         </div>
       </div>
+      )}
     </div>
   );
 }

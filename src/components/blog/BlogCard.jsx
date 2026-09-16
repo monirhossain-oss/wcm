@@ -123,7 +123,9 @@ const BlogCard = ({ initialBlogs = null, initialHasMore = false }) => {
               >
                 <Image
                   src={blog.image || '/fallback-image.png'}
-                  alt={blog.title}
+                  // The stored alt is the translated one in a localized read; the title is the
+                  // fallback for posts written before alt text existed.
+                  alt={blog.imageAlt || blog.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
