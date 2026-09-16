@@ -134,14 +134,15 @@ test('the image host allowlist is exactly the hosts this site serves images from
     'i.postimg.cc',
     'localhost',
     'wcm-server.onrender.com',
+    'api.worldculturemarketplace.com',
     'ui-avatars.com',
   ]);
   for (const host of hosts) {
     assert.ok(!host.endsWith('.co.com'), `${host} looks like the ibb.co.com typo again`);
   }
-  // Both upload origins stay scoped to the uploads path rather than the whole host.
+  // Every upload origin stays scoped to the uploads path rather than the whole host.
   for (const pattern of config.images.remotePatterns) {
-    if (['localhost', 'wcm-server.onrender.com'].includes(pattern.hostname)) {
+    if (['localhost', 'wcm-server.onrender.com', 'api.worldculturemarketplace.com'].includes(pattern.hostname)) {
       assert.equal(pattern.pathname, '/uploads/**', `${pattern.hostname} must stay scoped to uploads`);
     }
   }

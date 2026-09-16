@@ -27,6 +27,12 @@ const nextConfig = {
         pathname: '/uploads/**',
       },
       {
+        // The API on its own domain serves the same /uploads tree as Render does.
+        protocol: 'https',
+        hostname: 'api.worldculturemarketplace.com',
+        pathname: '/uploads/**',
+      },
+      {
         protocol: 'https',
         hostname: 'ui-avatars.com',
       },
