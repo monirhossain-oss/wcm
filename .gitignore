@@ -40,4 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+# test output (the tests in tests/ are source and are tracked)
+*.lcov
+.nyc_output/
+
+# stray saved pages — not part of the app
+page.html
