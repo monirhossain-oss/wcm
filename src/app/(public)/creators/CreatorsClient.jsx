@@ -6,6 +6,13 @@ import CustomDropdown from './CustomDropdown';
 import CreatorCard from './CreatorCard';
 import { useLocale } from '@/context/LocaleContext';
 
+// Accents are folded on both sides of the comparison, so "cafe" finds "Café" and the other way
+// round — a French reader should not have to reproduce an accent to find what they can see.
+const normalizeForSearch = (value) => String(value ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
 export default function CreatorsClient({ initialCreators, categories }) {
     const { t } = useLocale();
     const [searchQuery, setSearchQuery] = useState('');
@@ -18,13 +25,22 @@ export default function CreatorsClient({ initialCreators, categories }) {
     );
 
     const filteredCreators = useMemo(() => {
+        const searchTerm = normalizeForSearch(searchQuery);
         return initialCreators.filter((creator) => {
-            const searchTerm = searchQuery.toLowerCase();
-            const fullName = `${creator.firstName || ''} ${creator.lastName || ''}`.toLowerCase();
-            const country = (creator.profile?.country || '').toLowerCase();
-            const bio = (creator.profile?.bio || '').toLowerCase();
+            // Everything the card can show, so a visitor can always search by the name in front of
+            // them: the card's heading is `profile.displayName` when there is one, and the display
+            // and business names are the two fields a creator's published translation replaces —
+            // searching only first/last name missed them in both languages.
+            const haystack = [
+                `${creator.firstName || ''} ${creator.lastName || ''}`,
+                creator.profile?.displayName,
+                creator.profile?.businessName,
+                creator.profile?.country,
+                creator.profile?.bio,
+            ];
 
-            const matchesSearch = fullName.includes(searchTerm) || country.includes(searchTerm) || bio.includes(searchTerm);
+            const matchesSearch = !searchTerm
+                || haystack.some((value) => normalizeForSearch(value).includes(searchTerm));
             const matchesCulture = selectedCulture === '' || creator.profile?.country === selectedCulture;
             const creatorCatId = creator.profile?.category?._id || creator.profile?.category;
             const matchesCategory = selectedCategory === '' || String(creatorCatId) === String(selectedCategory);

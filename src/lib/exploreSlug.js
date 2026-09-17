@@ -6,6 +6,12 @@ export const toRouteSlug = (text) => {
   if (!value || ['all', 'all regions'].includes(value.toLowerCase())) return null;
   return value.toLowerCase()
     .replace(/&/g, 'and')
+    // Accents are folded to their base letter before the ASCII filter below, which would otherwise
+    // delete them outright rather than transliterate: "céramique" became "cramique", a word that
+    // matches nothing. Splitting each accented character into letter + combining mark and dropping
+    // the marks keeps the letter, and the slug stays ASCII.
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, '-')
     .replace(/[^-a-z0-9]/g, '')
     .replace(/-+/g, '-')
