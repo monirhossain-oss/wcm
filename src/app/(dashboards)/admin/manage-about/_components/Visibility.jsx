@@ -13,6 +13,7 @@ const Visibility = ({ data, refresh }) => {
         headline: { textPart: '', coloredPart: '' },
         founderText: { prefix: '', founderName: '', suffix: '' },
         description: '',
+        exploreButtonText: '',
         footerInfo: { locations: [], serviceText: '' }
     });
 
@@ -31,6 +32,7 @@ const Visibility = ({ data, refresh }) => {
                     suffix: data.founderText?.suffix || ''
                 },
                 description: data.description || '',
+                exploreButtonText: data.exploreButtonText || '',
                 footerInfo: {
                     locations: data.footerInfo?.locations || [],
                     serviceText: data.footerInfo?.serviceText || ''
@@ -50,6 +52,7 @@ const Visibility = ({ data, refresh }) => {
                 founderName: visibilityData.founderText.founderName,
                 suffix: visibilityData.founderText.suffix,
                 description: visibilityData.description,
+                exploreButtonText: visibilityData.exploreButtonText,
                 locations: visibilityData.footerInfo.locations,
                 serviceText: visibilityData.footerInfo.serviceText
             });
@@ -223,6 +226,25 @@ const Visibility = ({ data, refresh }) => {
                     disabled={!editMode}
                     className={`w-full bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm outline-none resize-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
                 />
+            </div>
+
+            {/* Explore Button Section */}
+            <div className="mb-8 bg-black/20 p-6 rounded-2xl border border-gray-800/50">
+                <h3 className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-orange-500 rounded-full"></span> Explore Button
+                </h3>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Button Text</label>
+                <input
+                    type="text"
+                    placeholder="Explore Our Creators"
+                    value={visibilityData.exploreButtonText}
+                    onChange={(e) => setVisibilityData({ ...visibilityData, exploreButtonText: e.target.value })}
+                    disabled={!editMode}
+                    className={`w-full bg-gray-900 border rounded-xl px-4 py-2.5 text-white text-sm outline-none transition-all ${editMode ? "border-orange-500 focus:ring-1 focus:ring-orange-500" : "border-gray-700 opacity-70 cursor-not-allowed"}`}
+                />
+                <p className="mt-2 text-[11px] text-gray-500">
+                    The button is displayed in uppercase on the public page. Switch this page to FR to translate it.
+                </p>
             </div>
 
             {/* Locations Section */}

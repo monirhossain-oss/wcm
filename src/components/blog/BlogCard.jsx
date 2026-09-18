@@ -190,13 +190,12 @@ const BlogCard = ({ initialBlogs = null, initialHasMore = false }) => {
 
       {/* ৫. নিউজলেটার সেকশন */}
       <div className="max-w-3xl mx-auto py-20 border-t border-zinc-100 dark:border-zinc-900">
+        {/* No weekly newsletter is sent, so the section carries its heading alone — the promise of
+            a curated weekly digest was removed rather than translated. */}
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-zinc-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-zinc-900 dark:text-white">
             {t('blog.newsletterTitle')}
           </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 text-sm md:text-base leading-relaxed font-medium">
-            {t('blog.newsletterDescription')}
-          </p>
         </div>
 
         <form

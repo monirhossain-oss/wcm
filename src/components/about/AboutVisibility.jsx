@@ -6,7 +6,7 @@ import { useLocale } from '@/context/LocaleContext';
 import React from 'react';
 
 const AboutVisibility = ({ data }) => {
-    const { localize } = useLocale();
+    const { localize, t } = useLocale();
     // Data destructuring with fallbacks
     const header = data?.headline || {};
     const founder = data?.founderText || {};
@@ -67,13 +67,13 @@ const AboutVisibility = ({ data }) => {
             {/* Explore Button */}
             <Link href={localize('/creators')} className="inline-block">
                 <button className="px-10 py-4 cursor-pointer rounded-2xl bg-[#F57C00] text-white font-black hover:bg-[#e67600] transition-all shadow-2xl shadow-orange-500/20 hover:scale-105 active:scale-95 uppercase tracking-wider">
-                    Explore Our Creators
+                    {data?.exploreButtonText || "Explore Our Creators"}
                 </button>
             </Link>
 
             {/* Trust Badge */}
             <p className="mt-8 text-gray-400 dark:text-gray-600 text-sm font-medium italic">
-                Supporting a more inclusive and respectful global cultural economy.
+                {t('about.trustBadge')}
             </p>
 
         </section>

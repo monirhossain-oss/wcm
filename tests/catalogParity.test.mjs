@@ -108,11 +108,13 @@ test('French keeps the same placeholders as English', () => {
 const IDENTICAL_BY_DESIGN = new Set([
   // Words French spells exactly as English does. They are correct French, not missed translations.
   'nav.navigation',
+  'nav.transactions',
   'overview.metrics.engagement',
   'overview.ledger.protocol',
   'add.tradition',
   'add.sources',
   'listings.columnActions',
+  'listings.edit.taxonomyTags',
   'listings.edit.tradition',
   'listings.edit.description',
   'promotions.columnPromotions',
@@ -120,7 +122,6 @@ const IDENTICAL_BY_DESIGN = new Set([
   'insights.budget',
   'insights.columnDate',
   'insights.columnType',
-  'transactions.columnVerification',
   'transactions.columnProtocol',
   'translations.notifications',
   'workspace.fields.description',

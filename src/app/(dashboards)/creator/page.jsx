@@ -26,7 +26,12 @@ import {
 } from 'recharts';
 import { Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { formatReportingDate, formatReportingTime, REPORTING_TIME_ZONE } from '@/lib/reportingTime';
+import {
+  formatReportingDate,
+  formatReportingTime,
+  formatReportingWeekday,
+  REPORTING_TIME_ZONE,
+} from '@/lib/reportingTime';
 import { useLocale } from '@/context/LocaleContext';
 import { formatCurrency, formatNumber } from '@/lib/i18n/formatters';
 
@@ -112,6 +117,12 @@ export default function CreatorDashboard() {
 
   const mainStats = stats?.stats;
   const walletBalance = stats?.walletBalance || '0.00';
+  // The API sends `name` as an English weekday; `fullDate` is the reporting key it came from, so the
+  // axis label is rebuilt in the dashboard language and falls back to the API's own text.
+  const chartData = (stats?.chartData || []).map((point) => ({
+    ...point,
+    name: point.fullDate ? formatReportingWeekday(point.fullDate, locale) : point.name,
+  }));
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans overflow-x-hidden">
@@ -244,7 +255,7 @@ export default function CreatorDashboard() {
 
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={stats?.chartData || []}>
+              <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="vGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#f97316" stopOpacity={0.1} />

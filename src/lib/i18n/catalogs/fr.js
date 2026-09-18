@@ -70,7 +70,7 @@ const fr = {
   blog: {
     heading: 'Histoires culturelles', intro: 'Explorez les traditions, le savoir-faire et la créativité culturelle du monde entier à travers un regard éditorial.', empty: 'Aucune histoire trouvée.',
     loading: 'Chargement des articles...', loadFailure: 'Impossible de charger les histoires.', readMore: 'Lire la suite', archiveEmpty: 'Aucune histoire trouvée dans les archives.', loadMore: 'Afficher plus d’articles',
-    newsletterTitle: 'Restez informé', newsletterDescription: 'Recevez notre sélection hebdomadaire d’articles présentant les récits culturels les plus captivants du monde.', newsletterEmailRequired: 'Veuillez saisir votre adresse e-mail !', newsletterSuccess: 'Merci pour votre inscription !', newsletterError: 'Une erreur est survenue.', subscribe: 'S’abonner',
+    newsletterTitle: 'Restez informé', newsletterEmailRequired: 'Veuillez saisir votre adresse e-mail !', newsletterSuccess: 'Merci pour votre inscription !', newsletterError: 'Une erreur est survenue.', subscribe: 'S’abonner',
     details: {
       notFoundTitle: 'Histoire introuvable | World Culture Marketplace', metaDescription: 'Lisez cette histoire culturelle sur World Culture Marketplace.', back: 'Retour aux articles', editorialTeam: 'Équipe éditoriale', insightAlt: 'Aperçu culturel', share: 'Partager cette histoire', linkCopied: 'Lien copié !',
       discussions: 'Discussions', commentPlaceholder: 'Partagez vos impressions...', signInToComment: 'Se connecter pour commenter', loginRequired: 'Veuillez vous connecter pour commenter', commentAdded: 'Commentaire ajouté !', commentFailure: 'Impossible de publier le commentaire',
@@ -108,8 +108,11 @@ const fr = {
       'Une photo de profil et une image de couverture qui présentent votre travail.',
     ],
     reviewHeading: 'La suite du processus',
-    review: 'Notre équipe de modération examine chaque candidature afin d’en vérifier l’authenticité et la pertinence culturelle. Vous conservez la pleine propriété de tout ce que vous publiez et pouvez retirer une annonce à tout moment. Les créateurs approuvés peuvent publier immédiatement.',
+    review: 'Notre équipe de modération examine chaque candidature afin d’en vérifier l’authenticité et la pertinence culturelle. Vous conservez la pleine propriété de tout ce que vous publiez et pouvez retirer une création à tout moment. Les créateurs approuvés peuvent publier immédiatement.',
     signInNote: 'Un compte est nécessaire pour candidater. Connectez-vous ou créez un compte pour ouvrir le formulaire.',
+  },
+  about: {
+    trustBadge: 'Favoriser une économie culturelle mondiale plus inclusive et respectueuse.',
   },
   howItWorks: {
     process: 'Notre processus',
@@ -153,7 +156,7 @@ const fr = {
     heading: 'Explorer les cultures du monde', categoryCollections: 'Collections', culturalHeritage: 'Patrimoine culturel', from: 'de',
     searchPlaceholder: 'Rechercher cultures, art, traditions... ', endResults: 'Fin des résultats.', noListings: 'Aucune création trouvée',
     noListingsDescription: 'Aucun résultat ne correspond à vos filtres ou à votre recherche.', scrollLeft: 'Faire défiler les catégories vers la gauche', scrollRight: 'Faire défiler les catégories vers la droite',
-    promoted: 'Sponsorisé', listingAlt: 'Création', heritage: 'Patrimoine', global: 'Monde',
+    promoted: 'Mise en Avant', listingAlt: 'Création', heritage: 'Patrimoine', global: 'Monde',
   },
   faq: { badge: 'Centre d’assistance', heading: 'Questions fréquentes' },
   navigation: {
@@ -165,10 +168,10 @@ const fr = {
   listingDetail: {
     back: 'Retour', explore: 'Explorer', save: 'Enregistrer', saved: 'Enregistré',
     saveToFavorites: 'Ajouter aux favoris', savedToFavorites: 'Ajouté aux favoris',
-    topRanked: 'Mieux classé', views: '{count} vues', tradition: 'Tradition', country: 'Pays',
+    promoted: 'Mise en Avant', views: '{count} vues', tradition: 'Tradition', country: 'Pays',
     byCreator: 'par @{username}', about: 'À propos', keyFeatures: 'Caractéristiques', followOnSocial: 'Suivre sur les réseaux',
     visitWebsite: 'Visiter le site du créateur', youMightAlsoLike: 'Vous aimerez aussi', moreFrom: 'Plus de', viewAll: 'Tout voir',
-    loginRequired: 'Connectez-vous pour enregistrer des annonces.', notFound: 'Annonce introuvable.', metaFallbackTitle: 'Détails de l’annonce',
+    loginRequired: 'Connectez-vous pour enregistrer des créations.', notFound: 'Création introuvable.', metaFallbackTitle: 'Détails de la création',
     metaFrom: 'de {country}', metaExploreTags: 'Découvrez {tags} sur World Culture Marketplace.',
     metaDiscover: 'Découvrez un artisanat culturel authentique sur World Culture Marketplace.',
     seoHeading: '{title} — {tradition} de {country} | World Culture Marketplace',
@@ -178,7 +181,7 @@ const fr = {
     metaTitle: 'Mes favoris | WCM', metaDescription: 'Consultez les créations culturelles enregistrées sur World Culture Marketplace.',
     heading: 'Mes favoris ❤️', savedSingular: 'élément enregistré', savedPlural: 'éléments enregistrés', loading: 'Chargement des favoris',
     emptyTitle: 'Aucun favori pour le moment', emptyDescription: 'Explorez la marketplace et enregistrez les créations qui vous inspirent.', explore: 'Explorer la marketplace',
-    featured: 'À LA UNE', heritage: 'Patrimoine', global: 'Monde', unknown: 'Inconnu', anonymous: 'Anonyme',
+    promoted: 'MISE EN AVANT', heritage: 'Patrimoine', global: 'Monde', unknown: 'Inconnu', anonymous: 'Anonyme',
     noImage: 'Aucune image disponible', coverAlt: 'Couverture du créateur', toggle: 'Ajouter ou retirer des favoris', login: 'Veuillez vous connecter',
     restricted: 'Votre compte peut naviguer, mais les actions commerciales sont actuellement limitées.', restrictedTitle: 'Les actions commerciales sont limitées pour ce compte',
     listings: 'Créations', profile: 'Profil', website: 'Site web',

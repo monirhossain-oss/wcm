@@ -75,7 +75,7 @@ const en = {
   blog: {
     heading: 'Cultural Stories', intro: 'Explore traditions, craftsmanship, and cultural creativity from around the world through an editorial lens.', empty: 'No stories found.',
     loading: 'Loading blogs...', loadFailure: 'Failed to load stories.', readMore: 'Read More', archiveEmpty: 'No stories found in the archives.', loadMore: 'Load More Insights',
-    newsletterTitle: 'Stay Informed', newsletterDescription: "Receive our curated weekly blogs featuring the world's most captivating cultural narratives.", newsletterEmailRequired: 'Please enter your email!', newsletterSuccess: 'Thank you for subscribing!', newsletterError: 'Something went wrong.', subscribe: 'Subscribe',
+    newsletterTitle: 'Stay Informed', newsletterEmailRequired: 'Please enter your email!', newsletterSuccess: 'Thank you for subscribing!', newsletterError: 'Something went wrong.', subscribe: 'Subscribe',
     details: {
       notFoundTitle: 'Story Not Found | World Culture Marketplace', metaDescription: 'Read this cultural story on World Culture Marketplace.', back: 'Back to Blogs', editorialTeam: 'Editorial Team', insightAlt: 'Cultural insight', share: 'Share this story', linkCopied: 'Link copied!',
       discussions: 'Discussions', commentPlaceholder: 'Share your thoughts...', signInToComment: 'Sign in to Comment', loginRequired: 'Please login to comment', commentAdded: 'Comment added!', commentFailure: 'Failed to post comment',
@@ -117,6 +117,11 @@ const en = {
     reviewHeading: 'What happens next',
     review: 'Our moderation team reviews every application for authenticity and cultural relevance. You keep full ownership of everything you upload and can withdraw a listing at any time. Approved creators can start publishing straight away.',
     signInNote: 'You need an account before you can apply. Sign in or register to open the application form.',
+  },
+  // /about-us takes its text from the About CMS record, one record per language. These two strings
+  // sit outside that record, so they are localized here instead.
+  about: {
+    trustBadge: 'Supporting a more inclusive and respectful global cultural economy.',
   },
   howItWorks: {
     process: 'Our Process',
@@ -175,7 +180,7 @@ const en = {
   listingDetail: {
     back: 'Back', explore: 'Explore', save: 'Save', saved: 'Saved',
     saveToFavorites: 'Save to Favorites', savedToFavorites: 'Saved to Favorites',
-    topRanked: 'Top Ranked', views: '{count} views', tradition: 'Tradition', country: 'Country',
+    promoted: 'Promoted', views: '{count} views', tradition: 'Tradition', country: 'Country',
     byCreator: 'by @{username}', about: 'About', keyFeatures: 'Key Features', followOnSocial: 'Follow on Social',
     visitWebsite: 'Visit Creator Website', youMightAlsoLike: 'You might also like', moreFrom: 'More from', viewAll: 'View all',
     loginRequired: 'Please log in to save listings.', notFound: 'Listing not found.', metaFallbackTitle: 'Listing Details',
@@ -188,7 +193,7 @@ const en = {
     metaTitle: 'Favorite Listings | WCM', metaDescription: 'View the cultural listings you saved on World Culture Marketplace.',
     heading: 'Favorite Listings ❤️', savedSingular: 'item saved', savedPlural: 'items saved', loading: 'Loading favorites',
     emptyTitle: 'No favorites yet', emptyDescription: 'Start exploring and save the items that inspire you.', explore: 'Explore Marketplace',
-    featured: 'FEATURED', heritage: 'Heritage', global: 'Global', unknown: 'Unknown', anonymous: 'Anonymous',
+    promoted: 'PROMOTED', heritage: 'Heritage', global: 'Global', unknown: 'Unknown', anonymous: 'Anonymous',
     noImage: 'No image available', coverAlt: 'Creator cover', toggle: 'Toggle favorite', login: 'Please login',
     restricted: 'Your account can browse, but business actions are currently restricted.', restrictedTitle: 'Business actions are restricted for this account',
     listings: 'Listings', profile: 'Profile', website: 'Website',

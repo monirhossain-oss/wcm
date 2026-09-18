@@ -109,7 +109,7 @@ export default function FavoritesPage() {
 
                                         {item.isPromoted && (
                                             <div className="absolute top-2 left-2 z-20 text-[9px] font-bold text-white bg-orange-600/60 px-2 py-0.5 rounded flex items-center gap-1">
-                                                <Star size={12} /> <span>{t('favorites.featured')}</span>
+                                                <Star size={12} /> <span>{t('favorites.promoted')}</span>
                                             </div>
                                         )}
                                     </div>

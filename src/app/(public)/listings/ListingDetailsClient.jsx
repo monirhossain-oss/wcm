@@ -249,7 +249,7 @@ export default function ListingDetailsClient({ initialProduct, initialRelated })
                                 {product.isPromoted && (
                                     <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-[#F57C00] px-3 py-1.5 rounded-full text-[9px] font-black text-white uppercase tracking-widest shadow-lg">
                                         <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                                        {t('listingDetail.topRanked')}
+                                        {t('listingDetail.promoted')}
                                     </div>
                                 )}
 
