@@ -24,8 +24,8 @@ import {
   inputClass,
   selectClass,
 } from '../_components/ui';
+import { OBJECT_TYPES, objectTypeLabel } from '../_components/objectTypes';
 
-const OBJECT_TYPES = ['listing', 'creatorProfile', 'category', 'tag', 'tradition', 'region', 'blog', 'faq', 'cms'];
 
 const MODE_HELP = {
   manual_review: 'A draft is created and an administrator must approve it before it goes live.',
@@ -115,7 +115,7 @@ export default function TranslationPublishingPoliciesPage() {
         <CardBody className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
           {DEFAULTS.map(([type, mode, hint]) => (
             <div key={type} className="rounded-xl border border-gray-200 dark:border-white/10 p-4">
-              <p className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-white">{type}</p>
+              <p className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-white">{objectTypeLabel(type)}</p>
               <Badge tone={mode === 'automatic' ? 'success' : 'warning'} className="mt-2">{mode.replace(/_/g, ' ')}</Badge>
               <p className="mt-2 text-[11px] font-medium text-gray-400">{hint}</p>
             </div>
@@ -130,7 +130,7 @@ export default function TranslationPublishingPoliciesPage() {
             <CardBody className="grid gap-4 md:grid-cols-3">
               <Field label="Business object">
                 <select value={form.businessObjectType} onChange={(event) => set('businessObjectType', event.target.value)} className={selectClass}>
-                  {OBJECT_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+                  {OBJECT_TYPES.map((type) => <option key={type} value={type}>{objectTypeLabel(type)}</option>)}
                 </select>
               </Field>
               <Field label="Language code">
@@ -171,7 +171,7 @@ export default function TranslationPublishingPoliciesPage() {
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
               {policies.map((policy) => (
                 <tr key={policy._id}>
-                  <Td className="font-bold text-gray-900 dark:text-white">{policy.businessObjectType}</Td>
+                  <Td className="font-bold text-gray-900 dark:text-white">{objectTypeLabel(policy.businessObjectType)}</Td>
                   <Td><Badge tone="info">{policy.languageCode}</Badge></Td>
                   <Td className="text-xs font-medium text-gray-500">v{policy.version}</Td>
                   <Td><Badge tone={policy.publicationMode === 'automatic' ? 'success' : 'warning'}>{policy.publicationMode.replace(/_/g, ' ')}</Badge></Td>

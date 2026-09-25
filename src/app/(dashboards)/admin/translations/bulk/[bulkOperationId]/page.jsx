@@ -26,6 +26,7 @@ import {
   Th,
   relativeTime,
 } from '../../_components/ui';
+import { objectTypeLabel } from '../../_components/objectTypes';
 
 export default function BulkTranslationOperationPage() {
   const { bulkOperationId } = useParams();
@@ -114,7 +115,7 @@ export default function BulkTranslationOperationPage() {
               {result.jobs.map((job) => (
                 <tr key={job._id}>
                   <Td>
-                    <p className="font-bold text-gray-900 dark:text-white">{job.businessObjectType}</p>
+                    <p className="font-bold text-gray-900 dark:text-white">{objectTypeLabel(job.businessObjectType)}</p>
                     <p className="max-w-xs truncate font-mono text-[10px] text-gray-400">{job.jobId}</p>
                   </Td>
                   <Td><StatusBadge value={job.targetLanguageCode} /></Td>

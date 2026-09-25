@@ -44,8 +44,8 @@ import {
   relativeTime,
   selectClass,
 } from './_components/ui';
+import { OBJECT_TYPES, objectTypeLabel } from './_components/objectTypes';
 
-const TYPES = ['listing', 'creatorProfile', 'category', 'tag', 'tradition', 'region', 'blog', 'faq', 'cms'];
 const TRANSLATION_STATUSES = ['ai_generated', 'creator_reviewed', 'admin_reviewed', 'outdated', 'failed'];
 const PUBLICATION_STATUSES = ['published', 'draft', 'unpublished', 'archived'];
 const EMPTY_FILTERS = {
@@ -57,17 +57,6 @@ const EMPTY_FILTERS = {
   search: '',
 };
 
-const typeLabels = {
-  listing: 'Listing',
-  creatorProfile: 'Creator profile',
-  category: 'Category',
-  tag: 'Tag',
-  tradition: 'Tradition',
-  region: 'Region',
-  blog: 'Blog',
-  faq: 'FAQ',
-  cms: 'CMS page',
-};
 
 export default function TranslationCentrePage() {
   const router = useRouter();
@@ -235,7 +224,7 @@ export default function TranslationCentrePage() {
           <Field label="Business object">
             <select value={filters.businessObjectType} onChange={(e) => set('businessObjectType', e.target.value)} className={selectClass}>
               <option value="">All business objects</option>
-              {TYPES.map((type) => <option key={type} value={type}>{typeLabels[type]}</option>)}
+              {OBJECT_TYPES.map((type) => <option key={type} value={type}>{objectTypeLabel(type)}</option>)}
             </select>
           </Field>
 
@@ -307,7 +296,7 @@ export default function TranslationCentrePage() {
                       {record.master?.label || record.businessObjectId}
                     </Link>
                     <span className="mt-1 block text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                      {typeLabels[record.businessObjectType] || record.businessObjectType}
+                      {objectTypeLabel(record.businessObjectType)}
                       {record.master?.cmsKey ? ` · ${record.master.cmsKey}` : ''}
                     </span>
                   </Td>

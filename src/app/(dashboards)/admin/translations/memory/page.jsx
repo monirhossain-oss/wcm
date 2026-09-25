@@ -38,6 +38,7 @@ import {
   relativeTime,
   selectClass,
 } from '../_components/ui';
+import { objectTypeLabel } from '../_components/objectTypes';
 
 // Every translation is filed: AI output, a creator's wording and Admin work. An Admin edit is always
 // filed at an Admin level.
@@ -245,7 +246,7 @@ export default function MemoryPage() {
                     <Td>
                       <span className="block font-bold text-gray-900 dark:text-white">{entry.fieldName}</span>
                       <Badge tone="info">{entry.sourceLanguageCode} → {entry.targetLanguageCode}</Badge>
-                      {entry.businessObjectType && <span className="block mt-1 text-[10px] text-gray-400">{entry.businessObjectType}</span>}
+                      {entry.businessObjectType && <span className="block mt-1 text-[10px] text-gray-400">{objectTypeLabel(entry.businessObjectType)}</span>}
                     </Td>
                     <Td>
                       {isEditing ? (

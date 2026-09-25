@@ -6,6 +6,7 @@ import { FaInstagram, FaPinterestP, FaLinkedinIn, FaFacebook } from 'react-icons
 import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useLocale } from '@/context/LocaleContext';
+import useLocalizedEmailValidity from '@/hooks/useLocalizedEmailValidity';
 
 const Footer = () => {
   const { locale, localize, t } = useLocale();
@@ -42,6 +43,10 @@ const Footer = () => {
 
   const [footerData, setFooterData] = useState(staticData);
   const [email, setEmail] = useState("");
+  const emailRef = useLocalizedEmailValidity(email, {
+    required: t('footer.emailRequired'),
+    invalid: t('footer.emailInvalid'),
+  });
   const [status, setStatus] = useState("");
 
 
@@ -209,8 +214,10 @@ const Footer = () => {
             <p className="text-sm mb-4">{footerData.newsletterDescription}</p>
             <form onSubmit={handleSubscribe} className="w-full space-y-3">
               <input
+                ref={emailRef}
                 type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('footer.email')}
+                aria-label={t('footer.email')}
                 className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-4 py-3 text-sm focus:outline-none focus:border-[#F57C00] transition-all rounded-md"
               />
               <button type="submit" disabled={status === "loading"} className="w-full bg-[#F57C00] hover:bg-[#e67600] text-white py-3 text-sm font-bold uppercase tracking-widest transition-all disabled:opacity-50 rounded-md shadow-md active:scale-95">

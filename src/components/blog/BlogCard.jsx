@@ -9,6 +9,7 @@ import emailjs from '@emailjs/browser';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import { useLocale } from '@/context/LocaleContext';
+import useLocalizedEmailValidity from '@/hooks/useLocalizedEmailValidity';
 
 // API instance
 const api = axios.create({
@@ -25,6 +26,10 @@ const BlogCard = ({ initialBlogs = null, initialHasMore = false }) => {
   const [loadMoreLoading, setLoadMoreLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const emailRef = useLocalizedEmailValidity(email, {
+    required: t('blog.newsletterEmailRequired'),
+    invalid: t('blog.newsletterEmailInvalid'),
+  });
 
   // Offset-based states
   const [offset, setOffset] = useState(0);
@@ -203,11 +208,13 @@ const BlogCard = ({ initialBlogs = null, initialHasMore = false }) => {
           className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto"
         >
           <input
+            ref={emailRef}
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
+            placeholder={t('blog.newsletterPlaceholder')}
+            aria-label={t('footer.email')}
             className="flex-1 px-6 py-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm font-medium"
           />
           <button

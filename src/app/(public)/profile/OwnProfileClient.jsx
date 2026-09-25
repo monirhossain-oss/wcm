@@ -187,7 +187,7 @@ function UserProfileView({
 
               <div className="space-y-2">
                 <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                  {fr ? 'Biographie (anglais uniquement)' : 'Biography (English only)'}
+                  {fr ? 'Biographie' : 'Biography'}
                 </label>
                 <textarea
                   {...register('bio')}
@@ -197,7 +197,7 @@ function UserProfileView({
                 />
                 <p className="text-[9px] text-gray-400 italic ml-1">
                   {fr
-                    ? 'Rédigez en anglais. La version française est générée automatiquement.'
+                    ? 'Rédigez en français. La version anglaise est générée automatiquement.'
                     : 'Write in English. The French version is generated automatically.'}
                 </p>
               </div>
@@ -314,9 +314,12 @@ export default function ProfilePage() {
       .then((res) => { if (!cancelled) setLocalizedProfile(res.data); })
       .catch(() => { if (!cancelled) setLocalizedProfile(null); });
     return () => { cancelled = true; };
-  }, [user?._id, user?.role, locale]);
+    // `user` rather than its id: a save replaces it, and the French version it returns has to follow.
+  }, [user, locale]);
 
   const displayUser = localizedProfile ?? user;
+  // The bio the form shows: the English master in English, the owner's version in another language.
+  const shownBio = (locale === 'en' ? null : localizedProfile?.editableBio) ?? user?.profile?.bio ?? '';
 
   const {
     register,
@@ -331,7 +334,7 @@ export default function ProfilePage() {
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
         displayName: user?.profile?.displayName || '',
-        bio: user?.profile?.bio || '',
+        bio: shownBio,
         country: user?.profile?.country || '',
         city: user?.profile?.city || '',
         language: user?.profile?.language || '',
@@ -339,7 +342,7 @@ export default function ProfilePage() {
         socialLink: user?.profile?.socialLink || '',
       });
     }
-  }, [user, reset, isEditing]);
+  }, [user, reset, isEditing, shownBio]);
 
   const handlePreview = (e, type) => {
     const file = e.target.files?.[0];
@@ -372,7 +375,14 @@ export default function ProfilePage() {
           'firstName', 'lastName', 'displayName', 'bio',
           'country', 'city', 'language', 'websiteLink', 'socialLink',
         ];
-      fields.forEach((field) => formData.append(field, data[field] || ''));
+      // The bio goes only when it was edited: sent back untouched in French it would read as a
+      // French rewrite of whatever the form happened to show.
+      const bioEdited = (data.bio || '').trim() !== shownBio.trim();
+      fields
+        .filter((field) => field !== 'bio' || bioEdited)
+        .forEach((field) => formData.append(field, data[field] || ''));
+      // The language the bio was written in: the page's own.
+      formData.append('sourceLanguage', locale);
 
       const profileFile = document.querySelector('input[name="profileImageCustom"]')?.files[0];
       const coverFile = document.querySelector('input[name="coverImageCustom"]')?.files[0];
@@ -385,8 +395,10 @@ export default function ProfilePage() {
 
       setUser(res.data.user);
       setMessage({ type: 'success', text: fr ? 'PROFIL MIS À JOUR' : 'SYSTEM IDENTITY UPDATED' });
-      // The French version is regenerated in the background, so it lags this save.
-      setTranslationNotice(fr);
+      // A French bio is stored as written, so only a French save that leaves it alone and renames the
+      // profile waits on a background translation.
+      const renamed = (data.displayName || '') !== (user?.profile?.displayName || '');
+      setTranslationNotice(fr && !bioEdited && renamed);
       setIsEditing(false);
       setPreviews({ profile: null, cover: null });
       setTimeout(() => {
@@ -669,7 +681,7 @@ export default function ProfilePage() {
 
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest ml-1">
-                    {L('Biography (English only)', 'Biographie (anglais uniquement)')}
+                    {L('Biography', 'Biographie')}
                   </label>
                   <textarea
                     {...register('bio')}
@@ -680,13 +692,13 @@ export default function ProfilePage() {
                   <p className="text-[9px] text-gray-400 italic ml-1">
                     {L(
                       'Write in English. The French version is generated automatically.',
-                      'Rédigez en anglais. La version française est générée automatiquement.'
+                      'Rédigez en français. La version anglaise est générée automatiquement.'
                     )}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InputField label={L('Language', 'Langue')} name="language" register={register} placeholder={L('Primary Language', 'Langue principale')} />
+                  <LanguageSelect label={L('Language', 'Langue')} register={register} current={user?.profile?.language} locale={locale} placeholder={L('Select a language', 'Choisir une langue')} />
                   <InputField label={L('Social Link', 'Lien social')} name="socialLink" register={register} placeholder="https://..." />
                 </div>
 
@@ -768,6 +780,36 @@ const InputField = ({ label, name, register, placeholder }) => (
     />
   </div>
 );
+
+// The two languages a profile can name. Stored as the English names `localizeLanguageName` reads. A
+// value saved before this was a free-text field is kept as its own option, so saving the form without
+// touching it does not erase it.
+const PROFILE_LANGUAGES = [
+  { value: 'English', label: { en: 'English', fr: 'Anglais' } },
+  { value: 'French', label: { en: 'French', fr: 'Français' } },
+];
+
+const LanguageSelect = ({ label, register, current, locale, placeholder }) => {
+  const legacy = current && !PROFILE_LANGUAGES.some(({ value }) => value === current) ? current : null;
+  return (
+    <div className="space-y-2">
+      <label htmlFor="profile-language" className="text-[9px] font-black uppercase text-gray-400 tracking-widest ml-1">
+        {label}
+      </label>
+      <select
+        id="profile-language"
+        {...register('language')}
+        className="w-full rounded-xl px-4 py-3 border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-[11px] font-bold focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+      >
+        <option value="">{placeholder}</option>
+        {PROFILE_LANGUAGES.map(({ value, label: names }) => (
+          <option key={value} value={value}>{names[locale] || names.en}</option>
+        ))}
+        {legacy && <option value={legacy}>{legacy}</option>}
+      </select>
+    </div>
+  );
+};
 
 const SocialLink = ({ icon: Icon, label, url }) => (
   <a

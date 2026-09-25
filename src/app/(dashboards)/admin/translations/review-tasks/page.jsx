@@ -29,6 +29,7 @@ import {
   relativeTime,
   selectClass,
 } from '../_components/ui';
+import { objectTypeLabel } from '../_components/objectTypes';
 
 const STATUS_OPTIONS = ['', 'pending', 'assigned', 'in_review', 'returned_for_modification'];
 
@@ -155,7 +156,8 @@ export default function ReviewTasksPage() {
               {tasks.map((task) => (
                 <tr key={task._id} className="align-top">
                   <Td>
-                    <p className="font-bold text-gray-900 dark:text-white">{task.businessObjectType}</p>
+                    <p className="font-bold text-gray-900 dark:text-white">{objectTypeLabel(task.businessObjectType)}</p>
+                    {task.objectLabel && <p className="text-xs font-medium text-gray-600 dark:text-gray-300">{task.objectLabel}</p>}
                     <p className="font-mono text-[10px] text-gray-400">{String(task.businessObjectId)}</p>
                   </Td>
                   <Td><Badge tone="info">{task.languageCode}</Badge></Td>
@@ -229,7 +231,7 @@ export default function ReviewTasksPage() {
               <div key={notification._id} className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 dark:border-white/10 px-4 py-3">
                 <Badge tone="info">{String(notification.eventType).replace(/_/g, ' ')}</Badge>
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                  {notification.businessObjectType} · {notification.languageCode}
+                  {objectTypeLabel(notification.businessObjectType)} · {notification.languageCode}
                 </span>
                 <span className="text-[11px] font-medium text-gray-400">{relativeTime(notification.createdAt)}</span>
                 <div className="ml-auto flex items-center gap-2">

@@ -24,8 +24,8 @@ import {
   selectClass,
   textareaClass,
 } from '../_components/ui';
+import { OBJECT_TYPES, objectTypeLabel } from '../_components/objectTypes';
 
-const OBJECT_TYPES = ['listing', 'creatorProfile', 'category', 'tag', 'tradition', 'region', 'blog', 'faq', 'cms'];
 
 const AVAILABLE_VARIABLES = [
   'sourceLanguageCode',
@@ -153,7 +153,7 @@ export default function PromptsPage() {
                 <Field label="Scope" hint="Generic serves every object type.">
                   <select value={draft.businessObjectType} onChange={(event) => setDraft((current) => ({ ...current, businessObjectType: event.target.value }))} className={selectClass}>
                     <option value="">Generic (all object types)</option>
-                    {OBJECT_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+                    {OBJECT_TYPES.map((type) => <option key={type} value={type}>{objectTypeLabel(type)}</option>)}
                   </select>
                 </Field>
                 <Field label="Required variables" hint="Comma separated; composition fails if one is missing.">
@@ -194,7 +194,7 @@ export default function PromptsPage() {
                 <CardHeader
                   icon={MessageSquareText}
                   title={`${prompt.key} · v${prompt.version}`}
-                  description={`${prompt.businessObjectType || 'Generic'} · created ${formatDateTime(prompt.createdAt)}${prompt.activatedAt ? ` · activated ${formatDateTime(prompt.activatedAt)}` : ''}`}
+                  description={`${prompt.businessObjectType ? objectTypeLabel(prompt.businessObjectType) : 'Generic'} · created ${formatDateTime(prompt.createdAt)}${prompt.activatedAt ? ` · activated ${formatDateTime(prompt.activatedAt)}` : ''}`}
                   actions={
                     <>
                       {prompt.isActive ? <Badge tone="success">Active</Badge> : (

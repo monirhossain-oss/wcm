@@ -75,7 +75,7 @@ const en = {
   blog: {
     heading: 'Cultural Stories', intro: 'Explore traditions, craftsmanship, and cultural creativity from around the world through an editorial lens.', empty: 'No stories found.',
     loading: 'Loading blogs...', loadFailure: 'Failed to load stories.', readMore: 'Read More', archiveEmpty: 'No stories found in the archives.', loadMore: 'Load More Insights',
-    newsletterTitle: 'Stay Informed', newsletterEmailRequired: 'Please enter your email!', newsletterSuccess: 'Thank you for subscribing!', newsletterError: 'Something went wrong.', subscribe: 'Subscribe',
+    newsletterTitle: 'Stay Informed', newsletterEmailRequired: 'Please enter your email!', newsletterEmailInvalid: 'Please enter a valid email address.', newsletterPlaceholder: 'your@email.com', newsletterSuccess: 'Thank you for subscribing!', newsletterError: 'Something went wrong.', subscribe: 'Subscribe',
     details: {
       notFoundTitle: 'Story Not Found | World Culture Marketplace', metaDescription: 'Read this cultural story on World Culture Marketplace.', back: 'Back to Blogs', editorialTeam: 'Editorial Team', insightAlt: 'Cultural insight', share: 'Share this story', linkCopied: 'Link copied!',
       discussions: 'Discussions', commentPlaceholder: 'Share your thoughts...', signInToComment: 'Sign in to Comment', loginRequired: 'Please login to comment', commentAdded: 'Comment added!', commentFailure: 'Failed to post comment',
@@ -203,7 +203,7 @@ const en = {
     platformLinks: { about: 'About Us', howItWorks: 'How It Works', faq: 'FAQ' }, resourceLinks: { blogs: 'Blogs', contact: 'Contact', creators: 'Creators' },
     legalLinks: { boost: 'Boost & PPC terms & condition', creator: 'Creator Terms & Condition', advertising: 'Advertising Policy', privacy: 'Privacy Policy', terms: 'Terms & Conditions', cookie: 'Cookie Policy' },
     newsletterTitle: 'Stay Connected', newsletterDescription: 'Stay informed about cultural stories and discoveries. More to come.',
-    email: 'Email address', subscribe: 'Subscribe', subscribing: 'Subscribing…', notConfigured: 'Not configured',
+    email: 'Email address', emailRequired: 'Please enter your email address.', emailInvalid: 'Please enter a valid email address.', subscribe: 'Subscribe', subscribing: 'Subscribing…', notConfigured: 'Not configured',
     subscriptionSuccess: 'Subscription Successful! Thank you for staying connected.', alreadySubscribed: 'This email is already subscribed!', subscriptionError: 'Something went wrong. Please try again later.',
   },
   auth: {

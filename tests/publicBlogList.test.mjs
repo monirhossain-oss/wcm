@@ -47,6 +47,8 @@ const blogModule = (axios) => load('src/components/blog/BlogCard.jsx', {
   'next/image': nextImage,
   'next/link': nextLink,
   '@/context/LocaleContext': localeContext,
+  // The validity hook only talks to a mounted input, which server rendering never has.
+  '@/hooks/useLocalizedEmailValidity': { __esModule: true, default: () => null },
   '@emailjs/browser': { send: async () => ({}) },
   'react-hot-toast': { __esModule: true, default: { success() {}, error() {} }, Toaster: () => null },
 });

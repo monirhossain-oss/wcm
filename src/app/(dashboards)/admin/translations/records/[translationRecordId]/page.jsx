@@ -52,6 +52,7 @@ import {
   relativeTime,
   textareaClass,
 } from '../../_components/ui';
+import { objectTypeLabel } from '../../_components/objectTypes';
 
 const SEO_FIELDS = [
   ['title', 'Meta title'],
@@ -253,7 +254,7 @@ export default function TranslationRecordDetailsPage() {
       <PageHeader
         icon={Languages}
         title={master?.label || String(record.businessObjectId)}
-        description={`${record.businessObjectType} · ${record.languageCode.toUpperCase()} · version ${record.versionNumber} · ${policy?.publicationMode?.replace(/_/g, ' ') || 'policy unavailable'}`}
+        description={`${objectTypeLabel(record.businessObjectType)} · ${record.languageCode.toUpperCase()} · version ${record.versionNumber} · ${policy?.publicationMode?.replace(/_/g, ' ') || 'policy unavailable'}`}
         actions={
           <>
             <StatusBadge value={record.translationStatus} />

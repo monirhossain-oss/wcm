@@ -70,7 +70,7 @@ const fr = {
   blog: {
     heading: 'Histoires culturelles', intro: 'Explorez les traditions, le savoir-faire et la créativité culturelle du monde entier à travers un regard éditorial.', empty: 'Aucune histoire trouvée.',
     loading: 'Chargement des articles...', loadFailure: 'Impossible de charger les histoires.', readMore: 'Lire la suite', archiveEmpty: 'Aucune histoire trouvée dans les archives.', loadMore: 'Afficher plus d’articles',
-    newsletterTitle: 'Restez informé', newsletterEmailRequired: 'Veuillez saisir votre adresse e-mail !', newsletterSuccess: 'Merci pour votre inscription !', newsletterError: 'Une erreur est survenue.', subscribe: 'S’abonner',
+    newsletterTitle: 'Restez informé', newsletterEmailRequired: 'Veuillez saisir votre adresse e-mail !', newsletterEmailInvalid: 'Veuillez saisir une adresse e-mail valide.', newsletterPlaceholder: 'votre@email.com', newsletterSuccess: 'Merci pour votre inscription !', newsletterError: 'Une erreur est survenue.', subscribe: 'S’abonner',
     details: {
       notFoundTitle: 'Histoire introuvable | World Culture Marketplace', metaDescription: 'Lisez cette histoire culturelle sur World Culture Marketplace.', back: 'Retour aux articles', editorialTeam: 'Équipe éditoriale', insightAlt: 'Aperçu culturel', share: 'Partager cette histoire', linkCopied: 'Lien copié !',
       discussions: 'Discussions', commentPlaceholder: 'Partagez vos impressions...', signInToComment: 'Se connecter pour commenter', loginRequired: 'Veuillez vous connecter pour commenter', commentAdded: 'Commentaire ajouté !', commentFailure: 'Impossible de publier le commentaire',
@@ -109,7 +109,7 @@ const fr = {
     ],
     reviewHeading: 'La suite du processus',
     review: 'Notre équipe de modération examine chaque candidature afin d’en vérifier l’authenticité et la pertinence culturelle. Vous conservez la pleine propriété de tout ce que vous publiez et pouvez retirer une création à tout moment. Les créateurs approuvés peuvent publier immédiatement.',
-    signInNote: 'Un compte est nécessaire pour candidater. Connectez-vous ou créez un compte pour ouvrir le formulaire.',
+    signInNote: 'Vous devez disposer d’un compte avant de pouvoir faire une demande pour devenir créateur. Connectez-vous ou inscrivez-vous pour accéder au formulaire.',
   },
   about: {
     trustBadge: 'Favoriser une économie culturelle mondiale plus inclusive et respectueuse.',
@@ -191,7 +191,7 @@ const fr = {
     platformLinks: { about: 'À propos', howItWorks: 'Fonctionnement', faq: 'FAQ' }, resourceLinks: { blogs: 'Blog', contact: 'Contact', creators: 'Créateurs' },
     legalLinks: { boost: 'Conditions de Boost et PPC', creator: 'Conditions générales des créateurs', advertising: 'Politique publicitaire', privacy: 'Politique de confidentialité', terms: 'Conditions d’utilisation', cookie: 'Politique des cookies' },
     newsletterTitle: 'Restez connecté', newsletterDescription: 'Restez informé sur les cultures, les créateurs et les découvertes.',
-    email: 'Adresse e-mail', subscribe: 'S’abonner', subscribing: 'Inscription…', notConfigured: 'Non configuré',
+    email: 'Adresse e-mail', emailRequired: 'Veuillez saisir votre adresse e-mail.', emailInvalid: 'Veuillez saisir une adresse e-mail valide.', subscribe: 'S’abonner', subscribing: 'Inscription…', notConfigured: 'Non configuré',
     subscriptionSuccess: 'Inscription réussie ! Merci de rester connecté.', alreadySubscribed: 'Cette adresse e-mail est déjà inscrite !', subscriptionError: 'Une erreur est survenue. Veuillez réessayer plus tard.',
   },
   auth: {
