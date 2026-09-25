@@ -20,9 +20,9 @@ const api = axios.create({
 // `id`, `price` and `days` mirror `wcm-server/src/constants/promotion.js` and are validated there
 // on purchase, so they stay literal. Only the reader-facing name and description are localized.
 const BOOST_PACKAGES = [
-  { id: 'starter', price: 12, days: 7 },
-  { id: 'standard', price: 29, days: 14 },
-  { id: 'premium', price: 79, days: 30 },
+  { id: 'starter', price: 9, days: 7 },
+  { id: 'standard', price: 19, days: 14 },
+  { id: 'premium', price: 39, days: 30 },
 ];
 
 /**
