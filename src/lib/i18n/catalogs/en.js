@@ -138,6 +138,14 @@ const en = {
     discover: 'Discover Creations', becomeCreator: 'Become a Creator', adminActive: 'Admin Access Active', creatorActive: 'Creator Mode Active',
     fallbackImageAlt: 'World Culture Marketplace', slideAlt: 'Hero Slide', slideLabel: 'Slide',
   },
+  // Asked before saving a listing or bio whose text looks like the other language than the page.
+  languageCheck: {
+    title: 'This looks like {language}',
+    body: 'This page is in {page}, but your text looks like {language}. Which language did you write it in?',
+    saveAs: 'Save as {language}',
+    back: 'Go back',
+    languages: { en: 'English', fr: 'French' },
+  },
   homeDiscovery: {
     viewAll: 'View all', listings: 'Listings', unknown: 'Unknown', world: 'World', viewProfile: 'View Profile', allRegions: 'All Regions', allCategories: 'All',
     cultures: { heading: 'Explore Cultures', description: 'Craftsmanship & heritage rituals.' },

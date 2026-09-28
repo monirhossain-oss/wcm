@@ -8,6 +8,7 @@ import { getCroppedImg } from '@/lib/cropImage';
 import toast, { Toaster } from 'react-hot-toast';
 import { useLocale } from '@/context/LocaleContext';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { useAuthoringLanguageCheck } from '@/components/LanguageMismatchDialog';
 import {
   FiUploadCloud,
   FiX,
@@ -31,6 +32,7 @@ const api = axios.create({
 
 export default function AddListing() {
   const { locale, localize, t, tf } = useLocale();
+  const { confirmAuthoringLanguage, languageDialog } = useAuthoringLanguageCheck(locale);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -222,6 +224,11 @@ export default function AddListing() {
     // ✅ country validation
     if (!formData.countryIsoCode) return toast.error(t('creator.add.errorCountry'));
 
+    // The language the listing is written in — the page's, unless the text reads as the other one
+    // and the creator confirms it. null: they went back to edit.
+    const sourceLanguage = await confirmAuthoringLanguage(`${formData.title}\n${formData.description}`);
+    if (!sourceLanguage) return;
+
     setLoading(true);
     try {
       const data = new FormData();
@@ -256,7 +263,7 @@ export default function AddListing() {
 
       // The language this listing was written in. The server keeps an English master whatever the
       // creator typed, and stores their own words as that language's version.
-      data.append('sourceLanguage', locale);
+      data.append('sourceLanguage', sourceLanguage);
 
       data.append('image', finalCroppedImage, 'listing-image.jpg');
 
@@ -284,6 +291,7 @@ export default function AddListing() {
   return (
     <div className="max-w-6xl mx-auto py-4 pb-20 font-sans px-4 md:px-0">
       <Toaster position="top-right" />
+      {languageDialog}
 
       {/* Header */}
       <div className="mb-8 border-b border-gray-100 dark:border-white/10 pb-6">

@@ -17,8 +17,14 @@ test('the bio is no longer English-only', () => {
   assert.match(source, /Rédigez en français\. La version anglaise est générée automatiquement\./);
 });
 
-test('a save tells the server which language the bio was written in', () => {
-  assert.match(client(), /formData\.append\('sourceLanguage', locale\)/);
+// The page's language, unless a rewritten bio reads as the other one and the owner confirms it; the
+// form's own language goes alongside, since that is what the server measures the edit against.
+test('a save tells the server which language the bio was written in and what the form showed', () => {
+  const source = client();
+  assert.match(source, /const sourceLanguage = bioEdited \? await confirmAuthoringLanguage\(data\.bio\) : locale;/);
+  assert.match(source, /if \(!sourceLanguage\) return;/);
+  assert.match(source, /formData\.append\('sourceLanguage', sourceLanguage\)/);
+  assert.match(source, /formData\.append\('formLanguage', locale\)/);
 });
 
 // Sent back untouched in French, the bio would read as a French rewrite and reach the English master.

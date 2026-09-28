@@ -129,6 +129,14 @@ const fr = {
     discover: 'Découvrir les créations', becomeCreator: 'Devenir créateur', adminActive: 'Accès administrateur actif', creatorActive: 'Mode créateur actif',
     fallbackImageAlt: 'World Culture Marketplace', slideAlt: 'Diapositive principale', slideLabel: 'Diapositive',
   },
+  // Asked before saving a listing or bio whose text looks like the other language than the page.
+  languageCheck: {
+    title: 'Ce texte semble être en {language}',
+    body: 'Cette page est en {page}, mais votre texte semble être en {language}. Dans quelle langue l’avez-vous écrit ?',
+    saveAs: 'Enregistrer en {language}',
+    back: 'Retour',
+    languages: { en: 'anglais', fr: 'français' },
+  },
   homeDiscovery: {
     viewAll: 'Voir tout', listings: 'Créations', unknown: 'Inconnu', world: 'Monde', viewProfile: 'Voir le créateur', allRegions: 'Toutes les régions', allCategories: 'Toutes',
     cultures: { heading: 'Explorer les cultures', description: 'Savoir-faire artisanal et rituels traditionnels' },

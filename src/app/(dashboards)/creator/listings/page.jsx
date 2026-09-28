@@ -25,6 +25,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from '@/context/LocaleContext';
 import { getApiErrorMessage } from '@/lib/apiError';
+import { useAuthoringLanguageCheck } from '@/components/LanguageMismatchDialog';
 import { loadCountries } from '@/lib/countryData';
 
 const api = axios.create({
@@ -52,6 +53,7 @@ const listingTitle = (item) => item.localizedText?.title || item.title || '';
 export default function MyListings() {
   const { isBusinessRestricted } = useAuth();
   const { locale, localize, t, tf } = useLocale();
+  const { confirmAuthoringLanguage, languageDialog } = useAuthoringLanguageCheck(locale);
   const [listings, setListings] = useState([]);
   const [metaData, setMetaData] = useState({ categories: [], tags: [] });
   const [loading, setLoading] = useState(true);
@@ -271,6 +273,20 @@ export default function MyListings() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    // Only the text rewritten in this edit says which language the creator is writing in; what the
+    // form showed untouched is the page's language by definition.
+    const shown = {
+      title: editingItem.localizedText?.title ?? editingItem.title,
+      description: editingItem.localizedText?.description ?? (editingItem.description || ''),
+    };
+    const rewritten = ['title', 'description']
+      .filter((field) => (editFormData[field] || '').trim() !== (shown[field] || '').trim())
+      .map((field) => editFormData[field])
+      .join('\n');
+    // null: the creator went back to edit.
+    const sourceLanguage = await confirmAuthoringLanguage(rewritten);
+    if (!sourceLanguage) return;
+
     setUpdateLoading(true);
     try {
       const data = new FormData();
@@ -281,8 +297,11 @@ export default function MyListings() {
       if (editFormData.countryIsoCode) data.append('countryIsoCode', editFormData.countryIsoCode);
       // Tag titles, never ids: a listing stores its tags as copied English titles.
       (editFormData.culturalTags || []).forEach((tag) => data.append('culturalTags', tag));
-      // An edit can be written in a different language than the listing was created in.
-      data.append('sourceLanguage', locale);
+      // An edit can be written in a different language than the listing was created in — and than the
+      // page, once the creator confirmed it. `formLanguage` is what the form was showing, which is what
+      // the server measures the edit against.
+      data.append('sourceLanguage', sourceLanguage);
+      data.append('formLanguage', locale);
       if (editImage) data.append('image', editImage);
 
       await api.put(`/api/listings/update/${editingItem._id}`, data);
@@ -325,6 +344,7 @@ export default function MyListings() {
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700 font-sans pb-20">
       <Toaster position="top-right" />
+      {languageDialog}
 
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between lg:items-center border-b border-gray-100 dark:border-white/10 pb-8 gap-6">

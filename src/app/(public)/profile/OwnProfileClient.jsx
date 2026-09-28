@@ -25,6 +25,7 @@ import { Globe, Languages, Box, Info } from 'lucide-react';
 import { getImageUrl } from '@/lib/imageHelper';
 import ListingCard from '@/components/ListingCard';
 import { useLocale } from '@/context/LocaleContext';
+import { useAuthoringLanguageCheck } from '@/components/LanguageMismatchDialog';
 import { localizeCountry, localizeLanguageName } from '@/lib/i18n/displayNames';
 
 const api = axios.create({
@@ -272,6 +273,7 @@ export default function ProfilePage() {
   const { user, setUser, loading } = useAuth();
   const { locale, localize } = useLocale();
   const fr = locale === 'fr';
+  const { confirmAuthoringLanguage, languageDialog } = useAuthoringLanguageCheck(locale);
   const L = (english, french) => fr ? french : english;
   const [isEditing, setIsEditing] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -378,11 +380,16 @@ export default function ProfilePage() {
       // The bio goes only when it was edited: sent back untouched in French it would read as a
       // French rewrite of whatever the form happened to show.
       const bioEdited = (data.bio || '').trim() !== shownBio.trim();
+      // The language the bio was written in: the page's, unless the rewritten bio reads as the other
+      // one and the owner confirms it. null: they went back to edit.
+      const sourceLanguage = bioEdited ? await confirmAuthoringLanguage(data.bio) : locale;
+      if (!sourceLanguage) return;
       fields
         .filter((field) => field !== 'bio' || bioEdited)
         .forEach((field) => formData.append(field, data[field] || ''));
-      // The language the bio was written in: the page's own.
-      formData.append('sourceLanguage', locale);
+      formData.append('sourceLanguage', sourceLanguage);
+      // What the form was showing, which is what the server measures the bio edit against.
+      formData.append('formLanguage', locale);
 
       const profileFile = document.querySelector('input[name="profileImageCustom"]')?.files[0];
       const coverFile = document.querySelector('input[name="coverImageCustom"]')?.files[0];
@@ -421,6 +428,8 @@ export default function ProfilePage() {
   // ── ROLE: user → simple design ──
   if (user?.role === 'user') {
     return (
+      <>
+      {languageDialog}
       <UserProfileView
         user={user}
         displayUser={displayUser}
@@ -438,12 +447,14 @@ export default function ProfilePage() {
         message={message}
         translationNotice={translationNotice}
       />
+      </>
     );
   }
 
   // ── ROLE: creator / admin → original full design ──
   return (
     <div className="min-h-screen bg-white dark:bg-[#0f0f0f] text-[#222] dark:text-gray-200 font-sans selection:bg-orange-100 pb-20">
+      {languageDialog}
 
       {/* ── Cover Image ── */}
       <div className="relative h-[250px] md:h-[300px] w-full overflow-hidden">
