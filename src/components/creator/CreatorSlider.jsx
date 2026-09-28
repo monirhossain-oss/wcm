@@ -4,9 +4,16 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import Image from "next/image";
 import Link from "next/link";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { localePath } from '@/lib/i18n';
 
 import "swiper/css";
+
+// The arrows show only while the Featured Creators section (`group/creators` in PopularCreators.jsx)
+// is hovered, or when a keyboard user tabs onto one. Hidden arrows ignore the pointer so they never
+// swallow a tap on a touch screen, which has no hover. Swiper sets `disabled` on the button at
+// either end, and adds `swiper-button-lock` when every creator already fits on screen.
+const arrowClass = "absolute top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-full items-center justify-center text-gray-800 dark:text-white shadow-xl transition-all duration-300 hover:bg-[#F57C00] hover:text-white opacity-0 pointer-events-none group-hover/creators:opacity-100 group-hover/creators:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto group-hover/creators:disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-800 dark:disabled:hover:bg-zinc-900 dark:disabled:hover:text-white hidden md:flex [&.swiper-button-lock]:hidden";
 
 const CreatorSlider = ({ creators, locale = 'en', labels = {} }) => {
     const prevRef = useRef(null);
@@ -14,6 +21,13 @@ const CreatorSlider = ({ creators, locale = 'en', labels = {} }) => {
 
     return (
         <div className="relative">
+            <button type="button" ref={prevRef} aria-label={labels.previous || "Previous creators"} className={`${arrowClass} left-0 -ml-2`}>
+                <FaChevronLeft size={14} />
+            </button>
+            <button type="button" ref={nextRef} aria-label={labels.next || "Next creators"} className={`${arrowClass} right-0 -mr-2`}>
+                <FaChevronRight size={14} />
+            </button>
+
             <Swiper
                 modules={[Navigation]}
                 spaceBetween={12}
@@ -64,7 +78,7 @@ const CreatorSlider = ({ creators, locale = 'en', labels = {} }) => {
 
                             {/* এই লিংকটা mt-auto দিয়ে নিচে চলে আসবে */}
                             <Link
-                                href={localePath(locale, `/profile/${creator.username || creator._id}`)}
+                                href={localePath(locale, `/profile/${creator.slug || creator.username || creator._id}`)}
                                 className="w-full py-2 md:py-2.5 text-[10px] md:text-xs font-bold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-all uppercase mt-auto shadow-sm active:scale-95 text-center"
                             >
                                 {labels.viewProfile || "View Profile"}

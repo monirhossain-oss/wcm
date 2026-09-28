@@ -132,7 +132,7 @@ const fr = {
   homeDiscovery: {
     viewAll: 'Voir tout', listings: 'Créations', unknown: 'Inconnu', world: 'Monde', viewProfile: 'Voir le créateur', allRegions: 'Toutes les régions', allCategories: 'Toutes',
     cultures: { heading: 'Explorer les cultures', description: 'Savoir-faire artisanal et rituels traditionnels' },
-    popularCreators: { heading: 'Créateurs à la une', description: 'Artistes et artisans vérifiés.', failure: 'Impossible de charger les créateurs.' },
+    popularCreators: { heading: 'Créateurs à la une', description: 'Artistes et artisans vérifiés.', failure: 'Impossible de charger les créateurs.', previous: 'Créateurs précédents', next: 'Créateurs suivants' },
     regions: { asia: 'Asie', africa: 'Afrique', europe: 'Europe', 'north-america': 'Amérique du Nord', 'latin-america': 'Amérique latine', 'middle-east': 'Moyen-Orient', oceania: 'Océanie' },
     regionsOf: { asia: 'd’Asie', africa: 'd’Afrique', europe: 'd’Europe', 'north-america': 'd’Amérique du Nord', 'latin-america': 'd’Amérique latine', 'middle-east': 'du Moyen-Orient', oceania: 'd’Océanie' },
     regionsHeritage: { asia: 'd’Asie', africa: 'd’Afrique', europe: 'd’Europe', 'north-america': 'd’Amérique du Nord', 'latin-america': 'd’Amérique latine', 'middle-east': 'du Moyen-Orient', oceania: 'd’Océanie' },

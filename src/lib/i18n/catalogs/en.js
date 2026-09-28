@@ -141,7 +141,7 @@ const en = {
   homeDiscovery: {
     viewAll: 'View all', listings: 'Listings', unknown: 'Unknown', world: 'World', viewProfile: 'View Profile', allRegions: 'All Regions', allCategories: 'All',
     cultures: { heading: 'Explore Cultures', description: 'Craftsmanship & heritage rituals.' },
-    popularCreators: { heading: 'Featured Creators', description: 'Verified artists & craftsmen.', failure: 'Failed to load creators.' },
+    popularCreators: { heading: 'Featured Creators', description: 'Verified artists & craftsmen.', failure: 'Failed to load creators.', previous: 'Previous creators', next: 'Next creators' },
     regions: { asia: 'Asia', africa: 'Africa', europe: 'Europe', 'north-america': 'North America', 'latin-america': 'Latin America', 'middle-east': 'Middle East', oceania: 'Oceania' },
     // Region name carrying its own preposition: French elides and contracts it ("d'Asie", "du
     // Moyen-Orient"), so the phrase cannot be assembled from a separate word at runtime.

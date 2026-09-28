@@ -121,7 +121,7 @@ export default function CreatorCard({ creator, index }) {
                 {/* 8. Action Buttons (Pushed to bottom) */}
                 <div className="mt-auto w-full flex flex-col gap-3">
                     <Link
-                        href={localize(`/profile/${creator.username || creator.id}`)}
+                        href={localize(`/profile/${creator.slug || creator.username || creator._id}`)}
                         className={`w-full text-[11px] font-black uppercase tracking-[0.2em] py-4 rounded-[16px] text-center
                             transition-all duration-300 shadow-sm
                             ${isFeatured

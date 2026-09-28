@@ -42,7 +42,7 @@ const CreatorPopover = ({ creator, item, creatorLocation }) => {
         {/* Buttons */}
         <div className="flex items-center justify-center gap-2 w-full mt-2">
           <Link
-            href={localize(`/profile/${creator?.username || creator?.id}`)}
+            href={localize(`/profile/${creator?.slug || creator?.username || creator?._id || creator?.id}`)}
             className="w-full py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase rounded-full text-center transition-colors"
           >
             {t('favorites.profile')}

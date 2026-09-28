@@ -22,6 +22,8 @@ export default async function CreatorDataWrapper({ locale = 'en' }) {
             world: translate(locale, 'homeDiscovery.world'),
             listings: translate(locale, 'homeDiscovery.listings'),
             viewProfile: translate(locale, 'homeDiscovery.viewProfile'),
+            previous: translate(locale, 'homeDiscovery.popularCreators.previous'),
+            next: translate(locale, 'homeDiscovery.popularCreators.next'),
         }} />;
     } catch (error) {
         console.error("Error fetching creators:", error);
