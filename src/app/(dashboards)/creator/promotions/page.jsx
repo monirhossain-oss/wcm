@@ -544,7 +544,9 @@ export default function PromotionsPage() {
                           setPpcAmount(val);
                           setTargetClicks(Math.floor(val / PPC_COST_PER_CLICK));
                         }}
-                        className="w-full bg-zinc-100 dark:bg-white/5 border border-transparent focus:border-orange-500 p-4 rounded-md text-sm font-black outline-none dark:text-white transition-all"
+                        // No spin buttons: the browser draws them at the right edge on hover, right
+                        // over the currency label. The right padding keeps long amounts clear of it.
+                        className="w-full bg-zinc-100 dark:bg-white/5 border border-transparent focus:border-orange-500 p-4 pr-14 rounded-md text-sm font-black outline-none dark:text-white transition-all [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         placeholder={t('creator.promotions.modal.budgetPlaceholder')}
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-400">
