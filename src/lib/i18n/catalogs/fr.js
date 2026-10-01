@@ -132,7 +132,7 @@ const fr = {
   // Asked before saving a listing or bio whose text looks like the other language than the page.
   languageCheck: {
     title: 'Ce texte semble être en {language}',
-    body: 'Cette page est en {page}, mais votre texte semble être en {language}. Dans quelle langue l’avez-vous écrit ?',
+    body: 'Cette page est en {page}, mais votre texte semble être en {language}. Dans quelle langue souhaitez-vous publier ?',
     saveAs: 'Enregistrer en {language}',
     back: 'Retour',
     languages: { en: 'anglais', fr: 'français' },
