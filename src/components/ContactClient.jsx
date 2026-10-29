@@ -54,6 +54,9 @@ const ContactClient = () => {
             });
     };
 
+
+    
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-16 font-sans transition-colors duration-300">
             <div className="max-w-7xl mx-auto p-6">
