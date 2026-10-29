@@ -1,12 +1,23 @@
-import PublicNavbar from "@/components/PublicNavbar";
+import CookieConsent from '@/components/CookieConsent';
+import Footer from '@/components/Footer';
+import Analytics from '@/components/Analytics';
+import VisitorTracker from '@/components/VisitorTracker';
+import PublicNavbar from '@/components/PublicNavbar';
 
 export default function PublicLayout({ children }) {
   return (
     <>
+      <Analytics />
+      <VisitorTracker />
+
       <PublicNavbar />
-      <main className="min-h-screen">
+      <main className="min-h-screen pt-20">
         {children}
+        <CookieConsent />
       </main>
+      <div className="mt-4">
+        <Footer />
+      </div>
     </>
   );
 }

@@ -1,17 +1,19 @@
-import FeaturesSection from "@/components/FeaturesSection";
-import HeroSection from "@/components/HeroSection";
-import ListingsSection from "@/components/TrendingListings";
-import NewsletterSection from "@/components/NewsletterSection";
-import PopularCreators from "@/components/PopularCreators";
+import PopularCreators from '@/components/PopularCreators';
+import TrendingListings from '@/components/TrendingListings';
+import FeaturesSection from '@/components/FeaturesSection';
+import CuratedCollections from '@/components/CuratedCollections';
+import WhyWorldCulture from '@/components/WhyWorldCulture';
+import HeroSection from '@/components/HeroSection';
 
 export default function HomePage() {
   return (
-    <div>
-        <HeroSection />
-        <FeaturesSection></FeaturesSection>
-        <ListingsSection></ListingsSection>
-        <PopularCreators></PopularCreators>
-        <NewsletterSection></NewsletterSection>
-    </div>
+    <main className="min-h-screen overflow-hidden bg-white dark:bg-zinc-950">
+      <HeroSection />
+      <FeaturesSection  />
+      <PopularCreators />
+      <CuratedCollections />
+      <TrendingListings />
+      <WhyWorldCulture />
+    </main>
   );
 }

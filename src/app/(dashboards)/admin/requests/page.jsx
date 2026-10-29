@@ -1,0 +1,607 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import {
+  FiCheck,
+  FiX,
+  FiGlobe,
+  FiEye,
+  FiMapPin,
+  FiInfo,
+  FiMessageSquare,
+  FiSend,
+  FiInstagram,
+  FiLink,
+  FiRepeat,
+  FiChevronLeft,
+  FiChevronRight,
+  FiSearch,
+  FiCalendar,
+  FiFilter,
+  FiClock,
+  FiGrid,
+  FiType,
+  FiAlertCircle,
+  FiBriefcase,
+  FiCheckCircle,
+} from 'react-icons/fi';
+import { getImageUrl } from '@/lib/imageHelper';
+import toast, { Toaster } from 'react-hot-toast';
+
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  withCredentials: true,
+});
+
+export default function CreatorRequestsPage() {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [rejectingUser, setRejectingUser] = useState(null);
+
+  // Updated State: adding reasonCode
+  const [rejectData, setRejectData] = useState({
+    reason: '',
+    reasonCode: '',
+  });
+
+  // Dynamic Reasons from Backend
+  const [reasonCodes, setReasonCodes] = useState([]);
+
+  // --- Filter & Pagination State ---
+  const [searchTerm, setSearchTerm] = useState('');
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRequests, setTotalRequests] = useState(0);
+  const itemsPerPage = 10;
+
+  // Fetch Reason Codes from Backend
+  useEffect(() => {
+    const fetchCodes = async () => {
+      try {
+        const res = await api.get('/api/users/moderation-reasons');
+        if (res.data.success) {
+          setReasonCodes(res.data.reasons);
+        }
+      } catch (err) {
+        console.error('Failed to load reason codes', err);
+      }
+    };
+    fetchCodes();
+  }, []);
+
+  const fetchRequests = useCallback(
+    async (isForce = false) => {
+      try {
+        setLoading(true);
+        const params = {
+          search: searchTerm,
+          timeRange: timeFilter,
+          page: currentPage,
+          limit: itemsPerPage,
+        };
+
+        const res = await api.get('/api/admin/creator-requests', { params });
+
+        if (res.data.success) {
+          setRequests(res.data.requests);
+          setTotalPages(res.data.pagination.totalPages);
+          setTotalRequests(res.data.pagination.totalRequests);
+          if (isForce) toast.success('Registry Synchronized');
+        }
+      } catch (error) {
+        console.error('Error fetching requests:', error);
+        toast.error('Failed to load requests');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [searchTerm, timeFilter, currentPage]
+  );
+
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
+  const handleFilterChange = (value) => {
+    setTimeFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleApprove = async (userId) => {
+    if (!confirm('Are you sure you want to approve this creator?')) return;
+    try {
+      setProcessingId(userId);
+      const res = await api.put(`/api/admin/approve-creator/${userId}`);
+
+      if (res.status === 200) {
+        toast.success('Creator Approved Successfully');
+        setRequests((prev) =>
+          prev.map((req) => (req._id === userId ? { ...req, role: 'creator' } : req))
+        );
+        fetchRequests();
+        setSelectedUser(null);
+      }
+    } catch (error) {
+      toast.error('Approval failed');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleRejectSubmit = async () => {
+    if (!rejectData.reasonCode) return toast.error('Please select a protocol reason code');
+    if (!rejectData.reason) return toast.error('Please provide detailed feedback');
+
+    try {
+      setProcessingId(rejectingUser._id);
+      await api.put(`/api/admin/reject-creator/${rejectingUser._id}`, {
+        reasonCode: rejectData.reasonCode,
+        reason: rejectData.reason,
+      });
+
+      toast.success('Application Rejected');
+      fetchRequests();
+      setRejectingUser(null);
+      setSelectedUser(null);
+    } catch (error) {
+      toast.error('Rejection failed');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  return (
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-6 pb-10 font-sans">
+      <Toaster position="top-right" />
+
+      {/* 🔹 Header & Controls */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 border-b border-gray-100 dark:border-white/10 pb-6">
+        <div>
+          <h2 className="text-2xl font-black uppercase tracking-tighter italic text-[#1f1f1f] dark:text-white">
+            Protocol <span className="text-orange-500">Verification</span>
+          </h2>
+          <div className="flex items-center gap-2 mt-1 opacity-60">
+            <FiClock size={10} className="text-orange-500" />
+            <p className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase">
+              Pending Nodes: {totalRequests}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative group">
+            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+            <input
+              type="text"
+              placeholder="SEARCH APPLICANT..."
+              className="pl-11 pr-6 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:border-orange-500/50 w-full md:w-56 transition-all shadow-sm dark:text-white"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+
+          <div className="flex items-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-3 group">
+            <FiFilter
+              className="text-gray-400 group-hover:text-orange-500 transition-colors"
+              size={14}
+            />
+            <select
+              className="bg-transparent py-3 px-2 text-[9px] font-black uppercase tracking-widest outline-none dark:text-white dark:bg-[#151515] cursor-pointer"
+              value={timeFilter}
+              onChange={(e) => handleFilterChange(e.target.value)}
+            >
+              <option value="all">ALL REQUESTS</option>
+              <option value="today">APPLIED TODAY</option>
+              <option value="week">THIS WEEK</option>
+              <option value="month">THIS MONTH</option>
+            </select>
+          </div>
+
+          <button
+            onClick={() => fetchRequests(true)}
+            className="p-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-orange-500 rounded-xl transition-all"
+          >
+            <FiRepeat className={loading ? 'animate-spin' : ''} size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* 🔹 Main Table */}
+      <div className="bg-white dark:bg-[#0c0c0c] rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden shadow-xl">
+        <div className="overflow-x-auto min-h-[400px]">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-gray-50/50 dark:bg-white/2 text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-100 dark:border-white/10">
+                <th className="px-8 py-5">Applicant Protocol</th>
+                <th className="px-8 py-5">Origin / Details</th>
+                <th className="px-8 py-5">Entry Type</th>
+                <th className="px-8 py-5 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50 dark:divide-white/5">
+              {loading ? (
+                [...Array(3)].map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td colSpan="4" className="px-8 py-10 bg-gray-50/10 dark:bg-white/2"></td>
+                  </tr>
+                ))
+              ) : requests.length > 0 ? (
+                requests.map((request) => (
+                  <tr
+                    onDoubleClick={() => setSelectedUser(request)}
+                    key={request._id}
+                    className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-all group cursor-pointer"
+                  >
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={getImageUrl(request.profile?.profileImage, 'avatar')}
+                          className="h-10 w-10 rounded-xl object-cover ring-1 ring-gray-100 dark:ring-white/10 shadow-md grayscale group-hover:grayscale-0 transition-all duration-500"
+                          alt=""
+                        />
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-tight text-[#1f1f1f] dark:text-white">
+                            {request.firstName} {request.lastName}
+                          </p>
+                          <p className="text-[9px] font-bold text-orange-500">
+                            @{request.username}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-5">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase italic">
+                          <FiGlobe size={10} className="text-orange-500" />{' '}
+                          {request.profile?.country || 'Global'}
+                        </div>
+                        <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 truncate max-w-[150px]">
+                          <FiLink size={10} /> {request.profile?.websiteLink || 'NO PORTFOLIO'}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-5">
+                      <span
+                        className={`px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest border ${request.creatorRequest?.rejectionReason ? 'bg-orange-500/5 text-orange-500 border-orange-500/20' : 'bg-blue-500/5 text-blue-500 border-blue-500/20'}`}
+                      >
+                        {request.creatorRequest?.rejectionReason ? 'RE-SUBMISSION' : 'FIRST ACCESS'}
+                      </span>
+                    </td>
+                    <td className="px-8 py-5 text-right">
+                      <button
+                        onClick={() => setSelectedUser(request)}
+                        className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-orange-500 rounded-xl transition-all shadow-sm"
+                      >
+                        <FiEye size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="px-8 py-24 text-center">
+                    <div className="flex flex-col items-center gap-3 opacity-20">
+                      <FiCheck size={40} className="text-gray-400" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] italic">
+                        NO PENDING NODES DETECTED.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* --- Pagination Controls --- */}
+        {totalPages > 1 && (
+          <div className="p-6 border-t border-gray-100 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 bg-gray-50/30 dark:bg-white/5">
+            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic">
+              Showing Nodes {(currentPage - 1) * itemsPerPage + 1} —{' '}
+              {Math.min(currentPage * itemsPerPage, totalRequests)} of {totalRequests}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2.5 bg-white dark:bg-white/5 rounded-xl border dark:border-white/10 disabled:opacity-20 hover:border-orange-500 transition-all shadow-sm"
+              >
+                <FiChevronLeft className="dark:text-white" />
+              </button>
+              <div className="flex gap-1.5">
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`w-9 h-9 rounded-xl text-[10px] font-black transition-all border ${currentPage === i + 1 ? 'bg-orange-500 border-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-400 hover:border-orange-500'}`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="p-2.5 bg-white dark:bg-white/5 rounded-xl border dark:border-white/10 disabled:opacity-20 hover:border-orange-500 transition-all shadow-sm"
+              >
+                <FiChevronRight className="dark:text-white" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 🔹 Modal: User Details */}
+      {selectedUser && !rejectingUser && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-4">
+          <div
+            className="absolute inset-0 bg-black/95 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => setSelectedUser(null)}
+          />
+          <div className="relative w-full max-w-3xl bg-white dark:bg-[#0a0a0a] rounded-md border border-gray-100 dark:border-white/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto scrollbar-hide">
+            <div className="h-32 md:h-44 w-full bg-gray-100 dark:bg-white/5 relative">
+              <img
+                src={
+                  getImageUrl(selectedUser.profile?.coverImage) ||
+                  'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'
+                }
+                className="w-full h-full object-cover opacity-60"
+                alt="cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent"></div>
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-red-500 text-white rounded-md transition-all backdrop-blur-md"
+              >
+                <FiX size={18} />
+              </button>
+            </div>
+
+            <div className="px-5 md:px-10 pb-8 -mt-12 md:-mt-16 relative">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 mb-8 text-center md:text-left">
+                <img
+                  src={getImageUrl(selectedUser.profile?.profileImage, 'avatar')}
+                  className="h-24 w-24 md:h-32 md:w-32 rounded-md border-4 border-white dark:border-[#0a0a0a] bg-white object-cover shadow-2xl"
+                  alt="avatar"
+                />
+                <div className="pb-2 w-full">
+                  <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
+                    <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter dark:text-white leading-none">
+                      {selectedUser.profile?.displayName ||
+                        `${selectedUser.firstName} ${selectedUser.lastName}`}
+                    </h3>
+                    <span
+                      className={`inline-block px-3 py-1 text-[8px] font-black uppercase tracking-widest rounded-md w-fit mx-auto md:mx-0 ${selectedUser.profile?.customerType === 'business' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'}`}
+                    >
+                      {selectedUser.profile?.customerType || 'Individual'}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap justify-center md:justify-start items-center gap-2 md:gap-3">
+                    <p className="text-gray-400 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em]">
+                      @{selectedUser.username}
+                    </p>
+                    <span className="hidden md:block h-1 w-1 rounded-full bg-gray-500"></span>
+                    <p className="text-gray-500 text-[10px] md:text-[11px] font-bold uppercase truncate max-w-[200px]">
+                      {selectedUser.email}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {selectedUser.profile?.customerType === 'business' && (
+                <div className="mb-8 p-4 bg-orange-500/5 border border-orange-500/10 rounded-md flex items-center justify-between">
+                  <div>
+                    <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest mb-1">
+                      VAT Information
+                    </p>
+                    <p className="text-xs font-bold dark:text-white uppercase tracking-tighter">
+                      ID: {selectedUser.profile?.vatNumber || 'NOT PROVIDED'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest ${selectedUser.profile?.isVatValid ? 'text-green-500' : 'text-red-500'}`}
+                    >
+                      {selectedUser.profile?.isVatValid ? <FiCheckCircle /> : <FiAlertCircle />}{' '}
+                      {selectedUser.profile?.isVatValid ? 'Verified' : 'Unverified'}
+                    </span>
+                    <p className="text-[8px] text-gray-500 font-bold uppercase">
+                      Checked:{' '}
+                      {selectedUser.profile?.vatLastChecked
+                        ? new Date(selectedUser.profile.vatLastChecked).toLocaleDateString()
+                        : 'Never'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
+                <div className="space-y-4 md:space-y-5">
+                  <DetailItem
+                    icon={FiBriefcase}
+                    label={
+                      selectedUser.profile?.customerType === 'business'
+                        ? 'Agency Name'
+                        : 'Legal Name'
+                    }
+                    value={selectedUser.profile?.businessName || 'N/A'}
+                  />
+                  <DetailItem
+                    icon={FiGrid}
+                    label="Expertise"
+                    value={selectedUser.profile?.category?.title || 'GENERAL'}
+                  />
+                  <DetailItem
+                    icon={FiGlobe}
+                    label="Region"
+                    value={`${selectedUser.profile?.country} (${selectedUser.profile?.countryCode})`}
+                  />
+                  <DetailItem
+                    icon={FiMapPin}
+                    label="City"
+                    value={selectedUser.profile?.city || 'N/A'}
+                  />
+                </div>
+                <div className="space-y-4 md:space-y-5">
+                  <DetailItem
+                    icon={FiType}
+                    label="Communication"
+                    value={selectedUser.profile?.language || 'EN'}
+                  />
+                  <DetailItem
+                    icon={FiLink}
+                    label="Portfolio"
+                    value={selectedUser.profile?.websiteLink || 'NO LINK'}
+                    isLink={!!selectedUser.profile?.websiteLink}
+                  />
+                  <DetailItem
+                    icon={FiInstagram}
+                    label="Social"
+                    value={selectedUser.profile?.socialLink || 'NO LINK'}
+                    isLink={!!selectedUser.profile?.socialLink}
+                  />
+                  <div className="p-4 md:p-5 bg-gray-50 dark:bg-white/5 rounded-md border border-gray-100 dark:border-white/10">
+                    <p className="text-[8px] font-black text-orange-500 uppercase mb-2 tracking-widest flex items-center gap-2">
+                      <FiInfo size={12} /> Statement
+                    </p>
+                    <p className="text-[10px] md:text-[11px] font-medium leading-relaxed dark:text-gray-400 italic">
+                      "{selectedUser.profile?.bio || 'No bio provided.'}"
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-3 md:gap-4 pt-6 border-t dark:border-white/5">
+                <button
+                  onClick={() => handleApprove(selectedUser._id)}
+                  disabled={processingId === selectedUser._id || selectedUser.role === 'creator'}
+                  className={`flex-[2] py-4 md:py-5 text-[10px] font-black uppercase tracking-[0.2em] rounded-md transition-all shadow-xl ${selectedUser.role === 'creator' ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed border border-gray-200 dark:border-white/10' : 'bg-green-600 text-white hover:bg-green-700 shadow-green-600/20'}`}
+                >
+                  {selectedUser.role === 'creator' ? 'Already a Creator' : 'Confirm & Approve'}
+                </button>
+                <button
+                  onClick={() => setRejectingUser(selectedUser)}
+                  disabled={selectedUser.role === 'creator'}
+                  className="flex-1 py-4 md:py-5 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-md border border-red-500/20 hover:bg-red-500 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  Reject Application
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔹 Modal: Reject/Feedback */}
+      {rejectingUser && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            onClick={() => setRejectingUser(null)}
+          />
+          <div className="relative w-full max-w-md bg-white dark:bg-[#0f0f0f] rounded-2xl border border-gray-100 dark:border-white/10 shadow-2xl p-8 animate-in zoom-in-95">
+            <div className="text-center mb-8">
+              <div className="h-16 w-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                <FiMessageSquare size={28} />
+              </div>
+              <h3 className="text-xl font-black uppercase tracking-tighter dark:text-white">
+                Review Feedback
+              </h3>
+              <p className="text-[10px] font-bold text-gray-400 uppercase mt-1 tracking-widest">
+                PROTOCOL REJECTION: @{rejectingUser.username}
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              {/* REASON CODE SELECTOR */}
+              <div>
+                <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                  PROTOCOL REASON CODE <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={rejectData.reasonCode}
+                  onChange={(e) => setRejectData({ ...rejectData, reasonCode: e.target.value })}
+                  className="w-full mt-2 bg-gray-50 dark:bg-white/20 border border-gray-100 dark:border-white/10 rounded-xl px-5 py-3.5 text-[10px] font-black uppercase tracking-widest outline-none focus:border-orange-500 dark:text-white cursor-pointer"
+                >
+                  <option value="" className="dark:bg-[#0f0f0f]">
+                    -- SELECT REASON --
+                  </option>
+                  {reasonCodes.map((code) => (
+                    <option key={code} value={code} className="dark:bg-[#0f0f0f]">
+                      {code.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                  FEEDBACK LOG
+                </label>
+                <textarea
+                  value={rejectData.reason}
+                  onChange={(e) => setRejectData({ ...rejectData, reason: e.target.value })}
+                  placeholder="PROVIDE DETAILED REASON FOR PROTOCOL DENIAL..."
+                  className="w-full mt-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-5 py-4 text-[11px] font-bold outline-none focus:border-orange-500 dark:text-white h-28 resize-none placeholder:text-gray-300 dark:placeholder:text-white/10"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-8">
+              <button
+                onClick={() => setRejectingUser(null)}
+                className="flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-black dark:hover:text-white transition-all"
+              >
+                CANCEL
+              </button>
+              <button
+                onClick={handleRejectSubmit}
+                disabled={processingId === rejectingUser._id}
+                className="flex-[2] py-4 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-xl shadow-black/10 dark:shadow-white/5"
+              >
+                {processingId === rejectingUser._id ? (
+                  'SYNCING...'
+                ) : (
+                  <>
+                    <FiSend /> FINALIZE DENIAL
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const DetailItem = ({ icon: Icon, label, value, isLink }) => (
+  <div className="flex items-center gap-4">
+    <div className="p-2 bg-gray-50 dark:bg-white/5 rounded-md text-orange-500 border border-gray-100 dark:border-white/10 shadow-sm">
+      <Icon size={18} />
+    </div>
+    <div className="leading-tight">
+      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
+        {label}
+      </p>
+      {isLink && value !== 'NOT LINKED' ? (
+        <a
+          href={value}
+          target="_blank"
+          className="text-[11px] font-bold text-orange-500 hover:underline tracking-tight break-all uppercase"
+        >
+          {value}
+        </a>
+      ) : (
+        <p className="text-[11px] font-bold dark:text-white tracking-tight uppercase">{value}</p>
+      )}
+    </div>
+  </div>
+);

@@ -1,101 +1,40 @@
-import Link from 'next/link';
-import React from 'react'
-import { FaUtensils, FaChevronDown, FaGlobe, FaTheaterMasks } from "react-icons/fa";
+import HeroSlider from "./HeroSlider";
+import HeroActions from "./HeroActions";
 
-export default function HeroSection() {
-    return (
-        <section className="bg-[#F2F2F2] dark:bg-[#0a0a0a]">
-            <div className="max-w-7xl mx-auto px-6 pt-28 pb-8 md:pt-28 flex flex-col items-center text-center">
+async function getSliders() {
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+  try {
+    const res = await fetch(`${API_BASE}/api/sliders`, { next: { revalidate: 3600 } });
+    if (!res.ok) return [];
+    return res.json();
+  } catch (error) {
+    console.error("Slider fetch failed:", error);
+    return [];
+  }
+}
 
-                {/* Heading */}
-                <h1 className="text-5xl md:text-6xl font-semibold text-[#1F1F1F] dark:text-gray-100">
-                    Discover <br /> culture <span className="text-[#7A1E1E]">worldwide</span>
-                </h1>
+export default async function HeroSection() {
+  const initialSliders = await getSliders();
 
-                {/* Subheading */}
-                <p className="mt-6 max-w-2xl text-lg text-[#1F1F1F]/80 dark:text-gray-300">
-                    Explore authentic products, stories, and experiences from creators
-                    around the world — crafted with culture, passion, and purpose.
-                </p>
-
-                {/* CTA Buttons */}
-                <div className="mt-4 flex py-4 sm:flex-row gap-3 sm:gap-4">
-                    <div className="flex gap-4">
-                        {/* Explore Products */}
-                        <Link href="/products">
-                            <button className="px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base cursor-pointer rounded-lg bg-[#F57C00] text-white font-medium hover:opacity-90 transition">
-                                Explore Products
-                            </button>
-                        </Link>
-
-                        {/* Become a Creator */}
-                        <Link href="/become-creator">
-                            <button className="px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base cursor-pointer rounded-lg border border-[#7A1E1E] text-[#7A1E1E] font-medium hover:bg-[#7A1E1E] hover:text-white transition">
-                                Become a Creator
-                            </button>
-                        </Link>
-                    </div>
-                </div>
-                {/* Filters / Selects */}
-                <div className="max-w-3xl w-full mx-auto py-4 flex flex-col md:flex-row gap-4">
-
-                    {/* Category */}
-                    <div className="relative w-full md:w-1/3 mx-auto">
-                        <FaUtensils className="absolute left-4 top-1/2 -translate-y-1/2 text-[#716f6f]" />
-                        <select
-                            className="w-full bg-white px-12 py-3 rounded-full  
-                         text-[#1F1F1F] dark:text-gray-500 appearance-none
-                         border border-gray-300 dark:border-gray-700
-                         focus:outline-none focus:ring-2 focus:ring-[#F57C00]
-                         transition duration-200"
-                        >
-                            <option value="">Category</option>
-                            <option value="food">Food</option>
-                            <option value="art">Art</option>
-                            <option value="music">Music</option>
-                        </select>
-                        <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#716f6f] dark:text-gray-200" />
-                    </div>
-
-                    {/* Region */}
-                    <div className="relative w-full md:w-1/3 mx-auto">
-                        <FaGlobe className="absolute left-4 top-1/2 -translate-y-1/2 text-[#716f6f]" />
-                        <select
-                            className="w-full bg-white px-12 py-3 rounded-full 
-                         text-[#1F1F1F] dark:text-gray-500 appearance-none
-                         border border-gray-300 dark:border-gray-700
-                         focus:outline-none focus:ring-2 focus:ring-[#F57C00]
-                         transition duration-200"
-                        >
-                            <option value="">Region</option>
-                            <option value="asia">Asia</option>
-                            <option value="europe">Europe</option>
-                            <option value="africa">Africa</option>
-                        </select>
-                        <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#716f6f] dark:text-gray-200" />
-                    </div>
-
-                    {/* Cultural */}
-                    <div className="relative w-full md:w-1/3 mx-auto">
-                        <FaTheaterMasks className="absolute left-4 top-1/2 -translate-y-1/2 text-[#716f6f]" />
-                        <select
-                            className="w-full bg-white px-12 py-3 rounded-full 
-                         text-[#1F1F1F] dark:text-gray-500 appearance-none
-                         border border-gray-300 dark:border-gray-700
-                         focus:outline-none focus:ring-2 focus:ring-[#F57C00]
-                         transition duration-200"
-                        >
-                            <option value="">Cultural</option>
-                            <option value="traditional">Traditional</option>
-                            <option value="modern">Modern</option>
-                            <option value="fusion">Fusion</option>
-                        </select>
-                        <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#716f6f] dark:text-gray-200" />
-                    </div>
-
-                </div>
-
-            </div>
-        </section>
-    )
+  return (
+    <section className="relative w-full flex flex-col md:flex-row items-center justify-between overflow-hidden px-6 min-h-[80vh] max-w-7xl mx-auto">
+      {/* Left Side: Text + CTA */}
+      <div className="relative z-10 w-full md:w-1/2 flex flex-col justify-center text-center md:text-left pt-10 md:pt-0">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold leading-tight text-gray-900 dark:text-white">
+          Join a <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F57C00] to-[#FFB347]">growing global community</span>
+          <br className="hidden lg:block" /> of <span className="text-[#F57C00]">artists & creators</span>
+        </h1>
+        <p className="text-base sm:text-lg md:text-xl mt-2 max-w-lg text-gray-700 dark:text-gray-300 mx-auto md:mx-0">
+          WCM helps you gain visibility and connect with a global audience.
+        </p>
+        <div className="md:mt-8 z-[50] flex flex-wrap gap-4 justify-center md:justify-start">
+          <HeroActions />
+        </div>
+      </div>
+      {/* Right Side: Slider */}
+      <div className="relative w-full h-[300px] z-0 sm:h-[350px] md:h-[450px] flex md:w-1/2 flex-shrink-0 mt-10 md:mt-0">
+        <HeroSlider initialSliders={initialSliders} />
+      </div>
+    </section>
+  );
 }

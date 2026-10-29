@@ -66,9 +66,9 @@ h6 {
   font-family: var(--font-mono);
 }
 
-/* ========================
+/* ==========================
    3. Utility classes for components
-   ======================== */
+   =========================== */
 
 /* Buttons */
 .btn-primary {
@@ -150,4 +150,67 @@ h6 {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* স্লাইডারের স্লাইড হোভার বা একটিভ হলে সবার উপরে থাকবে */
+.swiper-slide {
+  transition: z-index 0.3s;
+}
+
+.swiper-slide:hover,
+.swiper-slide:active,
+.swiper-slide-active {
+  z-index: 999 !important;
+}
+
+/* পপওভার যেন স্লাইডারের কন্টেইনারে আটকে না যায় */
+.swiper {
+  overflow: visible !important;
+}
+
+@keyframes creatorFade {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+.animate-creatorFade {
+  animation: creatorFade 0.18s ease-out forwards;
+}
+
+@layer utilities {
+
+  /* স্ক্রোলবার হাইড করার জন্য কাস্টম ইউটিলিটি */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
 }
