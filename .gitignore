@@ -31,7 +31,6 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
 
 # vercel
 .vercel
@@ -46,3 +45,12 @@ next-env.d.ts
 
 # stray saved pages — not part of the app
 page.html
+
+# Environment variables & secrets (added by GitHub Guardian)
+*.env
+!.env.example
+!.env.sample
+.envrc
+.venv/
+venv/
+config.bat
