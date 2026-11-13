@@ -226,8 +226,25 @@ export default function MyListings() {
     const [assets, countryList] = await Promise.all([loadEditAssets(categoryId), ensureCountries()]);
     // A stored value that is not one of the category's rows was typed into "Others", so it reopens in
     // the free-text field instead of silently dropping off the list.
-    setCustomRegion(Boolean(item.region) && !isKnownValue(assets.regions, item.region));
-    setCustomTradition(Boolean(item.tradition) && !isKnownValue(assets.traditions, item.tradition));
+    const regionIsCustom = Boolean(item.region) && !isKnownValue(assets.regions, item.region);
+    const traditionIsCustom = Boolean(item.tradition) && !isKnownValue(assets.traditions, item.tradition);
+    setCustomRegion(regionIsCustom);
+    setCustomTradition(traditionIsCustom);
+    // Predefined choices keep submitting their English master. Custom values are different: the
+    // creator edits the value for the current page language, while the server keeps the companion
+    // language and master linkage in hidden listing metadata.
+    setEditFormData((prev) => ({
+      ...prev,
+      region: regionIsCustom ? item.localizedLabels?.region || item.region : item.region || '',
+      tradition: traditionIsCustom
+        ? item.localizedLabels?.tradition || item.tradition
+        : item.tradition || '',
+      culturalTags: (item.culturalTags || []).map((tag, index) =>
+        isKnownValue(assets.tags, tag)
+          ? tag
+          : item.localizedLabels?.culturalTags?.[index] || tag
+      ),
+    }));
     const country = countryList.find((entry) => entry.name === item.country);
     if (country) setEditFormData((prev) => ({ ...prev, countryIsoCode: country.isoCode }));
   };
