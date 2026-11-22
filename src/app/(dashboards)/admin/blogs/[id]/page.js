@@ -342,7 +342,7 @@ export default function EditBlogPage() {
                           if (formData.selectedTags.includes(tag._id)) {
                             setFormData((p) => ({
                               ...p,
-                              selectedTags: p.selectedTags.filter((id) => id !== tag._id),
+
                             }));
                           } else if (formData.selectedTags.length < 5) {
                             setFormData((p) => ({
@@ -402,7 +402,7 @@ export default function EditBlogPage() {
                           >
                             <img src={img} className="w-full h-full object-cover" />
                             <button
-                              onClick={() => handleRemoveExistingImage(idx, i)}
+
                               className="absolute top-1 right-1 bg-red-500 text-white p-1.5 rounded-full md:opacity-0 group-hover:opacity-100 transition-all"
                             >
                               <FiTrash2 size={14} />
@@ -420,7 +420,7 @@ export default function EditBlogPage() {
                               className="w-full h-full object-cover"
                             />
                             <button
-                              onClick={() => handleRemoveNewFile(idx, fIdx)}
+
                               className="absolute top-1 right-1 bg-red-600 text-white p-1.5 rounded-full md:opacity-0 group-hover:opacity-100 transition-all"
                             >
                               <FiX size={14} />
@@ -434,7 +434,7 @@ export default function EditBlogPage() {
                               type="file"
                               className="hidden"
                               accept="image/*"
-                              onChange={(e) => handleGridImageChange(idx, e.target.files[0])}
+
                             />
                           </label>
                         )}
