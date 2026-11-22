@@ -475,7 +475,7 @@ export default function CreateBlogPage() {
                               {/* ✅ Individual delete button per image */}
                               <button
                                 type="button"
-                                onClick={() => handleRemoveGridImage(idx, fIdx)}
+
                                 className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 text-white rounded-full opacity-0 group-hover/img:opacity-100 hover:bg-red-500 transition-all"
                               >
                                 <FiX size={12} />
@@ -489,7 +489,7 @@ export default function CreateBlogPage() {
                                 type="file"
                                 className="hidden"
                                 accept="image/*"
-                                onChange={(e) => handleGridImageChange(idx, e.target.files[0])}
+
                               />
                             </label>
                           )}
