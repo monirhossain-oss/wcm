@@ -504,7 +504,7 @@ export default function CreateBlogPage() {
                                 {/* ✅ Individual delete button per image */}
                                 <button
                                   type="button"
-                                  onClick={() => handleRemoveGridImage(idx, fIdx)}
+
                                   className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 text-white rounded-full opacity-0 group-hover/img:opacity-100 hover:bg-red-500 transition-all"
                                 >
                                   <FiX size={12} />
@@ -512,7 +512,7 @@ export default function CreateBlogPage() {
                               </div>
                               <input
                                 value={block.imageAlts?.[fIdx] || ''}
-                                onChange={(e) => setGridAlt(idx, fIdx, e.target.value)}
+
                                 placeholder="Alt text"
                                 className="w-full bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-md px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500"
                               />
@@ -525,7 +525,7 @@ export default function CreateBlogPage() {
                                 type="file"
                                 className="hidden"
                                 accept="image/*"
-                                onChange={(e) => handleGridImageChange(idx, e.target.files[0])}
+
                               />
                             </label>
                           )}
