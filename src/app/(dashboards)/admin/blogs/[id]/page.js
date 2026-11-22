@@ -312,12 +312,12 @@ export default function EditBlogPage() {
                           key={tag._id}
                           onClick={() => {
                             if (formData.selectedTags.includes(tag._id)) {
-                              setFormData((p) => ({
+
                                 ...p,
-                                selectedTags: p.selectedTags.filter((id) => id !== tag._id),
+
                               }));
                             } else if (formData.selectedTags.length < 5) {
-                              setFormData((p) => ({
+
                                 ...p,
                                 selectedTags: [...p.selectedTags, tag._id],
                               }));
@@ -397,10 +397,10 @@ export default function EditBlogPage() {
                             >
                               <img src={img} className="w-full h-full object-cover" />
                               <button
-                                onClick={() => {
+
                                   const newContent = [...formData.content];
                                   newContent[idx].images = newContent[idx].images.filter(
-                                    (_, imgIdx) => imgIdx !== i
+
                                   );
                                   setFormData({ ...formData, content: newContent });
                                 }}
@@ -428,7 +428,7 @@ export default function EditBlogPage() {
                               <input
                                 type="file"
                                 className="hidden"
-                                onChange={(e) => handleGridImageChange(idx, e.target.files[0])}
+
                               />
                             </label>
                           )}
