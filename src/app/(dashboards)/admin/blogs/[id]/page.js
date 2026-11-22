@@ -400,7 +400,7 @@ export default function EditBlogPage() {
                           if (formData.selectedTags.includes(tag._id)) {
                             setFormData((p) => ({
                               ...p,
-                              selectedTags: p.selectedTags.filter((id) => id !== tag._id),
+
                             }));
                           } else if (formData.selectedTags.length < 5) {
                             setFormData((p) => ({
@@ -458,7 +458,7 @@ export default function EditBlogPage() {
                             <div className="relative aspect-square rounded-lg overflow-hidden group">
                               <img src={img} className="w-full h-full object-cover" alt={block.imageAlts?.[i] || ''} />
                               <button
-                                onClick={() => handleRemoveExistingImage(idx, i)}
+
                                 className="absolute top-1 right-1 bg-red-500 text-white p-1.5 rounded-full md:opacity-0 group-hover:opacity-100 transition-all"
                               >
                                 <FiTrash2 size={14} />
@@ -466,7 +466,7 @@ export default function EditBlogPage() {
                             </div>
                             <input
                               value={block.imageAlts?.[i] || ''}
-                              onChange={(e) => setGridAlt(idx, i, e.target.value)}
+
                               placeholder="Alt text"
                               className="w-full bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-md px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500"
                             />
@@ -482,7 +482,7 @@ export default function EditBlogPage() {
                                 alt=""
                               />
                               <button
-                                onClick={() => handleRemoveNewFile(idx, fIdx)}
+
                                 className="absolute top-1 right-1 bg-red-600 text-white p-1.5 rounded-full md:opacity-0 group-hover:opacity-100 transition-all"
                               >
                                 <FiX size={14} />
@@ -490,7 +490,7 @@ export default function EditBlogPage() {
                             </div>
                             <input
                               value={block.imageAlts?.[(block.images?.length || 0) + fIdx] || ''}
-                              onChange={(e) => setGridAlt(idx, (block.images?.length || 0) + fIdx, e.target.value)}
+
                               placeholder="Alt text"
                               className="w-full bg-white dark:bg-zinc-900 border dark:border-white/10 rounded-md px-2 py-1.5 text-[10px] font-bold outline-none focus:border-orange-500"
                             />
@@ -503,7 +503,7 @@ export default function EditBlogPage() {
                               type="file"
                               className="hidden"
                               accept="image/*"
-                              onChange={(e) => handleGridImageChange(idx, e.target.files[0])}
+
                             />
                           </label>
                         )}
